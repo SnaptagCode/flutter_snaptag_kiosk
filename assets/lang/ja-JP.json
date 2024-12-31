@@ -1,0 +1,23 @@
+{
+  "main_txt_01": "QRコードを通じて\r\n画像をアップロードしてください。",
+  "main_txt_02": "画像のアップロードは完了しましたか？",
+  "main_btn_txt": "認証番号を入力する",
+  "sub01_txt_01": "写真をアップロード後、\r\n発行された認証番号を入力してください。",
+  "sub01_btn_done": "完了",
+  "alert_title_authNum_error": " 認証番号エラー",
+  "alert_txt_authNum_error": "一致する認証番号がありません。\r\nもう一度確認をお願いします。",
+  "alert_btn_authNum_error": "帰る",
+  "sub02_txt_01": "フォトカードの画像を確認してください。",
+  "sub02_btn_pay": "決済する",
+  "sub03_txt_01": "フォトカードを出力中です。 少々お待ちください.",
+  "sub03_txt_02": "カードが出力されるまで約1分かかります。",
+  "alert_title_print_complete": "出力完了",
+  "alert_txt_print_complete": "フォトカードの出力が完了しました。\r\n下のフォトカード\r\nを受け取るところからカードを受け取ってください。\r\nありがとうございます。",
+  "alert_btn_print_complete": "確認",
+  "alert_title_purchase_failure": "購入失敗",
+  "alert_txt_purchase_failure": "購入が正常に完了しませんでした。\r\n再度お試しください。",
+  "alert_btn_purchase_failure": "戻る",
+  "alert_title_print_failure": "印刷失敗",
+  "alert_txt_print_failure": "印刷が正常に行われず、支払い金額は\r\n返金されます。返金が行われない場合は、\r\n管理者にお問い合わせください。\r\nご迷惑をおかけして申し訳ありません。",
+  "alert_btn_print_failure": "確認"
+}
