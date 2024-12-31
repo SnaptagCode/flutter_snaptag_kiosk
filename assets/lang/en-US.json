@@ -1,0 +1,23 @@
+{
+  "main_txt_01": "Please scan the QR code to\r\nupload the image",
+  "main_txt_02": "Did you upload the image?",
+  "main_btn_txt": "Enter Verification Code",
+  "sub01_txt_01": "After uploading the photo\r\nPlease enter the issued verification code.",
+  "sub01_btn_done": "Done",
+  "alert_title_authNum_error": "Verification Code Error",
+  "alert_txt_authNum_error": "There is no matched authentication\r\nnumber. \r\nPlease check again.",
+  "alert_btn_authNum_error": "back",
+  "sub02_txt_01": "Please check the photo CARD image.",
+  "sub02_btn_pay": "Pay Now",
+  "sub03_txt_01": "The photo CARD is being printed. Please wait a moment.",
+  "sub03_txt_02": "It takes about 1 minute for the card to be printed.",
+  "alert_title_print_complete": "Print Completed",
+  "alert_txt_print_complete": "Your photo card has been printed!\r\nPlease check the output tray below.\r\nThank you!",
+  "alert_btn_print_complete": "OK",
+  "alert_title_purchase_failure": "Payment Failed",
+  "alert_txt_purchase_failure": "The payment was not completed normally.\r\nPlease try again.",
+  "alert_btn_purchase_failure": "back",
+  "alert_title_print_failure": "Print Failed",
+  "alert_txt_print_failure": "The payment amount will be refunded\r\n because the printout is not done properly.\r\n If the refund has not been made, please\r\n contact the administrator.\r\nWe apologize for the inconvenience \r\ncaused to you.",
+  "alert_btn_print_failure": "Confirm"
+}
