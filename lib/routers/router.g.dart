@@ -8,7 +8,6 @@ part of 'router.dart';
 
 List<RouteBase> get $appRoutes => [
       $splashRoute,
-      $adminShellRouteData,
       $debugShellRouteData,
       $kioskShellRouteData,
     ];
@@ -29,14 +28,15 @@ extension $SplashRouteExtension on SplashRoute {
 
   Future<T?> push<T>(BuildContext context) => context.push<T>(location);
 
-  void pushReplacement(BuildContext context) => context.pushReplacement(location);
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
 
   void replace(BuildContext context) => context.replace(location);
 }
 
-RouteBase get $adminShellRouteData => ShellRouteData.$route(
-      navigatorKey: AdminShellRouteData.$navigatorKey,
-      factory: $AdminShellRouteDataExtension._fromState,
+RouteBase get $debugShellRouteData => ShellRouteData.$route(
+      navigatorKey: DebugShellRouteData.$navigatorKey,
+      factory: $DebugShellRouteDataExtension._fromState,
       routes: [
         GoRouteData.$route(
           path: '/printer-settings',
@@ -46,69 +46,6 @@ RouteBase get $adminShellRouteData => ShellRouteData.$route(
           path: '/payment-history',
           factory: $PaymentHistoryRouteDataExtension._fromState,
         ),
-        GoRouteData.$route(
-          path: '/admin-tab',
-          factory: $AdminTabRouteDataExtension._fromState,
-        ),
-      ],
-    );
-
-extension $AdminShellRouteDataExtension on AdminShellRouteData {
-  static AdminShellRouteData _fromState(GoRouterState state) => const AdminShellRouteData();
-}
-
-extension $PrinterSettingRouteDataExtension on PrinterSettingRouteData {
-  static PrinterSettingRouteData _fromState(GoRouterState state) => const PrinterSettingRouteData();
-
-  String get location => GoRouteData.$location(
-        '/printer-settings',
-      );
-
-  void go(BuildContext context) => context.go(location);
-
-  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
-
-  void pushReplacement(BuildContext context) => context.pushReplacement(location);
-
-  void replace(BuildContext context) => context.replace(location);
-}
-
-extension $PaymentHistoryRouteDataExtension on PaymentHistoryRouteData {
-  static PaymentHistoryRouteData _fromState(GoRouterState state) => const PaymentHistoryRouteData();
-
-  String get location => GoRouteData.$location(
-        '/payment-history',
-      );
-
-  void go(BuildContext context) => context.go(location);
-
-  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
-
-  void pushReplacement(BuildContext context) => context.pushReplacement(location);
-
-  void replace(BuildContext context) => context.replace(location);
-}
-
-extension $AdminTabRouteDataExtension on AdminTabRouteData {
-  static AdminTabRouteData _fromState(GoRouterState state) => const AdminTabRouteData();
-
-  String get location => GoRouteData.$location(
-        '/admin-tab',
-      );
-
-  void go(BuildContext context) => context.go(location);
-
-  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
-
-  void pushReplacement(BuildContext context) => context.pushReplacement(location);
-
-  void replace(BuildContext context) => context.replace(location);
-}
-
-RouteBase get $debugShellRouteData => ShellRouteData.$route(
-      navigatorKey: DebugShellRouteData.$navigatorKey,
-      factory: $DebugShellRouteDataExtension._fromState,
-      routes: [
         GoRouteData.$route(
           path: '/api-debug',
           factory: $ApiDebugRouteDataExtension._fromState,
@@ -133,15 +70,57 @@ RouteBase get $debugShellRouteData => ShellRouteData.$route(
           path: '/kiosk-colors',
           factory: $KioskColorsRouteDataExtension._fromState,
         ),
+        GoRouteData.$route(
+          path: '/image-storage',
+          factory: $ImageStorageRouteDataExtension._fromState,
+        ),
       ],
     );
 
 extension $DebugShellRouteDataExtension on DebugShellRouteData {
-  static DebugShellRouteData _fromState(GoRouterState state) => const DebugShellRouteData();
+  static DebugShellRouteData _fromState(GoRouterState state) =>
+      const DebugShellRouteData();
+}
+
+extension $PrinterSettingRouteDataExtension on PrinterSettingRouteData {
+  static PrinterSettingRouteData _fromState(GoRouterState state) =>
+      const PrinterSettingRouteData();
+
+  String get location => GoRouteData.$location(
+        '/printer-settings',
+      );
+
+  void go(BuildContext context) => context.go(location);
+
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  void replace(BuildContext context) => context.replace(location);
+}
+
+extension $PaymentHistoryRouteDataExtension on PaymentHistoryRouteData {
+  static PaymentHistoryRouteData _fromState(GoRouterState state) =>
+      const PaymentHistoryRouteData();
+
+  String get location => GoRouteData.$location(
+        '/payment-history',
+      );
+
+  void go(BuildContext context) => context.go(location);
+
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  void replace(BuildContext context) => context.replace(location);
 }
 
 extension $ApiDebugRouteDataExtension on ApiDebugRouteData {
-  static ApiDebugRouteData _fromState(GoRouterState state) => const ApiDebugRouteData();
+  static ApiDebugRouteData _fromState(GoRouterState state) =>
+      const ApiDebugRouteData();
 
   String get location => GoRouteData.$location(
         '/api-debug',
@@ -151,13 +130,15 @@ extension $ApiDebugRouteDataExtension on ApiDebugRouteData {
 
   Future<T?> push<T>(BuildContext context) => context.push<T>(location);
 
-  void pushReplacement(BuildContext context) => context.pushReplacement(location);
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
 
   void replace(BuildContext context) => context.replace(location);
 }
 
 extension $MaterialRouteDataExtension on MaterialRouteData {
-  static MaterialRouteData _fromState(GoRouterState state) => const MaterialRouteData();
+  static MaterialRouteData _fromState(GoRouterState state) =>
+      const MaterialRouteData();
 
   String get location => GoRouteData.$location(
         '/material-components',
@@ -167,13 +148,15 @@ extension $MaterialRouteDataExtension on MaterialRouteData {
 
   Future<T?> push<T>(BuildContext context) => context.push<T>(location);
 
-  void pushReplacement(BuildContext context) => context.pushReplacement(location);
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
 
   void replace(BuildContext context) => context.replace(location);
 }
 
 extension $KioskComponentsRouteDataExtension on KioskComponentsRouteData {
-  static KioskComponentsRouteData _fromState(GoRouterState state) => const KioskComponentsRouteData();
+  static KioskComponentsRouteData _fromState(GoRouterState state) =>
+      const KioskComponentsRouteData();
 
   String get location => GoRouteData.$location(
         '/kiosk-components',
@@ -183,13 +166,15 @@ extension $KioskComponentsRouteDataExtension on KioskComponentsRouteData {
 
   Future<T?> push<T>(BuildContext context) => context.push<T>(location);
 
-  void pushReplacement(BuildContext context) => context.pushReplacement(location);
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
 
   void replace(BuildContext context) => context.replace(location);
 }
 
 extension $KioskInfoRouteDataExtension on KioskInfoRouteData {
-  static KioskInfoRouteData _fromState(GoRouterState state) => const KioskInfoRouteData();
+  static KioskInfoRouteData _fromState(GoRouterState state) =>
+      const KioskInfoRouteData();
 
   String get location => GoRouteData.$location(
         '/kiosk-info',
@@ -199,13 +184,15 @@ extension $KioskInfoRouteDataExtension on KioskInfoRouteData {
 
   Future<T?> push<T>(BuildContext context) => context.push<T>(location);
 
-  void pushReplacement(BuildContext context) => context.pushReplacement(location);
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
 
   void replace(BuildContext context) => context.replace(location);
 }
 
 extension $KioskTypographyRouteDataExtension on KioskTypographyRouteData {
-  static KioskTypographyRouteData _fromState(GoRouterState state) => const KioskTypographyRouteData();
+  static KioskTypographyRouteData _fromState(GoRouterState state) =>
+      const KioskTypographyRouteData();
 
   String get location => GoRouteData.$location(
         '/kiosk-typography',
@@ -215,13 +202,15 @@ extension $KioskTypographyRouteDataExtension on KioskTypographyRouteData {
 
   Future<T?> push<T>(BuildContext context) => context.push<T>(location);
 
-  void pushReplacement(BuildContext context) => context.pushReplacement(location);
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
 
   void replace(BuildContext context) => context.replace(location);
 }
 
 extension $KioskColorsRouteDataExtension on KioskColorsRouteData {
-  static KioskColorsRouteData _fromState(GoRouterState state) => const KioskColorsRouteData();
+  static KioskColorsRouteData _fromState(GoRouterState state) =>
+      const KioskColorsRouteData();
 
   String get location => GoRouteData.$location(
         '/kiosk-colors',
@@ -231,7 +220,26 @@ extension $KioskColorsRouteDataExtension on KioskColorsRouteData {
 
   Future<T?> push<T>(BuildContext context) => context.push<T>(location);
 
-  void pushReplacement(BuildContext context) => context.pushReplacement(location);
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  void replace(BuildContext context) => context.replace(location);
+}
+
+extension $ImageStorageRouteDataExtension on ImageStorageRouteData {
+  static ImageStorageRouteData _fromState(GoRouterState state) =>
+      const ImageStorageRouteData();
+
+  String get location => GoRouteData.$location(
+        '/image-storage',
+      );
+
+  void go(BuildContext context) => context.go(location);
+
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
 
   void replace(BuildContext context) => context.replace(location);
 }
@@ -242,7 +250,7 @@ RouteBase get $kioskShellRouteData => ShellRouteData.$route(
       routes: [
         ShellRouteData.$route(
           navigatorKey: ContentsShellRouteData.$navigatorKey,
-          factory: $KioskContentsShellRouteDataExtension._fromState,
+          factory: $ContentsShellRouteDataExtension._fromState,
           routes: [
             GoRouteData.$route(
               path: '/kiosk/qr',
@@ -266,15 +274,18 @@ RouteBase get $kioskShellRouteData => ShellRouteData.$route(
     );
 
 extension $KioskShellRouteDataExtension on KioskShellRouteData {
-  static KioskShellRouteData _fromState(GoRouterState state) => const KioskShellRouteData();
+  static KioskShellRouteData _fromState(GoRouterState state) =>
+      const KioskShellRouteData();
 }
 
-extension $KioskContentsShellRouteDataExtension on ContentsShellRouteData {
-  static ContentsShellRouteData _fromState(GoRouterState state) => const ContentsShellRouteData();
+extension $ContentsShellRouteDataExtension on ContentsShellRouteData {
+  static ContentsShellRouteData _fromState(GoRouterState state) =>
+      const ContentsShellRouteData();
 }
 
 extension $PhotoCardUploadRouteDataExtension on PhotoCardUploadRouteData {
-  static PhotoCardUploadRouteData _fromState(GoRouterState state) => const PhotoCardUploadRouteData();
+  static PhotoCardUploadRouteData _fromState(GoRouterState state) =>
+      const PhotoCardUploadRouteData();
 
   String get location => GoRouteData.$location(
         '/kiosk/qr',
@@ -284,13 +295,15 @@ extension $PhotoCardUploadRouteDataExtension on PhotoCardUploadRouteData {
 
   Future<T?> push<T>(BuildContext context) => context.push<T>(location);
 
-  void pushReplacement(BuildContext context) => context.pushReplacement(location);
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
 
   void replace(BuildContext context) => context.replace(location);
 }
 
 extension $CodeVerificationRouteDataExtension on CodeVerificationRouteData {
-  static CodeVerificationRouteData _fromState(GoRouterState state) => const CodeVerificationRouteData();
+  static CodeVerificationRouteData _fromState(GoRouterState state) =>
+      const CodeVerificationRouteData();
 
   String get location => GoRouteData.$location(
         '/kiosk/code-verification',
@@ -300,13 +313,15 @@ extension $CodeVerificationRouteDataExtension on CodeVerificationRouteData {
 
   Future<T?> push<T>(BuildContext context) => context.push<T>(location);
 
-  void pushReplacement(BuildContext context) => context.pushReplacement(location);
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
 
   void replace(BuildContext context) => context.replace(location);
 }
 
 extension $PhotoCardPreviewRouteDataExtension on PhotoCardPreviewRouteData {
-  static PhotoCardPreviewRouteData _fromState(GoRouterState state) => const PhotoCardPreviewRouteData();
+  static PhotoCardPreviewRouteData _fromState(GoRouterState state) =>
+      const PhotoCardPreviewRouteData();
 
   String get location => GoRouteData.$location(
         '/kiosk/preview',
@@ -316,13 +331,15 @@ extension $PhotoCardPreviewRouteDataExtension on PhotoCardPreviewRouteData {
 
   Future<T?> push<T>(BuildContext context) => context.push<T>(location);
 
-  void pushReplacement(BuildContext context) => context.pushReplacement(location);
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
 
   void replace(BuildContext context) => context.replace(location);
 }
 
 extension $PrintProcessRouteDataExtension on PrintProcessRouteData {
-  static PrintProcessRouteData _fromState(GoRouterState state) => const PrintProcessRouteData();
+  static PrintProcessRouteData _fromState(GoRouterState state) =>
+      const PrintProcessRouteData();
 
   String get location => GoRouteData.$location(
         '/kiosk/print-process',
@@ -332,7 +349,8 @@ extension $PrintProcessRouteDataExtension on PrintProcessRouteData {
 
   Future<T?> push<T>(BuildContext context) => context.push<T>(location);
 
-  void pushReplacement(BuildContext context) => context.pushReplacement(location);
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
 
   void replace(BuildContext context) => context.replace(location);
 }
@@ -341,14 +359,15 @@ extension $PrintProcessRouteDataExtension on PrintProcessRouteData {
 // RiverpodGenerator
 // **************************************************************************
 
-String _$routerHash() => r'9db931a9d21736df5752251734cb1e846846cb05';
+String _$routerHash() => r'e9289bc573ced581df97c0dce8485b5459fec884';
 
 /// See also [router].
 @ProviderFor(router)
 final routerProvider = AutoDisposeProvider<GoRouter>.internal(
   router,
   name: r'routerProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product') ? null : _$routerHash,
+  debugGetCreateSourceHash:
+      const bool.fromEnvironment('dart.vm.product') ? null : _$routerHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );

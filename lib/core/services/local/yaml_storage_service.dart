@@ -1,18 +1,24 @@
 import 'dart:io';
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:path/path.dart' as path;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:yaml/yaml.dart';
 import 'package:yaml_edit/yaml_edit.dart';
 
-part 'storage_service.g.dart';
+part 'yaml_storage_service.g.dart';
 
-class StorageService {
-  StorageService._();
+@Riverpod(keepAlive: true)
+YamlStorageService storageService(Ref ref) {
+  throw UnimplementedError('Storage service not initialized');
+}
 
-  static Future<StorageService> initialize() async {
-    final repository = StorageService._();
+class YamlStorageService {
+  YamlStorageService._();
+
+  static Future<YamlStorageService> initialize() async {
+    final repository = YamlStorageService._();
     await repository._loadSettingsFromFile();
     return repository;
   }
@@ -68,9 +74,4 @@ class StorageService {
   }
 
   String get filePath => _filePath;
-}
-
-@Riverpod(keepAlive: true)
-StorageService storageService(StorageServiceRef ref) {
-  throw UnimplementedError('Storage service not initialized');
 }

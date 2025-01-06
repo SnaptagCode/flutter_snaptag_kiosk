@@ -1,15 +1,21 @@
 import 'dart:io';
 
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_snaptag_kiosk/core/core.dart';
 import 'package:flutter_snaptag_kiosk/flavors.dart';
 import 'package:flutter_snaptag_kiosk/models/models.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-final kioskRepositoryProvider = Provider<KioskRepository>((ref) {
-  final dio = ref.watch(dioProvider(F.kioskBaseUrl));
+part 'kiosk.g.dart';
 
-  return KioskRepository(KioskApiClient(dio));
-});
+@riverpod
+class Kiosk extends _$Kiosk {
+  @override
+  KioskRepository build() {
+    final dio = ref.watch(dioProvider(F.kioskBaseUrl));
+
+    return KioskRepository(KioskApiClient(dio));
+  }
+}
 
 class KioskRepository {
   final KioskApiClient _apiClient;

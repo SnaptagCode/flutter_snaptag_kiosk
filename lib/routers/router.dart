@@ -6,7 +6,6 @@ import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'router.admin.dart';
-part 'router.debug.dart';
 part 'router.g.dart';
 part 'router.kiosk.dart';
 
@@ -16,7 +15,7 @@ final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
 GoRouter router(Ref ref) {
   return GoRouter(
     navigatorKey: rootNavigatorKey,
-    initialLocation: '/kiosk/qr',
+    initialLocation: '/api-debug',
     routes: $appRoutes,
     observers: <NavigatorObserver>[NavObserver()],
   );

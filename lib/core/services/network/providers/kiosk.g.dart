@@ -1,24 +1,25 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'auth_code_provider.dart';
+part of 'kiosk.dart';
 
 // **************************************************************************
 // RiverpodGenerator
 // **************************************************************************
 
-String _$authCodeHash() => r'c93bb3f34c0f6f9f954a58ad4a5b2cedbdd02d67';
+String _$kioskHash() => r'313ac0f7f95dcf57a8c6ca1814154a8d9f79bc90';
 
-/// See also [AuthCode].
-@ProviderFor(AuthCode)
-final authCodeProvider = AutoDisposeNotifierProvider<AuthCode, String>.internal(
-  AuthCode.new,
-  name: r'authCodeProvider',
+/// See also [Kiosk].
+@ProviderFor(Kiosk)
+final kioskProvider =
+    AutoDisposeNotifierProvider<Kiosk, KioskRepository>.internal(
+  Kiosk.new,
+  name: r'kioskProvider',
   debugGetCreateSourceHash:
-      const bool.fromEnvironment('dart.vm.product') ? null : _$authCodeHash,
+      const bool.fromEnvironment('dart.vm.product') ? null : _$kioskHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );
 
-typedef _$AuthCode = AutoDisposeNotifier<String>;
+typedef _$Kiosk = AutoDisposeNotifier<KioskRepository>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

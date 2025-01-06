@@ -1,16 +1,22 @@
 part of 'router.dart';
 
-final GlobalKey<NavigatorState> adminNavigatorKey = GlobalKey<NavigatorState>();
+final GlobalKey<NavigatorState> adminNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'debug');
 
-@TypedShellRoute<AdminShellRouteData>(
+@TypedShellRoute<DebugShellRouteData>(
   routes: <TypedRoute<RouteData>>[
     TypedGoRoute<PrinterSettingRouteData>(path: '/printer-settings'),
     TypedGoRoute<PaymentHistoryRouteData>(path: '/payment-history'),
-    TypedGoRoute<AdminTabRouteData>(path: '/admin-tab'),
+    TypedGoRoute<ApiDebugRouteData>(path: '/api-debug'),
+    TypedGoRoute<MaterialRouteData>(path: '/material-components'),
+    TypedGoRoute<KioskComponentsRouteData>(path: '/kiosk-components'),
+    TypedGoRoute<KioskInfoRouteData>(path: '/kiosk-info'),
+    TypedGoRoute<KioskTypographyRouteData>(path: '/kiosk-typography'),
+    TypedGoRoute<KioskColorsRouteData>(path: '/kiosk-colors'),
+    TypedGoRoute<ImageStorageRouteData>(path: '/image-storage'),
   ],
 )
-class AdminShellRouteData extends ShellRouteData {
-  const AdminShellRouteData();
+class DebugShellRouteData extends ShellRouteData {
+  const DebugShellRouteData();
 
   static final GlobalKey<NavigatorState> $navigatorKey = adminNavigatorKey;
 
@@ -42,13 +48,79 @@ class PaymentHistoryRouteData extends GoRouteData {
   }
 }
 
-class AdminTabRouteData extends GoRouteData {
-  const AdminTabRouteData();
+class ApiDebugRouteData extends GoRouteData {
+  const ApiDebugRouteData();
 
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) {
     return NoTransitionPage(
-      child: AdminTabScreen(),
+      child: const ApiDebugScreen(),
+    );
+  }
+}
+
+class MaterialRouteData extends GoRouteData {
+  const MaterialRouteData();
+
+  @override
+  Page<void> buildPage(BuildContext context, GoRouterState state) {
+    return NoTransitionPage(
+      child: const MaterialScreen(),
+    );
+  }
+}
+
+class KioskComponentsRouteData extends GoRouteData {
+  const KioskComponentsRouteData();
+
+  @override
+  Page<void> buildPage(BuildContext context, GoRouterState state) {
+    return NoTransitionPage(
+      child: const KioskComponentsScreen(),
+    );
+  }
+}
+
+class KioskColorsRouteData extends GoRouteData {
+  const KioskColorsRouteData();
+
+  @override
+  Page<void> buildPage(BuildContext context, GoRouterState state) {
+    return NoTransitionPage(
+      child: const KioskColorsScreen(),
+    );
+  }
+}
+
+class KioskTypographyRouteData extends GoRouteData {
+  const KioskTypographyRouteData();
+
+  @override
+  Page<void> buildPage(BuildContext context, GoRouterState state) {
+    return NoTransitionPage(
+      child: const KioskTypographyScreen(),
+    );
+  }
+}
+
+class KioskInfoRouteData extends GoRouteData {
+  const KioskInfoRouteData();
+
+  @override
+  Page<void> buildPage(BuildContext context, GoRouterState state) {
+    return NoTransitionPage(
+      child: const KioskInfoScreen(),
+    );
+  }
+}
+
+class ImageStorageRouteData extends GoRouteData {
+  const ImageStorageRouteData();
+
+  @override
+  Page<void> buildPage(BuildContext context, GoRouterState state) {
+    return NoTransitionPage(
+      child: const ImageStorageScreen(),
     );
   }
 }
