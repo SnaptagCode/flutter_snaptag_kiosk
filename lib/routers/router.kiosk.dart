@@ -4,10 +4,10 @@ final GlobalKey<NavigatorState> kioskNavigatorKey = GlobalKey<NavigatorState>(de
 
 @TypedShellRoute<KioskShellRouteData>(
   routes: <TypedRoute<RouteData>>[
-    TypedGoRoute<QRRouteData>(path: '/kiosk-qr'),
-    TypedGoRoute<ApprovalRouteData>(path: '/kiosk-keypad'),
-    TypedGoRoute<ConfirmationRouteData>(path: '/kiosk-payment'),
-    TypedGoRoute<PrintRouteData>(path: '/kiosk-print'),
+    TypedGoRoute<PhotoCardUploadRouteData>(path: '/kiosk/qr'),
+    TypedGoRoute<CodeVerificationRouteData>(path: '/kiosk/code-verification'),
+    TypedGoRoute<PhotoCardPreviewRouteData>(path: '/kiosk/preview'),
+    TypedGoRoute<PrintProcessRouteData>(path: '/kiosk/print-process'),
   ],
 )
 class KioskShellRouteData extends ShellRouteData {
@@ -21,62 +21,46 @@ class KioskShellRouteData extends ShellRouteData {
   }
 }
 
-class QRRouteData extends GoRouteData {
-  const QRRouteData();
+class PhotoCardUploadRouteData extends GoRouteData {
+  const PhotoCardUploadRouteData();
 
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) {
     return NoTransitionPage(
-      child: const Scaffold(
-        body: Center(
-          child: Text('QR Code'),
-        ),
-      ),
+      child: PhotoCardUploadScreen(),
     );
   }
 }
 
-class ApprovalRouteData extends GoRouteData {
-  const ApprovalRouteData();
+class CodeVerificationRouteData extends GoRouteData {
+  const CodeVerificationRouteData();
 
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) {
     return NoTransitionPage(
-      child: const Scaffold(
-        body: Center(
-          child: Text('Approval'),
-        ),
-      ),
+      child: CodeVerificationScreen(),
     );
   }
 }
 
-class ConfirmationRouteData extends GoRouteData {
-  const ConfirmationRouteData();
+class PhotoCardPreviewRouteData extends GoRouteData {
+  const PhotoCardPreviewRouteData();
 
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) {
     return NoTransitionPage(
-      child: const Scaffold(
-        body: Center(
-          child: Text('Confirmation'),
-        ),
-      ),
+      child: PhotoCardPreviewScreen(),
     );
   }
 }
 
-class PrintRouteData extends GoRouteData {
-  const PrintRouteData();
+class PrintProcessRouteData extends GoRouteData {
+  const PrintProcessRouteData();
 
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) {
     return NoTransitionPage(
-      child: const Scaffold(
-        body: Center(
-          child: Text('Print'),
-        ),
-      ),
+      child: PrintProcessScreen(),
     );
   }
 }

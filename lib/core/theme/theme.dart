@@ -1,3 +1,4 @@
+export 'box_decoration.dart';
 export 'button_styles.dart';
 export 'extensions.dart';
 export 'kiosk_colors.dart';

@@ -12,7 +12,6 @@ class KioskThemeService {
   KioskThemeService(this.kioskInfo);
 
   Future<ThemeData> createTheme() async {
-    final fontFamily = 'Pretendard';
     final kioskColors = _createKioskColors();
     final primary = kioskColors.buttonColor;
 
