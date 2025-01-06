@@ -75,19 +75,19 @@ class KioskComponentsScreen extends ConsumerWidget {
             const Text('Dialog Test'),
             const SizedBox(height: 16),
             ElevatedButton(
-              onPressed: () => DialogHelper.showErrorDialog(context),
+              onPressed: () => DialogHelper.showErrorDialog(),
               style: context.dialogButtonStyle,
               child: Text('Show Error Dialog'.tr()),
             ),
             const SizedBox(height: 16),
             ElevatedButton(
-              onPressed: () => DialogHelper.showPurchaseFailedDialog(context),
+              onPressed: () => DialogHelper.showPurchaseFailedDialog(),
               style: context.dialogButtonStyle,
               child: Text('Show Purchase Failed Dialog'.tr()),
             ),
             const SizedBox(height: 16),
             ElevatedButton(
-              onPressed: () => DialogHelper.showPrintErrorDialog(context),
+              onPressed: () => DialogHelper.showPrintErrorDialog(),
               style: context.dialogButtonStyle,
               child: Text('Show Print Error Dialog'.tr()),
             ),

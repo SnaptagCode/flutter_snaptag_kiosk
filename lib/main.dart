@@ -1,12 +1,19 @@
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_snaptag_kiosk/app.dart';
+import 'package:flutter_snaptag_kiosk/flavors.dart';
 
 import 'core/services/services.dart';
 
 void main() async {
+  if (kDebugMode) {
+    F.appFlavor = Flavor.dev;
+  } else {
+    F.appFlavor = Flavor.prod;
+  }
   final storage = await StorageService.initialize();
   WidgetsFlutterBinding.ensureInitialized();
   await EasyLocalization.ensureInitialized();
