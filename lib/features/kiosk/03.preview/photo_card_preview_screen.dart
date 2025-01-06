@@ -21,7 +21,7 @@ class _PhotoCardPreviewScreenState extends ConsumerState<PhotoCardPreviewScreen>
   Widget build(BuildContext context) {
     return Center(
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Text(
@@ -29,24 +29,30 @@ class _PhotoCardPreviewScreenState extends ConsumerState<PhotoCardPreviewScreen>
             textAlign: TextAlign.center,
             style: context.typography.kioskBody1B,
           ),
+          SizedBox(height: 30.h),
           GradientContainer(
             content: LayoutBuilder(
               builder: (context, constraints) {
-                return ClipRRect(
-                  borderRadius: BorderRadius.circular(10.r),
-                  child: Image.network(
-                    'https://picsum.photos/id/1/200/300', //TODO: 이미지 URL
-                    fit: BoxFit.fill,
+                return Padding(
+                  padding: EdgeInsets.symmetric(vertical: 22.h),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(10.r),
+                    child: Image.network(
+                      'https://picsum.photos/id/1/200/300', //TODO: 이미지 URL
+                      fit: BoxFit.fill,
+                    ),
                   ),
                 );
               },
             ),
           ),
+          SizedBox(height: 30.h),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               PriceBox(),
+              SizedBox(width: 20.w),
               ElevatedButton(
                 style: context.paymentButtonStyle,
                 onPressed: () {
@@ -57,7 +63,7 @@ class _PhotoCardPreviewScreenState extends ConsumerState<PhotoCardPreviewScreen>
                 ),
               ),
             ],
-          )
+          ),
         ],
       ),
     );

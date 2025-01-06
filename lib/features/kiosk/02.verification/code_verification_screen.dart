@@ -10,13 +10,14 @@ class CodeVerificationScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Text(
           LocaleKeys.sub01_txt_01.tr(),
           style: context.typography.kioskBody1B,
         ),
+        ...[LocaleKeys.sub01_txt_02.tr().isNotEmpty ? SizedBox(height: 12.h) : SizedBox(height: 0)],
         Text(
           LocaleKeys.sub01_txt_02.tr(),
           style: context.typography.kioskBody1B,

@@ -4,7 +4,8 @@ import 'package:flutter_snaptag_kiosk/lib.dart';
 
 extension ButtonStyles on BuildContext {
   ButtonStyle get mainLargeButtonStyle => ElevatedButton.styleFrom(
-        fixedSize: Size(520.w, 82.h),
+        fixedSize: Size(double.infinity, 82.h),
+        minimumSize: Size(520.w, 78.h),
         backgroundColor: kioskColors.buttonColor,
         foregroundColor: kioskColors.couponTextColor,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
