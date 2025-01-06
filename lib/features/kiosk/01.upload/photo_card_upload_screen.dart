@@ -1,14 +1,16 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_snaptag_kiosk/flavors.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
-class PhotoCardUploadScreen extends StatelessWidget {
+class PhotoCardUploadScreen extends ConsumerWidget {
   const PhotoCardUploadScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisAlignment: MainAxisAlignment.start,
@@ -34,7 +36,8 @@ class PhotoCardUploadScreen extends StatelessWidget {
             borderRadius: BorderRadius.circular(20.r),
           ),
           child: QrImageView(
-            data: 'https://photocard-kiosk-qr.snaptag.co.kr',
+            data:
+                '${F.qrCodePrefix}/${context.locale.languageCode}/${ref.watch(storageServiceProvider).settings.kioskEventId} ',
             size: 330.r,
             padding: EdgeInsets.all(20.r),
             version: QrVersions.auto,

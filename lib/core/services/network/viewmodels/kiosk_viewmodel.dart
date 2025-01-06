@@ -2,10 +2,11 @@ import 'dart:io';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_snaptag_kiosk/core/core.dart';
+import 'package:flutter_snaptag_kiosk/flavors.dart';
 import 'package:flutter_snaptag_kiosk/models/models.dart';
 
 final kioskRepositoryProvider = Provider<KioskRepository>((ref) {
-  final dio = ref.watch(dioProvider('https://kiosk-dev-server.snaptag.co.kr'));
+  final dio = ref.watch(dioProvider(F.kioskBaseUrl));
 
   return KioskRepository(KioskApiClient(dio));
 });

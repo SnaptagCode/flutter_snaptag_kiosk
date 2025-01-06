@@ -70,7 +70,7 @@ class _InputDisplay extends ConsumerWidget {
               children: [
                 Expanded(
                   child: Text(
-                    keypadState.formattedInput,
+                    keypadState,
                     textAlign: TextAlign.center,
                     style: context.typography.kioskInput1B.copyWith(color: Colors.black),
                   ),
@@ -145,7 +145,7 @@ class _NumericPad extends ConsumerWidget {
       return ElevatedButton(
         style: context.keypadCompleteStyle,
         onPressed: () {
-          PhotoCardPreviewRouteData().go(context);
+          ref.read(authCodeProvider.notifier).submit(context);
         },
         child: Text(LocaleKeys.sub01_btn_done.tr()),
       );

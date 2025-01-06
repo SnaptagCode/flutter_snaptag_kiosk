@@ -36,6 +36,7 @@ dependencies:
   qr_flutter: ^4.1.0
   flutter_screenutil: ^5.9.3
   palette_generator: ^0.3.3+5
+  loader_overlay: ^5.0.0
 
 
 dev_dependencies:

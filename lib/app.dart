@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_snaptag_kiosk/features/features.dart';
 
+import 'flavors.dart';
 import 'routers/router.dart';
 
 class App extends ConsumerWidget {
@@ -38,6 +39,13 @@ class App extends ConsumerWidget {
                 PointerDeviceKind.touch,
               },
             ),
+            builder: (context, child) {
+              return _flavorBanner(
+                child: child!,
+                ref: ref,
+                show: F.appFlavor == Flavor.dev,
+              );
+            },
           ),
           loading: () => const _LoadingApp(),
           error: (error, stack) => _ErrorApp(error: error),
@@ -47,6 +55,23 @@ class App extends ConsumerWidget {
       error: (error, stack) => _ErrorApp(error: error),
     );
   }
+
+  Widget _flavorBanner({
+    required Widget child,
+    required WidgetRef ref,
+    bool show = true,
+  }) =>
+      show
+          ? Banner(
+              location: BannerLocation.bottomStart,
+              message: F.name,
+              color: Colors.green.withOpacity(0.6),
+              textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12.0, letterSpacing: 1.0),
+              child: child,
+            )
+          : Container(
+              child: child,
+            );
 }
 
 class _LoadingApp extends StatelessWidget {
