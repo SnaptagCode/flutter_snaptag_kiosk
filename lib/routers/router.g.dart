@@ -262,20 +262,20 @@ RouteBase get $kioskShellRouteData => ShellRouteData.$route(
       factory: $KioskShellRouteDataExtension._fromState,
       routes: [
         GoRouteData.$route(
-          path: '/kiosk-qr',
-          factory: $QRRouteDataExtension._fromState,
+          path: '/kiosk/qr',
+          factory: $PhotoCardUploadRouteDataExtension._fromState,
         ),
         GoRouteData.$route(
-          path: '/kiosk-keypad',
-          factory: $ApprovalRouteDataExtension._fromState,
+          path: '/kiosk/code-verification',
+          factory: $CodeVerificationRouteDataExtension._fromState,
         ),
         GoRouteData.$route(
-          path: '/kiosk-payment',
-          factory: $ConfirmationRouteDataExtension._fromState,
+          path: '/kiosk/preview',
+          factory: $PhotoCardPreviewRouteDataExtension._fromState,
         ),
         GoRouteData.$route(
-          path: '/kiosk-print',
-          factory: $PrintRouteDataExtension._fromState,
+          path: '/kiosk/print-process',
+          factory: $PrintProcessRouteDataExtension._fromState,
         ),
       ],
     );
@@ -285,11 +285,12 @@ extension $KioskShellRouteDataExtension on KioskShellRouteData {
       const KioskShellRouteData();
 }
 
-extension $QRRouteDataExtension on QRRouteData {
-  static QRRouteData _fromState(GoRouterState state) => const QRRouteData();
+extension $PhotoCardUploadRouteDataExtension on PhotoCardUploadRouteData {
+  static PhotoCardUploadRouteData _fromState(GoRouterState state) =>
+      const PhotoCardUploadRouteData();
 
   String get location => GoRouteData.$location(
-        '/kiosk-qr',
+        '/kiosk/qr',
       );
 
   void go(BuildContext context) => context.go(location);
@@ -302,12 +303,12 @@ extension $QRRouteDataExtension on QRRouteData {
   void replace(BuildContext context) => context.replace(location);
 }
 
-extension $ApprovalRouteDataExtension on ApprovalRouteData {
-  static ApprovalRouteData _fromState(GoRouterState state) =>
-      const ApprovalRouteData();
+extension $CodeVerificationRouteDataExtension on CodeVerificationRouteData {
+  static CodeVerificationRouteData _fromState(GoRouterState state) =>
+      const CodeVerificationRouteData();
 
   String get location => GoRouteData.$location(
-        '/kiosk-keypad',
+        '/kiosk/code-verification',
       );
 
   void go(BuildContext context) => context.go(location);
@@ -320,12 +321,12 @@ extension $ApprovalRouteDataExtension on ApprovalRouteData {
   void replace(BuildContext context) => context.replace(location);
 }
 
-extension $ConfirmationRouteDataExtension on ConfirmationRouteData {
-  static ConfirmationRouteData _fromState(GoRouterState state) =>
-      const ConfirmationRouteData();
+extension $PhotoCardPreviewRouteDataExtension on PhotoCardPreviewRouteData {
+  static PhotoCardPreviewRouteData _fromState(GoRouterState state) =>
+      const PhotoCardPreviewRouteData();
 
   String get location => GoRouteData.$location(
-        '/kiosk-payment',
+        '/kiosk/preview',
       );
 
   void go(BuildContext context) => context.go(location);
@@ -338,12 +339,12 @@ extension $ConfirmationRouteDataExtension on ConfirmationRouteData {
   void replace(BuildContext context) => context.replace(location);
 }
 
-extension $PrintRouteDataExtension on PrintRouteData {
-  static PrintRouteData _fromState(GoRouterState state) =>
-      const PrintRouteData();
+extension $PrintProcessRouteDataExtension on PrintProcessRouteData {
+  static PrintProcessRouteData _fromState(GoRouterState state) =>
+      const PrintProcessRouteData();
 
   String get location => GoRouteData.$location(
-        '/kiosk-print',
+        '/kiosk/print-process',
       );
 
   void go(BuildContext context) => context.go(location);
@@ -360,7 +361,7 @@ extension $PrintRouteDataExtension on PrintRouteData {
 // RiverpodGenerator
 // **************************************************************************
 
-String _$routerHash() => r'a4d5b8760274074e4ed3a70370f555aaf8f3c107';
+String _$routerHash() => r'9db931a9d21736df5752251734cb1e846846cb05';
 
 /// See also [router].
 @ProviderFor(router)
