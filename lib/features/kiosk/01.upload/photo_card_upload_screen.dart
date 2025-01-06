@@ -11,30 +11,41 @@ class PhotoCardUploadScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
-      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.start,
       children: [
         Text(
           LocaleKeys.main_txt_01_01.tr(),
           style: context.typography.kioskBody1B,
         ),
+        SizedBox(height: 12.h),
         Text(
           LocaleKeys.main_txt_01_02.tr(),
           style: context.typography.kioskBody1B,
         ),
+        SizedBox(height: 12.h),
         Text(
           LocaleKeys.main_txt_01_03.tr(),
-          style: context.typography.kioskBody1B,
+          style: context.typography.kioskBody2B,
         ),
-        QrImageView(
-          data: 'https://photocard-kiosk-qr.snaptag.co.kr',
-          size: 330.r,
-          padding: EdgeInsets.all(20.r),
-          version: QrVersions.auto,
+        SizedBox(height: 30.h),
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20.r),
+          ),
+          child: QrImageView(
+            data: 'https://photocard-kiosk-qr.snaptag.co.kr',
+            size: 330.r,
+            padding: EdgeInsets.all(20.r),
+            version: QrVersions.auto,
+          ),
         ),
+        SizedBox(height: 30.h),
         Text(
           LocaleKeys.main_txt_02.tr(),
           style: context.typography.kioskBody2B,
         ),
+        SizedBox(height: 30.h),
         ElevatedButton(
           style: context.mainLargeButtonStyle,
           child: Text(

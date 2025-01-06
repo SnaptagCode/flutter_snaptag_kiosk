@@ -26,7 +26,7 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
   Widget build(BuildContext context) {
     return Center(
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Text(
@@ -34,6 +34,7 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
             textAlign: TextAlign.center,
             style: context.typography.kioskBody1B,
           ),
+          SizedBox(height: 30.h),
           GradientContainer(
             content: Padding(
               padding: EdgeInsets.all(8.r),
@@ -46,11 +47,11 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
               ),
             ),
           ),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(10.r), // 10px 둥근 테두리 추가
-            child: SizedBox(
-              height: 3.h,
-            ),
+          SizedBox(height: 30.h),
+          Text(
+            LocaleKeys.sub03_txt_02.tr(),
+            textAlign: TextAlign.center,
+            style: context.typography.kioskBody2B,
           ),
         ],
       ),
