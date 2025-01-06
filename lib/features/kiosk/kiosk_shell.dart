@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_snaptag_kiosk/lib.dart';
+import 'package:go_router/go_router.dart';
 
 class KioskShell extends ConsumerWidget {
   final Widget child;
@@ -13,99 +15,61 @@ class KioskShell extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
-      body: Center(
-        child: child,
-      ),
-    );
-    /*
-    return Center(
-      child: SizedBox(
-        width: 1080.w,
-        height: 1920.h,
-        child: Material(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              SizedBox(
-                height: imageAsync.topBannerSize?.height.h,
-                width: imageAsync.topBannerSize?.width.w,
-                child: Stack(
-                  children: [
-                    Container(
-                      decoration: BoxDecoration(
-                          image: imageAsync.topBanner != null ? DecorationImage(image: imageAsync.topBanner!) : null),
+      body: AspectRatio(
+        aspectRatio: 9 / 16,
+        child: Column(
+          children: [
+            SizedBox(
+              height: 855.h,
+              width: double.infinity,
+              child: Image.network(
+                ref.watch(storageServiceProvider).settings.topBannerUrl,
+                fit: BoxFit.cover,
+              ),
+            ),
+            Expanded(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  image: DecorationImage(
+                    image: NetworkImage(
+                      ref.watch(storageServiceProvider).settings.mainImageUrl,
                     ),
-                    HiddenButton(), // 12/26일 배포하지 않기로 결정
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                child: Column(
+                  children: [
+                    // 앱바 영역
+                    SizedBox(
+                      height: 70.h,
+                      child: Row(
+                        children: [
+                          const Spacer(),
+                          Builder(builder: (context) {
+                            final currentPath = GoRouterState.of(context).matchedLocation;
+                            if (currentPath != PhotoCardUploadRouteData().location) {
+                              return const HomeButton();
+                            } else {
+                              return const LanguageSwitcher();
+                            }
+                          }),
+                        ],
+                      ),
+                    ),
+                    SizedBox(
+                      height: 230.h,
+                    ),
+                    // 실제 콘텐츠
+                    Expanded(
+                      child: child,
+                    ),
                   ],
                 ),
               ),
-              Container(
-                height: imageAsync.mainImageSize?.height.h,
-                width: imageAsync.mainImageSize?.width.w,
-                decoration: BoxDecoration(
-                    image: imageAsync.mainImage != null ? DecorationImage(image: imageAsync.mainImage!) : null),
-                child: Scaffold(
-                  appBar: AppBar(
-                    backgroundColor: Colors.transparent,
-                    elevation: 0,
-                    toolbarHeight: 70.h,
-                    actions: [
-                      Center(
-                        child: Builder(builder: (context) {
-                          final currentPath = GoRouterState.of(context).matchedLocation;
-                          if (currentPath != QRRouteData().location) {
-                            return const KioskNavigationBar();
-                          } else {
-                            return const LocalePopupMenu();
-                          }
-                        }),
-                      ),
-                    ],
-                  ),
-                  body: _WidgetSection(child: child),
-                ),
-              )
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
-     */
-  }
-}
-
-class _TitleSection extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: (140 + 70).h,
-    );
-  }
-}
-
-class _WidgetSection extends StatelessWidget {
-  const _WidgetSection({
-    required this.child,
-  });
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(builder: (context, constraints) {
-      return SizedBox(
-        width: constraints.maxWidth,
-        height: constraints.maxHeight,
-        child: Column(
-          children: [
-            _TitleSection(),
-            SizedBox(
-              height: 20.h,
-            ),
-            Expanded(child: child)
-          ],
-        ),
-      );
-    });
   }
 }
