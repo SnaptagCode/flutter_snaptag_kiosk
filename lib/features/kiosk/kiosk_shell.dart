@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
-import 'package:go_router/go_router.dart';
 
 class KioskShell extends ConsumerWidget {
   final Widget child;
@@ -45,14 +44,7 @@ class KioskShell extends ConsumerWidget {
                       child: Row(
                         children: [
                           const Spacer(),
-                          Builder(builder: (context) {
-                            final currentPath = GoRouterState.of(context).matchedLocation;
-                            if (currentPath != PhotoCardUploadRouteData().location) {
-                              return const HomeButton();
-                            } else {
-                              return const LanguageSwitcher();
-                            }
-                          }),
+                          KioskNavigatorButton(),
                         ],
                       ),
                     ),
