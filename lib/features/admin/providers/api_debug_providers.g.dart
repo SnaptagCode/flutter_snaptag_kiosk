@@ -6,22 +6,7 @@ part of 'api_debug_providers.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$machineInfoHash() => r'b30240e4155d5ef6f2e36331ff34ed871c4578f6';
-
-/// See also [MachineInfo].
-@ProviderFor(MachineInfo)
-final machineInfoProvider =
-    AutoDisposeNotifierProvider<MachineInfo, ApiResponse<dynamic>>.internal(
-  MachineInfo.new,
-  name: r'machineInfoProvider',
-  debugGetCreateSourceHash:
-      const bool.fromEnvironment('dart.vm.product') ? null : _$machineInfoHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
-
-typedef _$MachineInfo = AutoDisposeNotifier<ApiResponse<dynamic>>;
-String _$updatePrintStatusHash() => r'1561c82559fcbad8a1747fa68d0bb66ac3ce6180';
+String _$updatePrintStatusHash() => r'e826ffaba0961ab9157b372c1f8e391c912252f4';
 
 /// See also [UpdatePrintStatus].
 @ProviderFor(UpdatePrintStatus)
@@ -37,7 +22,7 @@ final updatePrintStatusProvider = AutoDisposeNotifierProvider<UpdatePrintStatus,
 );
 
 typedef _$UpdatePrintStatus = AutoDisposeNotifier<ApiResponse<dynamic>>;
-String _$frontPhotoListHash() => r'2b11d7e0ec4952bf48be601e8ff7921b3a32440e';
+String _$frontPhotoListHash() => r'0b766838f6b9a3f76108e7f7ddfbfc58df4efadd';
 
 /// See also [FrontPhotoList].
 @ProviderFor(FrontPhotoList)
@@ -53,7 +38,7 @@ final frontPhotoListProvider =
 );
 
 typedef _$FrontPhotoList = AutoDisposeNotifier<ApiResponse<dynamic>>;
-String _$backPhotoCardHash() => r'b54a34b2bd35ccb6c688c648ef53c2b7ffe3fb72';
+String _$backPhotoCardHash() => r'05ab9a187f9b382d778290c059d45f938045ab11';
 
 /// See also [BackPhotoCard].
 @ProviderFor(BackPhotoCard)
@@ -69,7 +54,7 @@ final backPhotoCardProvider =
 );
 
 typedef _$BackPhotoCard = AutoDisposeNotifier<ApiResponse<dynamic>>;
-String _$createOrderHash() => r'5daeaa4f31c56d9a38942a8fe88863cc7dbe5342';
+String _$createOrderHash() => r'95582d08d464f0200a7c92f889323d0c737f4f24';
 
 /// See also [CreateOrder].
 @ProviderFor(CreateOrder)
@@ -84,7 +69,7 @@ final createOrderProvider =
 );
 
 typedef _$CreateOrder = AutoDisposeNotifier<ApiResponse<dynamic>>;
-String _$updateOrderHash() => r'ab42f58432ceca0a042e666df2a13614723ba483';
+String _$updateOrderHash() => r'ea2dcf72167052756f3ab589bf1a2e78a1c0efa7';
 
 /// See also [UpdateOrder].
 @ProviderFor(UpdateOrder)

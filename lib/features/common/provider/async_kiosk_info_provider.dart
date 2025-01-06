@@ -12,7 +12,7 @@ class AsyncKioskInfo extends _$AsyncKioskInfo {
 
   Future<KioskMachineInfo> _fetchAndUpdateKioskInfo() async {
     try {
-      final yamlRepo = ref.read(storageServiceProvider);
+      final yamlRepo = ref.read(yamlStorageServiceProvider);
 
       // 먼저 파일 재로드
       await yamlRepo.reloadSettings();
@@ -26,7 +26,7 @@ class AsyncKioskInfo extends _$AsyncKioskInfo {
       }
 
       // API를 통해 최신 정보 가져오기
-      final kioskRepo = ref.read(kioskRepositoryProvider);
+      final kioskRepo = ref.read(kioskProvider);
       final response = await kioskRepo.getKioskMachineInfo(
         currentSettings.kioskMachineId,
       );

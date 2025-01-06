@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_snaptag_kiosk/features/features.dart';
-import 'package:flutter_snaptag_kiosk/models/enums/enums.dart';
+import 'package:flutter_snaptag_kiosk/lib.dart';
 
 class ApiDebugScreen extends ConsumerWidget {
   const ApiDebugScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final machineInfoState = ref.watch(machineInfoProvider);
     final printStatusState = ref.watch(updatePrintStatusProvider);
     final frontPhotoListState = ref.watch(frontPhotoListProvider);
     final backPhotoCardState = ref.watch(backPhotoCardProvider);
@@ -91,9 +89,21 @@ class ApiDebugScreen extends ConsumerWidget {
         child: Column(
           children: [
             buildApiSection(
-              title: 'Get Machine Info',
-              state: machineInfoState,
-              onTest: () => ref.read(machineInfoProvider.notifier).fetch(1),
+              title: 'Get Front Photo List',
+              state: frontPhotoListState,
+              onTest: () => ref
+                  .read(frontPhotoListProvider.notifier)
+                  .fetch(ref.watch(yamlStorageServiceProvider).settings.kioskEventId),
+            ),
+            buildApiSection(
+              title: 'Get Back Photo Card',
+              state: backPhotoCardState,
+              onTest: () => ref.read(backPhotoCardProvider.notifier).fetch(1, '1234'),
+            ),
+            buildApiSection(
+              title: 'Create Order',
+              state: createOrderState,
+              onTest: () => ref.read(createOrderProvider.notifier).create({}),
             ),
             buildApiSection(
               title: 'Update Print Status',
@@ -105,21 +115,6 @@ class ApiDebugScreen extends ConsumerWidget {
                     photoAuthNumber: '1234',
                     status: PrintStatus.completed,
                   ),
-            ),
-            buildApiSection(
-              title: 'Get Front Photo List',
-              state: frontPhotoListState,
-              onTest: () => ref.read(frontPhotoListProvider.notifier).fetch(1),
-            ),
-            buildApiSection(
-              title: 'Get Back Photo Card',
-              state: backPhotoCardState,
-              onTest: () => ref.read(backPhotoCardProvider.notifier).fetch(1, '1234'),
-            ),
-            buildApiSection(
-              title: 'Create Order',
-              state: createOrderState,
-              onTest: () => ref.read(createOrderProvider.notifier).create({}),
             ),
             buildApiSection(
               title: 'Update Order',

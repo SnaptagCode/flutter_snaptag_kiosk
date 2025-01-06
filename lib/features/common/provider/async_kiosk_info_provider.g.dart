@@ -6,7 +6,7 @@ part of 'async_kiosk_info_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$asyncKioskInfoHash() => r'19addea79ef485a365132d45eaa9ab77bf74713b';
+String _$asyncKioskInfoHash() => r'b142da41375b3e511f10a616ff942e98e9b927a0';
 
 /// See also [AsyncKioskInfo].
 @ProviderFor(AsyncKioskInfo)

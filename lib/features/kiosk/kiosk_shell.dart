@@ -23,7 +23,7 @@ class KioskShell extends ConsumerWidget {
               height: 855.h,
               width: double.infinity,
               child: Image.network(
-                ref.watch(storageServiceProvider).settings.topBannerUrl,
+                ref.watch(yamlStorageServiceProvider).settings.topBannerUrl,
                 fit: BoxFit.cover,
               ),
             ),
@@ -63,7 +63,7 @@ class ContentsShell extends ConsumerWidget {
         decoration: BoxDecoration(
           image: DecorationImage(
             image: NetworkImage(
-              ref.watch(storageServiceProvider).settings.mainImageUrl,
+              ref.watch(yamlStorageServiceProvider).settings.mainImageUrl,
             ),
             fit: BoxFit.cover,
           ),

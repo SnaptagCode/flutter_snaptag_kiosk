@@ -1,27 +1,26 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'storage_service.dart';
+part of 'image_storage_service.dart';
 
 // **************************************************************************
 // RiverpodGenerator
 // **************************************************************************
 
-String _$storageServiceHash() => r'03978f8e2da9690fd47f51fe5ee4c421679a811c';
+String _$imageStorageHash() => r'2ca16c8d8f07a4dca2ae54aa18af3142268d26fd';
 
-/// See also [storageService].
-@ProviderFor(storageService)
-final storageServiceProvider = Provider<StorageService>.internal(
-  storageService,
-  name: r'storageServiceProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$storageServiceHash,
+/// See also [imageStorage].
+@ProviderFor(imageStorage)
+final imageStorageProvider = Provider<ImageStorageService>.internal(
+  imageStorage,
+  name: r'imageStorageProvider',
+  debugGetCreateSourceHash:
+      const bool.fromEnvironment('dart.vm.product') ? null : _$imageStorageHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
-typedef StorageServiceRef = ProviderRef<StorageService>;
+typedef ImageStorageRef = ProviderRef<ImageStorageService>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

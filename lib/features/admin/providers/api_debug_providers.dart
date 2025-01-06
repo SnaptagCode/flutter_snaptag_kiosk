@@ -22,23 +22,6 @@ class ApiResponse<T> {
 }
 
 @riverpod
-class MachineInfo extends _$MachineInfo {
-  @override
-  ApiResponse<dynamic> build() => const ApiResponse();
-
-  Future<void> fetch(int id) async {
-    state = state.copyWith(isLoading: true);
-    try {
-      final repository = ref.read(kioskRepositoryProvider);
-      final response = await repository.getKioskMachineInfo(id);
-      state = ApiResponse(data: response);
-    } catch (e) {
-      state = ApiResponse(error: e.toString());
-    }
-  }
-}
-
-@riverpod
 class UpdatePrintStatus extends _$UpdatePrintStatus {
   @override
   ApiResponse<dynamic> build() => const ApiResponse();
@@ -52,7 +35,7 @@ class UpdatePrintStatus extends _$UpdatePrintStatus {
   }) async {
     state = state.copyWith(isLoading: true);
     try {
-      final repository = ref.read(kioskRepositoryProvider);
+      final repository = ref.read(kioskProvider);
       final response = await repository.updatePrintStatus(
         kioskMachineId: kioskMachineId,
         kioskEventId: kioskEventId,
@@ -75,7 +58,7 @@ class FrontPhotoList extends _$FrontPhotoList {
   Future<void> fetch(int id) async {
     state = state.copyWith(isLoading: true);
     try {
-      final repository = ref.read(kioskRepositoryProvider);
+      final repository = ref.read(kioskProvider);
       final response = await repository.getFrontPhotoList(id);
       state = ApiResponse(data: response);
     } catch (e) {
@@ -92,7 +75,7 @@ class BackPhotoCard extends _$BackPhotoCard {
   Future<void> fetch(int id, String authNumber) async {
     state = state.copyWith(isLoading: true);
     try {
-      final repository = ref.read(kioskRepositoryProvider);
+      final repository = ref.read(kioskProvider);
       final response = await repository.getBackPhotoCard(id, authNumber);
       state = ApiResponse(data: response);
     } catch (e) {
@@ -109,7 +92,7 @@ class CreateOrder extends _$CreateOrder {
   Future<void> create(Map<String, dynamic> data) async {
     state = state.copyWith(isLoading: true);
     try {
-      final repository = ref.read(kioskRepositoryProvider);
+      final repository = ref.read(kioskProvider);
       final response = await repository.createOrder(data);
       state = ApiResponse(data: response);
     } catch (e) {
@@ -126,7 +109,7 @@ class UpdateOrder extends _$UpdateOrder {
   Future<void> update(int id, OrderStatus status) async {
     state = state.copyWith(isLoading: true);
     try {
-      final repository = ref.read(kioskRepositoryProvider);
+      final repository = ref.read(kioskProvider);
       final response = await repository.updateOrder(id, status);
       state = ApiResponse(data: response);
     } catch (e) {

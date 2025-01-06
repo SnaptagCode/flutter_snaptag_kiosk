@@ -14,7 +14,8 @@ void main() async {
   } else {
     F.appFlavor = Flavor.prod;
   }
-  final storage = await StorageService.initialize();
+  final yamlStorage = await YamlStorageService.initialize();
+  final imageStorage = await ImageStorageService.initialize();
   WidgetsFlutterBinding.ensureInitialized();
   await EasyLocalization.ensureInitialized();
 
@@ -31,7 +32,8 @@ void main() async {
       child: ProviderScope(
         observers: [RiverpodLogger()],
         overrides: [
-          storageServiceProvider.overrideWithValue(storage),
+          yamlStorageServiceProvider.overrideWithValue(yamlStorage),
+          imageStorageProvider.overrideWithValue(imageStorage),
         ],
         child: ScreenUtilInit(
           designSize: const Size(1080, 1920),
