@@ -9,9 +9,9 @@ class BackPhotoCardResponse with _$BackPhotoCardResponse {
     required int kioskEventId,
     required int backPhotoCardId,
     int? nominatedBackPhotoCardId,
-    required int embeddingProductId,
-    required String photoAuthNumber,
     required String backPhotoCardOriginUrl,
+    required String photoAuthNumber,
+    int? embeddingProductId,
     required String formattedBackPhotoCardUrl,
   }) = _BackPhotoCardResponse;
 

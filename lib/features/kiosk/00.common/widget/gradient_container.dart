@@ -33,29 +33,28 @@ class GradientContainer extends StatelessWidget {
             ),
           ),
           // 중앙 콘텐츠
-          Center(
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Expanded(
-                  child: Container(
-                    height: double.infinity,
-                    clipBehavior: Clip.antiAlias,
-                    decoration: ShapeDecoration(
-                      color: Colors.transparent, // 회색 배경
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10), // 둥근 모서리
-                      ),
-                    ),
-                    child: Center(
-                      child: content, // 콘텐츠 위젯 삽입
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Expanded(
+                child: Container(
+                  height: double.infinity,
+                  clipBehavior: Clip.antiAlias,
+                  decoration: ShapeDecoration(
+                    color: Colors.transparent, // 회색 배경
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10), // 둥근 모서리
                     ),
                   ),
+                  margin: EdgeInsets.symmetric(vertical: 22.h),
+                  child: Center(
+                    child: content, // 콘텐츠 위젯 삽입
+                  ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ],
       ),

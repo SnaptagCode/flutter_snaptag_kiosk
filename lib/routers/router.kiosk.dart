@@ -60,12 +60,12 @@ class CodeVerificationRouteData extends GoRouteData {
 }
 
 class PhotoCardPreviewRouteData extends GoRouteData {
-  const PhotoCardPreviewRouteData();
-
+  const PhotoCardPreviewRouteData({required this.$extra});
+  final BackPhotoCardResponse $extra;
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) {
     return NoTransitionPage(
-      child: PhotoCardPreviewScreen(),
+      child: PhotoCardPreviewScreen(extra: $extra),
     );
   }
 }

@@ -3,20 +3,20 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_snaptag_kiosk/features/kiosk/03.preview/providers/photo_card_preview.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 
 class PhotoCardPreviewScreen extends ConsumerStatefulWidget {
   const PhotoCardPreviewScreen({
     super.key,
+    required this.extra,
   });
-
+  final BackPhotoCardResponse extra;
   @override
   ConsumerState<PhotoCardPreviewScreen> createState() => _PhotoCardPreviewScreenState();
 }
 
 class _PhotoCardPreviewScreenState extends ConsumerState<PhotoCardPreviewScreen> {
-  //get http => null;
-
   @override
   Widget build(BuildContext context) {
     return Center(
@@ -31,19 +31,12 @@ class _PhotoCardPreviewScreenState extends ConsumerState<PhotoCardPreviewScreen>
           ),
           SizedBox(height: 30.h),
           GradientContainer(
-            content: LayoutBuilder(
-              builder: (context, constraints) {
-                return Padding(
-                  padding: EdgeInsets.symmetric(vertical: 22.h),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(10.r),
-                    child: Image.network(
-                      'https://picsum.photos/id/1/200/300', //TODO: 이미지 URL
-                      fit: BoxFit.fill,
-                    ),
-                  ),
-                );
-              },
+            content: ClipRRect(
+              borderRadius: BorderRadius.circular(10.r),
+              child: Image.network(
+                widget.extra.formattedBackPhotoCardUrl,
+                fit: BoxFit.fill,
+              ),
             ),
           ),
           SizedBox(height: 30.h),
@@ -56,7 +49,7 @@ class _PhotoCardPreviewScreenState extends ConsumerState<PhotoCardPreviewScreen>
               ElevatedButton(
                 style: context.paymentButtonStyle,
                 onPressed: () {
-                  PrintProcessRouteData().go(context);
+                  ref.read(photoCardPreviewProvider.notifier).payment();
                 },
                 child: Text(
                   LocaleKeys.sub02_btn_pay.tr(),

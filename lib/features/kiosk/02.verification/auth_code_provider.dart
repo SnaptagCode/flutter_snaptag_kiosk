@@ -32,16 +32,16 @@ class AuthCode extends _$AuthCode {
     state = '';
   }
 
-  Future<void> submit(BuildContext _) async {
-    BuildContext context = contentsNavigatorKey.currentContext!;
-    context.loaderOverlay.show();
+  Future<void> submit(BuildContext context) async {
     try {
       if (state.length == maxLength) {
+        context.loaderOverlay.show();
         final BackPhotoCardResponse response = await ref.read(kioskRepositoryProvider).getBackPhotoCard(
               ref.watch(storageServiceProvider).settings.kioskEventId,
               state,
             );
         logger.d('BackPhotoCardResponse: ${response.toJson()}');
+        PhotoCardPreviewRouteData($extra: response).go(context);
       } else {
         throw Exception('Invalid code length');
       }
@@ -49,7 +49,9 @@ class AuthCode extends _$AuthCode {
       await DialogHelper.showErrorDialog();
       logger.e('Error submitting auth code: $msg stacktrace $stacktrace');
     } finally {
-      context.loaderOverlay.hide();
+      if (context.loaderOverlay.visible) {
+        context.loaderOverlay.hide();
+      }
       clear();
     }
   }
