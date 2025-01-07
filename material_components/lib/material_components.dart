@@ -1,3 +1,5 @@
+library material_components;
+
 export 'color_box.dart';
 export 'color_palettes_screen.dart';
 export 'component_screen.dart';

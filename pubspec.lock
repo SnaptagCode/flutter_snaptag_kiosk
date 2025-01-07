@@ -506,6 +506,13 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.11.1"
+  material_components:
+    dependency: "direct main"
+    description:
+      path: material_components
+      relative: true
+    source: path
+    version: "1.0.0+1"
   meta:
     dependency: transitive
     description:
