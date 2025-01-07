@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_snaptag_kiosk/flavors.dart';
 import 'package:flutter_snaptag_kiosk/routers/routers.dart';
 import 'package:go_router/go_router.dart';
 
@@ -16,75 +17,83 @@ class AdminShell extends ConsumerWidget {
     return Scaffold(
       body: child,
       bottomNavigationBar: NavigationBar(
-        onDestinationSelected: (index) {
-          switch (index) {
-            case 0:
-              const KioskInfoRouteData().go(context);
-              break;
-            case 1:
-              const ApiDebugRouteData().go(context);
-              break;
-            case 2:
-              const MaterialRouteData().go(context);
-              break;
-            case 3:
-              const KioskColorsRouteData().go(context);
-              break;
-            case 4:
-              const KioskTypographyRouteData().go(context);
-              break;
-            case 5:
-              const KioskComponentsRouteData().go(context);
-              break;
-            case 6:
-              const ImageStorageRouteData().go(context);
-              break;
-          }
-        },
+        onDestinationSelected: (index) => _onDestinationSelected(context, index),
         selectedIndex: _calculateSelectedIndex(context),
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.info),
-            label: 'Kiosk Info',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.api),
-            label: 'API Debug',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.widgets),
-            label: 'Material',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.color_lens),
-            label: 'Colors',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.text_fields),
-            label: 'Typography',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.devices),
-            label: 'Kiosk Components',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.image),
-            label: 'Image Storage',
-          ),
-        ],
+        destinations: _buildDestinations(),
       ),
     );
   }
 
+  void _onDestinationSelected(BuildContext context, int index) {
+    final routes = _getRoutes();
+    if (index < routes.length) {
+      context.go(routes[index].path);
+    }
+  }
+
+  List<NavigationDestination> _buildDestinations() {
+    return _getRoutes().map((route) => route.destination).toList();
+  }
+
   int _calculateSelectedIndex(BuildContext context) {
     final String location = GoRouterState.of(context).uri.path;
-    if (location.startsWith('/kiosk-info')) return 0;
-    if (location.startsWith('/api-debug')) return 1;
-    if (location.startsWith('/material-components')) return 2;
-    if (location.startsWith('/kiosk-colors')) return 3;
-    if (location.startsWith('/kiosk-typography')) return 4;
-    if (location.startsWith('/kiosk-components')) return 5;
-    if (location.startsWith('/image-storage')) return 6;
-    return 0;
+    final paths = _getRoutes().map((route) => route.path).toList();
+    return paths.indexWhere(location.startsWith);
   }
+
+  List<RouteModel> _getRoutes() {
+    final routes = [
+      RouteModel(
+        path: '/kiosk-info',
+        route: const KioskInfoRouteData(),
+        destination: const NavigationDestination(
+          icon: Icon(Icons.info),
+          label: 'Kiosk Info',
+        ),
+      ),
+    ];
+
+    if (F.appFlavor == Flavor.dev) {
+      routes.addAll([
+        RouteModel(
+          path: '/api-debug',
+          route: const ApiDebugRouteData(),
+          destination: const NavigationDestination(
+            icon: Icon(Icons.api),
+            label: 'API Debug',
+          ),
+        ),
+        RouteModel(
+          path: '/material-components',
+          route: const MaterialRouteData(),
+          destination: const NavigationDestination(
+            icon: Icon(Icons.widgets),
+            label: 'Material',
+          ),
+        ),
+        RouteModel(
+          path: '/kiosk-components',
+          route: const KioskComponentsRouteData(),
+          destination: const NavigationDestination(
+            icon: Icon(Icons.devices),
+            label: 'Kiosk Components',
+          ),
+        ),
+      ]);
+    }
+
+    return routes;
+  }
+}
+
+class RouteModel {
+  final String path;
+  final GoRouteData route;
+  final NavigationDestination destination;
+
+  RouteModel({
+    required this.path,
+    required this.route,
+    required this.destination,
+  });
 }

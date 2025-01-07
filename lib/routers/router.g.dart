@@ -62,18 +62,6 @@ RouteBase get $debugShellRouteData => ShellRouteData.$route(
           path: '/kiosk-info',
           factory: $KioskInfoRouteDataExtension._fromState,
         ),
-        GoRouteData.$route(
-          path: '/kiosk-typography',
-          factory: $KioskTypographyRouteDataExtension._fromState,
-        ),
-        GoRouteData.$route(
-          path: '/kiosk-colors',
-          factory: $KioskColorsRouteDataExtension._fromState,
-        ),
-        GoRouteData.$route(
-          path: '/image-storage',
-          factory: $ImageStorageRouteDataExtension._fromState,
-        ),
       ],
     );
 
@@ -178,60 +166,6 @@ extension $KioskInfoRouteDataExtension on KioskInfoRouteData {
 
   String get location => GoRouteData.$location(
         '/kiosk-info',
-      );
-
-  void go(BuildContext context) => context.go(location);
-
-  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
-
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
-
-  void replace(BuildContext context) => context.replace(location);
-}
-
-extension $KioskTypographyRouteDataExtension on KioskTypographyRouteData {
-  static KioskTypographyRouteData _fromState(GoRouterState state) =>
-      const KioskTypographyRouteData();
-
-  String get location => GoRouteData.$location(
-        '/kiosk-typography',
-      );
-
-  void go(BuildContext context) => context.go(location);
-
-  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
-
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
-
-  void replace(BuildContext context) => context.replace(location);
-}
-
-extension $KioskColorsRouteDataExtension on KioskColorsRouteData {
-  static KioskColorsRouteData _fromState(GoRouterState state) =>
-      const KioskColorsRouteData();
-
-  String get location => GoRouteData.$location(
-        '/kiosk-colors',
-      );
-
-  void go(BuildContext context) => context.go(location);
-
-  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
-
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
-
-  void replace(BuildContext context) => context.replace(location);
-}
-
-extension $ImageStorageRouteDataExtension on ImageStorageRouteData {
-  static ImageStorageRouteData _fromState(GoRouterState state) =>
-      const ImageStorageRouteData();
-
-  String get location => GoRouteData.$location(
-        '/image-storage',
       );
 
   void go(BuildContext context) => context.go(location);

@@ -29,7 +29,7 @@ class YamlStorageService {
   static const String _bodyKey = 'body';
   static const String _headerKey = 'header';
 
-  String get filePath => _fileSystem.getFilePath(DirectoryPaths.settings, _fileName);
+  String get filePath => _fileSystem.getFilePath(DirectoryPaths.settings, fileName: _fileName);
 
   KioskMachineInfo _settings = const KioskMachineInfo();
   String _bodyImagePath = '';
@@ -55,11 +55,11 @@ class YamlStorageService {
     await _loadSettingsFromFile();
   }
 
-  Future<void> _loadSettingsFromFile({String? bodyPath, String? headerPath}) async {
+  Future<void> _loadSettingsFromFile() async {
     try {
       await _fileSystem.ensureDirectoryExists(DirectoryPaths.settings);
 
-      final filePath = _fileSystem.getFilePath(DirectoryPaths.settings, _fileName);
+      final filePath = _fileSystem.getFilePath(DirectoryPaths.settings, fileName: _fileName);
       final file = File(filePath);
 
       if (!await file.exists()) {

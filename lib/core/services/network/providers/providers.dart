@@ -1,1 +1,1 @@
-export 'kiosk.dart';
+export 'kiosk_repository.dart';

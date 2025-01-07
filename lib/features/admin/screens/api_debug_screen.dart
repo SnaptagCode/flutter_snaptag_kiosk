@@ -8,7 +8,6 @@ class ApiDebugScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final printStatusState = ref.watch(updatePrintStatusProvider);
-    final frontPhotoListState = ref.watch(frontPhotoListProvider);
     final backPhotoCardState = ref.watch(backPhotoCardProvider);
     final createOrderState = ref.watch(createOrderProvider);
     final updateOrderState = ref.watch(updateOrderProvider);
@@ -88,13 +87,6 @@ class ApiDebugScreen extends ConsumerWidget {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            buildApiSection(
-              title: 'Get Front Photo List',
-              state: frontPhotoListState,
-              onTest: () => ref
-                  .read(frontPhotoListProvider.notifier)
-                  .fetch(ref.watch(yamlStorageServiceProvider).settings.kioskEventId),
-            ),
             buildApiSection(
               title: 'Get Back Photo Card',
               state: backPhotoCardState,

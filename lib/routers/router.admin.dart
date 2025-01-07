@@ -10,9 +10,6 @@ final GlobalKey<NavigatorState> adminNavigatorKey = GlobalKey<NavigatorState>(de
     TypedGoRoute<MaterialRouteData>(path: '/material-components'),
     TypedGoRoute<KioskComponentsRouteData>(path: '/kiosk-components'),
     TypedGoRoute<KioskInfoRouteData>(path: '/kiosk-info'),
-    TypedGoRoute<KioskTypographyRouteData>(path: '/kiosk-typography'),
-    TypedGoRoute<KioskColorsRouteData>(path: '/kiosk-colors'),
-    TypedGoRoute<ImageStorageRouteData>(path: '/image-storage'),
   ],
 )
 class DebugShellRouteData extends ShellRouteData {
@@ -81,28 +78,6 @@ class KioskComponentsRouteData extends GoRouteData {
   }
 }
 
-class KioskColorsRouteData extends GoRouteData {
-  const KioskColorsRouteData();
-
-  @override
-  Page<void> buildPage(BuildContext context, GoRouterState state) {
-    return NoTransitionPage(
-      child: const KioskColorsScreen(),
-    );
-  }
-}
-
-class KioskTypographyRouteData extends GoRouteData {
-  const KioskTypographyRouteData();
-
-  @override
-  Page<void> buildPage(BuildContext context, GoRouterState state) {
-    return NoTransitionPage(
-      child: const KioskTypographyScreen(),
-    );
-  }
-}
-
 class KioskInfoRouteData extends GoRouteData {
   const KioskInfoRouteData();
 
@@ -110,17 +85,6 @@ class KioskInfoRouteData extends GoRouteData {
   Page<void> buildPage(BuildContext context, GoRouterState state) {
     return NoTransitionPage(
       child: const KioskInfoScreen(),
-    );
-  }
-}
-
-class ImageStorageRouteData extends GoRouteData {
-  const ImageStorageRouteData();
-
-  @override
-  Page<void> buildPage(BuildContext context, GoRouterState state) {
-    return NoTransitionPage(
-      child: const ImageStorageScreen(),
     );
   }
 }

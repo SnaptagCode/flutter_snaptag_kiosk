@@ -5,13 +5,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_snaptag_kiosk/core/constants/constants.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 
-class ImageStorageScreen extends ConsumerWidget {
-  const ImageStorageScreen({super.key});
+class FrontImagesStore extends ConsumerWidget {
+  const FrontImagesStore({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final fileSystem = FileSystemService.instance;
-    final imagePath = fileSystem.getFilePath(DirectoryPaths.frontImages, 'test_image.jpg');
     return Scaffold(
       appBar: AppBar(
         title: const Text('Image Storage Test'),
@@ -24,12 +22,9 @@ class ImageStorageScreen extends ConsumerWidget {
             ElevatedButton(
               onPressed: () async {
                 try {
-                  final imageStorage = ref.read(imageStorageProvider);
-                  await imageStorage.saveImage(
-                    DirectoryPaths.frontImages,
-                    'https://picsum.photos/id/1/200/300',
-                    'test_image',
-                  );
+                  await ref
+                      .read(frontPhotoListProvider.notifier)
+                      .fetch(ref.watch(yamlStorageServiceProvider).settings.kioskEventId);
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('이미지 저장 성공!')),
@@ -48,21 +43,28 @@ class ImageStorageScreen extends ConsumerWidget {
             const SizedBox(height: 20),
 
             // 저장된 이미지 표시
-            Image.file(
-              File(imagePath),
-              height: 300,
-              width: 200,
-              errorBuilder: (context, error, stackTrace) {
-                return const Text('이미지를 찾을 수 없습니다.');
-              },
-            ),
+            Consumer(builder: (context, ref, child) {
+              final frontPhotoListState = ref.watch(frontPhotoListProvider);
+              final List<FrontPhotoPath> frontPhotoList = frontPhotoListState ?? [];
+              return Wrap(
+                children: [
+                  for (final photo in frontPhotoList)
+                    Image.file(
+                      File(photo.localPath),
+                      width: 200,
+                      height: 300,
+                      fit: BoxFit.cover,
+                    ),
+                ],
+              );
+            }),
             const SizedBox(height: 20),
 
             // 이미지 삭제 버튼
             ElevatedButton(
               onPressed: () async {
                 try {
-                  await fileSystem.clearDirectory(DirectoryPaths.frontImages);
+                  await ref.read(frontPhotoListProvider.notifier).clearImages();
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('이미지 삭제 성공!')),
@@ -80,7 +82,6 @@ class ImageStorageScreen extends ConsumerWidget {
             ),
             FilePathActions(
               directory: DirectoryPaths.frontImages,
-              fileName: 'test_image.jpg',
             ),
           ],
         ),
@@ -93,12 +94,12 @@ class FilePathActions extends StatelessWidget {
   const FilePathActions({
     super.key,
     required this.directory,
-    required this.fileName,
+    this.fileName,
     this.showOpenDirectory = true,
   });
 
   final DirectoryPaths directory;
-  final String fileName;
+  final String? fileName;
   final bool showOpenDirectory;
 
   @override
@@ -116,14 +117,14 @@ class FilePathActions extends StatelessWidget {
           ),
         Flexible(
           child: Text(
-            'Path: ${fileSystem.getFilePath(directory, fileName)}',
+            'Path: ${fileSystem.getFilePath(directory, fileName: fileName)}',
             overflow: TextOverflow.ellipsis,
           ),
         ),
         IconButton(
           icon: const Icon(Icons.copy),
           onPressed: () async {
-            await fileSystem.copyPathToClipboard(directory, fileName);
+            await fileSystem.copyPathToClipboard(directory, fileName: fileName);
             if (context.mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('Path copied to clipboard')),
@@ -131,11 +132,6 @@ class FilePathActions extends StatelessWidget {
             }
           },
           tooltip: 'Copy path',
-        ),
-        IconButton(
-          icon: const Icon(Icons.open_in_new),
-          onPressed: () => fileSystem.openFileLocation(directory, fileName),
-          tooltip: 'Open file location',
         ),
       ],
     );
