@@ -1,8 +1,9 @@
 import 'dart:io';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_snaptag_kiosk/core/constants/directory_paths.dart';
+import 'package:flutter_snaptag_kiosk/core/exceptions/exceptions.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
-import 'package:path/path.dart' as path;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:yaml/yaml.dart';
 import 'package:yaml_edit/yaml_edit.dart';
@@ -23,8 +24,10 @@ class YamlStorageService {
     return repository;
   }
 
+  final _fileSystem = FileSystemService.instance;
   static const String _fileName = 'kiosk_setting.yaml';
-  String get _filePath => path.join(Directory.current.path, _fileName);
+
+  String get filePath => _fileSystem.getFilePath(DirectoryPaths.settings, _fileName);
 
   KioskMachineInfo _settings = const KioskMachineInfo();
   KioskMachineInfo get settings => _settings;
@@ -39,13 +42,16 @@ class YamlStorageService {
 
   Future<void> _loadSettingsFromFile() async {
     try {
-      final file = File(_filePath);
+      await _fileSystem.ensureDirectoryExists(DirectoryPaths.settings);
+
+      final filePath = _fileSystem.getFilePath(DirectoryPaths.settings, _fileName);
+      final file = File(filePath);
 
       if (!await file.exists()) {
         final yamlEditor = YamlEditor('');
         yamlEditor.update([], _settings.toJson());
         await file.writeAsString(yamlEditor.toString());
-        logger.d('설정 파일이 없어 새로 생성되었습니다: $_filePath');
+        logger.d('설정 파일이 없어 새로 생성되었습니다: $filePath');
         return;
       }
 
@@ -55,23 +61,31 @@ class YamlStorageService {
       _settings = KioskMachineInfo.fromJson(jsonMap);
     } catch (e, stack) {
       _settings = const KioskMachineInfo();
-      throw Exception('설정 파일 로드 중 오류 발생 ($e) 파일 경로: $_filePath\n$stack');
+      throw StorageException(
+        StorageErrorType.loadError,
+        path: filePath,
+        originalError: e,
+        stackTrace: stack,
+      );
     }
   }
 
   Future<void> saveSettings(KioskMachineInfo info) async {
     try {
-      final file = File(_filePath);
+      final file = File(filePath);
       final yamlEditor = YamlEditor('');
       yamlEditor.update([], info.toJson());
       await file.writeAsString(yamlEditor.toString());
       _settings = info;
-      logger.d('설정이 저장되었습니다: $_filePath');
+      logger.d('설정이 저장되었습니다: $filePath');
     } catch (e, stack) {
       logger.e('설정 저장 중 오류 발생', error: e, stackTrace: stack);
-      throw Exception('설정 저장 중 오류 발생');
+      throw StorageException(
+        StorageErrorType.saveError,
+        path: filePath,
+        originalError: e,
+        stackTrace: stack,
+      );
     }
   }
-
-  String get filePath => _filePath;
 }
