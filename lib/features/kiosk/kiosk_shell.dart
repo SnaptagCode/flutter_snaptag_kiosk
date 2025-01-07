@@ -26,7 +26,7 @@ class KioskShell extends ConsumerWidget {
               width: double.infinity,
               child: Image.file(
                 File(
-                  ref.watch(yamlStorageServiceProvider).headerImagePath ?? '',
+                  ref.watch(storageServiceProvider).headerImagePath ?? '',
                 ),
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) {
@@ -71,7 +71,7 @@ class ContentsShell extends ConsumerWidget {
           image: DecorationImage(
             image: FileImage(
               File(
-                ref.watch(yamlStorageServiceProvider).bodyImagePath ?? '',
+                ref.watch(storageServiceProvider).bodyImagePath ?? '',
               ),
             ),
             fit: BoxFit.cover,

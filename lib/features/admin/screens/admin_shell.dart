@@ -51,6 +51,14 @@ class AdminShell extends ConsumerWidget {
           label: 'Kiosk Info',
         ),
       ),
+      RouteModel(
+        path: '/payment-history',
+        route: const PaymentHistoryRouteData(),
+        destination: const NavigationDestination(
+          icon: Icon(Icons.history),
+          label: 'Payment History',
+        ),
+      ),
     ];
 
     if (F.appFlavor == Flavor.dev) {

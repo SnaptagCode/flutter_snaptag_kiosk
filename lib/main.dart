@@ -32,7 +32,7 @@ void main() async {
       child: ProviderScope(
         observers: [RiverpodLogger()],
         overrides: [
-          yamlStorageServiceProvider.overrideWithValue(yamlStorage),
+          storageServiceProvider.overrideWithValue(yamlStorage),
           imageStorageProvider.overrideWithValue(imageStorage),
         ],
         child: ScreenUtilInit(

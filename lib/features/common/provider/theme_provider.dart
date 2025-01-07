@@ -10,7 +10,7 @@ class ThemeNotifier extends _$ThemeNotifier {
   Future<ThemeData> build() async {
     try {
       // YAML 레포지토리에서 키오스크 정보 가져오기
-      final kioskInfo = ref.read(yamlStorageServiceProvider).settings;
+      final kioskInfo = ref.read(storageServiceProvider).settings;
 
       // KioskThemeService 생성
       final themeService = KioskThemeService(kioskInfo);

@@ -10,7 +10,7 @@ class UpdatePrintResponse with _$UpdatePrintResponse {
   const factory UpdatePrintResponse({
     required int kioskEventId,
     required int backPhotoId,
-    required PrintStatus status,
+    required PrintedStatus status,
     required bool isEmbedded,
     required int printedPhotoCardId,
   }) = _UpdatePrintResponse;

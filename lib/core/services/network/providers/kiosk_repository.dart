@@ -8,19 +8,19 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'kiosk_repository.g.dart';
 
 @riverpod
-class Kiosk extends _$Kiosk {
+class KioskRepository extends _$KioskRepository {
   @override
-  KioskRepository build() {
+  _KioskRepository build() {
     final dio = ref.watch(dioProvider(F.kioskBaseUrl));
 
-    return KioskRepository(KioskApiClient(dio));
+    return _KioskRepository(KioskApiClient(dio));
   }
 }
 
-class KioskRepository {
+class _KioskRepository {
   final KioskApiClient _apiClient;
 
-  KioskRepository(this._apiClient);
+  _KioskRepository(this._apiClient);
 
   // Machine Info Operations
   Future<KioskMachineInfo> getKioskMachineInfo(int machineId) async {
@@ -31,17 +31,17 @@ class KioskRepository {
     }
   }
 
-  Future<UpdatePrintResponse> updatePrintStatus({
+  Future<UpdatePrintResponse> updatePrintedStatus({
     required int kioskMachineId,
     required int kioskEventId,
     required int frontPhotoCardId,
     required String photoAuthNumber,
-    required PrintStatus status,
+    required PrintedStatus status,
     File? file,
     int? printedPhotoCardId,
   }) async {
     try {
-      return await _apiClient.updatePrintStatus(
+      return await _apiClient.updatePrintedStatus(
         kioskMachineId: kioskMachineId,
         kioskEventId: kioskEventId,
         frontPhotoCardId: frontPhotoCardId,
@@ -89,7 +89,6 @@ class KioskRepository {
     try {
       return await _apiClient.updateOrder(
         orderId: orderId,
-        //mock value TODO: update this
         request: UpdateOrderRequest(
           kioskEventId: 1,
           kioskMachineId: 1,
@@ -100,7 +99,19 @@ class KioskRepository {
           authSeqNumber: '1234',
           approvalNumber: '1234',
           detail: '1234',
-        ),
+        ), // JSON 변환
+      );
+    } catch (e) {
+      throw Exception(e);
+    }
+  }
+
+  Future<OrderResponse> getOrders(GetOrdersRequest request) async {
+    try {
+      return await _apiClient.getOrders(
+        pageSize: request.pageSize,
+        currentPage: request.currentPage,
+        kioskEventId: request.kioskEventId,
       );
     } catch (e) {
       throw Exception(e);

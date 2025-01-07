@@ -22,7 +22,7 @@ class ApiResponse<T> {
 }
 
 @riverpod
-class UpdatePrintStatus extends _$UpdatePrintStatus {
+class UpdatePrintedStatus extends _$UpdatePrintedStatus {
   @override
   ApiResponse<dynamic> build() => const ApiResponse();
 
@@ -31,12 +31,12 @@ class UpdatePrintStatus extends _$UpdatePrintStatus {
     required int kioskEventId,
     required int frontPhotoCardId,
     required String photoAuthNumber,
-    required PrintStatus status,
+    required PrintedStatus status,
   }) async {
     state = state.copyWith(isLoading: true);
     try {
-      final repository = ref.read(kioskProvider);
-      final response = await repository.updatePrintStatus(
+      final repository = ref.read(kioskRepositoryProvider);
+      final response = await repository.updatePrintedStatus(
         kioskMachineId: kioskMachineId,
         kioskEventId: kioskEventId,
         frontPhotoCardId: frontPhotoCardId,
@@ -58,7 +58,7 @@ class BackPhotoCard extends _$BackPhotoCard {
   Future<void> fetch(int id, String authNumber) async {
     state = state.copyWith(isLoading: true);
     try {
-      final repository = ref.read(kioskProvider);
+      final repository = ref.read(kioskRepositoryProvider);
       final response = await repository.getBackPhotoCard(id, authNumber);
       state = ApiResponse(data: response);
     } catch (e) {
@@ -75,7 +75,7 @@ class CreateOrder extends _$CreateOrder {
   Future<void> create(Map<String, dynamic> data) async {
     state = state.copyWith(isLoading: true);
     try {
-      final repository = ref.read(kioskProvider);
+      final repository = ref.read(kioskRepositoryProvider);
       final response = await repository.createOrder(data);
       state = ApiResponse(data: response);
     } catch (e) {
@@ -92,7 +92,7 @@ class UpdateOrder extends _$UpdateOrder {
   Future<void> update(int id, OrderStatus status) async {
     state = state.copyWith(isLoading: true);
     try {
-      final repository = ref.read(kioskProvider);
+      final repository = ref.read(kioskRepositoryProvider);
       final response = await repository.updateOrder(id, status);
       state = ApiResponse(data: response);
     } catch (e) {

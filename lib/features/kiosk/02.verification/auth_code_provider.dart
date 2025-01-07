@@ -37,8 +37,8 @@ class AuthCode extends _$AuthCode {
     context.loaderOverlay.show();
     try {
       if (state.length == maxLength) {
-        final BackPhotoCardResponse response = await ref.read(kioskProvider).getBackPhotoCard(
-              ref.watch(yamlStorageServiceProvider).settings.kioskEventId,
+        final BackPhotoCardResponse response = await ref.read(kioskRepositoryProvider).getBackPhotoCard(
+              ref.watch(storageServiceProvider).settings.kioskEventId,
               state,
             );
         logger.d('BackPhotoCardResponse: ${response.toJson()}');

@@ -7,7 +7,7 @@ class ApiDebugScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final printStatusState = ref.watch(updatePrintStatusProvider);
+    final PrintedStatusState = ref.watch(updatePrintedStatusProvider);
     final backPhotoCardState = ref.watch(backPhotoCardProvider);
     final createOrderState = ref.watch(createOrderProvider);
     final updateOrderState = ref.watch(updateOrderProvider);
@@ -99,13 +99,13 @@ class ApiDebugScreen extends ConsumerWidget {
             ),
             buildApiSection(
               title: 'Update Print Status',
-              state: printStatusState,
-              onTest: () => ref.read(updatePrintStatusProvider.notifier).update(
+              state: PrintedStatusState,
+              onTest: () => ref.read(updatePrintedStatusProvider.notifier).update(
                     kioskMachineId: 1,
                     kioskEventId: 1,
                     frontPhotoCardId: 1,
                     photoAuthNumber: '1234',
-                    status: PrintStatus.completed,
+                    status: PrintedStatus.completed,
                   ),
             ),
             buildApiSection(

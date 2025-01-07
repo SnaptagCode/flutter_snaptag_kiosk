@@ -13,7 +13,7 @@ class FrontImages extends _$FrontImages {
 
   Future<void> _fetchAndSaveImages() async {
     try {
-      final yamlRepo = ref.read(yamlStorageServiceProvider);
+      final yamlRepo = ref.read(storageServiceProvider);
       final currentSettings = yamlRepo.settings;
 
       if (currentSettings.kioskEventId == 0) {
@@ -21,7 +21,7 @@ class FrontImages extends _$FrontImages {
       }
 
       // API를 통해 이미지 목록 가져오기
-      final kioskRepo = ref.read(kioskProvider);
+      final kioskRepo = ref.read(kioskRepositoryProvider);
       final response = await kioskRepo.getFrontPhotoList(
         currentSettings.kioskEventId,
       );
