@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'kiosk.dart';
+part of 'kiosk_repository.dart';
 
 // **************************************************************************
 // RiverpodGenerator

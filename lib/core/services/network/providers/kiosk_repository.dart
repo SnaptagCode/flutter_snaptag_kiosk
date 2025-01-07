@@ -5,7 +5,7 @@ import 'package:flutter_snaptag_kiosk/flavors.dart';
 import 'package:flutter_snaptag_kiosk/models/models.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-part 'kiosk.g.dart';
+part 'kiosk_repository.g.dart';
 
 @riverpod
 class Kiosk extends _$Kiosk {

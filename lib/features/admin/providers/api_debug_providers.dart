@@ -51,23 +51,6 @@ class UpdatePrintStatus extends _$UpdatePrintStatus {
 }
 
 @riverpod
-class FrontPhotoList extends _$FrontPhotoList {
-  @override
-  ApiResponse<dynamic> build() => const ApiResponse();
-
-  Future<void> fetch(int id) async {
-    state = state.copyWith(isLoading: true);
-    try {
-      final repository = ref.read(kioskProvider);
-      final response = await repository.getFrontPhotoList(id);
-      state = ApiResponse(data: response);
-    } catch (e) {
-      state = ApiResponse(error: e.toString());
-    }
-  }
-}
-
-@riverpod
 class BackPhotoCard extends _$BackPhotoCard {
   @override
   ApiResponse<dynamic> build() => const ApiResponse();

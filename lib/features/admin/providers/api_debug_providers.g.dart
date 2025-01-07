@@ -22,22 +22,6 @@ final updatePrintStatusProvider = AutoDisposeNotifierProvider<UpdatePrintStatus,
 );
 
 typedef _$UpdatePrintStatus = AutoDisposeNotifier<ApiResponse<dynamic>>;
-String _$frontPhotoListHash() => r'0b766838f6b9a3f76108e7f7ddfbfc58df4efadd';
-
-/// See also [FrontPhotoList].
-@ProviderFor(FrontPhotoList)
-final frontPhotoListProvider =
-    AutoDisposeNotifierProvider<FrontPhotoList, ApiResponse<dynamic>>.internal(
-  FrontPhotoList.new,
-  name: r'frontPhotoListProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$frontPhotoListHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
-
-typedef _$FrontPhotoList = AutoDisposeNotifier<ApiResponse<dynamic>>;
 String _$backPhotoCardHash() => r'05ab9a187f9b382d778290c059d45f938045ab11';
 
 /// See also [BackPhotoCard].

@@ -30,10 +30,11 @@ class ImageStorageService {
     if (lastDot != -1) {
       return path.substring(lastDot);
     }
-    return '.jpg'; // 기본값
+    return '.png'; // 기본값
   }
 
   String _getFileExtensionFromContentType(String? contentType) {
+    logger.d('Content-Type: $contentType');
     switch (contentType?.toLowerCase()) {
       case 'image/jpeg':
         return '.jpg';
@@ -44,7 +45,7 @@ class ImageStorageService {
       case 'image/webp':
         return '.webp';
       default:
-        return '.jpg'; // 기본값
+        return '.png'; // 기본값
     }
   }
 
@@ -69,7 +70,7 @@ class ImageStorageService {
           contentType != null ? _getFileExtensionFromContentType(contentType) : _getFileExtensionFromUrl(imageUrl);
 
       final fullFileName = '$fileName$extension';
-      final filePath = _fileSystem.getFilePath(directory, fullFileName);
+      final filePath = _fileSystem.getFilePath(directory, fileName: fullFileName);
       final file = File(filePath);
       await file.writeAsBytes(response.data!);
       logger.d('이미지가 저장되었습니다: ${file.path}');
@@ -77,9 +78,34 @@ class ImageStorageService {
     } catch (e, stack) {
       throw StorageException(
         StorageErrorType.saveError,
-        path: _fileSystem.getFilePath(directory, fileName),
+        path: _fileSystem.getFilePath(directory, fileName: fileName),
         originalError: e,
         stackTrace: stack,
+      );
+    }
+  }
+
+  Future<List<String>> saveImages(DirectoryPaths directory, NominatedPhotoList photoList) async {
+    final List<String> filePaths = [];
+    for (var photo in photoList.list) {
+      try {
+        final fileName = '${photo.id}_${photo.embeddingProductId}';
+        final filePath = await saveImage(directory, photo.embeddedUrl, fileName);
+        filePaths.add(filePath);
+      } catch (e) {
+        logger.e('이미지 저장 중 오류가 발생했습니다: $e');
+      }
+    }
+    return filePaths;
+  }
+
+  //clearDirectory
+  Future<void> clearDirectory(DirectoryPaths directory) async {
+    try {
+      await _fileSystem.clearDirectory(directory);
+    } catch (e) {
+      throw StorageException(
+        StorageErrorType.deleteError,
       );
     }
   }
