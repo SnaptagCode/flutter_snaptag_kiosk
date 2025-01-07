@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -22,9 +24,14 @@ class KioskShell extends ConsumerWidget {
             SizedBox(
               height: 855.h,
               width: double.infinity,
-              child: Image.network(
-                ref.watch(yamlStorageServiceProvider).settings.topBannerUrl,
+              child: Image.file(
+                File(
+                  ref.watch(yamlStorageServiceProvider).headerImagePath ?? '',
+                ),
                 fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  return const Text('이미지를 찾을 수 없습니다.');
+                },
               ),
             ),
             Expanded(
@@ -62,8 +69,10 @@ class ContentsShell extends ConsumerWidget {
       child: DecoratedBox(
         decoration: BoxDecoration(
           image: DecorationImage(
-            image: NetworkImage(
-              ref.watch(yamlStorageServiceProvider).settings.mainImageUrl,
+            image: FileImage(
+              File(
+                ref.watch(yamlStorageServiceProvider).bodyImagePath ?? '',
+              ),
             ),
             fit: BoxFit.cover,
           ),

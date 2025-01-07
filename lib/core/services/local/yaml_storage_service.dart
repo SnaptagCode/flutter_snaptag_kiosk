@@ -26,13 +26,28 @@ class YamlStorageService {
 
   final _fileSystem = FileSystemService.instance;
   static const String _fileName = 'kiosk_setting.yaml';
+  static const String _bodyKey = 'body';
+  static const String _headerKey = 'header';
 
   String get filePath => _fileSystem.getFilePath(DirectoryPaths.settings, _fileName);
 
   KioskMachineInfo _settings = const KioskMachineInfo();
+  String _bodyImagePath = '';
+  String _headerImagePath = '';
+
   KioskMachineInfo get settings => _settings;
+  String get bodyImagePath => _bodyImagePath;
+  String get headerImagePath => _headerImagePath;
   set settings(KioskMachineInfo value) {
     _settings = value;
+  }
+
+  set bodyImagePath(String? value) {
+    _bodyImagePath = value ?? '';
+  }
+
+  set headerImagePath(String? value) {
+    _headerImagePath = value ?? '';
   }
 
   // 명시적 새로고침 메서드 추가
@@ -40,7 +55,7 @@ class YamlStorageService {
     await _loadSettingsFromFile();
   }
 
-  Future<void> _loadSettingsFromFile() async {
+  Future<void> _loadSettingsFromFile({String? bodyPath, String? headerPath}) async {
     try {
       await _fileSystem.ensureDirectoryExists(DirectoryPaths.settings);
 
@@ -58,9 +73,15 @@ class YamlStorageService {
       final yamlString = await file.readAsString();
       final yamlMap = loadYaml(yamlString) as Map;
       final jsonMap = Map<String, dynamic>.from(yamlMap);
-      _settings = KioskMachineInfo.fromJson(jsonMap);
+      // 이미지 경로 로드
+
+      settings = KioskMachineInfo.fromJson(jsonMap);
+      bodyImagePath = jsonMap[_bodyKey] as String?;
+      headerImagePath = jsonMap[_headerKey] as String?;
     } catch (e, stack) {
-      _settings = const KioskMachineInfo();
+      settings = const KioskMachineInfo();
+      bodyImagePath = null;
+      headerImagePath = null;
       throw StorageException(
         StorageErrorType.loadError,
         path: filePath,
@@ -74,7 +95,12 @@ class YamlStorageService {
     try {
       final file = File(filePath);
       final yamlEditor = YamlEditor('');
-      yamlEditor.update([], info.toJson());
+      final data = {
+        ...info.toJson(),
+        _bodyKey: _bodyImagePath,
+        _headerKey: _headerImagePath,
+      };
+      yamlEditor.update([], data);
       await file.writeAsString(yamlEditor.toString());
       _settings = info;
       logger.d('설정이 저장되었습니다: $filePath');
@@ -87,5 +113,11 @@ class YamlStorageService {
         stackTrace: stack,
       );
     }
+  }
+
+  Future<void> updateImagePaths({String? bodyPath, String? headerPath}) async {
+    if (bodyPath != null) _bodyImagePath = bodyPath;
+    if (headerPath != null) _headerImagePath = headerPath;
+    await saveSettings(_settings);
   }
 }
