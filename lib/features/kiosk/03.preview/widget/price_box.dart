@@ -11,7 +11,7 @@ class PriceBox extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, ref) {
-    final photoCardPrice = ref.watch(yamlStorageServiceProvider).settings.photoCardPrice;
+    final photoCardPrice = ref.watch(storageServiceProvider).settings.photoCardPrice;
     String priceValue = NumberFormat.currency(locale: 'ko_KR', symbol: '').format(photoCardPrice);
 
     String currency = context.locale.languageCode == 'ko' ? '원' : 'KRW';

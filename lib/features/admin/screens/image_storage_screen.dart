@@ -24,7 +24,7 @@ class FrontImagesStore extends ConsumerWidget {
                 try {
                   await ref
                       .read(frontPhotoListProvider.notifier)
-                      .fetch(ref.watch(yamlStorageServiceProvider).settings.kioskEventId);
+                      .fetch(ref.watch(storageServiceProvider).settings.kioskEventId);
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('이미지 저장 성공!')),
@@ -86,54 +86,6 @@ class FrontImagesStore extends ConsumerWidget {
           ],
         ),
       ),
-    );
-  }
-}
-
-class FilePathActions extends StatelessWidget {
-  const FilePathActions({
-    super.key,
-    required this.directory,
-    this.fileName,
-    this.showOpenDirectory = true,
-  });
-
-  final DirectoryPaths directory;
-  final String? fileName;
-  final bool showOpenDirectory;
-
-  @override
-  Widget build(BuildContext context) {
-    final fileSystem = FileSystemService.instance;
-
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        if (showOpenDirectory)
-          IconButton(
-            icon: const Icon(Icons.folder),
-            onPressed: () => fileSystem.openDirectory(directory),
-            tooltip: 'Open directory',
-          ),
-        Flexible(
-          child: Text(
-            'Path: ${fileSystem.getFilePath(directory, fileName: fileName)}',
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-        IconButton(
-          icon: const Icon(Icons.copy),
-          onPressed: () async {
-            await fileSystem.copyPathToClipboard(directory, fileName: fileName);
-            if (context.mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Path copied to clipboard')),
-              );
-            }
-          },
-          tooltip: 'Copy path',
-        ),
-      ],
     );
   }
 }

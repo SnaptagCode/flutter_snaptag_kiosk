@@ -8,7 +8,7 @@ class KioskInfoScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // 비동기 상태 감시
-    final info = ref.watch(yamlStorageServiceProvider).settings;
+    final info = ref.watch(storageServiceProvider).settings;
 
     return Scaffold(
       appBar: AppBar(

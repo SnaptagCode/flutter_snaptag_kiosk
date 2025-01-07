@@ -22,7 +22,7 @@ class FrontImagesAction extends ConsumerWidget {
                 try {
                   await ref
                       .read(frontPhotoListProvider.notifier)
-                      .fetch(ref.watch(yamlStorageServiceProvider).settings.kioskEventId);
+                      .fetch(ref.watch(storageServiceProvider).settings.kioskEventId);
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('이미지 저장 성공!')),
