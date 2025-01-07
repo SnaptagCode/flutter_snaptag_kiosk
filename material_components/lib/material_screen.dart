@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_snaptag_kiosk/core/core.dart';
 
 import 'color_palettes_screen.dart';
 import 'component_screen.dart';
@@ -137,8 +136,8 @@ class _MaterialScreenState extends State<MaterialScreen> with SingleTickerProvid
   Widget build(BuildContext context) {
     return Theme(
       data: useLightMode
-          ? context.theme.copyWith(brightness: Brightness.light)
-          : context.theme.copyWith(brightness: Brightness.dark),
+          ? Theme.of(context).copyWith(brightness: Brightness.light)
+          : Theme.of(context).copyWith(brightness: Brightness.dark),
       child: AnimatedBuilder(
         animation: controller,
         builder: (context, child) {

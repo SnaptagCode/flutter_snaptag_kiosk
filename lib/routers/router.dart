@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_snaptag_kiosk/core/core.dart';
 import 'package:flutter_snaptag_kiosk/features/features.dart';
 import 'package:go_router/go_router.dart';
+import 'package:material_components/material_components.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'router.admin.dart';
@@ -15,7 +16,7 @@ final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
 GoRouter router(Ref ref) {
   return GoRouter(
     navigatorKey: rootNavigatorKey,
-    initialLocation: '/kiosk/qr',
+    initialLocation: '/api-debug',
     routes: $appRoutes,
     observers: <NavigatorObserver>[NavObserver()],
   );
