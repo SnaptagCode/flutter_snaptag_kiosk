@@ -28,7 +28,7 @@ class ImageStorageScreen extends ConsumerWidget {
                   await imageStorage.saveImage(
                     DirectoryPaths.frontImages,
                     'https://picsum.photos/id/1/200/300',
-                    'test_image.jpg',
+                    'test_image',
                   );
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(

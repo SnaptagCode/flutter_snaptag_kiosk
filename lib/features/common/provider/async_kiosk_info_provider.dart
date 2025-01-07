@@ -1,3 +1,4 @@
+import 'package:flutter_snaptag_kiosk/core/constants/constants.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -32,7 +33,18 @@ class AsyncKioskInfo extends _$AsyncKioskInfo {
       );
 
       // API 응답으로 yaml 파일 업데이트
+
+      final imageStorage = ref.read(imageStorageProvider);
       await yamlRepo.saveSettings(response);
+      if (response.mainImageUrl.isNotEmpty) {
+        final body = await imageStorage.saveImage(DirectoryPaths.settings, response.mainImageUrl, 'body');
+        await yamlRepo.updateImagePaths(bodyPath: body);
+      }
+      if (response.topBannerUrl.isNotEmpty) {
+        final header = await imageStorage.saveImage(DirectoryPaths.settings, response.topBannerUrl, 'header');
+        await yamlRepo.updateImagePaths(headerPath: header);
+      }
+
       return response;
     } catch (e) {
       throw KioskException(e is KioskException ? e.message : '키오스크 정보를 가져오는데 실패했습니다.\n오류: $e');

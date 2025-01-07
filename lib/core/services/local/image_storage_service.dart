@@ -23,7 +23,32 @@ class ImageStorageService {
 
   final _fileSystem = FileSystemService.instance;
 
-  Future<void> saveImage(DirectoryPaths directory, String imageUrl, String fileName) async {
+  String _getFileExtensionFromUrl(String url) {
+    final uri = Uri.parse(url);
+    final path = uri.path;
+    final lastDot = path.lastIndexOf('.');
+    if (lastDot != -1) {
+      return path.substring(lastDot);
+    }
+    return '.jpg'; // 기본값
+  }
+
+  String _getFileExtensionFromContentType(String? contentType) {
+    switch (contentType?.toLowerCase()) {
+      case 'image/jpeg':
+        return '.jpg';
+      case 'image/png':
+        return '.png';
+      case 'image/gif':
+        return '.gif';
+      case 'image/webp':
+        return '.webp';
+      default:
+        return '.jpg'; // 기본값
+    }
+  }
+
+  Future<String> saveImage(DirectoryPaths directory, String imageUrl, String fileName) async {
     try {
       await _fileSystem.ensureDirectoryExists(directory);
 
@@ -39,11 +64,16 @@ class ImageStorageService {
           originalError: 'Status code: ${response.statusCode}',
         );
       }
+      final contentType = response.headers.value('content-type');
+      final extension =
+          contentType != null ? _getFileExtensionFromContentType(contentType) : _getFileExtensionFromUrl(imageUrl);
 
-      final filePath = _fileSystem.getFilePath(directory, fileName);
+      final fullFileName = '$fileName$extension';
+      final filePath = _fileSystem.getFilePath(directory, fullFileName);
       final file = File(filePath);
       await file.writeAsBytes(response.data!);
       logger.d('이미지가 저장되었습니다: ${file.path}');
+      return file.path;
     } catch (e, stack) {
       throw StorageException(
         StorageErrorType.saveError,
