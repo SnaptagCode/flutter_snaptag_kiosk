@@ -1,8 +1,4 @@
-import 'package:dio/dio.dart';
-import 'package:flutter_snaptag_kiosk/core/constants/constants.dart';
-import 'package:flutter_snaptag_kiosk/core/core.dart';
-import 'package:flutter_snaptag_kiosk/features/admin/providers/front_photo_path.dart';
-import 'package:flutter_snaptag_kiosk/models/models.dart';
+import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'front_photo_list.g.dart';
@@ -14,10 +10,7 @@ class FrontPhotoList extends _$FrontPhotoList {
 
   Future<void> fetch(int id) async {
     try {
-      final Response<dynamic> res =
-          await Dio().get('https://kiosk-server.snaptag.co.kr/v1/kiosk-event/front-photo-list?kioskEventId=4');
-      final response = NominatedPhotoList.fromJson(res.data);
-
+      final NominatedPhotoList response = await ref.read(kioskRepositoryProvider).getFrontPhotoList(id);
       final data = await saveImages(response);
       state = data;
     } catch (e) {

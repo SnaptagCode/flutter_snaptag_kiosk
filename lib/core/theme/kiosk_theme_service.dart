@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_snaptag_kiosk/core/extensions/extensions.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:palette_generator/palette_generator.dart';
 

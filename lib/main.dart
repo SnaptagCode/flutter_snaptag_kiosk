@@ -3,10 +3,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_snaptag_kiosk/app.dart';
-import 'package:flutter_snaptag_kiosk/flavors.dart';
-
-import 'core/services/services.dart';
+import 'package:flutter_snaptag_kiosk/data/data.dart';
+import 'package:flutter_snaptag_kiosk/lib.dart';
 
 void main() async {
   if (kDebugMode) {
