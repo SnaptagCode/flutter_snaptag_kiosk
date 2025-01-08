@@ -19,9 +19,7 @@ class FrontImagesAction extends ConsumerWidget {
             ElevatedButton(
               onPressed: () async {
                 try {
-                  await ref
-                      .read(frontPhotoListProvider.notifier)
-                      .fetch(ref.watch(storageServiceProvider).settings.kioskEventId);
+                  await ref.read(frontPhotoListProvider.notifier).fetch();
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('이미지 저장 성공!')),

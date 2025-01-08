@@ -1,5 +1,3 @@
-import 'package:flutter_snaptag_kiosk/core/constants/constants.dart';
-import 'package:flutter_snaptag_kiosk/data/data.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -22,9 +20,7 @@ class AsyncKioskInfo extends _$AsyncKioskInfo {
 
       // kioskMachineId가 없는 경우 예외 발생
       if (currentSettings.kioskMachineId == 0) {
-        throw KioskException('키오스크 ID가 설정되지 않았습니다.\n'
-            '다음 경로의 설정 파일을 확인해주세요:\n'
-            '${yamlRepo.filePath}');
+        throw KioskException(KioskErrorType.missingMachineId);
       }
 
       // API를 통해 최신 정보 가져오기
@@ -48,7 +44,11 @@ class AsyncKioskInfo extends _$AsyncKioskInfo {
 
       return response;
     } catch (e) {
-      throw KioskException(e is KioskException ? e.message : '키오스크 정보를 가져오는데 실패했습니다.\n오류: $e');
+      if (e is KioskException) {
+        rethrow;
+      } else {
+        throw Exception('Failed to fetch and update kiosk info: $e');
+      }
     }
   }
 

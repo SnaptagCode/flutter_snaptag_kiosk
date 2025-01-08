@@ -8,9 +8,17 @@ class FrontPhotoList extends _$FrontPhotoList {
   @override
   List<FrontPhotoPath> build() => [];
 
-  Future<void> fetch(int id) async {
+  Future<void> fetch() async {
     try {
-      final NominatedPhotoList response = await ref.read(kioskRepositoryProvider).getFrontPhotoList(id);
+      final yamlRepo = ref.read(storageServiceProvider);
+      final currentSettings = yamlRepo.settings;
+
+      if (currentSettings.kioskEventId == 0) {
+        throw KioskException(KioskErrorType.missingEventId);
+      }
+      // API를 통해 이미지 목록 가져오기
+      final kioskRepo = ref.read(kioskRepositoryProvider);
+      final NominatedPhotoList response = await kioskRepo.getFrontPhotoList(currentSettings.kioskEventId);
       final data = await saveImages(response);
       state = data;
     } catch (e) {
@@ -20,11 +28,13 @@ class FrontPhotoList extends _$FrontPhotoList {
 
   Future<List<FrontPhotoPath>> saveImages(NominatedPhotoList photoList) async {
     final List<FrontPhotoPath> frontPhotoPaths = [];
+    // 이미지 저장소 준비
+    final imageStorage = ref.read(imageStorageProvider);
+    // 각 이미지 다운로드 및 저장
     for (var photo in photoList.list) {
       try {
         final fileName = '${photo.id}_${photo.embeddingProductId}';
-        final filePath =
-            await ref.read(imageStorageProvider).saveImage(DirectoryPaths.frontImages, photo.embeddedUrl, fileName);
+        final filePath = await imageStorage.saveImage(DirectoryPaths.frontImages, photo.embeddedUrl, fileName);
 
         frontPhotoPaths.add(FrontPhotoPath(localPath: filePath, photo: photo));
       } catch (e) {
