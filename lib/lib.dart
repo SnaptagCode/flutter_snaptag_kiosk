@@ -4,7 +4,7 @@ export 'data/data.dart';
 export 'domain/domain.dart';
 export 'features/features.dart';
 export 'flavors.dart';
-export 'locale_keys.g.dart';
+export 'locale_keys.dart';
 export 'main.dart';
 export 'presentation/presentation.dart';
 export 'routers/routers.dart';

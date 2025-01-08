@@ -41,6 +41,7 @@ dependencies:
   material_components:
     path: ./material_components
   faker: ^2.2.0
+  window_manager: ^0.4.3
 
 
 dev_dependencies:

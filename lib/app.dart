@@ -11,7 +11,6 @@ class App extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(routerProvider);
-
     final kioskInfo = ref.watch(asyncKioskInfoProvider);
     return kioskInfo.when(
       data: (info) {
@@ -97,7 +96,24 @@ class _ErrorApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         body: Center(
-          child: Text('Error: $error'),
+          child: Builder(builder: (context) {
+            if (error is KioskException) {
+              final kioskError = error as KioskException;
+              return Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(kioskError.type.value),
+                  FilePathActions(
+                    directory: kioskError.type == KioskErrorType.missingMachineId
+                        ? DirectoryPaths.settings
+                        : DirectoryPaths.frontImages,
+                  ),
+                ],
+              );
+            }
+            return Text('Error: $error');
+          }),
         ),
       ),
     );
