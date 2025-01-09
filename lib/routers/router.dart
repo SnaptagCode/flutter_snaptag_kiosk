@@ -15,7 +15,7 @@ final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
 GoRouter router(Ref ref) {
   return GoRouter(
     navigatorKey: rootNavigatorKey,
-    initialLocation: '/kiosk/qr',
+    initialLocation: '/payment-request-test',
     routes: $appRoutes,
     observers: <NavigatorObserver>[NavObserver()],
   );

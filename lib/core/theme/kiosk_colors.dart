@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-@immutable
 class KioskColors extends ThemeExtension<KioskColors> {
   const KioskColors({
     required this.buttonColor,

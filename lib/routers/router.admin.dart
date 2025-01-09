@@ -10,6 +10,7 @@ final GlobalKey<NavigatorState> adminNavigatorKey = GlobalKey<NavigatorState>(de
     TypedGoRoute<MaterialRouteData>(path: '/material-components'),
     TypedGoRoute<KioskComponentsRouteData>(path: '/kiosk-components'),
     TypedGoRoute<KioskInfoRouteData>(path: '/kiosk-info'),
+    TypedGoRoute<PaymentRequestTestRouteData>(path: '/payment-request-test'),
   ],
 )
 class DebugShellRouteData extends ShellRouteData {
@@ -85,6 +86,17 @@ class KioskInfoRouteData extends GoRouteData {
   Page<void> buildPage(BuildContext context, GoRouterState state) {
     return NoTransitionPage(
       child: const KioskInfoScreen(),
+    );
+  }
+}
+
+class PaymentRequestTestRouteData extends GoRouteData {
+  const PaymentRequestTestRouteData();
+
+  @override
+  Page<void> buildPage(BuildContext context, GoRouterState state) {
+    return NoTransitionPage(
+      child: const PaymentRequestTestScreen(),
     );
   }
 }

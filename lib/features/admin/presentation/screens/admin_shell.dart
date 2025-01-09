@@ -87,6 +87,14 @@ class AdminShell extends ConsumerWidget {
             label: 'Kiosk Components',
           ),
         ),
+        RouteModel(
+          path: '/payment-request-test',
+          route: const PaymentRequestTestRouteData(),
+          destination: const NavigationDestination(
+            icon: Icon(Icons.payment),
+            label: 'Payment Request Test',
+          ),
+        ),
       ]);
     }
 
