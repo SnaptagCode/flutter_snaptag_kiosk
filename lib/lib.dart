@@ -6,5 +6,4 @@ export 'features/features.dart';
 export 'flavors.dart';
 export 'locale_keys.dart';
 export 'main.dart';
-export 'presentation/presentation.dart';
 export 'routers/routers.dart';

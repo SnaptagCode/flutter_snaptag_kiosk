@@ -43,6 +43,7 @@ dependencies:
   faker: ^2.2.0
   window_manager: ^0.4.3
   http: ^1.2.2
+  image: ^4.5.2
 
 
 dev_dependencies:
@@ -64,6 +65,8 @@ flutter:
   assets:
     - assets/lang/
     - assets/images/
+    - assets/luka/
+    
   fonts:
     - family: PretendardJP
       fonts:
