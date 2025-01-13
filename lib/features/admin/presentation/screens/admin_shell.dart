@@ -21,6 +21,12 @@ class AdminShell extends ConsumerWidget {
         selectedIndex: _calculateSelectedIndex(context),
         destinations: _buildDestinations(),
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          PhotoCardUploadRouteData().go(context);
+        },
+        child: const Icon(Icons.drive_file_move_rounded),
+      ),
     );
   }
 
@@ -85,14 +91,6 @@ class AdminShell extends ConsumerWidget {
           destination: const NavigationDestination(
             icon: Icon(Icons.devices),
             label: 'Kiosk Components',
-          ),
-        ),
-        RouteModel(
-          path: '/payment-request-test',
-          route: const PaymentRequestTestRouteData(),
-          destination: const NavigationDestination(
-            icon: Icon(Icons.payment),
-            label: 'Payment Request Test',
           ),
         ),
       ]);

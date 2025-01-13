@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_snaptag_kiosk/data/data.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 
 class KioskInfoScreen extends ConsumerWidget {
@@ -14,6 +13,14 @@ class KioskInfoScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Kiosk Info'),
+        actions: [
+          IconButton(
+            onPressed: () {
+              ref.read(asyncKioskInfoProvider.notifier).refresh();
+            },
+            icon: const Icon(Icons.refresh),
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -30,14 +37,9 @@ class KioskInfoScreen extends ConsumerWidget {
             FrontImagesAction(),
             KioskColorsWidget(),
             KioskTypographyWidget(),
+            const FlavorInfoWidget(),
           ],
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          ref.read(asyncKioskInfoProvider.notifier).refresh();
-        },
-        child: const Icon(Icons.refresh),
       ),
     );
   }
