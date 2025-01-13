@@ -3,12 +3,46 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
+import 'package:loader_overlay/loader_overlay.dart';
 
-class CodeVerificationScreen extends StatelessWidget {
+class CodeVerificationScreen extends ConsumerWidget {
   const CodeVerificationScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    ref.listen<AsyncValue<BackPhotoCardResponse?>>(
+      verifyPhotoCardProvider,
+      (previous, next) {
+        // 로딩 상태 처리
+        if (next.isLoading) {
+          context.loaderOverlay.show();
+          return;
+        }
+
+        // 로딩 오버레이 숨기기
+        if (context.loaderOverlay.visible) {
+          context.loaderOverlay.hide();
+        }
+        // 에러 처리
+        next.whenOrNull(
+          error: (error, stack) async {
+            await DialogHelper.showErrorDialog();
+            logger.e('Error verifying photo card: $error stacktrace $stack');
+            // 에러 시 입력값 초기화
+            ref.read(authCodeProvider.notifier).clear();
+          },
+          data: (response) {
+            if (response != null) {
+              PhotoCardPreviewRouteData($extra: response).go(context);
+              // 성공 후 상태 리셋
+              ref.read(verifyPhotoCardProvider.notifier).reset();
+              ref.read(authCodeProvider.notifier).clear();
+            }
+          },
+        );
+      },
+    );
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -145,7 +179,10 @@ class _NumericPad extends ConsumerWidget {
       return ElevatedButton(
         style: context.keypadCompleteStyle,
         onPressed: () {
-          ref.read(authCodeProvider.notifier).submit(context);
+          final code = ref.read(authCodeProvider);
+          if (ref.read(authCodeProvider.notifier).isValid()) {
+            ref.read(verifyPhotoCardProvider.notifier).verify(code);
+          }
         },
         child: Text(LocaleKeys.sub01_btn_done.tr()),
       );

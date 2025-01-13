@@ -67,7 +67,7 @@ class DialogHelper {
   static Future<void> showPurchaseFailedDialog() async {
     await _showKioskDialog(
       title: 'alert_title_purchase_failure'.tr(),
-      message: '${'alert_txt_purchase_failure'.tr()}\nError Code : 404, Unknown',
+      message: '${'alert_txt_purchase_failure'.tr()}\n\nError Code : 404, Unknown', //TODO: Add error code
       buttonText: 'alert_btn_purchase_failure'.tr(),
     );
   }
