@@ -61,6 +61,13 @@ class PaymentRequestTestScreen extends ConsumerWidget {
   Future<void> _approvePayment(BuildContext context, WidgetRef ref) async {
     final testCase = ref.read(testCaseStateProvider);
     try {
+      final request = PaymentRequest.approval(
+        totalAmount: testCase.amount.toString(),
+        tax: '91', // 예시 값
+        supplyAmount: '913', // 예시 값
+      );
+      ref.read(paymentRequestProvider.notifier).state = request.serialize();
+
       final response = await ref.read(paymentRepositoryProvider).approve(
             totalAmount: testCase.amount.toString(),
             tax: '91', // 예시 값
@@ -76,6 +83,15 @@ class PaymentRequestTestScreen extends ConsumerWidget {
   Future<void> _cancelPayment(BuildContext context, WidgetRef ref) async {
     final testCase = ref.read(testCaseStateProvider);
     try {
+      final request = PaymentRequest.cancel(
+        totalAmount: testCase.amount.toString(),
+        tax: '91', // 예시 값
+        supplyAmount: '913', // 예시 값
+        originalApprovalNo: testCase.approvalNo,
+        originalApprovalDate: testCase.approvalDate,
+      );
+      ref.read(paymentRequestProvider.notifier).state = request.serialize();
+
       final response = await ref.read(paymentRepositoryProvider).cancel(
             totalAmount: testCase.amount.toString(),
             tax: '91', // 예시 값
@@ -95,6 +111,7 @@ class PaymentRequestTestScreen extends ConsumerWidget {
     final testCase = ref.watch(testCaseStateProvider);
     final notifier = ref.read(testCaseStateProvider.notifier);
 
+    final paymentRequest = ref.watch(paymentRequestProvider);
     final paymentResponse = ref.watch(paymentResponseProvider);
     final paymentError = ref.watch(paymentErrorProvider);
 
@@ -118,6 +135,7 @@ class PaymentRequestTestScreen extends ConsumerWidget {
             const SizedBox(height: 24),
             _buildActionButtons(context, ref, testCase),
             const SizedBox(height: 24),
+            if (paymentRequest != null) _buildRequestInfo('Request:', paymentRequest),
             if (paymentResponse != null) _buildRequestInfo('Response:', paymentResponse),
             if (paymentError != null) _buildRequestInfo('Error:', paymentError),
           ],
@@ -154,6 +172,8 @@ class PaymentRequestTestScreen extends ConsumerWidget {
   }
 
   Widget _buildRequestInfo(String title, String content) {
+    final displayContent = formatForDisplay(content);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -165,13 +185,31 @@ class PaymentRequestTestScreen extends ConsumerWidget {
         Card(
           child: Padding(
             padding: const EdgeInsets.all(16),
-            child: SelectableText(content),
+            child: Text(displayContent),
           ),
         ),
       ],
     );
   }
+
+  String formatForDisplay(String request) {
+    return request.split('').map((char) {
+      switch (char.codeUnitAt(0)) {
+        case 0x02: // STX
+          return '[STX]';
+        case 0x03: // ETX
+          return '[ETX]';
+        case 0x0D: // CR
+          return '[CR]';
+        case 0x1C: // FS
+          return '[FS]';
+        default:
+          return char;
+      }
+    }).join();
+  }
 }
 
+final paymentRequestProvider = StateProvider<String?>((ref) => null);
 final paymentResponseProvider = StateProvider<String?>((ref) => null);
 final paymentErrorProvider = StateProvider<String?>((ref) => null);
