@@ -4,8 +4,8 @@ import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-part 'payment_request_test_screen.freezed.dart';
-part 'payment_request_test_screen.g.dart';
+part 'payment_request_test_widget.freezed.dart';
+part 'payment_request_test_widget.g.dart';
 
 @freezed
 class PaymentTestCase with _$PaymentTestCase {
@@ -55,8 +55,8 @@ class TestCaseState extends _$TestCaseState {
   }
 }
 
-class PaymentRequestTestScreen extends ConsumerWidget {
-  const PaymentRequestTestScreen({super.key});
+class PaymentRequestTestWidget extends ConsumerWidget {
+  const PaymentRequestTestWidget({super.key});
 
   Future<void> _approvePayment(BuildContext context, WidgetRef ref) async {
     final testCase = ref.read(testCaseStateProvider);
@@ -109,38 +109,22 @@ class PaymentRequestTestScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final testCase = ref.watch(testCaseStateProvider);
-    final notifier = ref.read(testCaseStateProvider.notifier);
 
     final paymentRequest = ref.watch(paymentRequestProvider);
     final paymentResponse = ref.watch(paymentResponseProvider);
     final paymentError = ref.watch(paymentErrorProvider);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Payment Request Test - ${testCase.name}'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.swap_horiz),
-            tooltip: '테스트 케이스 변경',
-            onPressed: () => notifier.toggleTestCase(),
-          ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildTestCaseInfo(testCase),
-            const SizedBox(height: 24),
-            _buildActionButtons(context, ref, testCase),
-            const SizedBox(height: 24),
-            if (paymentRequest != null) _buildRequestInfo('Request:', paymentRequest),
-            if (paymentResponse != null) _buildRequestInfo('Response:', paymentResponse),
-            if (paymentError != null) _buildRequestInfo('Error:', paymentError),
-          ],
-        ),
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildTestCaseInfo(testCase),
+        const SizedBox(height: 24),
+        _buildActionButtons(context, ref, testCase),
+        const SizedBox(height: 24),
+        if (paymentRequest != null) _buildRequestInfo('Request:', paymentRequest),
+        if (paymentResponse != null) _buildRequestInfo('Response:', paymentResponse),
+        if (paymentError != null) _buildRequestInfo('Error:', paymentError),
+      ],
     );
   }
 
@@ -162,6 +146,11 @@ class PaymentRequestTestScreen extends ConsumerWidget {
         ElevatedButton(
           onPressed: () => _approvePayment(context, ref),
           child: const Text('승인'),
+        ),
+        IconButton(
+          icon: const Icon(Icons.swap_horiz),
+          tooltip: '테스트 케이스 변경',
+          onPressed: () => ref.read(testCaseStateProvider.notifier).toggleTestCase(),
         ),
         ElevatedButton(
           onPressed: testCase.isRefund ? () => _cancelPayment(context, ref) : null,

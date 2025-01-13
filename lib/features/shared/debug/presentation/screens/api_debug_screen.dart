@@ -116,6 +116,7 @@ class ApiDebugScreen extends ConsumerWidget {
                     OrderStatus.completed,
                   ),
             ),
+            PaymentRequestTestWidget(),
           ],
         ),
       ),
