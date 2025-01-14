@@ -2,12 +2,8 @@ import 'dart:io';
 
 import 'package:dio/dio.dart' as dio show Dio, Options, ResponseType;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_snaptag_kiosk/core/constants/constants.dart';
-import 'package:flutter_snaptag_kiosk/core/errors/errors.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-
-import 'file_system_service.dart';
 
 part 'image_storage_service.g.dart';
 
@@ -92,7 +88,7 @@ class ImageStorageService {
     for (var photo in photoList.list) {
       try {
         final fileName = '${photo.id}_${photo.embeddingProductId}';
-        final filePath = await saveImage(directory, photo.embeddedUrl, fileName);
+        final filePath = await saveImage(directory, photo.embedUrl, fileName);
         filePaths.add(filePath);
       } catch (e) {
         logger.e('이미지 저장 중 오류가 발생했습니다: $e');

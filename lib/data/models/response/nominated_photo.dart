@@ -8,7 +8,9 @@ class NominatedPhoto with _$NominatedPhoto {
   const factory NominatedPhoto({
     required int id,
     required int embeddingProductId,
-    required String embeddedUrl,
+    required int code,
+    required String originUrl,
+    required String embedUrl,
   }) = _NominatedPhoto;
 
   factory NominatedPhoto.fromJson(Map<String, dynamic> json) => _$NominatedPhotoFromJson(json);
