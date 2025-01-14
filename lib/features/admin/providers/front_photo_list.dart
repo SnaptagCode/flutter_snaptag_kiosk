@@ -34,7 +34,7 @@ class FrontPhotoList extends _$FrontPhotoList {
     for (var photo in photoList.list) {
       try {
         final fileName = '${photo.id}_${photo.embeddingProductId}';
-        final filePath = await imageStorage.saveImage(DirectoryPaths.frontImages, photo.embeddedUrl, fileName);
+        final filePath = await imageStorage.saveImage(DirectoryPaths.frontImages, photo.embedUrl, fileName);
 
         frontPhotoPaths.add(FrontPhotoPath(localPath: filePath, photo: photo));
       } catch (e) {
