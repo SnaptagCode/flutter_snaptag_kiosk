@@ -65,7 +65,7 @@ flutter:
   assets:
     - assets/lang/
     - assets/images/
-    - assets/luka/
+    - assets/luca/
     
   fonts:
     - family: PretendardJP
