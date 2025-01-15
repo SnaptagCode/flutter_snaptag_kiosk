@@ -65,6 +65,7 @@ class PaymentRequestTestWidget extends ConsumerWidget {
         totalAmount: testCase.amount.toString(),
         tax: '91', // 예시 값
         supplyAmount: '913', // 예시 값
+        isTest: true,
       );
       ref.read(paymentRequestProvider.notifier).state = request.serialize();
 
@@ -89,6 +90,7 @@ class PaymentRequestTestWidget extends ConsumerWidget {
         supplyAmount: '913', // 예시 값
         originalApprovalNo: testCase.approvalNo,
         originalApprovalDate: testCase.approvalDate,
+        isTest: true,
       );
       ref.read(paymentRequestProvider.notifier).state = request.serialize();
 

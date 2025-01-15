@@ -4,7 +4,7 @@ final GlobalKey<NavigatorState> adminNavigatorKey = GlobalKey<NavigatorState>(de
 
 @TypedShellRoute<DebugShellRouteData>(
   routes: <TypedRoute<RouteData>>[
-    TypedGoRoute<PrinterSettingRouteData>(path: '/printer-settings'),
+    TypedGoRoute<PrintTestRouteData>(path: '/print-test'),
     TypedGoRoute<PaymentHistoryRouteData>(path: '/payment-history'),
     TypedGoRoute<ApiDebugRouteData>(path: '/api-debug'),
     TypedGoRoute<MaterialRouteData>(path: '/material-components'),
@@ -23,13 +23,13 @@ class DebugShellRouteData extends ShellRouteData {
   }
 }
 
-class PrinterSettingRouteData extends GoRouteData {
-  const PrinterSettingRouteData();
+class PrintTestRouteData extends GoRouteData {
+  const PrintTestRouteData();
 
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) {
     return NoTransitionPage(
-      child: const PrinterSettingScreen(),
+      child: const PrintTestScreen(),
     );
   }
 }
