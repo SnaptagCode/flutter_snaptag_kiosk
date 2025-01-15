@@ -17,19 +17,17 @@ class PaymentApiClient {
       Uri.parse(url),
       headers: {'Content-Type': 'application/json; charset=euc-kr'},
     );
-    logger.d(response.body);
-    // JSONP 응답 파싱
-    // 응답 형식: callback('{"res":"0000","data":{...}}')
+
     final body = response.body;
-    final jsonStr = body.substring(
+    final broken = body.substring(
       callback.length + 1, // callback( 제거
       body.length - 1, // ) 제거
     );
 
     // EUC-KR 디코딩
-    final decode = cp949.decodeString(jsonStr);
+    final decode = cp949.decodeString(broken);
 
-    logger.d(PaymentResponse.fromJson(json.decode(decode)));
+    logger.d(decode);
     return PaymentResponse.fromJson(json.decode(decode));
   }
 }
