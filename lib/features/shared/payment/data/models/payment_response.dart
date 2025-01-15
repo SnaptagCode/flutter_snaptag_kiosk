@@ -1,5 +1,4 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'payment_response.freezed.dart';
 part 'payment_response.g.dart';
@@ -7,34 +6,32 @@ part 'payment_response.g.dart';
 @freezed
 class PaymentResponse with _$PaymentResponse {
   const factory PaymentResponse({
-    required String res, // 응답코드
-    String? msg, // 응답 메시지
-    String? status, // 상태 - 정상승인인 경우 'O'
-    String? approvalNo, // 승인번호
-    String? tradeTime, // 거래시간
-    String? tradeUniqueNo, // VAN TR번호
-    String? originalApprovalNo, // 원거래승인번호
+    @JsonKey(name: 'APPROVALNO') String? approvalNo,
+    @JsonKey(name: 'CARDNAME') String? cardName,
+    @JsonKey(name: 'CARDTYPE') String? cardType,
+    @JsonKey(name: 'CLASSFLAG') String? classFlag,
+    @JsonKey(name: 'COMPANYINFO') String? companyInfo,
+    @JsonKey(name: 'CORPRESPCODE') String? corpRespCode,
+    @JsonKey(name: 'RES') required String res,
+    @JsonKey(name: 'MSG') String? msg,
+    @JsonKey(name: 'TRADEUNIQUENO') String? tradeUniqueNo,
+    @JsonKey(name: 'TRADETIME') String? tradeTime,
+    @JsonKey(name: 'STATUS') String? status,
   }) = _PaymentResponse;
 
-  factory PaymentResponse.fromJson(Map<String, dynamic> json) => _$PaymentResponseFromJson(json);
+  factory PaymentResponse.fromJson(Map<String, dynamic> json) => _$PaymentResponseFromJson(_trimValues(json));
 }
 
-@riverpod
-class PaymentResponseState extends _$PaymentResponseState {
-  @override
-  AsyncValue<PaymentResponse?> build() {
-    return const AsyncValue.data(null);
-  }
+// 모든 String 값의 공백을 trim
+Map<String, dynamic> _trimValues(Map<String, dynamic> json) {
+  return json.map((key, value) {
+    if (value is String) {
+      return MapEntry(key, value.trim());
+    }
+    return MapEntry(key, value);
+  });
+}
 
-  void setResponse(PaymentResponse response) {
-    state = AsyncValue.data(response);
-  }
-
-  void setError(Object error, StackTrace stackTrace) {
-    state = AsyncValue.error(error, stackTrace);
-  }
-
-  void reset() {
-    state = const AsyncValue.data(null);
-  }
+extension PaymentResponseExtension on PaymentResponse {
+  bool get isSuccess => res == '0000';
 }

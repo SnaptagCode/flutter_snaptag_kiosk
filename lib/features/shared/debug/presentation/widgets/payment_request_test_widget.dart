@@ -20,6 +20,18 @@ class PaymentTestCase with _$PaymentTestCase {
   factory PaymentTestCase.fromJson(Map<String, dynamic> json) => _$PaymentTestCaseFromJson(json);
 }
 
+@riverpod
+class ApprovalInfo extends _$ApprovalInfo {
+  @override
+  PaymentResponse? build() {
+    return null;
+  }
+
+  void setInfo(PaymentResponse response) {
+    state = response;
+  }
+}
+
 final defaultTestCases = [
   PaymentTestCase(
     name: '일반 결제',
@@ -63,18 +75,20 @@ class PaymentRequestTestWidget extends ConsumerWidget {
     try {
       final request = PaymentRequest.approval(
         totalAmount: testCase.amount.toString(),
-        tax: '91', // 예시 값
-        supplyAmount: '913', // 예시 값
-        isTest: true,
+        tax: '91',
+        supplyAmount: '913',
       );
       ref.read(paymentRequestProvider.notifier).state = request.serialize();
 
       final response = await ref.read(paymentRepositoryProvider).approve(
             totalAmount: testCase.amount.toString(),
-            tax: '91', // 예시 값
-            supplyAmount: '913', // 예시 값
+            tax: '91',
+            supplyAmount: '913',
           );
+      // 응답 저장
       ref.read(paymentResponseProvider.notifier).state = response.toString();
+      // 승인 정보 저장
+      ref.read(approvalInfoProvider.notifier).setInfo(response);
       ref.read(paymentErrorProvider.notifier).state = null;
     } on PaymentException catch (e) {
       ref.read(paymentErrorProvider.notifier).state = e.toString();
@@ -83,26 +97,35 @@ class PaymentRequestTestWidget extends ConsumerWidget {
 
   Future<void> _cancelPayment(BuildContext context, WidgetRef ref) async {
     final testCase = ref.read(testCaseStateProvider);
+    final approvalInfo = ref.read(approvalInfoProvider);
+
+    if (approvalInfo == null) {
+      ref.read(paymentErrorProvider.notifier).state = '승인 정보가 없습니다';
+      return;
+    }
+
     try {
       final request = PaymentRequest.cancel(
         totalAmount: testCase.amount.toString(),
-        tax: '91', // 예시 값
-        supplyAmount: '913', // 예시 값
-        originalApprovalNo: testCase.approvalNo,
-        originalApprovalDate: testCase.approvalDate,
-        isTest: true,
+        tax: '91',
+        supplyAmount: '913',
+        originalApprovalNo: approvalInfo.approvalNo ?? '',
+        originalApprovalDate: approvalInfo.tradeTime?.substring(0, 6) ?? '', // YYMMDD 형식으로 추출
       );
       ref.read(paymentRequestProvider.notifier).state = request.serialize();
 
       final response = await ref.read(paymentRepositoryProvider).cancel(
             totalAmount: testCase.amount.toString(),
-            tax: '91', // 예시 값
-            supplyAmount: '913', // 예시 값
-            originalApprovalNo: testCase.approvalNo,
-            originalApprovalDate: testCase.approvalDate,
+            tax: '91',
+            supplyAmount: '913',
+            originalApprovalNo: approvalInfo.approvalNo ?? '',
+            originalApprovalDate: approvalInfo.tradeTime?.substring(0, 6) ?? '',
           );
       ref.read(paymentResponseProvider.notifier).state = response.toString();
       ref.read(paymentErrorProvider.notifier).state = null;
+
+      // 취소 성공 시 승인 정보 초기화
+      if (response.isSuccess) {}
     } catch (e) {
       ref.read(paymentErrorProvider.notifier).state = e.toString();
     }
@@ -111,15 +134,14 @@ class PaymentRequestTestWidget extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final testCase = ref.watch(testCaseStateProvider);
-
+    final approvalInfo = ref.watch(approvalInfoProvider);
     final paymentRequest = ref.watch(paymentRequestProvider);
     final paymentResponse = ref.watch(paymentResponseProvider);
     final paymentError = ref.watch(paymentErrorProvider);
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildTestCaseInfo(testCase),
+        _buildTestCaseInfo(testCase, approvalInfo),
         const SizedBox(height: 24),
         _buildActionButtons(context, ref, testCase),
         const SizedBox(height: 24),
@@ -130,12 +152,22 @@ class PaymentRequestTestWidget extends ConsumerWidget {
     );
   }
 
-  Widget _buildTestCaseInfo(PaymentTestCase testCase) {
+  Widget _buildTestCaseInfo(PaymentTestCase testCase, PaymentResponse? approvalInfo) {
     return Card(
       child: ListTile(
         title: Text(testCase.name),
-        subtitle: Text(
-          '금액: ${testCase.amount}원${testCase.isRefund ? ' / 승인번호: ${testCase.approvalNo} / 승인일자: ${testCase.approvalDate}' : ''}',
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '금액: ${testCase.amount}원',
+            ),
+            if (approvalInfo != null) ...[
+              Text('승인번호: ${approvalInfo.approvalNo}'),
+              Text('승인일자: ${approvalInfo.tradeTime}'),
+              Text('거래고유번호: ${approvalInfo.tradeUniqueNo}'),
+            ],
+          ],
         ),
       ),
     );

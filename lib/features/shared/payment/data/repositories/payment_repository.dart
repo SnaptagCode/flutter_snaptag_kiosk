@@ -34,7 +34,6 @@ class PaymentRepository {
       totalAmount: totalAmount,
       tax: tax,
       supplyAmount: supplyAmount,
-      isTest: true,
     );
 
     return _request(request);
@@ -53,7 +52,6 @@ class PaymentRepository {
       supplyAmount: supplyAmount,
       originalApprovalNo: originalApprovalNo,
       originalApprovalDate: originalApprovalDate,
-      isTest: true,
     );
 
     return _request(request);
