@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PrtCfg>
+	<!-- print setting -->
+	<Print>
+		<EntireRotate180>0</EntireRotate180>	<!-- The overall image is rotated 180 degrees, which is mainly used to synchronize with the driving effect. 0:Do not rotate (default); 1:rotate; -->
+		<FixWhiteLine> <!-- Repair white edges -->
+			<WlIsOpen>0</WlIsOpen> <!-- Whether to enable the repair of white edges function. 0: No; 1: Yes; -->
+			<WlTop>8</WlTop> <!-- Upper repair Range:[0-25] -->
+			<WlDown>8</WlDown> <!-- Bottom repair Range:[0-24] -->
+			<WlLeft>8</WlLeft> <!-- Left repair Range:[0-45] -->
+			<WlRight>8</WlRight> <!-- Right repair Range:[0-45] -->
+		</FixWhiteLine>
+	</Print>
+	<!-- combined-printing -->
+	<CmbnPrt>
+		<SaveTempPic>0</SaveTempPic>	<!-- Do you want to save the intermediate layers generated during the template printing process. 0: Do not save (default); 1: Save; This function is currently not implemented -->		
+		<CmbnPrtDebug>1</CmbnPrtDebug> <!-- Do you want to save the final base and mask images for printing (excluding YMC, K, and Coat region settings processing), mainly for debugging and troubleshooting. 0: Do not save (default); 1: Save; -->
+	</CmbnPrt>
+	<!-- log setting -->
+	<Log>
+		<Level>3</Level>	
+		<!-- log level  
+		LVL_ERROR    0  
+		LVL_WARNING  1
+		LVL_INFO     2
+		LVL_LIB		 3
+		LVL_LOGPAR	 4	//Display parameter logs
+		LVL_COMMAND  5  //Used to display printing instruction data
+		LVL_ALL		 6 -->
+		<OutputIORaw>0</OutputIORaw>	<!-- Whether to output IO raw data. 0: Do not output (default); 1: Output; -->
+		<LogPath>%temp%</LogPath>   <!-- Log save path -->
+		<WriteMode>0</WriteMode> <!-- Do you want to create a separate log file for each thread in multithreading. 0: Multiple threads sharing one log file; 1: Each thread has its own log file -->
+	</Log>
+	<!-- Reader settings -->
+	<CardReader>
+		<Vendor>none</Vendor>		<!-- Manufacturer. none: Not dependent on reader library; 0: DECARD -->
+		<Model>0</Model>		<!-- 0: three-in-one; 1: contactless; 2: contact; -->
+		<ActionNeedCardReader>0</ActionNeedCardReader> <!-- Is a CARD reader required for CARD entry and exit. 0: Not required; 1: Need; The three in one CARD reader should be 1. -->
+		<!-- Magnetic stripe reader settings -->
+		<MagReader>
+			<IsOpenMag>1</IsOpenMag>	<!-- Using a magnetic stripe CARD reader; 0: Off, 1: On; -->		
+		</MagReader>
+	</CardReader>
+</PrtCfg>
