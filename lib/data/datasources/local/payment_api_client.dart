@@ -15,7 +15,7 @@ class PaymentApiClient {
 
     final response = await http.get(
       Uri.parse(url),
-      headers: {'Content-Type': 'application/json'},
+      headers: {'Content-Type': 'application/json; charset=euc-kr'},
     );
     logger.d(response.body);
     // JSONP 응답 파싱
@@ -25,9 +25,11 @@ class PaymentApiClient {
       callback.length + 1, // callback( 제거
       body.length - 1, // ) 제거
     );
-    logger.d(jsonStr);
-    logger.d(json.decode(jsonStr));
-    logger.d(PaymentResponse.fromJson(json.decode(jsonStr)));
-    return PaymentResponse.fromJson(json.decode(jsonStr));
+
+    // EUC-KR 디코딩
+    final decode = cp949.decodeString(jsonStr);
+
+    logger.d(PaymentResponse.fromJson(json.decode(decode)));
+    return PaymentResponse.fromJson(json.decode(decode));
   }
 }
