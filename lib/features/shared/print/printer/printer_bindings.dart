@@ -1,95 +1,125 @@
-import 'dart:ffi' as ffi;
+import 'dart:ffi';
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:ffi/ffi.dart';
+import 'package:flutter_snaptag_kiosk/core/utils/logger_service.dart';
 import 'package:image/image.dart' as img;
+import 'package:path/path.dart' as path;
 
 // DLL 함수 시그니처 정의
-typedef R600LibInitNative = ffi.Uint32 Function();
+typedef R600LibInitNative = Uint32 Function();
 typedef R600LibInit = int Function();
 
-typedef R600GetErrorOuterInfoNative = ffi.Uint32 Function(
-    ffi.Uint32 errCode, ffi.Pointer<Utf8> outputStr, ffi.Pointer<ffi.Int32> len);
-typedef R600GetErrorOuterInfo = int Function(int errCode, ffi.Pointer<Utf8> outputStr, ffi.Pointer<ffi.Int32> len);
+typedef R600GetErrorOuterInfoNative = Uint32 Function(Uint32 errCode, Pointer<Utf8> outputStr, Pointer<Int32> len);
+typedef R600GetErrorOuterInfo = int Function(int errCode, Pointer<Utf8> outputStr, Pointer<Int32> len);
 
 // 추가적인 DLL 함수 시그니처 정의
-typedef R600IsPrtHaveCardNative = ffi.Uint32 Function(ffi.Pointer<ffi.Uint8> flag);
-typedef R600IsPrtHaveCard = int Function(ffi.Pointer<ffi.Uint8> flag);
+typedef R600IsPrtHaveCardNative = Uint32 Function(Pointer<Uint8> flag);
+typedef R600IsPrtHaveCard = int Function(Pointer<Uint8> flag);
 
-typedef R600PrepareCanvasNative = ffi.Uint32 Function(ffi.Int32 nChromaticMode, ffi.Int32 nMonoChroMode);
+typedef R600PrepareCanvasNative = Uint32 Function(Int32 nChromaticMode, Int32 nMonoChroMode);
 typedef R600PrepareCanvas = int Function(int nChromaticMode, int nMonoChroMode);
 
-typedef R600DrawImageNative = ffi.Uint32 Function(ffi.Double dX, ffi.Double dY, ffi.Double dWidth, ffi.Double dHeight,
-    ffi.Pointer<Utf8> szImgFilePath, ffi.Int32 nSetNoAbsoluteBlack);
-typedef R600DrawImage = int Function(
-    double dX, double dY, double dWidth, double dHeight, ffi.Pointer<Utf8> szImgFilePath, int nSetNoAbsoluteBlack);
-
-typedef R600DrawTextNative = ffi.Uint32 Function(ffi.Double dX, ffi.Double dY, ffi.Double width, ffi.Double height,
-    ffi.Pointer<Utf8> szText, ffi.Int32 nSetNoAbsoluteBlack);
+typedef R600DrawTextNative = Uint32 Function(
+    Double dX, Double dY, Double width, Double height, Pointer<Utf8> szText, Int32 nSetNoAbsoluteBlack);
 typedef R600DrawText = int Function(
-    double dX, double dY, double width, double height, ffi.Pointer<Utf8> szText, int nSetNoAbsoluteBlack);
+    double dX, double dY, double width, double height, Pointer<Utf8> szText, int nSetNoAbsoluteBlack);
 
-typedef R600CardInjectNative = ffi.Uint32 Function(ffi.Uint8 ucDestPos);
+typedef R600CardInjectNative = Uint32 Function(Uint8 ucDestPos);
 typedef R600CardInject = int Function(int ucDestPos);
 
-typedef R600PrintDrawNative = ffi.Uint32 Function(ffi.Pointer<Utf8> szImgInfoFront, ffi.Pointer<Utf8> szImgInfoBack);
-typedef R600PrintDraw = int Function(ffi.Pointer<Utf8> szImgInfoFront, ffi.Pointer<Utf8> szImgInfoBack);
+typedef R600PrintDrawNative = Uint32 Function(Pointer<Utf8> szImgInfoFront, Pointer<Utf8> szImgInfoBack);
+typedef R600PrintDraw = int Function(Pointer<Utf8> szImgInfoFront, Pointer<Utf8> szImgInfoBack);
 
-typedef R600CardEjectNative = ffi.Uint32 Function(ffi.Uint8 ucDestPos);
+typedef R600CardEjectNative = Uint32 Function(Uint8 ucDestPos);
 typedef R600CardEject = int Function(int ucDestPos);
 
 // 추가적인 DLL 함수 시그니처 정의
-typedef R600EnumUsbPrtNative = ffi.Uint32 Function(
-    ffi.Pointer<ffi.Uint8> enumList, ffi.Pointer<ffi.Uint32> listLen, ffi.Pointer<ffi.Int32> num);
-typedef R600EnumUsbPrt = int Function(
-    ffi.Pointer<ffi.Uint8> enumList, ffi.Pointer<ffi.Uint32> listLen, ffi.Pointer<ffi.Int32> num);
+typedef R600EnumUsbPrtNative = Uint32 Function(Pointer<Uint8> enumList, Pointer<Uint32> listLen, Pointer<Int32> num);
+typedef R600EnumUsbPrt = int Function(Pointer<Uint8> enumList, Pointer<Uint32> listLen, Pointer<Int32> num);
 
-typedef R600UsbSetTimeoutNative = ffi.Uint32 Function(ffi.Uint32 readTimeout, ffi.Uint32 writeTimeout);
+typedef R600UsbSetTimeoutNative = Uint32 Function(Uint32 readTimeout, Uint32 writeTimeout);
 typedef R600UsbSetTimeout = int Function(int readTimeout, int writeTimeout);
 
 // 추가되어야 할 함수 시그니처 정의 (기존 typedef 선언부 아래)
-typedef R600SetCanvasPortraitNative = ffi.Uint32 Function(ffi.Int32);
+typedef R600SetCanvasPortraitNative = Uint32 Function(Int32);
 typedef R600SetCanvasPortrait = int Function(int nPortrait);
 
-typedef R600SetCoatRgnNative = ffi.Uint32 Function(
-    ffi.Double, ffi.Double, ffi.Double, ffi.Double, ffi.Uint8, ffi.Uint8);
+typedef R600SetCoatRgnNative = Uint32 Function(Double, Double, Double, Double, Uint8, Uint8);
 typedef R600SetCoatRgn = int Function(double x, double y, double width, double height, int isFront, int isMeansErase);
 
-typedef R600SetImageParaNative = ffi.Uint32 Function(ffi.Int32, ffi.Int32, ffi.Float);
+typedef R600SetImageParaNative = Uint32 Function(Int32, Int32, Float);
 typedef R600SetImagePara = int Function(int whiteTransparency, int nRotation, double fScale);
 // commitCanvas를 위한 typedef 추가
-typedef R600CommitCanvasNative = ffi.Uint32 Function(
-  ffi.Pointer<Utf8> szImgInfo,
-  ffi.Pointer<ffi.Int32> pImgInfoLen,
+typedef R600CommitCanvasNative = Uint32 Function(
+  Pointer<Utf8> szImgInfo,
+  Pointer<Int32> pImgInfoLen,
 );
 typedef R600CommitCanvas = int Function(
-  ffi.Pointer<Utf8> szImgInfo,
-  ffi.Pointer<ffi.Int32> pImgInfoLen,
+  Pointer<Utf8> szImgInfo,
+  Pointer<Int32> pImgInfoLen,
 );
-// DLL 함수 시그니처 정의부에 추가
-typedef R600QueryPrtStatusNative = ffi.Uint32 Function(
-  ffi.Pointer<ffi.Int16> pChassisTemp,
-  ffi.Pointer<ffi.Int16> pPrintheadTemp,
-  ffi.Pointer<ffi.Int16> pHeaterTemp,
-  ffi.Pointer<ffi.Uint32> pMainStatus,
-  ffi.Pointer<ffi.Uint32> pSubStatus,
-  ffi.Pointer<ffi.Uint32> pErrorStatus,
-  ffi.Pointer<ffi.Uint32> pWarningStatus,
-  ffi.Pointer<ffi.Uint8> pMainCode,
-  ffi.Pointer<ffi.Uint8> pSubCode,
+
+typedef R600QueryPrtStatusNative = Uint32 Function(
+  Pointer<Int16> pChassisTemp,
+  Pointer<Int16> pPrintheadTemp,
+  Pointer<Int16> pHeaterTemp,
+  Pointer<Uint32> pMainStatus,
+  Pointer<Uint32> pSubStatus,
+  Pointer<Uint32> pErrorStatus,
+  Pointer<Uint32> pWarningStatus,
+  Pointer<Uint8> pMainCode,
+  Pointer<Uint8> pSubCode,
 );
 
 typedef R600QueryPrtStatus = int Function(
-  ffi.Pointer<ffi.Int16> pChassisTemp,
-  ffi.Pointer<ffi.Int16> pPrintheadTemp,
-  ffi.Pointer<ffi.Int16> pHeaterTemp,
-  ffi.Pointer<ffi.Uint32> pMainStatus,
-  ffi.Pointer<ffi.Uint32> pSubStatus,
-  ffi.Pointer<ffi.Uint32> pErrorStatus,
-  ffi.Pointer<ffi.Uint32> pWarningStatus,
-  ffi.Pointer<ffi.Uint8> pMainCode,
-  ffi.Pointer<ffi.Uint8> pSubCode,
+  Pointer<Int16> pChassisTemp,
+  Pointer<Int16> pPrintheadTemp,
+  Pointer<Int16> pHeaterTemp,
+  Pointer<Uint32> pMainStatus,
+  Pointer<Uint32> pSubStatus,
+  Pointer<Uint32> pErrorStatus,
+  Pointer<Uint32> pWarningStatus,
+  Pointer<Uint8> pMainCode,
+  Pointer<Uint8> pSubCode,
 );
+
+// 추가적인 DLL 함수 시그니처 정의
+typedef R600SelectPrtNative = Uint32 Function(Pointer<Uint8> enumList);
+typedef R600SelectPrt = int Function(Pointer<Uint8> enumList);
+
+typedef R600LibClearNative = Uint32 Function();
+typedef R600LibClear = int Function();
+
+typedef R600SetRibbonOptNative = Uint32 Function(
+  Uint8 isWrite,
+  Uint32 key,
+  Pointer<Utf8> value,
+  Int32 valueLen,
+);
+typedef R600SetRibbonOpt = int Function(
+  int isWrite,
+  int key,
+  Pointer<Utf8> value,
+  int valueLen,
+);
+
+typedef R600DrawWaterMarkNative = Uint32 Function(
+    Double dX, Double dY, Double width, Double height, Pointer<Utf8> szImgFilePath);
+typedef R600DrawWaterMark = int Function(
+    double dX, double dY, double width, double height, Pointer<Utf8> szImgFilePath);
+
+typedef R600SetFontNative = Uint32 Function(Pointer<Utf8>, Float);
+typedef R600SetFont = int Function(Pointer<Utf8>, double);
+
+typedef R600SetTextIsStrongNative = Uint32 Function(Int32);
+typedef R600SetTextIsStrong = int Function(int);
+
+typedef R600DrawImageNative = Uint32 Function(
+    Double dX, Double dY, Double dWidth, Double dHeight, Pointer<Utf8> szImgFilePath, Int32 nSetNoAbsoluteBlack);
+typedef R600DrawImage = int Function(
+    double dX, double dY, double dWidth, double dHeight, Pointer<Utf8> szImgFilePath, int nSetNoAbsoluteBlack);
 
 // 상태값을 담을 클래스 추가
 class _PrinterStatus {
@@ -117,12 +147,11 @@ class _PrinterStatus {
 }
 
 class PrinterBindings {
-  late final ffi.DynamicLibrary _dll;
+  late final DynamicLibrary _dll;
   late final R600LibInit _libInit;
   late final R600GetErrorOuterInfo _getErrorInfo;
   late final R600IsPrtHaveCard _isPrtHaveCard;
   late final R600PrepareCanvas _prepareCanvas;
-  late final R600DrawImage _drawImage;
   late final R600DrawText _drawText;
   late final R600CardInject _cardInject;
   late final R600PrintDraw _printDraw;
@@ -134,10 +163,19 @@ class PrinterBindings {
   late final R600EnumUsbPrt _enumUsbPrt;
   late final R600UsbSetTimeout _usbSetTimeout;
   late final R600CommitCanvas _commitCanvas;
+  late final R600SelectPrt _selectPrinter; // 추가
+  late final R600LibClear _libClear;
+  late final R600SetRibbonOpt _setRibbonOpt;
+  late final R600DrawWaterMark _drawWaterMark;
+  late final R600SetFont _setFont;
+  late final R600SetTextIsStrong _setTextIsStrong;
+  late final R600DrawImage _drawImage;
 
   PrinterBindings() {
     // DLL 로드
-    _dll = ffi.DynamicLibrary.open('libDSRetransfer600App.dll');
+    final exeDir = Directory.current;
+    final dllSource = path.join(exeDir.path, 'assets', 'luca', 'libDSRetransfer600App.dll');
+    _dll = DynamicLibrary.open(dllSource);
 
     // 함수 바인딩
     _libInit = _dll.lookupFunction<R600LibInitNative, R600LibInit>('R600LibInit');
@@ -155,32 +193,18 @@ class PrinterBindings {
         _dll.lookupFunction<R600SetCanvasPortraitNative, R600SetCanvasPortrait>('R600SetCanvasPortrait');
     _setCoatRgn = _dll.lookupFunction<R600SetCoatRgnNative, R600SetCoatRgn>('R600SetCoatRgn');
     _setImagePara = _dll.lookupFunction<R600SetImageParaNative, R600SetImagePara>('R600SetImagePara');
-    _queryPrinterStatus = _dll.lookupFunction<
-        ffi.Uint32 Function(
-            ffi.Pointer<ffi.Int16>,
-            ffi.Pointer<ffi.Int16>,
-            ffi.Pointer<ffi.Int16>,
-            ffi.Pointer<ffi.Uint32>,
-            ffi.Pointer<ffi.Uint32>,
-            ffi.Pointer<ffi.Uint32>,
-            ffi.Pointer<ffi.Uint32>,
-            ffi.Pointer<ffi.Uint8>,
-            ffi.Pointer<ffi.Uint8>),
-        int Function(
-            ffi.Pointer<ffi.Int16>,
-            ffi.Pointer<ffi.Int16>,
-            ffi.Pointer<ffi.Int16>,
-            ffi.Pointer<ffi.Uint32>,
-            ffi.Pointer<ffi.Uint32>,
-            ffi.Pointer<ffi.Uint32>,
-            ffi.Pointer<ffi.Uint32>,
-            ffi.Pointer<ffi.Uint8>,
-            ffi.Pointer<ffi.Uint8>)>('R600QueryPrtStatus');
+    _queryPrinterStatus = _dll.lookupFunction<R600QueryPrtStatusNative, R600QueryPrtStatus>('R600QueryPrtStatus');
 
     // 추가 바인딩
     _enumUsbPrt = _dll.lookupFunction<R600EnumUsbPrtNative, R600EnumUsbPrt>('R600EnumUsbPrt');
     _usbSetTimeout = _dll.lookupFunction<R600UsbSetTimeoutNative, R600UsbSetTimeout>('R600UsbSetTimeout');
     _commitCanvas = _dll.lookupFunction<R600CommitCanvasNative, R600CommitCanvas>('R600CommitCanvas');
+    _selectPrinter = _dll.lookupFunction<R600SelectPrtNative, R600SelectPrt>('R600SelectPrt');
+    _libClear = _dll.lookupFunction<R600LibClearNative, R600LibClear>('R600LibClear');
+    _setRibbonOpt = _dll.lookupFunction<R600SetRibbonOptNative, R600SetRibbonOpt>('R600SetRibbonOpt');
+    _drawWaterMark = _dll.lookupFunction<R600DrawWaterMarkNative, R600DrawWaterMark>('R600DrawWaterMark');
+    _setFont = _dll.lookupFunction<R600SetFontNative, R600SetFont>('R600SetFont');
+    _setTextIsStrong = _dll.lookupFunction<R600SetTextIsStrongNative, R600SetTextIsStrong>('R600SetTextIsStrong');
   }
 
   int initLibrary() {
@@ -188,8 +212,8 @@ class PrinterBindings {
   }
 
   String getErrorInfo(int errorCode) {
-    final outputStr = calloc<ffi.Uint8>(500).cast<Utf8>();
-    final len = calloc<ffi.Int32>();
+    final outputStr = calloc<Uint8>(500).cast<Utf8>();
+    final len = calloc<Int32>();
     len.value = 500;
 
     try {
@@ -204,7 +228,7 @@ class PrinterBindings {
 
   // 카드 위치 확인 함수
   bool checkCardPosition() {
-    final flag = calloc<ffi.Uint8>();
+    final flag = calloc<Uint8>();
     try {
       final result = _isPrtHaveCard(flag);
       if (result != 0) {
@@ -218,9 +242,15 @@ class PrinterBindings {
 
   // 캔버스 준비 함수
   void prepareCanvas({bool isColor = true}) {
-    final result = _prepareCanvas(isColor ? 1 : 0, 0);
+    logger.d('PrepareCanvas called with isColor: $isColor');
+    // 첫 번째 파라미터: chromatic mode (0: monochrome, 1: color)
+    // 두 번째 파라미터: monochrome mode (0: default)
+    final result = _prepareCanvas(isColor ? 0 : 1, 0);
+    logger.d('PrepareCanvas result: $result');
+
     if (result != 0) {
-      throw Exception('Failed to prepare canvas');
+      final error = getErrorInfo(result);
+      throw Exception('Failed to prepare canvas: $error (code: $result)');
     }
   }
 
@@ -233,11 +263,16 @@ class PrinterBindings {
     required double height,
     bool noAbsoluteBlack = true,
   }) {
+    logger.d('Drawing image from path: $imagePath'); // 경로 확인
+    logger.d('Image file exists: ${File(imagePath).existsSync()}'); // 파일 존재 확인
+
     final pathPointer = imagePath.toNativeUtf8();
     try {
-      final result = _drawImage(x, y, width, height, pathPointer, noAbsoluteBlack ? 1 : 0);
+      final result = _drawImage(x, y, width, height, pathPointer.cast(), noAbsoluteBlack ? 1 : 0);
+      logger.d('DrawImage result: $result'); // 결과 코드 확인
       if (result != 0) {
-        throw Exception('Failed to draw image');
+        final error = getErrorInfo(result);
+        throw Exception('Failed to draw image: $error (code: $result)');
       }
     } finally {
       calloc.free(pathPointer);
@@ -255,7 +290,7 @@ class PrinterBindings {
   }) {
     final textPointer = text.toNativeUtf8();
     try {
-      final result = _drawText(x, y, width, height, textPointer, noAbsoluteBlack ? 1 : 0);
+      final result = _drawText(x, y, width, height, textPointer.cast(), noAbsoluteBlack ? 1 : 0);
       if (result != 0) {
         throw Exception('Failed to draw text');
       }
@@ -278,7 +313,7 @@ class PrinterBindings {
     String? backImageInfo,
   }) {
     final frontPointer = frontImageInfo.toNativeUtf8();
-    final backPointer = backImageInfo?.toNativeUtf8() ?? ffi.nullptr;
+    final backPointer = backImageInfo?.toNativeUtf8() ?? nullptr;
     try {
       final result = _printDraw(frontPointer, backPointer);
       if (result != 0) {
@@ -334,15 +369,15 @@ class PrinterBindings {
 
   // getPrinterStatus 메서드 추가
   _PrinterStatus? getPrinterStatus() {
-    final pChassisTemp = calloc<ffi.Int16>();
-    final pPrintheadTemp = calloc<ffi.Int16>();
-    final pHeaterTemp = calloc<ffi.Int16>();
-    final pMainStatus = calloc<ffi.Uint32>();
-    final pSubStatus = calloc<ffi.Uint32>();
-    final pErrorStatus = calloc<ffi.Uint32>();
-    final pWarningStatus = calloc<ffi.Uint32>();
-    final pMainCode = calloc<ffi.Uint8>();
-    final pSubCode = calloc<ffi.Uint8>();
+    final pChassisTemp = calloc<Int16>();
+    final pPrintheadTemp = calloc<Int16>();
+    final pHeaterTemp = calloc<Int16>();
+    final pMainStatus = calloc<Uint32>();
+    final pSubStatus = calloc<Uint32>();
+    final pErrorStatus = calloc<Uint32>();
+    final pWarningStatus = calloc<Uint32>();
+    final pMainCode = calloc<Uint8>();
+    final pSubCode = calloc<Uint8>();
 
     try {
       final result = _queryPrinterStatus(
@@ -358,7 +393,8 @@ class PrinterBindings {
       );
 
       if (result != 0) {
-        throw Exception('Failed to get printer status');
+        logger.d('Query printer status failed with code: $result'); // 디버그용
+        return null; // null 반환으로 변경
       }
 
       return _PrinterStatus(
@@ -372,6 +408,9 @@ class PrinterBindings {
         heaterTemperature: pHeaterTemp.value,
         subStatus: pSubStatus.value,
       );
+    } catch (e) {
+      logger.d('Error in getPrinterStatus: $e'); // 디버그용
+      return null; // 예외 발생 시 null 반환
     } finally {
       calloc.free(pChassisTemp);
       calloc.free(pPrintheadTemp);
@@ -387,24 +426,33 @@ class PrinterBindings {
 
   // USB 초기화 메서드 추가
   void initializeUsb() {
-    final enumListPtr = calloc<ffi.Uint8>(500);
-    final listLenPtr = calloc<ffi.Uint32>()..value = 500;
-    final numPtr = calloc<ffi.Int32>()..value = 10;
+    final enumListPtr = calloc<Uint8>(500);
+    final listLenPtr = calloc<Uint32>()..value = 500;
+    final numPtr = calloc<Int32>()..value = 10;
 
     try {
+      // USB 프린터 열거
       final enumResult = _enumUsbPrt(enumListPtr.cast(), listLenPtr, numPtr);
       if (enumResult != 0) {
         throw Exception('Failed to enumerate USB printer');
       }
 
+      // USB 시간 초과 설정
       final timeoutResult = _usbSetTimeout(3000, 3000);
       if (timeoutResult != 0) {
         throw Exception('Failed to set USB timeout');
       }
-    } finally {}
-    calloc.free(enumListPtr);
-    calloc.free(listLenPtr);
-    calloc.free(numPtr);
+
+      // 프린터 선택
+      final selectResult = _selectPrinter(enumListPtr.cast());
+      if (selectResult != 0) {
+        throw Exception('Failed to select printer');
+      }
+    } finally {
+      calloc.free(enumListPtr);
+      calloc.free(listLenPtr);
+      calloc.free(numPtr);
+    }
   }
 
   // 이미지 회전 기능 추가
@@ -418,8 +466,130 @@ class PrinterBindings {
   }
 
   // commitCanvas 메서드 추가
-  int commitCanvas(ffi.Pointer<Utf8> strPtr, ffi.Pointer<ffi.Int32> lenPtr) {
+  int commitCanvas(Pointer<Utf8> strPtr, Pointer<Int32> lenPtr) {
     final result = _commitCanvas(strPtr, lenPtr);
     return result;
+  }
+
+  bool connectPrinter({bool isEtherNet = false}) {
+    final enumListPtr = calloc<Uint8>(500);
+    final listLenPtr = calloc<Uint32>()..value = 500;
+    final numPtr = calloc<Int32>()..value = 10;
+
+    try {
+      // 먼저 이전 상태를 정리
+      _libInit();
+
+      logger.d('Enumerating USB printer...'); // 디버그 로그 추가
+      // USB 프린터만 사용
+      int result = _enumUsbPrt(enumListPtr.cast(), listLenPtr, numPtr);
+      if (result != 0) {
+        logger.d('Failed to enumerate printer: $result');
+        return false;
+      }
+
+      logger.d('Setting USB timeout...'); // 디버그 로그 추가
+      result = _usbSetTimeout(3000, 3000);
+      if (result != 0) {
+        logger.d('Failed to set USB timeout: $result');
+        return false;
+      }
+
+      logger.d('Selecting printer...'); // 디버그 로그 추가
+      result = _selectPrinter(enumListPtr.cast());
+      if (result != 0) {
+        logger.d('Failed to select printer: $result');
+        return false;
+      }
+
+      logger.d('Printer connected successfully'); // 디버그 로그 추가
+      return true;
+    } finally {
+      calloc.free(enumListPtr);
+      calloc.free(listLenPtr);
+      calloc.free(numPtr);
+    }
+  }
+
+  bool ensurePrinterReady() {
+    try {
+      // 카드 존재 여부 확인
+      final flag = calloc<Uint8>();
+      try {
+        int result = _isPrtHaveCard(flag);
+        if (result != 0) {
+          logger.d('Failed to check card position');
+          return false;
+        }
+
+        // 카드가 있다면 배출
+        if (flag.value != 0) {
+          logger.d('Card is in the printer, ejecting...');
+          result = _cardEject(0); // 왼쪽으로 배출
+          if (result != 0) {
+            logger.d('Failed to eject card');
+            return false;
+          }
+        }
+        return true;
+      } finally {
+        calloc.free(flag);
+      }
+    } catch (e) {
+      logger.d('Error in ensurePrinterReady: $e');
+      return false;
+    }
+  }
+
+  void clearLibrary() {
+    _libClear();
+  }
+
+  void setRibbonOpt(
+    int isWrite,
+    int key,
+    String value,
+    int valueLen,
+  ) {
+    final valuePtr = value.toNativeUtf8();
+    try {
+      final result = _setRibbonOpt(isWrite, key, valuePtr, valueLen);
+      if (result != 0) {
+        throw Exception('Failed to set ribbon opt');
+      }
+    } finally {
+      calloc.free(valuePtr);
+    }
+  }
+
+  void drawWaterMark(String imagePath) {
+    final imagePathPtr = imagePath.toNativeUtf8();
+    try {
+      final result = _drawWaterMark(0, 0, 0, 0, imagePathPtr);
+      if (result != 0) {
+        throw Exception('Failed to draw water mark');
+      }
+    } finally {
+      calloc.free(imagePathPtr);
+    }
+  }
+
+  void setFont(String fontName, double fontSize) {
+    final fontNamePtr = fontName.toNativeUtf8();
+    try {
+      final result = _setFont(fontNamePtr, fontSize);
+      if (result != 0) {
+        throw Exception('Failed to set font');
+      }
+    } finally {
+      calloc.free(fontNamePtr);
+    }
+  }
+
+  void setTextIsStrong(int isStrong) {
+    final result = _setTextIsStrong(isStrong);
+    if (result != 0) {
+      throw Exception('Failed to set text strength');
+    }
   }
 }
