@@ -9,8 +9,8 @@ class FrontImagesAction extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final frontPhotoListState = ref.watch(frontPhotoListProvider);
-    final List<FrontPhotoPath> frontPhotoList = frontPhotoListState;
+    final List<FrontPhotoPath> frontPhotoListState = ref.watch(frontPhotoListProvider);
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -64,7 +64,7 @@ class FrontImagesAction extends ConsumerWidget {
         // 저장된 이미지 표시
         Wrap(
           children: [
-            for (final photo in frontPhotoList)
+            for (final photo in frontPhotoListState)
               Image.file(
                 File(photo.localPath),
                 width: 200,
