@@ -37,7 +37,7 @@ class _PhotoCardPreviewScreenState extends ConsumerState<PhotoCardPreviewScreen>
         // 에러/성공 처리
         next.whenOrNull(
           error: (error, stack) async {
-            await DialogHelper.showPurchaseFailedDialog();
+            await DialogHelper.showPurchaseFailedDialog(context);
             logger.e('Payment error: $error stacktrace $stack');
           },
           data: (_) {
