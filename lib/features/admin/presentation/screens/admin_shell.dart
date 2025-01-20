@@ -78,11 +78,11 @@ class AdminShell extends ConsumerWidget {
     if (F.appFlavor == Flavor.dev) {
       routes.addAll([
         RouteModel(
-          path: '/api-debug',
-          route: const ApiDebugRouteData(),
+          path: '/unit-test',
+          route: const UnitTestRouteData(),
           destination: const NavigationDestination(
             icon: Icon(Icons.api),
-            label: 'API Debug',
+            label: 'Debug',
           ),
         ),
         RouteModel(

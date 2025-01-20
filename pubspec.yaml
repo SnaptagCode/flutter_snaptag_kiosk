@@ -44,6 +44,7 @@ dependencies:
   window_manager: ^0.4.3
   http: ^1.2.2
   image: ^4.5.2
+  file_picker: ^8.1.7
 
 
 dev_dependencies:

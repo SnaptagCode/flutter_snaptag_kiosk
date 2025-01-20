@@ -26,7 +26,7 @@ class CodeVerificationScreen extends ConsumerWidget {
         // 에러 처리
         next.whenOrNull(
           error: (error, stack) async {
-            await DialogHelper.showErrorDialog();
+            await DialogHelper.showErrorDialog(context);
             logger.e('Error verifying photo card: $error stacktrace $stack');
             // 에러 시 입력값 초기화
             ref.read(authCodeProvider.notifier).clear();

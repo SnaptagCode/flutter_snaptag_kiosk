@@ -95,8 +95,9 @@ class PrinterState extends _$PrinterState {
             throw Exception('Failed to prepare rear canvas: $e');
           }
         } finally {
-          // 회전된 이미지 임시 파일 삭제
-          await File(rotatedRearPath).delete().catchError((_) {});
+          await File(rotatedRearPath).delete().catchError((_) {
+            logger.d('Failed to delete rotated rear image');
+          });
         }
       }
 
