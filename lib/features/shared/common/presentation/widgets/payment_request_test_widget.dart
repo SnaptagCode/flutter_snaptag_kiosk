@@ -36,14 +36,14 @@ final defaultTestCases = [
   PaymentTestCase(
     name: '일반 결제',
     isRefund: false,
-    amount: 10000,
+    amount: 1000,
   ),
   PaymentTestCase(
     name: '취소 결제',
     isRefund: true,
     approvalNo: '12345678',
     approvalDate: '240108',
-    amount: 10000,
+    amount: 1000,
   ),
 ];
 

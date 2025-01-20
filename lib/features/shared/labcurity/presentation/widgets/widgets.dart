@@ -1,1 +1,1 @@
-export 'image_preview.dart';
+export 'labcurity_image.dart';

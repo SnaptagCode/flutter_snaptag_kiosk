@@ -78,11 +78,11 @@ class AdminShell extends ConsumerWidget {
     if (F.appFlavor == Flavor.dev) {
       routes.addAll([
         RouteModel(
-          path: '/api-debug',
-          route: const ApiDebugRouteData(),
+          path: '/unit-test',
+          route: const UnitTestRouteData(),
           destination: const NavigationDestination(
             icon: Icon(Icons.api),
-            label: 'API Debug',
+            label: 'Debug',
           ),
         ),
         RouteModel(
@@ -99,14 +99,6 @@ class AdminShell extends ConsumerWidget {
           destination: const NavigationDestination(
             icon: Icon(Icons.devices),
             label: 'Kiosk Components',
-          ),
-        ),
-        RouteModel(
-          path: '/security-image-test',
-          route: const LabcurityImageTestRouteData(),
-          destination: const NavigationDestination(
-            icon: Icon(Icons.image),
-            label: 'Security Image Test',
           ),
         ),
       ]);

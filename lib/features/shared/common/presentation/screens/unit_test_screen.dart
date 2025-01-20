@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 
-class ApiDebugScreen extends ConsumerWidget {
-  const ApiDebugScreen({super.key});
+class UnitTestScreen extends ConsumerWidget {
+  const UnitTestScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -117,6 +117,7 @@ class ApiDebugScreen extends ConsumerWidget {
                   ),
             ),
             PaymentRequestTestWidget(),
+            LabcurityImageWidget(),
           ],
         ),
       ),
