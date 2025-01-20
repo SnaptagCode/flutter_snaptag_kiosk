@@ -101,6 +101,14 @@ class AdminShell extends ConsumerWidget {
             label: 'Kiosk Components',
           ),
         ),
+        RouteModel(
+          path: '/security-image-test',
+          route: const LabcurityImageTestRouteData(),
+          destination: const NavigationDestination(
+            icon: Icon(Icons.image),
+            label: 'Security Image Test',
+          ),
+        ),
       ]);
     }
 
