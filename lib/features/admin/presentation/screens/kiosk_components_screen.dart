@@ -42,6 +42,9 @@ class KioskComponentsScreen extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
+            KioskColorsWidget(),
+            KioskTypographyWidget(),
+            const FlavorInfoWidget(),
             const Text('Button Styles'),
             ElevatedButton(
               onPressed: () {},
@@ -75,21 +78,21 @@ class KioskComponentsScreen extends ConsumerWidget {
             const Text('Dialog Test'),
             const SizedBox(height: 16),
             ElevatedButton(
-              onPressed: () => DialogHelper.showErrorDialog(),
+              onPressed: () => DialogHelper.showErrorDialog(context),
               style: context.dialogButtonStyle,
-              child: Text('Show Error Dialog'.tr()),
+              child: Text('Show Error Dialog'),
             ),
             const SizedBox(height: 16),
             ElevatedButton(
-              onPressed: () => DialogHelper.showPurchaseFailedDialog(),
+              onPressed: () => DialogHelper.showPurchaseFailedDialog(context),
               style: context.dialogButtonStyle,
-              child: Text('Show Purchase Failed Dialog'.tr()),
+              child: Text('Show Purchase Failed Dialog'),
             ),
             const SizedBox(height: 16),
             ElevatedButton(
-              onPressed: () => DialogHelper.showPrintErrorDialog(),
+              onPressed: () => DialogHelper.showPrintErrorDialog(context),
               style: context.dialogButtonStyle,
-              child: Text('Show Print Error Dialog'.tr()),
+              child: Text('Show Print Error Dialog'),
             ),
             const SizedBox(height: 16),
             const Text('Localization Texts'),
