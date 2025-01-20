@@ -10,6 +10,7 @@ final GlobalKey<NavigatorState> adminNavigatorKey = GlobalKey<NavigatorState>(de
     TypedGoRoute<MaterialRouteData>(path: '/material-components'),
     TypedGoRoute<KioskComponentsRouteData>(path: '/kiosk-components'),
     TypedGoRoute<KioskInfoRouteData>(path: '/kiosk-info'),
+    TypedGoRoute<LabcurityImageTestRouteData>(path: '/security-image-test'), // 새로운 경로 추가
   ],
 )
 class DebugShellRouteData extends ShellRouteData {
@@ -85,6 +86,17 @@ class KioskInfoRouteData extends GoRouteData {
   Page<void> buildPage(BuildContext context, GoRouterState state) {
     return NoTransitionPage(
       child: const KioskInfoScreen(),
+    );
+  }
+}
+
+class LabcurityImageTestRouteData extends GoRouteData {
+  const LabcurityImageTestRouteData();
+
+  @override
+  Page<void> buildPage(BuildContext context, GoRouterState state) {
+    return NoTransitionPage(
+      child: LabcurityImageScreen(),
     );
   }
 }
