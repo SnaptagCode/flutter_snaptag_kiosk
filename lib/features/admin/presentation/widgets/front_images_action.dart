@@ -9,7 +9,7 @@ class FrontImagesAction extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final List<FrontPhotoPath> frontPhotoListState = ref.watch(frontPhotoListProvider);
+    final List<String> frontPhotoListState = ref.watch(frontPhotoListProvider);
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -66,7 +66,7 @@ class FrontImagesAction extends ConsumerWidget {
           children: [
             for (final photo in frontPhotoListState)
               Image.file(
-                File(photo.localPath),
+                File(photo),
                 width: 200,
                 height: 300,
                 fit: BoxFit.cover,
