@@ -1,14 +1,10 @@
 import 'dart:io';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_snaptag_kiosk/core/constants/directory_paths.dart';
-import 'package:flutter_snaptag_kiosk/core/errors/errors.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:yaml/yaml.dart';
 import 'package:yaml_edit/yaml_edit.dart';
-
-import 'file_system_service.dart';
 
 part 'yaml_storage_service.g.dart';
 

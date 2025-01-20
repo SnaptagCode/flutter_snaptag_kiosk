@@ -5,14 +5,15 @@ import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:go_router/go_router.dart';
 
 class DialogHelper {
-  static Future<bool> _showKioskDialog({
+  static Future<bool> _showKioskDialog(
+    BuildContext context, {
     required String title,
     required String message,
     required String buttonText,
     VoidCallback? onButtonPressed,
   }) async {
     await showDialog(
-      context: contentsNavigatorKey.currentContext!,
+      context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           insetPadding: EdgeInsets.symmetric(horizontal: 100.w),
@@ -56,27 +57,30 @@ class DialogHelper {
     return true;
   }
 
-  static Future<void> showErrorDialog() async {
+  static Future<void> showErrorDialog(BuildContext context) async {
     await _showKioskDialog(
-      title: 'alert_title_authNum_error'.tr(),
-      message: 'alert_txt_authNum_error'.tr(),
-      buttonText: 'alert_btn_authNum_error'.tr(),
+      context,
+      title: LocaleKeys.alert_title_authNum_error.tr(),
+      message: LocaleKeys.alert_txt_authNum_error.tr(),
+      buttonText: LocaleKeys.alert_btn_authNum_error.tr(),
     );
   }
 
-  static Future<void> showPurchaseFailedDialog() async {
+  static Future<void> showPurchaseFailedDialog(BuildContext context) async {
     await _showKioskDialog(
-      title: 'alert_title_purchase_failure'.tr(),
-      message: '${'alert_txt_purchase_failure'.tr()}\n\nError Code : 404, Unknown', //TODO: Add error code
-      buttonText: 'alert_btn_purchase_failure'.tr(),
+      context,
+      title: LocaleKeys.alert_title_purchase_failure.tr(),
+      message: '${LocaleKeys.alert_txt_purchase_failure.tr()}\n\nError Code : 404, Unknown', //TODO: Add error code
+      buttonText: LocaleKeys.alert_btn_purchase_failure.tr(),
     );
   }
 
-  static Future<bool> showPrintErrorDialog() async {
+  static Future<bool> showPrintErrorDialog(BuildContext context) async {
     return await _showKioskDialog(
-      title: 'alert_title_failure_print'.tr(),
-      message: 'alert_txt_failure_print'.tr(),
-      buttonText: 'alert_btn_failure_print'.tr(),
+      context,
+      title: LocaleKeys.alert_title_print_failure.tr(),
+      message: LocaleKeys.alert_txt_print_failure.tr(),
+      buttonText: LocaleKeys.alert_btn_print_failure.tr(),
     );
   }
 }
