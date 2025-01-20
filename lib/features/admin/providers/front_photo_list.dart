@@ -59,6 +59,8 @@ class FrontPhotoList extends _$FrontPhotoList {
 
   Future<void> fetch() async {
     try {
+      await ref.read(imageStorageProvider).clearDirectory(DirectoryPaths.frontImages);
+
       final yamlRepo = ref.read(storageServiceProvider);
       final currentSettings = yamlRepo.settings;
 
@@ -82,7 +84,7 @@ class FrontPhotoList extends _$FrontPhotoList {
     // 각 이미지 다운로드 및 저장
     for (var photo in photoList.list) {
       try {
-        // 파일명이 '{id}_{code}_{embeddingProductId}.확장자' 형식
+        // '{id}_{code}_{embeddingProductId}.확장자' 형식
         final fileName = '${photo.id}_${photo.code}_${photo.embeddingProductId}';
         final filePath = await imageStorage.saveImage(DirectoryPaths.frontImages, photo.embedUrl, fileName);
 
@@ -94,15 +96,6 @@ class FrontPhotoList extends _$FrontPhotoList {
     return frontPhotoPaths;
   }
 
-  Future<void> clearImages() async {
-    try {
-      await ref.read(imageStorageProvider).clearDirectory(DirectoryPaths.frontImages);
-      state = [];
-    } catch (e) {
-      state = [];
-    }
-  }
-
   ({String path, int id, int code, int embeddingProductId})? getRandomPhoto() {
     if (state.isEmpty) return null;
 
@@ -111,24 +104,18 @@ class FrontPhotoList extends _$FrontPhotoList {
 
     try {
       // 파일명에서 정보 추출
-      final fileName = path.basenameWithoutExtension(randomPath);
-      final parts = fileName.split('_');
+      final result = getPhotoInfo(randomPath);
 
-      if (parts.length == 3) {
-        final id = int.tryParse(parts[0]);
-        final code = int.tryParse(parts[1]);
-        final embeddingProductId = int.tryParse(parts[2]);
-
-        if (id != null && code != null && embeddingProductId != null) {
-          return (
-            path: randomPath,
-            id: id,
-            code: code,
-            embeddingProductId: embeddingProductId,
-          );
-        }
+      if (result != null) {
+        return (
+          id: result.id,
+          code: result.code,
+          embeddingProductId: result.embeddingProductId,
+          path: randomPath,
+        );
       }
-      throw Exception('Invalid file name format: $fileName');
+
+      throw Exception('Invalid file name format: $randomPath');
     } catch (e) {
       logger.e('이미지 정보 추출 중 오류가 발생했습니다: $e');
       return null;

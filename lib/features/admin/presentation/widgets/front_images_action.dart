@@ -35,25 +35,7 @@ class FrontImagesAction extends ConsumerWidget {
               },
               child: const Text('Call API'),
             ), // 이미지 삭제 버튼
-            ElevatedButton(
-              onPressed: () async {
-                try {
-                  await ref.read(frontPhotoListProvider.notifier).clearImages();
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('이미지 삭제 성공!')),
-                    );
-                  }
-                } catch (e) {
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('이미지 삭제 실패: $e')),
-                    );
-                  }
-                }
-              },
-              child: const Text('Clear Directory'),
-            ),
+
             FilePathActions(
               directory: DirectoryPaths.frontImages,
             ),
