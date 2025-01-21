@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter_snaptag_kiosk/data/datasources/remote/remote.dart';
 import 'package:flutter_snaptag_kiosk/data/models/models.dart';
 import 'package:flutter_snaptag_kiosk/flavors.dart';
@@ -31,30 +29,6 @@ class _KioskRepository {
     }
   }
 
-  Future<UpdatePrintResponse> updatePrintedStatus({
-    required int kioskMachineId,
-    required int kioskEventId,
-    required int frontPhotoCardId,
-    required String photoAuthNumber,
-    required PrintedStatus status,
-    File? file,
-    int? printedPhotoCardId,
-  }) async {
-    try {
-      return await _apiClient.updatePrintedStatus(
-        kioskMachineId: kioskMachineId,
-        kioskEventId: kioskEventId,
-        frontPhotoCardId: frontPhotoCardId,
-        photoAuthNumber: photoAuthNumber,
-        status: status,
-        file: file,
-        printedPhotoCardId: printedPhotoCardId,
-      );
-    } catch (e) {
-      throw Exception(e);
-    }
-  }
-
   // Photo Operations
   Future<NominatedPhotoList> getFrontPhotoList(int eventId) async {
     try {
@@ -75,43 +49,69 @@ class _KioskRepository {
     }
   }
 
-  Future<OrderResponse> createOrder(Map<String, dynamic> orderRequest) async {
-    try {
-      return await _apiClient.createOrder(
-        request: CreateOrderRequest.fromJson(orderRequest),
-      );
-    } catch (e) {
-      throw Exception(e);
-    }
-  }
-
-  Future<OrderResponse> updateOrder(int orderId, OrderStatus status) async {
-    try {
-      return await _apiClient.updateOrder(
-        orderId: orderId,
-        request: UpdateOrderRequest(
-          kioskEventId: 1,
-          kioskMachineId: 1,
-          photoAuthNumber: '1234',
-          status: status,
-          amount: 10000,
-          purchaseAuthNumber: '1234',
-          authSeqNumber: '1234',
-          approvalNumber: '1234',
-          detail: '1234',
-        ), // JSON 변환
-      );
-    } catch (e) {
-      throw Exception(e);
-    }
-  }
-
   Future<OrderResponse> getOrders(GetOrdersRequest request) async {
     try {
       return await _apiClient.getOrders(
         pageSize: request.pageSize,
         currentPage: request.currentPage,
         kioskEventId: request.kioskEventId,
+      );
+    } catch (e) {
+      throw Exception(e);
+    }
+  }
+
+  Future<PostOrderResponse> createOrder(PostOrderRequest request) async {
+    try {
+      return await _apiClient.createOrder(
+        queries: request.toJson(),
+      );
+    } catch (e) {
+      throw Exception(e);
+    }
+  }
+
+  Future<PatchOrderResponse> updateOrderStatus(PatchOrderRequest request) async {
+    try {
+      return await _apiClient.updateOrder(
+        orderId: request.kioskEventId,
+        queries: request.toJson(),
+      );
+    } catch (e) {
+      throw Exception(e);
+    }
+  }
+
+  Future<PostPrintResponse> createPrintedStatus({
+    required PostPrintRequest request,
+  }) async {
+    try {
+      return await _apiClient.postPrint(
+        kioskMachineId: request.kioskMachineId,
+        kioskEventId: request.kioskEventId,
+        frontPhotoCardId: request.frontPhotoCardId,
+        photoAuthNumber: request.photoAuthNumber,
+        status: request.status,
+        file: request.file,
+        printedPhotoCardId: request.printedPhotoCardId,
+      );
+    } catch (e) {
+      throw Exception(e);
+    }
+  }
+
+  Future<PatchPrintResponse> updatePrintedStatus({
+    required PatchPrintRequest request,
+  }) async {
+    try {
+      return await _apiClient.patchPrint(
+        kioskMachineId: request.kioskMachineId,
+        kioskEventId: request.kioskEventId,
+        frontPhotoCardId: request.frontPhotoCardId,
+        photoAuthNumber: request.photoAuthNumber,
+        status: request.status,
+        file: request.file,
+        printedPhotoCardId: request.printedPhotoCardId,
       );
     } catch (e) {
       throw Exception(e);

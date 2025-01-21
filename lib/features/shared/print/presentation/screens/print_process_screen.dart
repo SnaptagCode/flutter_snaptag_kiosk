@@ -3,27 +3,36 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
+import 'package:loader_overlay/loader_overlay.dart';
 
-class PrintProcessScreen extends ConsumerStatefulWidget {
+class PrintProcessScreen extends ConsumerWidget {
   const PrintProcessScreen({super.key});
 
   @override
-  ConsumerState<PrintProcessScreen> createState() => _PrintProcessScreenState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    ref.listen<AsyncValue<void>>(
+      printProcessProvider,
+      (previous, next) async {
+        if (next.isLoading) {
+          context.loaderOverlay.show();
+          return;
+        }
 
-class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
-  @override
-  void initState() {
-    super.initState();
-  }
+        if (context.loaderOverlay.visible) {
+          context.loaderOverlay.hide();
+        }
 
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
+        await next.when(
+          error: (error, stack) async {
+            await DialogHelper.showPrintErrorDialog(context);
+          },
+          loading: () => null,
+          data: (_) {
+            PhotoCardUploadRouteData().go(context);
+          },
+        );
+      },
+    );
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,

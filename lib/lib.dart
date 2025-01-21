@@ -1,7 +1,6 @@
 export 'app.dart';
 export 'core/core.dart';
 export 'data/data.dart';
-export 'domain/domain.dart';
 export 'features/features.dart';
 export 'flavors.dart';
 export 'locale_keys.dart';

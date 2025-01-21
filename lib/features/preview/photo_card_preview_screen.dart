@@ -4,25 +4,64 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
+import 'package:http/http.dart' as http;
 import 'package:loader_overlay/loader_overlay.dart';
 
 class PhotoCardPreviewScreen extends ConsumerStatefulWidget {
   const PhotoCardPreviewScreen({
     super.key,
-    required this.extra,
   });
-  final BackPhotoCardResponse extra;
+
   @override
   ConsumerState<PhotoCardPreviewScreen> createState() => _PhotoCardPreviewScreenState();
 }
 
 class _PhotoCardPreviewScreenState extends ConsumerState<PhotoCardPreviewScreen> {
+  Future<void> _handlePaymentError(Object error, StackTrace stack) async {
+    logger.e('Payment error occurred', error: error, stackTrace: stack);
+
+    if (error is http.ClientException) {
+      await DialogHelper.showCustomDialog(
+        context,
+        title: error.runtimeType.toString(),
+        message: error.toString(),
+        buttonText: LocaleKeys.sub01_btn_done.tr(),
+      );
+      return;
+    }
+    final exceptionType = switch (error) {
+      PaymentException(:final type) => type,
+      _ => PaymentExceptionType.unknown,
+    };
+
+    switch (exceptionType) {
+      // 시스템 관련 오류 - 재시도 가능
+      case PaymentExceptionType.cardIssuerTimeout ||
+            PaymentExceptionType.ksnetSystemError ||
+            PaymentExceptionType.reQueryRequested:
+
+      // 카드 상태 관련 오류 - 다른 카드 사용 필요
+      case PaymentExceptionType.stolenOrLostCard ||
+            PaymentExceptionType.transactionSuspendedCard ||
+            PaymentExceptionType.expiredCard:
+
+      // 결제 금액 관련 오류
+      case PaymentExceptionType.amountError ||
+            PaymentExceptionType.noAmountEntered ||
+            PaymentExceptionType.merchantLimitExceeded:
+      default:
+        await DialogHelper.showPurchaseFailedDialog(
+          context,
+          exception: exceptionType,
+        );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    // 결제 상태 감시
     ref.listen<AsyncValue<void>>(
       photoCardPreviewProvider,
-      (previous, next) {
+      (previous, next) async {
         // 로딩 상태 처리
         if (next.isLoading) {
           context.loaderOverlay.show();
@@ -35,11 +74,9 @@ class _PhotoCardPreviewScreenState extends ConsumerState<PhotoCardPreviewScreen>
         }
 
         // 에러/성공 처리
-        next.whenOrNull(
-          error: (error, stack) async {
-            await DialogHelper.showPurchaseFailedDialog(context);
-            logger.e('Payment error: $error stacktrace $stack');
-          },
+        await next.when(
+          error: _handlePaymentError,
+          loading: () => null,
           data: (_) {
             // 결제 성공 처리
             PrintProcessRouteData().go(context);
@@ -63,7 +100,7 @@ class _PhotoCardPreviewScreenState extends ConsumerState<PhotoCardPreviewScreen>
             content: ClipRRect(
               borderRadius: BorderRadius.circular(10.r),
               child: Image.network(
-                widget.extra.formattedBackPhotoCardUrl,
+                ref.watch(backPhotoCardResponseInfoProvider).formattedBackPhotoCardUrl,
                 fit: BoxFit.fill,
               ),
             ),
@@ -82,31 +119,8 @@ class _PhotoCardPreviewScreenState extends ConsumerState<PhotoCardPreviewScreen>
               ),
             ],
           ),
-          if (F.appFlavor == Flavor.dev) ...[
-            SizedBox(height: 20.h),
-            _buildTestButtons(),
-          ],
         ],
       ),
-    );
-  }
-
-  Widget _buildTestButtons() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        ElevatedButton(
-          onPressed: () => ref.read(photoCardPreviewProvider.notifier).simulateSuccess(),
-          style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
-          child: const Text('Success'),
-        ),
-        SizedBox(width: 10.w),
-        ElevatedButton(
-          onPressed: () => ref.read(photoCardPreviewProvider.notifier).simulateError(),
-          style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-          child: const Text('Error'),
-        ),
-      ],
     );
   }
 }

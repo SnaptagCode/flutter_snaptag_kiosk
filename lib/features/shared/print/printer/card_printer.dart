@@ -54,7 +54,7 @@ class PrinterState extends _$PrinterState {
 
   Future<void> printImage({
     required String frontImagePath,
-    String? backImagePath,
+    required File embeddedFile,
   }) async {
     try {
       state = const AsyncValue.loading();
@@ -76,29 +76,28 @@ class PrinterState extends _$PrinterState {
       }
 
       StringBuffer? rearBuffer;
-      if (backImagePath != null) {
-        logger.d('3. Loading and rotating rear image...');
-        final rearImage = await File(backImagePath).readAsBytes();
-        final rotatedRearImage = _bindings.flipImage180(rearImage);
 
-        // 임시 파일로 저장
-        final rotatedRearPath = '${backImagePath}_rotated.png';
-        await File(rotatedRearPath).writeAsBytes(rotatedRearImage);
+      logger.d('3. Loading and rotating rear image...');
+      final rearImage = await embeddedFile.readAsBytes();
+      final rotatedRearImage = _bindings.flipImage180(rearImage);
+      // 임시 파일로 저장
+      final temp = DateTime.now().millisecondsSinceEpoch.toString();
+      final rotatedRearPath = '${temp}_rotated.png';
+      await File(rotatedRearPath).writeAsBytes(rotatedRearImage);
 
+      try {
+        logger.d('4. Preparing rear canvas...');
+        rearBuffer = StringBuffer();
         try {
-          logger.d('4. Preparing rear canvas...');
-          rearBuffer = StringBuffer();
-          try {
-            await _prepareAndDrawImage(rearBuffer, rotatedRearPath, false);
-          } catch (e, stack) {
-            logger.d('Error in rear canvas preparation: $e\nStack: $stack');
-            throw Exception('Failed to prepare rear canvas: $e');
-          }
-        } finally {
-          await File(rotatedRearPath).delete().catchError((_) {
-            logger.d('Failed to delete rotated rear image');
-          });
+          await _prepareAndDrawImage(rearBuffer, rotatedRearPath, false);
+        } catch (e, stack) {
+          logger.d('Error in rear canvas preparation: $e\nStack: $stack');
+          throw Exception('Failed to prepare rear canvas: $e');
         }
+      } finally {
+        await File(rotatedRearPath).delete().catchError((_) {
+          logger.d('Failed to delete rotated rear image');
+        });
       }
 
       logger.d('5. Injecting card...');
@@ -107,7 +106,7 @@ class PrinterState extends _$PrinterState {
       logger.d('6. Printing card...');
       _bindings.printCard(
         frontImageInfo: frontBuffer.toString(),
-        backImageInfo: rearBuffer?.toString(),
+        backImageInfo: rearBuffer.toString(),
       );
 
       logger.d('7. Ejecting card...');

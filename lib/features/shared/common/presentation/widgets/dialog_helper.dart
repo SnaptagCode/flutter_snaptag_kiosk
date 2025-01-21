@@ -57,6 +57,21 @@ class DialogHelper {
     return true;
   }
 
+  //showCustomDialog
+  static Future<void> showCustomDialog(BuildContext context,
+      {required String title,
+      required String message,
+      required String buttonText,
+      VoidCallback? onButtonPressed}) async {
+    await _showKioskDialog(
+      context,
+      title: title,
+      message: message,
+      buttonText: buttonText,
+      onButtonPressed: onButtonPressed,
+    );
+  }
+
   static Future<void> showErrorDialog(BuildContext context) async {
     await _showKioskDialog(
       context,
@@ -66,11 +81,12 @@ class DialogHelper {
     );
   }
 
-  static Future<void> showPurchaseFailedDialog(BuildContext context) async {
+  static Future<void> showPurchaseFailedDialog(BuildContext context, {PaymentExceptionType? exception}) async {
+    final type = exception ?? PaymentExceptionType.unknown;
     await _showKioskDialog(
       context,
       title: LocaleKeys.alert_title_purchase_failure.tr(),
-      message: '${LocaleKeys.alert_txt_purchase_failure.tr()}\n\nError Code : 404, Unknown', //TODO: Add error code
+      message: '${LocaleKeys.alert_txt_purchase_failure.tr()}\n\n${type.message}',
       buttonText: LocaleKeys.alert_btn_purchase_failure.tr(),
     );
   }
