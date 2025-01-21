@@ -63,18 +63,14 @@ class PaymentRepository {
         _getCallback(),
         request.serialize(),
       );
-
-      if (response.res == '0100') {
-        throw const PaymentException.needRecheck();
-      } else if (response.res == '0800') {
-        throw const PaymentException.inProgress();
-      } else if (response.res != '0000') {
-        throw PaymentException.error(response.msg ?? 'Unknown error');
+      final exceptionType = PaymentExceptionType.fromCode(int.parse(response.res));
+      if (exceptionType != PaymentExceptionType.normalCompletion) {
+        throw PaymentException(exceptionType);
       }
 
       return response;
     } on http.ClientException catch (e, s) {
-      throw PaymentClientException('Network error: $e', s);
+      throw http.ClientException(e.message, e.uri);
     }
   }
 }

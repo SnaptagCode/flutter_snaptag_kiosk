@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:dio/dio.dart';
-import 'package:flutter_snaptag_kiosk/data/models/response/models.dart';
+import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:retrofit/retrofit.dart';
 
 part 'kiosk_api_client.g.dart';
@@ -31,9 +31,26 @@ abstract class KioskApiClient {
     @Query('photoAuthNumber') required String photoAuthNumber,
   });
 
-  @PATCH('/v1/machine/print')
+  @GET('/v1/order/list')
+  Future<OrderResponse> getOrders({
+    @Query('pageSize') required int pageSize,
+    @Query('currentPage') required int currentPage,
+    @Query('kioskEventId') required int kioskEventId,
+  });
+
+  @POST('/v1/order')
+  Future<PostOrderResponse> createOrder({
+    @Queries() required Map<String, dynamic> queries,
+  });
+
+  @PATCH('/v1/order/{orderId}')
+  Future<PatchOrderResponse> updateOrder({
+    @Path('orderId') required int orderId,
+    @Queries() required Map<String, dynamic> queries,
+  });
+  @POST('/v1/print')
   @MultiPart()
-  Future<UpdatePrintResponse> updatePrintedStatus({
+  Future<PostPrintResponse> postPrint({
     @Part() required int kioskMachineId,
     @Part() required int kioskEventId,
     @Part() required int frontPhotoCardId,
@@ -42,22 +59,15 @@ abstract class KioskApiClient {
     @Part() File? file,
     @Part() int? printedPhotoCardId,
   });
-
-  @POST('/v1/order')
-  Future<OrderResponse> createOrder({
-    @Body() required CreateOrderRequest request,
-  });
-
-  @PATCH('/v1/order/{orderId}')
-  Future<OrderResponse> updateOrder({
-    @Path('orderId') required int orderId,
-    @Body() required UpdateOrderRequest request,
-  });
-
-  @GET('/v1/order/list')
-  Future<OrderResponse> getOrders({
-    @Query('pageSize') required int pageSize,
-    @Query('currentPage') required int currentPage,
-    @Query('kioskEventId') required int kioskEventId,
+  @PATCH('/v1/print/{printedPhotoCardId}')
+  @MultiPart()
+  Future<PatchPrintResponse> patchPrint({
+    @Part() required int kioskMachineId,
+    @Part() required int kioskEventId,
+    @Part() required int frontPhotoCardId,
+    @Part() required String photoAuthNumber,
+    @Part() required PrintedStatus status,
+    @Part() File? file,
+    @Part() int? printedPhotoCardId,
   });
 }

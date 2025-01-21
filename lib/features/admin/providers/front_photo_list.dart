@@ -96,8 +96,10 @@ class FrontPhotoList extends _$FrontPhotoList {
     return frontPhotoPaths;
   }
 
-  ({String path, int id, int code, int embeddingProductId})? getRandomPhoto() {
-    if (state.isEmpty) return null;
+  Future<({String path, int id, int code, int embeddingProductId})> getRandomPhoto() async {
+    if (state.isEmpty) {
+      throw Exception('No front images available');
+    }
 
     final random = Random();
     final randomPath = state[random.nextInt(state.length)];
@@ -118,7 +120,7 @@ class FrontPhotoList extends _$FrontPhotoList {
       throw Exception('Invalid file name format: $randomPath');
     } catch (e) {
       logger.e('이미지 정보 추출 중 오류가 발생했습니다: $e');
-      return null;
+      throw Exception('Failed to get random photo');
     }
   }
 

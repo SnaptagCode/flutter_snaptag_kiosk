@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:dio/dio.dart' as dio show Dio, Options, ResponseType;
+import 'package:dio/dio.dart' as dio show Response;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -21,57 +21,19 @@ class ImageStorageService {
 
   final _fileSystem = FileSystemService.instance;
 
-  String _getFileExtensionFromUrl(String url) {
-    final uri = Uri.parse(url);
-    final path = uri.path;
-    final lastDot = path.lastIndexOf('.');
-    if (lastDot != -1) {
-      return path.substring(lastDot);
-    }
-    return '.png'; // 기본값
-  }
-
-  String _getFileExtensionFromContentType(String? contentType) {
-    logger.d('Content-Type: $contentType');
-    switch (contentType?.toLowerCase()) {
-      case 'image/jpeg':
-        return '.jpg';
-      case 'image/png':
-        return '.png';
-      case 'image/gif':
-        return '.gif';
-      case 'image/webp':
-        return '.webp';
-      default:
-        return '.png'; // 기본값
-    }
-  }
-
   Future<String> saveImage(DirectoryPaths directory, String imageUrl, String fileName) async {
     try {
       await _fileSystem.ensureDirectoryExists(directory);
-
-      final response = await dio.Dio().get<List<int>>(
-        imageUrl,
-        options: dio.Options(responseType: dio.ResponseType.bytes),
-      );
-
-      if (response.statusCode != 200) {
-        throw StorageException(
-          StorageErrorType.downloadError,
-          path: imageUrl,
-          originalError: 'Status code: ${response.statusCode}',
-        );
-      }
+      final dio.Response response = await ImageHelper().getImageBytes(imageUrl);
       final contentType = response.headers.value('content-type');
-      final extension =
-          contentType != null ? _getFileExtensionFromContentType(contentType) : _getFileExtensionFromUrl(imageUrl);
+      final extension = contentType != null
+          ? ImageHelper().getFileExtensionFromContentType(contentType)
+          : ImageHelper().getFileExtensionFromUrl(imageUrl);
 
       final fullFileName = '$fileName$extension';
       final filePath = _fileSystem.getFilePath(directory, fileName: fullFileName);
       final file = File(filePath);
       await file.writeAsBytes(response.data!);
-      logger.d('이미지가 저장되었습니다: ${file.path}');
       return file.path;
     } catch (e, stack) {
       throw StorageException(

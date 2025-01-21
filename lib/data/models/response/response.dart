@@ -4,4 +4,7 @@ export 'models.dart';
 export 'nominated_photo.dart';
 export 'nominated_photo_list.dart';
 export 'order_response.dart';
-export 'update_print_response.dart';
+export 'patch_order_response.dart';
+export 'patch_print_response.dart';
+export 'post_order_response.dart';
+export 'post_print_response.dart';

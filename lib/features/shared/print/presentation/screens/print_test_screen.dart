@@ -8,7 +8,7 @@ import 'package:flutter_snaptag_kiosk/features/shared/labcurity/providers/labcur
 import 'package:flutter_snaptag_kiosk/features/shared/print/printer/card_printer.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-part 'print_page.g.dart';
+part 'print_test_screen.g.dart';
 
 @riverpod
 class ProcessedImage extends _$ProcessedImage {
@@ -23,7 +23,7 @@ class ProcessedImage extends _$ProcessedImage {
     state = await AsyncValue.guard(() async {
       // 1. 랜덤 이미지 선택
       final frontPhotoList = ref.read(frontPhotoListProvider.notifier);
-      final randomPhoto = frontPhotoList.getRandomPhoto();
+      final randomPhoto = await frontPhotoList.getRandomPhoto();
       if (randomPhoto == null) {
         throw Exception('No front images available');
       }
@@ -48,7 +48,7 @@ class ProcessedImage extends _$ProcessedImage {
       try {
         await ref.read(printerStateProvider.notifier).printImage(
               frontImagePath: randomPhoto.path,
-              backImagePath: tempFile.path,
+              embeddedFile: tempFile,
             );
       } finally {
         // 임시 파일 삭제

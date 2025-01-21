@@ -65,8 +65,12 @@ class PhotoCardPreviewRouteData extends GoRouteData {
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) {
     return NoTransitionPage(
-      child: PhotoCardPreviewScreen(extra: $extra),
-    );
+        child: ProviderScope(
+      overrides: [
+        backPhotoCardResponseInfoProvider.overrideWithValue($extra),
+      ],
+      child: PhotoCardPreviewScreen(),
+    ));
   }
 }
 
