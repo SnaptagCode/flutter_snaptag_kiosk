@@ -86,7 +86,7 @@ class ContentsShell extends ConsumerWidget {
           image: DecorationImage(
             image: FileImage(
               File(
-                ref.watch(storageServiceProvider).bodyImagePath ?? '',
+                ref.watch(storageServiceProvider).bodyImagePath,
               ),
             ),
             fit: BoxFit.cover,

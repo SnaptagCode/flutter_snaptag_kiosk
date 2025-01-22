@@ -60,17 +60,13 @@ class CodeVerificationRouteData extends GoRouteData {
 }
 
 class PhotoCardPreviewRouteData extends GoRouteData {
-  const PhotoCardPreviewRouteData({required this.$extra});
-  final BackPhotoCardResponse $extra;
+  const PhotoCardPreviewRouteData();
+
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) {
     return NoTransitionPage(
-        child: ProviderScope(
-      overrides: [
-        backPhotoCardResponseInfoProvider.overrideWithValue($extra),
-      ],
-      child: PhotoCardPreviewScreen(),
-    ));
+      child: const PhotoCardPreviewScreen(),
+    );
   }
 }
 
@@ -80,7 +76,7 @@ class PrintProcessRouteData extends GoRouteData {
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) {
     return NoTransitionPage(
-      child: PrintProcessScreen(),
+      child: const PrintProcessScreen(),
     );
   }
 }

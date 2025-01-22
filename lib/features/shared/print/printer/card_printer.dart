@@ -68,12 +68,14 @@ class PrinterState extends _$PrinterState {
 
       logger.d('2. Preparing front canvas...');
       final frontBuffer = StringBuffer();
+      /**
       try {
         await _prepareAndDrawImage(frontBuffer, frontImagePath, true);
       } catch (e, stack) {
         logger.d('Error in front canvas preparation: $e\nStack: $stack');
         throw Exception('Failed to prepare front canvas: $e');
       }
+       */
 
       StringBuffer? rearBuffer;
 
@@ -88,12 +90,14 @@ class PrinterState extends _$PrinterState {
       try {
         logger.d('4. Preparing rear canvas...');
         rearBuffer = StringBuffer();
+        /**
         try {
           await _prepareAndDrawImage(rearBuffer, rotatedRearPath, false);
         } catch (e, stack) {
           logger.d('Error in rear canvas preparation: $e\nStack: $stack');
           throw Exception('Failed to prepare rear canvas: $e');
         }
+         */
       } finally {
         await File(rotatedRearPath).delete().catchError((_) {
           logger.d('Failed to delete rotated rear image');

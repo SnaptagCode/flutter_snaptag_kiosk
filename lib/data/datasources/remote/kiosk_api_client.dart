@@ -35,39 +35,32 @@ abstract class KioskApiClient {
   Future<OrderResponse> getOrders({
     @Query('pageSize') required int pageSize,
     @Query('currentPage') required int currentPage,
-    @Query('kioskEventId') required int kioskEventId,
   });
 
   @POST('/v1/order')
   Future<PostOrderResponse> createOrder({
-    @Queries() required Map<String, dynamic> queries,
+    @Body() required Map<String, dynamic> body,
   });
 
   @PATCH('/v1/order/{orderId}')
   Future<PatchOrderResponse> updateOrder({
     @Path('orderId') required int orderId,
-    @Queries() required Map<String, dynamic> queries,
+    @Body() required Map<String, dynamic> body,
   });
+
   @POST('/v1/print')
   @MultiPart()
   Future<PostPrintResponse> postPrint({
-    @Part() required int kioskMachineId,
-    @Part() required int kioskEventId,
-    @Part() required int frontPhotoCardId,
-    @Part() required String photoAuthNumber,
-    @Part() required PrintedStatus status,
-    @Part() File? file,
-    @Part() int? printedPhotoCardId,
+    @Part(name: 'kioskMachineId') required int kioskMachineId,
+    @Part(name: 'kioskEventId') required int kioskEventId,
+    @Part(name: 'frontPhotoCardId') required int frontPhotoCardId,
+    @Part(name: 'backPhotoCardId') required int backPhotoCardId,
+    @Part(name: 'file') File? file,
   });
+
   @PATCH('/v1/print/{printedPhotoCardId}')
-  @MultiPart()
   Future<PatchPrintResponse> patchPrint({
-    @Part() required int kioskMachineId,
-    @Part() required int kioskEventId,
-    @Part() required int frontPhotoCardId,
-    @Part() required String photoAuthNumber,
-    @Part() required PrintedStatus status,
-    @Part() File? file,
-    @Part() int? printedPhotoCardId,
+    @Path('printedPhotoCardId') required int printedPhotoCardId,
+    @Body() required Map<String, dynamic> body,
   });
 }

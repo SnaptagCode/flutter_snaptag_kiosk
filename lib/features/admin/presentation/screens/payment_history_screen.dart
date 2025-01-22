@@ -102,27 +102,21 @@ class OrderListPage extends ConsumerWidget {
   }
 }
 
-class OrderCard extends StatelessWidget {
+class OrderCard extends ConsumerWidget {
   final OrderEntity order;
 
   const OrderCard({super.key, required this.order});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
 
     return Card(
       elevation: 2,
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: () {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Selected Order ID: ${order.orderId}'),
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
+          ref.read(setUpRefundProcessProvider.notifier).startRefund(order);
         },
         child: Padding(
           padding: const EdgeInsets.all(12),

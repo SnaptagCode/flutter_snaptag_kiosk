@@ -19,19 +19,3 @@ LabcurityService labcurityService(LabcurityServiceRef ref) {
   final library = ref.watch(labcurityLibraryProvider);
   return LabcurityService(library);
 }
-
-@riverpod
-class LabcurityImage extends _$LabcurityImage {
-  @override
-  Future<Uint8List?> build() {
-    return Future.value(null);
-  }
-
-  Future<void> embedImage(Uint8List imageData, [LabcurityImageConfig? config]) async {
-    state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() async {
-      final service = ref.read(labcurityServiceProvider);
-      return service.embedImage(imageData, config);
-    });
-  }
-}

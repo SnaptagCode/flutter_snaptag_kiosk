@@ -11,7 +11,6 @@ class PhotoCardPreviewScreen extends ConsumerStatefulWidget {
   const PhotoCardPreviewScreen({
     super.key,
   });
-
   @override
   ConsumerState<PhotoCardPreviewScreen> createState() => _PhotoCardPreviewScreenState();
 }
@@ -99,9 +98,18 @@ class _PhotoCardPreviewScreenState extends ConsumerState<PhotoCardPreviewScreen>
           GradientContainer(
             content: ClipRRect(
               borderRadius: BorderRadius.circular(10.r),
-              child: Image.network(
-                ref.watch(backPhotoCardResponseInfoProvider).formattedBackPhotoCardUrl,
-                fit: BoxFit.fill,
+              child: ref.watch(verifyPhotoCardProvider).when(
+                data: (data) {
+                  return Image.network(
+                    data?.formattedBackPhotoCardUrl ?? '',
+                  );
+                },
+                loading: () {
+                  return const CircularProgressIndicator();
+                },
+                error: (error, stack) {
+                  return const Text('Error loading photo card');
+                },
               ),
             ),
           ),

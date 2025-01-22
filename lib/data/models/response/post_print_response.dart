@@ -10,8 +10,6 @@ class PostPrintResponse with _$PostPrintResponse {
   const factory PostPrintResponse({
     required int kioskEventId,
     required int backPhotoId,
-    required PrintedStatus status,
-    required bool isEmbedded,
     required int printedPhotoCardId,
   }) = _PostPrintResponse;
 

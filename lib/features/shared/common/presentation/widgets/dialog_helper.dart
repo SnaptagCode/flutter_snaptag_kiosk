@@ -72,6 +72,15 @@ class DialogHelper {
     );
   }
 
+  static Future<void> showPrintCompleteDialog(BuildContext context) async {
+    await _showKioskDialog(
+      context,
+      title: LocaleKeys.alert_title_print_complete.tr(),
+      message: LocaleKeys.alert_txt_print_complete.tr(),
+      buttonText: LocaleKeys.alert_btn_print_complete.tr(),
+    );
+  }
+
   static Future<void> showErrorDialog(BuildContext context) async {
     await _showKioskDialog(
       context,

@@ -4,7 +4,6 @@ final GlobalKey<NavigatorState> adminNavigatorKey = GlobalKey<NavigatorState>(de
 
 @TypedShellRoute<DebugShellRouteData>(
   routes: <TypedRoute<RouteData>>[
-    TypedGoRoute<PrintTestRouteData>(path: '/print-test'),
     TypedGoRoute<PaymentHistoryRouteData>(path: '/payment-history'),
     TypedGoRoute<UnitTestRouteData>(path: '/unit-test'),
     TypedGoRoute<MaterialRouteData>(path: '/material-components'),
@@ -20,17 +19,6 @@ class DebugShellRouteData extends ShellRouteData {
   @override
   Widget builder(BuildContext context, GoRouterState state, Widget navigator) {
     return AdminShell(child: navigator);
-  }
-}
-
-class PrintTestRouteData extends GoRouteData {
-  const PrintTestRouteData();
-
-  @override
-  Page<void> buildPage(BuildContext context, GoRouterState state) {
-    return NoTransitionPage(
-      child: const PrintTestScreen(),
-    );
   }
 }
 
