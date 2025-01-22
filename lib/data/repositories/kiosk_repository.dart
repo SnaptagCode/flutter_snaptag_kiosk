@@ -54,7 +54,6 @@ class _KioskRepository {
       return await _apiClient.getOrders(
         pageSize: request.pageSize,
         currentPage: request.currentPage,
-        kioskEventId: request.kioskEventId,
       );
     } catch (e) {
       throw Exception(e);
@@ -64,18 +63,18 @@ class _KioskRepository {
   Future<PostOrderResponse> createOrder(PostOrderRequest request) async {
     try {
       return await _apiClient.createOrder(
-        queries: request.toJson(),
+        body: request.toJson(),
       );
     } catch (e) {
       throw Exception(e);
     }
   }
 
-  Future<PatchOrderResponse> updateOrderStatus(PatchOrderRequest request) async {
+  Future<PatchOrderResponse> updateOrderStatus(int orderId, PatchOrderRequest request) async {
     try {
       return await _apiClient.updateOrder(
-        orderId: request.kioskEventId,
-        queries: request.toJson(),
+        orderId: orderId,
+        body: request.toJson(),
       );
     } catch (e) {
       throw Exception(e);
@@ -90,10 +89,8 @@ class _KioskRepository {
         kioskMachineId: request.kioskMachineId,
         kioskEventId: request.kioskEventId,
         frontPhotoCardId: request.frontPhotoCardId,
-        photoAuthNumber: request.photoAuthNumber,
-        status: request.status,
+        backPhotoCardId: request.backPhotoCardId,
         file: request.file,
-        printedPhotoCardId: request.printedPhotoCardId,
       );
     } catch (e) {
       throw Exception(e);
@@ -101,17 +98,13 @@ class _KioskRepository {
   }
 
   Future<PatchPrintResponse> updatePrintedStatus({
+    required int printedPhotoCardId,
     required PatchPrintRequest request,
   }) async {
     try {
       return await _apiClient.patchPrint(
-        kioskMachineId: request.kioskMachineId,
-        kioskEventId: request.kioskEventId,
-        frontPhotoCardId: request.frontPhotoCardId,
-        photoAuthNumber: request.photoAuthNumber,
-        status: request.status,
-        file: request.file,
-        printedPhotoCardId: request.printedPhotoCardId,
+        printedPhotoCardId: printedPhotoCardId,
+        body: request.toJson(),
       );
     } catch (e) {
       throw Exception(e);

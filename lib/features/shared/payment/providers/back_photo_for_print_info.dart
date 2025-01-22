@@ -3,7 +3,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'back_photo_for_print_info.g.dart';
 
-@riverpod
+@Riverpod(keepAlive: true)
 class BackPhotoForPrintInfo extends _$BackPhotoForPrintInfo {
   @override
   BackPhotoForPrint? build() => null;

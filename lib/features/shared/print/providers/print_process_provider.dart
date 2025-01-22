@@ -1,6 +1,7 @@
 import 'dart:io';
+import 'dart:typed_data';
 
-import 'package:dio/dio.dart' as dio show Dio, Options, ResponseType, Response;
+import 'package:dio/dio.dart' as dio show Response;
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -9,49 +10,83 @@ part 'print_process_provider.g.dart';
 @riverpod
 class PrintProcess extends _$PrintProcess {
   @override
-  AsyncValue<void> build() {
-    _startPrinting();
-    return const AsyncValue.data(null);
+  FutureOr<void> build() {
+    return _startPrinting();
   }
 
-  Future<void> _startPrinting() async {
+  FutureOr<void> _startPrinting() async {
     state = const AsyncValue.loading();
-
-    try {
+    await AsyncValue.guard(() async {
       // 1. 사전 검증
       _validatePrintRequirements();
 
-      // 2. 프린트 작업 생성
-      await _createPrintJob();
+      // 2. 프론트 이미지 & 백 이미지 처리
+      final frontPhotoInfo = await _prepareFrontPhoto();
+      final embeddedBackImage = await _prepareBackImage();
 
-      // 3. BackPhoto 이미지 임베딩
+      // 3. 프린트 작업 생성
+      final printJobInfo = await _createPrintJob(
+        frontPhotoCardId: frontPhotoInfo.id,
+        backPhotoCardId: ref.read(verifyPhotoCardProvider).value?.backPhotoCardId ?? 0,
+        file: embeddedBackImage,
+      );
 
-      final File embedBackImage = await _embeddingProcess();
+      try {
+        await _updatePrintStatus(
+          printJobInfo.printedPhotoCardId,
+          PrintedStatus.started,
+        );
+        // 4. 실제 프린트 실행
+        await _executePrint(
+          frontPhotoPath: frontPhotoInfo.path,
+          embedded: embeddedBackImage,
+        );
 
-      // 4. 프린트 실행
-      await _executePrint(embedBackImage);
-
-      // 5. 상태 업데이트
-      await _updatePrintStatus(PrintedStatus.completed);
-
-      state = const AsyncValue.data(null);
-    } catch (e, stack) {
-      await _handlePrintFailure(e, stack);
-      state = AsyncValue.error(e, stack);
-    }
+        // 5. 성공 상태 업데이트
+        await _updatePrintStatus(
+          printJobInfo.printedPhotoCardId,
+          PrintedStatus.completed,
+        );
+      } catch (e, stack) {
+        // 프린트 실패 처리
+        await _handlePrintFailure(
+          printJobInfo.printedPhotoCardId,
+          e,
+          stack,
+        );
+        rethrow;
+      }
+    });
   }
 
-  Future<File> _embeddingProcess() async {
-    final backPhotoUrl = ref.read(backPhotoCardResponseInfoProvider).backPhotoCardOriginUrl;
-    final embedConfig = ref.read(backPhotoForPrintInfoProvider);
+  Future<({String path, int id})> _prepareFrontPhoto() async {
+    final frontPhotoList = ref.read(frontPhotoListProvider.notifier);
+    final randomPhoto = await frontPhotoList.getRandomPhoto();
+
+    if (randomPhoto == null) {
+      throw Exception('No front images available');
+    }
+
+    return (
+      path: randomPhoto.path,
+      id: randomPhoto.id,
+    );
+  }
+
+  Future<File> _prepareBackImage() async {
+    final backPhoto = ref.read(verifyPhotoCardProvider).value;
+    if (backPhoto == null) {
+      throw Exception('No back photo available');
+    }
+    final backPhotoUrl = ref.watch(verifyPhotoCardProvider).value?.backPhotoCardOriginUrl ?? '';
+    final embedConfig = ref.watch(backPhotoForPrintInfoProvider);
     final dio.Response response = await ImageHelper().getImageBytes(backPhotoUrl);
     // 1. 이미지 읽기
 
     // 2. Labcurity 처리
-    final labcurityImage = ref.read(labcurityImageProvider.notifier);
-    await labcurityImage.embedImage(
-      response.data,
-      /**
+    Uint8List? processedImage = await ref.read(labcurityServiceProvider).embedImage(
+          response.data,
+          /**
         * LabcurityImageConfig(
         *   size: embedConfig.$a,
         *   strength: embedConfig.$a,
@@ -63,20 +98,55 @@ class PrintProcess extends _$PrintProcess {
         *   foxtrotCode: embedConfig.$a,
         * ),
        */
-    );
-    final processedImage = await ref.read(labcurityImageProvider.future);
+        );
+    try {
+      // 1. 이미지 다운로드
+      final response = await ImageHelper().getImageBytes(backPhoto.backPhotoCardOriginUrl);
 
-    if (processedImage == null) {
-      throw Exception('Failed to process image with Labcurity');
+      // 2. Labcurity 처리
+      final processedImage = await ref.read(labcurityServiceProvider).embedImage(
+            response.data,
+          );
+
+      if (processedImage == null) {
+        throw PrinterException('Failed to process back image with Labcurity');
+      }
+
+      // 3. 임시 파일로 저장
+      final tempFile = File('${DateTime.now().millisecondsSinceEpoch}_processed.png');
+      await tempFile.writeAsBytes(processedImage);
+
+      return tempFile;
+    } catch (e) {
+      throw PrinterException('Failed to prepare back image: ${e.toString()}');
     }
+  }
 
-    // 3. 임시 파일로 저장
-    final tempFile = File('${DateTime.now().millisecondsSinceEpoch}_processed.png');
-    //tempFile의 Path
-    logger.d('tempFile Path: ${tempFile.path}');
-    await tempFile.writeAsBytes(processedImage);
+  Future<void> _handlePrintFailure(
+    int printedPhotoCardId,
+    Object error,
+    StackTrace stack,
+  ) async {
+    logger.e('Print failure', error: error, stackTrace: stack);
 
-    return tempFile;
+    try {
+      // 1. 프린트 상태 실패로 업데이트
+      await _updatePrintStatus(
+        printedPhotoCardId,
+        PrintedStatus.failed,
+      );
+
+      // 2. 결제 환불 시도
+      await ref.read(userOrderProcessProvider.notifier).startRefund();
+    } catch (refundError, refundStack) {
+      logger.e(
+        'Failed to handle print failure properly',
+        error: refundError,
+        stackTrace: refundStack,
+      );
+      // 결제 환불 실패 - 관리자의 수동 개입이 필요할 수 있음
+      throw Exception('Failed to process refund after print failure');
+    }
   }
 
   void _validatePrintRequirements() {
@@ -86,7 +156,8 @@ class PrintProcess extends _$PrintProcess {
       throw Exception('No back photo for print info available');
     }
     // backPhotoCardResponseInfo 검증
-    final backPhotoCardResponseInfo = ref.read(backPhotoCardResponseInfoProvider);
+    final backPhotoCardResponseInfo = ref.watch(verifyPhotoCardProvider).value;
+
     if (backPhotoCardResponseInfo == null) {
       throw Exception('No back photo card response info available');
     }
@@ -102,18 +173,13 @@ class PrintProcess extends _$PrintProcess {
     }
   }
 
-  Future<void> _executePrint(File embedded) async {
-    final frontPhotoList = ref.read(frontPhotoListProvider.notifier);
+  Future<void> _executePrint({required String frontPhotoPath, required File embedded}) async {
     final printerState = ref.read(printerStateProvider.notifier);
-    final backPhoto = ref.read(backPhotoForPrintInfoProvider);
 
     try {
-      // 1. 랜덤 프론트 이미지 선택
-      final randomPhoto = await frontPhotoList.getRandomPhoto();
-
       // 2. 프린트 실행
       await printerState.printImage(
-        frontImagePath: randomPhoto.path,
+        frontImagePath: frontPhotoPath,
         embeddedFile: embedded,
       );
     } catch (e) {
@@ -126,46 +192,47 @@ class PrintProcess extends _$PrintProcess {
     }
   }
 
-  Future<void> _createPrintJob() async {
-    /**
+  Future<({int printedPhotoCardId})> _createPrintJob(
+      {required int frontPhotoCardId, required int backPhotoCardId, required File file}) async {
     try {
-      final request = PostPrintRequest();
+      final request = PostPrintRequest(
+        kioskMachineId: ref.watch(storageServiceProvider).settings.kioskMachineId,
+        kioskEventId: ref.watch(storageServiceProvider).settings.kioskEventId,
+        frontPhotoCardId: frontPhotoCardId,
+        backPhotoCardId: backPhotoCardId,
+        file: file,
+      );
 
-      await ref.read(kioskRepositoryProvider).createPrintedStatus(request: request);
+      final response = await ref.read(kioskRepositoryProvider).createPrintedStatus(request: request);
+      return (printedPhotoCardId: response.printedPhotoCardId);
     } catch (e) {
       throw Exception('Failed to create print job');
     }
-     */
   }
 
-  Future<void> _updatePrintStatus(PrintedStatus status) async {
-    /**
+  Future<void> _updatePrintStatus(int printedPhotoCardId, PrintedStatus status) async {
     try {
-      final request = PatchPrintRequest();
+      final request = PatchPrintRequest(
+        kioskMachineId: ref.watch(storageServiceProvider).settings.kioskMachineId,
+        kioskEventId: ref.watch(storageServiceProvider).settings.kioskEventId,
+        status: status,
+      );
 
-      await ref.read(kioskRepositoryProvider).updatePrintedStatus(request: request);
+      await ref
+          .read(kioskRepositoryProvider)
+          .updatePrintedStatus(printedPhotoCardId: printedPhotoCardId, request: request);
     } catch (e) {
       throw Exception('Failed to update print status');
     }
-    */
   }
+}
 
-  Future<void> _handlePrintFailure(Object error, StackTrace stack) async {
-    try {
-      // 1. 프린트 실패 상태 업데이트
-      await _updatePrintStatus(PrintedStatus.failed);
+class PrinterException implements Exception {
+  final String message;
+  final int? errorCode;
 
-      // 2. 결제 취소 진행
-      try {
-        await ref.read(paymentServiceProvider.notifier).cancelPayment();
-        await ref.read(paymentServiceProvider.notifier).updateOrder(OrderStatus.refunded);
-      } catch (cancelError) {
-        // 결제 취소 실패 시
-        await ref.read(paymentServiceProvider.notifier).updateOrder(OrderStatus.refunded_failed);
-        throw Exception('Payment cancellation failed');
-      }
-    } catch (e) {
-      throw Exception('Failed to handle print failure');
-    }
-  }
+  PrinterException(this.message, {this.errorCode});
+
+  @override
+  String toString() => 'PrinterException: $message${errorCode != null ? ' (Error code: $errorCode)' : ''}';
 }

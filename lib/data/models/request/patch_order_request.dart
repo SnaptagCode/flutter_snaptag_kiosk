@@ -17,7 +17,7 @@ class PatchOrderRequest with _$PatchOrderRequest {
     String? uniqueNumber,
     required String authSeqNumber,
     required String approvalNumber,
-    required Map<String, dynamic> detail,
+    @Default('{}') String detail,
   }) = _PatchOrderRequest;
 
   factory PatchOrderRequest.fromJson(Map<String, dynamic> json) => _$PatchOrderRequestFromJson(json);

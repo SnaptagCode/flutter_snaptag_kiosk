@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_snaptag_kiosk/domain/entities/invoice.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:http/http.dart' as http;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -26,30 +27,28 @@ class PaymentRepository {
   }
 
   Future<PaymentResponse> approve({
-    required String totalAmount,
-    required String tax,
-    required String supplyAmount,
+    required int totalAmount,
   }) async {
+    final Invoice invoice = Invoice.calculate(totalAmount);
     final request = PaymentRequest.approval(
-      totalAmount: totalAmount,
-      tax: tax,
-      supplyAmount: supplyAmount,
+      totalAmount: invoice.total.toString(),
+      tax: invoice.taxAmount.toString(),
+      supplyAmount: invoice.supplyAmount.toString(),
     );
 
     return _request(request);
   }
 
   Future<PaymentResponse> cancel({
-    required String totalAmount,
-    required String tax,
-    required String supplyAmount,
+    required int totalAmount,
     required String originalApprovalNo,
     required String originalApprovalDate,
   }) async {
+    final Invoice invoice = Invoice.calculate(totalAmount);
     final request = PaymentRequest.cancel(
-      totalAmount: totalAmount,
-      tax: tax,
-      supplyAmount: supplyAmount,
+      totalAmount: invoice.total.toString(),
+      tax: invoice.taxAmount.toString(),
+      supplyAmount: invoice.supplyAmount.toString(),
       originalApprovalNo: originalApprovalNo,
       originalApprovalDate: originalApprovalDate,
     );

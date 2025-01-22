@@ -12,39 +12,27 @@ class PhotoCardPreview extends _$PhotoCardPreview {
 
   Future<void> payment() async {
     state = const AsyncValue.loading();
-
     try {
-      // 1. 주문 생성
-      await ref.read(paymentServiceProvider.notifier).createOrder();
-
-      // 2. 결제 승인 요청
-      await ref.read(paymentServiceProvider.notifier).approvePayment();
-
-      // 3. 결제 완료 상태로 업데이트
-      await ref.read(paymentServiceProvider.notifier).updateOrder(OrderStatus.completed);
-
-      // 4. 결제 완료 후 상태 갱신
+      await ref.read(userOrderProcessProvider.notifier).startPayment();
       state = const AsyncValue.data(null);
     } catch (e, stack) {
-      await _handlePaymentFailure(e, stack);
-      state = AsyncValue.error(e, stack);
-    }
-  }
-
-  Future<void> _handlePaymentFailure(Object error, StackTrace stack) async {
-    try {
-      // 1. 실패 상태로 주문 업데이트
-      await ref.read(paymentServiceProvider.notifier).updateOrder(OrderStatus.failed);
-
-      // 2. 결제 취소 시도
-      await ref.read(paymentServiceProvider.notifier).cancelPayment();
-
-      // 3. 환불 완료로 상태 업데이트
-      await ref.read(paymentServiceProvider.notifier).updateOrder(OrderStatus.refunded);
-    } catch (cancelError) {
-      // 결제 취소 실패 시 로그 기록
-      logger.e('Payment cancellation failed', error: cancelError);
-      await ref.read(paymentServiceProvider.notifier).updateOrder(OrderStatus.refunded_failed);
+      // 결제 실패 시 즉시 환불 시도
+      try {
+        await ref.read(userOrderProcessProvider.notifier).startRefund();
+        // 환불 성공 - 원래 에러를 표시
+        state = AsyncValue.error(e, stack);
+      } catch (refundError, refundStack) {
+        // 환불 실패 - 더 심각한 상황
+        logger.e(
+          'Payment failed and refund also failed',
+          error: refundError,
+          stackTrace: refundStack,
+        );
+        state = AsyncValue.error(
+          Exception('Payment failed and refund also failed: $refundError'),
+          refundStack,
+        );
+      }
     }
   }
 }

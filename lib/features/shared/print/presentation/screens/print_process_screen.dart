@@ -6,7 +6,9 @@ import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 
 class PrintProcessScreen extends ConsumerWidget {
-  const PrintProcessScreen({super.key});
+  const PrintProcessScreen({
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -24,11 +26,24 @@ class PrintProcessScreen extends ConsumerWidget {
 
         await next.when(
           error: (error, stack) async {
-            await DialogHelper.showPrintErrorDialog(context);
+            logger.e('Print process error', error: error, stackTrace: stack);
+
+            if (error is PrinterException) {
+              await DialogHelper.showPrintErrorDialog(context);
+            } else {
+              await DialogHelper.showCustomDialog(
+                context,
+                title: '오류',
+                message: error.toString(),
+                buttonText: 'OK',
+              );
+            }
+            // 에러 발생 시 초기 화면으로 이동
+            PhotoCardUploadRouteData().go(context);
           },
           loading: () => null,
-          data: (_) {
-            PhotoCardUploadRouteData().go(context);
+          data: (_) async {
+            await DialogHelper.showPrintCompleteDialog(context);
           },
         );
       },

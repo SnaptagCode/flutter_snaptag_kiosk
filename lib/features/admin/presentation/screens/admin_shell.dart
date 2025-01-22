@@ -65,14 +65,6 @@ class AdminShell extends ConsumerWidget {
           label: 'Payment History',
         ),
       ),
-      RouteModel(
-        path: '/print-test',
-        route: const PrintTestRouteData(),
-        destination: const NavigationDestination(
-          icon: Icon(Icons.print),
-          label: 'Print',
-        ),
-      ),
     ];
 
     if (F.appFlavor == Flavor.dev) {
