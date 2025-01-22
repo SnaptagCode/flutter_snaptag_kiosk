@@ -34,6 +34,7 @@ class LanguageSwitcher extends ConsumerWidget {
         locale: const Locale('ja', 'JP'),
         name: '日本語',
         flag: 'assets/images/jp.png',
+        fontFamily: 'PrentendardJP',
       ),
     ];
 
@@ -112,6 +113,7 @@ class MenuWidget extends StatelessWidget {
                 fontSize: 20.sp,
                 fontWeight: FontWeight.w500,
                 color: Colors.black,
+                fontFamily: option.fontFamily,
               ),
             ),
           ],
@@ -136,10 +138,11 @@ class LocaleOption {
     required this.locale,
     required this.name,
     required this.flag,
+    this.fontFamily = 'Pretendard',
   });
 
   final Locale locale;
   final String name;
-
   final String flag;
+  final String fontFamily;
 }
