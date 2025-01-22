@@ -14,15 +14,20 @@ class PhotoCardPreview extends _$PhotoCardPreview {
     state = const AsyncValue.loading();
     try {
       await ref.read(userOrderProcessProvider.notifier).startPayment();
+
+      // 결제 성공시에만 상태 업데이트
+      final userOrderState = ref.read(userOrderProcessProvider);
+      if (userOrderState.hasError) {
+        throw userOrderState.error!;
+      }
+
       state = const AsyncValue.data(null);
     } catch (e, stack) {
       // 결제 실패 시 즉시 환불 시도
       try {
         await ref.read(userOrderProcessProvider.notifier).startRefund();
-        // 환불 성공 - 원래 에러를 표시
         state = AsyncValue.error(e, stack);
       } catch (refundError, refundStack) {
-        // 환불 실패 - 더 심각한 상황
         logger.e(
           'Payment failed and refund also failed',
           error: refundError,

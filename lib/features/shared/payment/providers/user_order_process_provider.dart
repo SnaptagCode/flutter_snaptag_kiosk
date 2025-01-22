@@ -55,14 +55,14 @@ class UserOrderProcess extends _$UserOrderProcess {
       ref.read(createOrderInfoProvider.notifier).update(postOrderResponse);
 
       // 2. 결제 승인
-      try {
-        PaymentResponse paymentResponse =
-            await _approvePayment(ref.read(storageServiceProvider).settings.photoCardPrice);
-        ref.read(approvalInfoProvider.notifier).update(paymentResponse);
-      } catch (e) {
-        await _updateOrder(OrderStatus.failed);
-        rethrow;
+      PaymentResponse paymentResponse = await _approvePayment(ref.read(storageServiceProvider).settings.photoCardPrice);
+
+      // 성공이 아닐 경우 즉시 예외 throw
+      if (!paymentResponse.isSuccess) {
+        throw Exception('Payment failed: ${paymentResponse.errorMessage} (${paymentResponse.res})');
       }
+
+      ref.read(approvalInfoProvider.notifier).update(paymentResponse);
 
       // 3. 주문 상태 업데이트
       final response = await _updateOrder(OrderStatus.completed);
@@ -72,7 +72,9 @@ class UserOrderProcess extends _$UserOrderProcess {
         ref.read(backPhotoForPrintInfoProvider.notifier).update(response.backPhotoForPrint);
       }
     } catch (e) {
-      throw Exception('결제 생성 실패');
+      // 실패했을 경우 주문 상태를 failed로 업데이트
+      await _updateOrder(OrderStatus.failed);
+      rethrow; // 예외를 rethrow하여 상위로 전파
     }
   }
 
@@ -85,7 +87,7 @@ class UserOrderProcess extends _$UserOrderProcess {
 
       return response;
     } catch (e) {
-      throw Exception('van 결제 : approval 실패');
+      rethrow;
     }
   }
 

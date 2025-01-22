@@ -5,6 +5,8 @@ part 'payment_response.g.dart';
 
 @freezed
 class PaymentResponse with _$PaymentResponse {
+  const PaymentResponse._(); // freezed에서 메서드를 추가하기 위한 private constructor
+
   const factory PaymentResponse({
     @JsonKey(name: 'APPROVALNO') String? approvalNo,
     @JsonKey(name: 'CARDNAME') String? cardName,
@@ -20,6 +22,10 @@ class PaymentResponse with _$PaymentResponse {
   }) = _PaymentResponse;
 
   factory PaymentResponse.fromJson(Map<String, dynamic> json) => _$PaymentResponseFromJson(_trimValues(json));
+
+  bool get isSuccess => res == '0000';
+
+  String get errorMessage => msg?.trim() ?? '결제 처리 중 오류가 발생했습니다.';
 }
 
 // 모든 String 값의 공백을 trim
@@ -30,8 +36,4 @@ Map<String, dynamic> _trimValues(Map<String, dynamic> json) {
     }
     return MapEntry(key, value);
   });
-}
-
-extension PaymentResponseExtension on PaymentResponse {
-  bool get isSuccess => res == '0000';
 }

@@ -27,32 +27,12 @@ class _PhotoCardPreviewScreenState extends ConsumerState<PhotoCardPreviewScreen>
         buttonText: LocaleKeys.sub01_btn_done.tr(),
       );
       return;
-    }
-    final exceptionType = switch (error) {
-      PaymentException(:final type) => type,
-      _ => PaymentExceptionType.unknown,
-    };
-
-    switch (exceptionType) {
-      // 시스템 관련 오류 - 재시도 가능
-      case PaymentExceptionType.cardIssuerTimeout ||
-            PaymentExceptionType.ksnetSystemError ||
-            PaymentExceptionType.reQueryRequested:
-
-      // 카드 상태 관련 오류 - 다른 카드 사용 필요
-      case PaymentExceptionType.stolenOrLostCard ||
-            PaymentExceptionType.transactionSuspendedCard ||
-            PaymentExceptionType.expiredCard:
-
-      // 결제 금액 관련 오류
-      case PaymentExceptionType.amountError ||
-            PaymentExceptionType.noAmountEntered ||
-            PaymentExceptionType.merchantLimitExceeded:
-      default:
-        await DialogHelper.showPurchaseFailedDialog(
-          context,
-          exception: exceptionType,
-        );
+    } else {
+      await DialogHelper.showPurchaseFailedDialog(
+        context,
+        exception: error as Exception,
+      );
+      return;
     }
   }
 
