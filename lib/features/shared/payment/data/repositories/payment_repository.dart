@@ -1,7 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_snaptag_kiosk/domain/entities/invoice.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
-import 'package:http/http.dart' as http;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'payment_repository.g.dart';
@@ -62,14 +61,10 @@ class PaymentRepository {
         _getCallback(),
         request.serialize(),
       );
-      final exceptionType = PaymentExceptionType.fromCode(int.parse(response.res));
-      if (exceptionType != PaymentExceptionType.normalCompletion) {
-        throw PaymentException(exceptionType);
-      }
 
       return response;
-    } on http.ClientException catch (e, s) {
-      throw http.ClientException(e.message, e.uri);
+    } catch (e, s) {
+      throw Exception('Failed to request payment: $e\n$s');
     }
   }
 }

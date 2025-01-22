@@ -8,7 +8,7 @@ class PaymentApiClient {
 
   static const baseUrl = 'http://127.0.0.1:27098';
 
-  Future<dynamic> requestPayment(String callback, String request) async {
+  Future<PaymentResponse> requestPayment(String callback, String request) async {
     // URL을 직접 구성 - 인코딩 없이
     final url = '$baseUrl?callback=$callback&REQ=$request';
     print('\n=== Raw Payment Request URL ===\n$url');

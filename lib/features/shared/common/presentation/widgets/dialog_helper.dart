@@ -90,12 +90,11 @@ class DialogHelper {
     );
   }
 
-  static Future<void> showPurchaseFailedDialog(BuildContext context, {PaymentExceptionType? exception}) async {
-    final type = exception ?? PaymentExceptionType.unknown;
+  static Future<void> showPurchaseFailedDialog(BuildContext context, {Exception? exception}) async {
     await _showKioskDialog(
       context,
       title: LocaleKeys.alert_title_purchase_failure.tr(),
-      message: '${LocaleKeys.alert_txt_purchase_failure.tr()}\n\n${type.message}',
+      message: '${LocaleKeys.alert_txt_purchase_failure.tr()}\n\n${exception.toString()}',
       buttonText: LocaleKeys.alert_btn_purchase_failure.tr(),
     );
   }
