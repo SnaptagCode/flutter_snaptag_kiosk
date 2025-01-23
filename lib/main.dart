@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
@@ -6,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
+import 'package:window_manager/window_manager.dart';
 
 void main() async {
   if (kDebugMode) {
@@ -13,10 +15,14 @@ void main() async {
   } else {
     F.appFlavor = Flavor.prod;
   }
+  WidgetsFlutterBinding.ensureInitialized();
+  await windowManagerSetting();
+
   final yamlStorage = await YamlStorageService.initialize();
   final imageStorage = await ImageStorageService.initialize();
-  WidgetsFlutterBinding.ensureInitialized();
+
   await EasyLocalization.ensureInitialized();
+
   // 에러 핸들러 초기화
   await AppErrorHandler.initialize();
 
@@ -58,4 +64,22 @@ void main() async {
   Timer.periodic(const Duration(days: 1), (_) {
     AppErrorHandler.cleanOldLogs();
   });
+}
+
+Future<void> windowManagerSetting() async {
+  //platform이 windows인 경우에만 실행
+  if (Platform.isWindows) {
+    await windowManager.ensureInitialized();
+    WindowOptions windowOptions = WindowOptions(
+      fullScreen: true,
+      backgroundColor: Colors.transparent,
+      skipTaskbar: false,
+      titleBarStyle: TitleBarStyle.hidden,
+    );
+    windowManager.waitUntilReadyToShow(windowOptions, () async {
+      await windowManager.setFullScreen(true);
+      await windowManager.show();
+      await windowManager.focus();
+    });
+  }
 }
