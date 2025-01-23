@@ -40,21 +40,10 @@ class KioskShell extends ConsumerWidget {
           ],
         ),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
-      floatingActionButton: F.appFlavor == Flavor.dev
-          ? FloatingActionButton(
-              onPressed: () {
-                KioskInfoRouteData().go(context);
-              },
-              child: const Icon(Icons.drive_file_move_rounded),
-            )
-          : TripleTapFloatingButton(
-              // onPressed: () {
-              //   KioskInfoRouteData().go(context);
-              // },
-              // elevation: 0.0,
-              // backgroundColor: Colors.transparent,
-              ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerTop,
+      floatingActionButton: TripleTapFloatingButton(
+        isSetup: false,
+      ),
     );
   }
 }
@@ -73,10 +62,10 @@ class ContentsShell extends ConsumerWidget {
       overlayWidgetBuilder: (dynamic progress) {
         return Center(
           child: SizedBox(
-            width: 350.w,
+            width: 350.h,
             height: 350.h,
             child: CircularProgressIndicator(
-              strokeWidth: 15.w,
+              strokeWidth: 15.h,
             ),
           ),
         );

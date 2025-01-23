@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_snaptag_kiosk/features/move_me/widgets/triple_tap_fab.dart';
 import 'package:flutter_snaptag_kiosk/flavors.dart';
 import 'package:flutter_snaptag_kiosk/routers/routers.dart';
 import 'package:go_router/go_router.dart';
@@ -21,11 +22,9 @@ class SetupShell extends ConsumerWidget {
         selectedIndex: _calculateSelectedIndex(context),
         destinations: _buildDestinations(),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          PhotoCardUploadRouteData().go(context);
-        },
-        child: const Icon(Icons.drive_file_move_rounded),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerTop,
+      floatingActionButton: TripleTapFloatingButton(
+        isSetup: true,
       ),
     );
   }
