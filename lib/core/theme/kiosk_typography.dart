@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-@immutable
 class KioskTypography extends ThemeExtension<KioskTypography> {
   const KioskTypography({
     required this.kioskBtn1B,
