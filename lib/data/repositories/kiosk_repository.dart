@@ -49,7 +49,7 @@ class _KioskRepository {
     }
   }
 
-  Future<OrderResponse> getOrders(GetOrdersRequest request) async {
+  Future<OrderListResponse> getOrders(GetOrdersRequest request) async {
     try {
       return await _apiClient.getOrders(
         pageSize: request.pageSize,
@@ -60,7 +60,7 @@ class _KioskRepository {
     }
   }
 
-  Future<PostOrderResponse> createOrder(PostOrderRequest request) async {
+  Future<CreateOrderResponse> createOrderStatus(CreateOrderRequest request) async {
     try {
       return await _apiClient.createOrder(
         body: request.toJson(),
@@ -70,7 +70,7 @@ class _KioskRepository {
     }
   }
 
-  Future<PatchOrderResponse> updateOrderStatus(int orderId, PatchOrderRequest request) async {
+  Future<UpdateOrderResponse> updateOrderStatus(int orderId, UpdateOrderRequest request) async {
     try {
       return await _apiClient.updateOrder(
         orderId: orderId,
@@ -81,11 +81,11 @@ class _KioskRepository {
     }
   }
 
-  Future<PostPrintResponse> createPrintedStatus({
-    required PostPrintRequest request,
+  Future<CreatePrintResponse> createPrintStatus({
+    required CreatePrintRequest request,
   }) async {
     try {
-      return await _apiClient.postPrint(
+      return await _apiClient.createPrint(
         kioskMachineId: request.kioskMachineId,
         kioskEventId: request.kioskEventId,
         frontPhotoCardId: request.frontPhotoCardId,
@@ -97,12 +97,12 @@ class _KioskRepository {
     }
   }
 
-  Future<PatchPrintResponse> updatePrintedStatus({
+  Future<UpdatePrintResponse> updatePrintStatus({
     required int printedPhotoCardId,
-    required PatchPrintRequest request,
+    required UpdatePrintRequest request,
   }) async {
     try {
-      return await _apiClient.patchPrint(
+      return await _apiClient.updatePrint(
         printedPhotoCardId: printedPhotoCardId,
         body: request.toJson(),
       );

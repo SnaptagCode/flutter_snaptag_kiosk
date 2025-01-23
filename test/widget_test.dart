@@ -7,7 +7,7 @@
 
 import 'dart:convert';
 
-import 'package:flutter_snaptag_kiosk/features/shared/payment/data/models/payment_response.dart';
+import 'package:flutter_snaptag_kiosk/data/models/response/payment_response.dart';
 
 void main() {
   String jsonString = '{"MSG" : "오류            시간 초과       ", "REQ" : "AP", "RES" : "1004"}';

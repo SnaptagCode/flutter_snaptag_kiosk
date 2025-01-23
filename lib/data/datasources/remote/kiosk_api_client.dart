@@ -32,25 +32,25 @@ abstract class KioskApiClient {
   });
 
   @GET('/v1/order/list')
-  Future<OrderResponse> getOrders({
+  Future<OrderListResponse> getOrders({
     @Query('pageSize') required int pageSize,
     @Query('currentPage') required int currentPage,
   });
 
   @POST('/v1/order')
-  Future<PostOrderResponse> createOrder({
+  Future<CreateOrderResponse> createOrder({
     @Body() required Map<String, dynamic> body,
   });
 
   @PATCH('/v1/order/{orderId}')
-  Future<PatchOrderResponse> updateOrder({
+  Future<UpdateOrderResponse> updateOrder({
     @Path('orderId') required int orderId,
     @Body() required Map<String, dynamic> body,
   });
 
   @POST('/v1/print')
   @MultiPart()
-  Future<PostPrintResponse> postPrint({
+  Future<CreatePrintResponse> createPrint({
     @Part(name: 'kioskMachineId') required int kioskMachineId,
     @Part(name: 'kioskEventId') required int kioskEventId,
     @Part(name: 'frontPhotoCardId') required int frontPhotoCardId,
@@ -59,7 +59,7 @@ abstract class KioskApiClient {
   });
 
   @PATCH('/v1/print/{printedPhotoCardId}')
-  Future<PatchPrintResponse> patchPrint({
+  Future<UpdatePrintResponse> updatePrint({
     @Path('printedPhotoCardId') required int printedPhotoCardId,
     @Body() required Map<String, dynamic> body,
   });
