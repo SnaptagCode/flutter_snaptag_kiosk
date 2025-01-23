@@ -1,11 +1,21 @@
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_snaptag_kiosk/domain/entities/entities.dart';
 import 'package:intl/intl.dart';
 import 'package:path/path.dart' as path;
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../domain/entities/security_image_config.dart';
 import 'labcurity_library.dart';
+
+part 'labcurity_service.g.dart';
+
+@riverpod
+LabcurityService labcurityService(Ref ref) {
+  final library = ref.watch(labcurityLibraryProvider);
+  return LabcurityService(library);
+}
 
 class LabcurityService {
   final LabcurityLibrary _library;

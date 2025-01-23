@@ -39,7 +39,7 @@ class _PhotoCardPreviewScreenState extends ConsumerState<PhotoCardPreviewScreen>
   @override
   Widget build(BuildContext context) {
     ref.listen<AsyncValue<void>>(
-      photoCardPreviewProvider,
+      photoCardPreviewScreenProviderProvider,
       (previous, next) async {
         // 로딩 상태 처리
         if (next.isLoading) {
@@ -102,7 +102,7 @@ class _PhotoCardPreviewScreenState extends ConsumerState<PhotoCardPreviewScreen>
               SizedBox(width: 20.w),
               ElevatedButton(
                 style: context.paymentButtonStyle,
-                onPressed: () => ref.read(photoCardPreviewProvider.notifier).payment(),
+                onPressed: () => ref.read(photoCardPreviewScreenProviderProvider.notifier).payment(),
                 child: Text(LocaleKeys.sub02_btn_pay.tr()),
               ),
             ],
