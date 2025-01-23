@@ -1,8 +1,8 @@
 part of 'router.dart';
 
-final GlobalKey<NavigatorState> adminNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'debug');
+final GlobalKey<NavigatorState> setupNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'setup');
 
-@TypedShellRoute<DebugShellRouteData>(
+@TypedShellRoute<SetupShellRouteData>(
   routes: <TypedRoute<RouteData>>[
     TypedGoRoute<PaymentHistoryRouteData>(path: '/payment-history'),
     TypedGoRoute<UnitTestRouteData>(path: '/unit-test'),
@@ -11,14 +11,14 @@ final GlobalKey<NavigatorState> adminNavigatorKey = GlobalKey<NavigatorState>(de
     TypedGoRoute<KioskInfoRouteData>(path: '/kiosk-info'),
   ],
 )
-class DebugShellRouteData extends ShellRouteData {
-  const DebugShellRouteData();
+class SetupShellRouteData extends ShellRouteData {
+  const SetupShellRouteData();
 
-  static final GlobalKey<NavigatorState> $navigatorKey = adminNavigatorKey;
+  static final GlobalKey<NavigatorState> $navigatorKey = setupNavigatorKey;
 
   @override
   Widget builder(BuildContext context, GoRouterState state, Widget navigator) {
-    return AdminShell(child: navigator);
+    return SetupShell(child: navigator);
   }
 }
 

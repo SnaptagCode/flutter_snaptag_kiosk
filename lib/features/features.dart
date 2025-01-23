@@ -1,6 +1,3 @@
-export 'admin/admin.dart';
-export 'kiosk/kiosk.dart';
-export 'preview/preview.dart';
-export 'shared/shared.dart';
-export 'upload/upload.dart';
-export 'verification/verification.dart';
+export 'core/core.dart';
+export 'move_me/move_me.dart';
+export 'presentation/presentation.dart';
