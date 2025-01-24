@@ -41,23 +41,9 @@ class LabcurityImageTestWidget extends ConsumerWidget {
       children: [
         securityImageState.when(
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, stack) => Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.error_outline, color: Colors.red, size: 48),
-                const SizedBox(height: 16),
-                Text(
-                  'Error: ${error.toString()}',
-                  style: const TextStyle(color: Colors.red),
-                  textAlign: TextAlign.center,
-                ),
-                ElevatedButton(
-                  onPressed: () => ref.refresh(labcurityImageTestProvider),
-                  child: const Text('재시도'),
-                ),
-              ],
-            ),
+          error: (error, stack) => GeneralErrorWidget(
+            exception: error as Exception,
+            onRetry: () => ref.refresh(labcurityImageTestProvider),
           ),
           data: (processedImage) => Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,

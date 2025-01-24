@@ -88,7 +88,10 @@ class _PhotoCardPreviewScreenState extends ConsumerState<PhotoCardPreviewScreen>
                   return const CircularProgressIndicator();
                 },
                 error: (error, stack) {
-                  return const Text('Error loading photo card');
+                  return GeneralErrorWidget(
+                    exception: error as Exception,
+                    onRetry: () => ref.refresh(verifyPhotoCardProvider),
+                  );
                 },
               ),
             ),
