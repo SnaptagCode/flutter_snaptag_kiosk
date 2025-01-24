@@ -86,12 +86,12 @@ class _LoadingApp extends StatelessWidget {
   }
 }
 
-class _ErrorApp extends StatelessWidget {
+class _ErrorApp extends ConsumerWidget {
   const _ErrorApp({required this.error});
   final Object error;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
@@ -109,10 +109,19 @@ class _ErrorApp extends StatelessWidget {
                         ? DirectoryPaths.settings
                         : DirectoryPaths.frontImages,
                   ),
+                  ElevatedButton(
+                    onPressed: () {
+                      ref.refresh(asyncKioskInfoProvider);
+                    },
+                    child: Text('Retry'),
+                  ),
                 ],
               );
             }
-            return Text('Error: $error');
+            return GeneralErrorWidget(
+              exception: error as Exception,
+              onRetry: () => ref.refresh(asyncKioskInfoProvider),
+            );
           }),
         ),
       ),

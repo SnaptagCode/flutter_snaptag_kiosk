@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter_snaptag_kiosk/lib.dart';
+import 'package:path/path.dart' as path;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'print_service.g.dart';
@@ -107,12 +108,18 @@ class PrintService extends _$PrintService {
         throw Exception('Failed to process back image with Labcurity');
       }
 
-      final tempFile = File('${DateTime.now().millisecondsSinceEpoch}_processed.png');
-      await tempFile.writeAsBytes(processedImage);
+      final embedDir = Directory('embed');
+      if (!embedDir.existsSync()) {
+        embedDir.createSync();
+      }
+      final fileName = '${DateTime.now().millisecondsSinceEpoch}_processed.png';
+      File embedFile = File(path.join(embedDir.path, fileName));
 
-      return tempFile;
+      await embedFile.writeAsBytes(processedImage);
+
+      return embedFile;
     } catch (e) {
-      throw Exception('Failed to prepare back image: ${e.toString()}');
+      rethrow;
     }
   }
 
@@ -155,7 +162,7 @@ class PrintService extends _$PrintService {
       final response = await ref.read(kioskRepositoryProvider).createPrintStatus(request: request);
       return (printedPhotoCardId: response.printedPhotoCardId);
     } catch (e) {
-      throw Exception('Failed to create print job');
+      rethrow;
     }
   }
 
@@ -171,7 +178,7 @@ class PrintService extends _$PrintService {
           .read(kioskRepositoryProvider)
           .updatePrintStatus(printedPhotoCardId: printedPhotoCardId, request: request);
     } catch (e) {
-      throw Exception('Failed to update print status');
+      rethrow;
     }
   }
 
@@ -185,7 +192,7 @@ class PrintService extends _$PrintService {
             embeddedFile: embedded,
           );
     } catch (e) {
-      throw Exception('Failed to execute print');
+      rethrow;
     } finally {
       if (await embedded.exists()) {
         await embedded.delete();

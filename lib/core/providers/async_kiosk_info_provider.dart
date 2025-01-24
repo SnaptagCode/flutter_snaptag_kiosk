@@ -44,11 +44,8 @@ class AsyncKioskInfo extends _$AsyncKioskInfo {
 
       return response;
     } catch (e) {
-      if (e is KioskException) {
-        rethrow;
-      } else {
-        throw Exception('Failed to fetch and update kiosk info: $e');
-      }
+      logger.e('Failed to fetch kiosk info', error: e);
+      rethrow;
     }
   }
 

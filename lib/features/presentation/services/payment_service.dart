@@ -132,7 +132,7 @@ class PaymentService extends _$PaymentService {
 
       return await ref.read(kioskRepositoryProvider).updateOrderStatus(orderId.toInt(), request);
     } catch (e) {
-      throw Exception('주문 업데이트 실패');
+      rethrow;
     }
   }
 }

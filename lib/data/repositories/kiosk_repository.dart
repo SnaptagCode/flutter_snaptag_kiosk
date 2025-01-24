@@ -25,7 +25,7 @@ class _KioskRepository {
     try {
       return await _apiClient.getKioskMachineInfo(kioskMachineId: machineId);
     } catch (e) {
-      throw Exception(e);
+      rethrow;
     }
   }
 
@@ -34,7 +34,7 @@ class _KioskRepository {
     try {
       return await _apiClient.getFrontPhotoList(kioskEventId: eventId);
     } catch (e) {
-      throw Exception(e);
+      rethrow;
     }
   }
 
@@ -45,7 +45,7 @@ class _KioskRepository {
         photoAuthNumber: authNumber,
       );
     } catch (e) {
-      throw Exception(e);
+      rethrow;
     }
   }
 
@@ -56,7 +56,7 @@ class _KioskRepository {
         currentPage: request.currentPage,
       );
     } catch (e) {
-      throw Exception(e);
+      rethrow;
     }
   }
 
@@ -66,7 +66,7 @@ class _KioskRepository {
         body: request.toJson(),
       );
     } catch (e) {
-      throw Exception(e);
+      rethrow;
     }
   }
 
@@ -77,7 +77,7 @@ class _KioskRepository {
         body: request.toJson(),
       );
     } catch (e) {
-      throw Exception(e);
+      rethrow;
     }
   }
 
@@ -93,7 +93,7 @@ class _KioskRepository {
         file: request.file,
       );
     } catch (e) {
-      throw Exception(e);
+      rethrow;
     }
   }
 
@@ -107,7 +107,7 @@ class _KioskRepository {
         body: request.toJson(),
       );
     } catch (e) {
-      throw Exception(e);
+      rethrow;
     }
   }
 }
