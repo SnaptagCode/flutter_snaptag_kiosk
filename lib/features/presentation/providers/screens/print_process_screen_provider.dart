@@ -6,18 +6,18 @@ part 'print_process_screen_provider.g.dart';
 @riverpod
 class PrintProcessScreenProvider extends _$PrintProcessScreenProvider {
   @override
-  FutureOr<void> build() async {
-    state = const AsyncValue.loading(); // 명시적 loading 설정
+  FutureOr<void> build() {
+    state = const AsyncValue.loading();
     return _startPrinting();
   }
 
   Future<void> _startPrinting() async {
-    return await AsyncValue.guard(() async {
+    try {
       await ref.read(printServiceProvider.notifier).print();
-    }).then((value) => value.when(
-          data: (_) => null,
-          error: (err, stack) => throw err,
-          loading: () => null,
-        ));
+      state = const AsyncValue.data(null);
+    } catch (err, stack) {
+      state = AsyncValue.error(err, stack);
+      rethrow;
+    }
   }
 }

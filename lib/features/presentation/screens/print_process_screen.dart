@@ -16,16 +16,15 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
   @override
   Widget build(BuildContext context) {
     final printProcess = ref.watch(printProcessScreenProviderProvider);
-
-    // 로딩 오버레이 처리
     if (printProcess.isLoading) {
       if (!context.loaderOverlay.visible) context.loaderOverlay.show();
     } else {
       if (context.loaderOverlay.visible) context.loaderOverlay.hide();
     }
 
+    // listen 부분에서는 로딩 오버레이 처리를 제거
     ref.listen(printProcessScreenProviderProvider, (previous, next) async {
-      if (next.isLoading) {
+      if (next.isLoading && !context.loaderOverlay.visible) {
         context.loaderOverlay.show();
         return;
       }
@@ -34,30 +33,31 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
         context.loaderOverlay.hide();
       }
 
-      await next.when(
-        error: (error, stack) async {
-          logger.e('Print process error', error: error, stackTrace: stack);
+      if (!next.isLoading) {
+        // 로딩이 아닐 때만 처리
+        await next.when(
+          error: (error, stack) async {
+            logger.e('Print process error', error: error, stackTrace: stack);
 
-          // 에러 발생 시 환불 처리
-          try {
-            await ref.read(paymentServiceProvider.notifier).refund();
-          } catch (refundError) {
-            logger.e('Refund failed', error: refundError);
-          }
+            // 에러 발생 시 환불 처리
+            try {
+              await ref.read(paymentServiceProvider.notifier).refund();
+            } catch (refundError) {
+              logger.e('Refund failed', error: refundError);
+            }
 
-          await DialogHelper.showCustomDialog(
-            context,
-            title: '오류',
-            message: error.toString(),
-            buttonText: 'OK',
-          );
-        },
-        loading: () => null,
-        data: (_) async {
-          await DialogHelper.showPrintCompleteDialog(context);
-          PhotoCardUploadRouteData().go(context);
-        },
-      );
+            await DialogHelper.showPrintErrorDialog(
+              context,
+              exception: Exception(error.toString()),
+            );
+          },
+          loading: () => null,
+          data: (_) async {
+            await DialogHelper.showPrintCompleteDialog(context);
+            PhotoCardUploadRouteData().go(context);
+          },
+        );
+      }
     });
 
     return Center(

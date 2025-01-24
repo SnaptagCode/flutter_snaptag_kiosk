@@ -12,14 +12,20 @@ class PrintService extends _$PrintService {
 
   Future<void> print() async {
     try {
-      // 1. 사전 검증
+      // 사전 검증
+      // throw Exception('Printer not ready');
       _validatePrintRequirements();
 
-      // 2. 이미지 준비
+      // 프론트 이미지
       final frontPhotoInfo = await _prepareFrontPhoto();
-      final embeddedBackImage = await _prepareBackImage();
+      // throw Exception('No front images available');
 
-      // 3. 프린트 작업 생성
+      // 백 이미지 다운로드/처리
+      final embeddedBackImage = await _prepareBackImage();
+      // throw Exception('Failed to download back image');
+
+      // 프린트 작업 생성
+      // throw Exception('Failed to create print job');
       final printJobInfo = await _createPrintJob(
         frontPhotoCardId: frontPhotoInfo.id,
         backPhotoCardId: ref.read(verifyPhotoCardProvider).value?.backPhotoCardId ?? 0,
@@ -28,25 +34,29 @@ class PrintService extends _$PrintService {
 
       try {
         // 4. 프린트 상태 업데이트 (시작)
+        // throw Exception('Failed to update print status');
         await _updatePrintStatus(
           printJobInfo.printedPhotoCardId,
           PrintedStatus.started,
         );
 
         // 5. 실제 프린트 실행
+        // throw Exception('Failed to execute print');
         await _executePrint(
           frontPhotoPath: frontPhotoInfo.path,
           embedded: embeddedBackImage,
         );
 
         // 6. 프린트 상태 업데이트 (완료)
+        // throw Exception('Failed to update print status');
         await _updatePrintStatus(
           printJobInfo.printedPhotoCardId,
           PrintedStatus.completed,
         );
       } catch (e, stack) {
         // 프린트 실패 처리
-        await _handlePrintFailure(printJobInfo.printedPhotoCardId, e, stack);
+        logger.e('Print failure', error: e, stackTrace: stack);
+        await _updatePrintStatus(printJobInfo.printedPhotoCardId, PrintedStatus.failed);
         rethrow;
       }
     } catch (e) {
@@ -180,22 +190,6 @@ class PrintService extends _$PrintService {
       if (await embedded.exists()) {
         await embedded.delete();
       }
-    }
-  }
-
-  Future<void> _handlePrintFailure(
-    int printedPhotoCardId,
-    Object error,
-    StackTrace stack,
-  ) async {
-    logger.e('Print failure', error: error, stackTrace: stack);
-
-    try {
-      await _updatePrintStatus(printedPhotoCardId, PrintedStatus.failed);
-      // 환불 진행은 PrintProcessScreen에서 처리
-    } catch (e) {
-      logger.e('Failed to handle print failure', error: e);
-      rethrow;
     }
   }
 }
