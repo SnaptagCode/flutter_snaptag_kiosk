@@ -91,19 +91,21 @@ class DialogHelper {
   }
 
   static Future<void> showPurchaseFailedDialog(BuildContext context, {Exception? exception}) async {
+    final error = exception.toString().isNotEmpty ? '\n\n${exception.toString()}' : null;
     await _showKioskDialog(
       context,
       title: LocaleKeys.alert_title_purchase_failure.tr(),
-      message: '${LocaleKeys.alert_txt_purchase_failure.tr()}\n\n${exception.toString()}',
+      message: '${LocaleKeys.alert_txt_purchase_failure.tr()}$error',
       buttonText: LocaleKeys.alert_btn_purchase_failure.tr(),
     );
   }
 
-  static Future<bool> showPrintErrorDialog(BuildContext context) async {
+  static Future<bool> showPrintErrorDialog(BuildContext context, {Exception? exception}) async {
+    final error = exception.toString().isNotEmpty ? '\n\n${exception.toString()}' : null;
     return await _showKioskDialog(
       context,
       title: LocaleKeys.alert_title_print_failure.tr(),
-      message: LocaleKeys.alert_txt_print_failure.tr(),
+      message: '${LocaleKeys.alert_txt_print_failure.tr()}$error',
       buttonText: LocaleKeys.alert_btn_print_failure.tr(),
     );
   }
