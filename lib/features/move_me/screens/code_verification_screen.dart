@@ -86,14 +86,7 @@ class _InputDisplay extends ConsumerWidget {
     return Container(
       width: 478.w,
       height: 86.h,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(
-          width: 2.w,
-          color: context.kioskColors.buttonColor,
-        ),
-      ),
+      decoration: context.keypadDisplayDecoration,
       child: Stack(
         alignment: AlignmentDirectional.center,
         children: [
