@@ -16,6 +16,7 @@ class DialogHelper {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
+          backgroundColor: Colors.white, // 고정값
           insetPadding: EdgeInsets.symmetric(horizontal: 100.w),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20.r),
@@ -23,12 +24,16 @@ class DialogHelper {
           title: Center(
             child: Text(
               title,
-              style: context.typography.kioskAlert1B,
+              style: context.typography.kioskAlert1B.copyWith(
+                color: Colors.black, // 고정값
+              ),
             ),
           ),
           content: Text(
             message,
-            style: context.typography.kioskAlert2M,
+            style: context.typography.kioskAlert2M.copyWith(
+              color: Colors.black, // 고정값
+            ),
             textAlign: TextAlign.center,
           ),
           actions: [
