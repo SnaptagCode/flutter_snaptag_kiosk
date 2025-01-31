@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/svg.dart';
 
 class LanguageSwitcher extends ConsumerWidget {
   const LanguageSwitcher({
@@ -23,17 +24,17 @@ class LanguageSwitcher extends ConsumerWidget {
       LocaleOption(
         locale: const Locale('ko', 'KR'),
         name: '한국어',
-        flag: 'assets/images/kr.png',
+        flag: 'assets/icons/flag_kr.svg',
       ),
       LocaleOption(
         locale: const Locale('en', 'US'),
         name: 'English',
-        flag: 'assets/images/am.png',
+        flag: 'assets/icons/flag_us.svg',
       ),
       LocaleOption(
         locale: const Locale('ja', 'JP'),
         name: '日本語',
-        flag: 'assets/images/jp.png',
+        flag: 'assets/icons/flag_jp.svg',
         fontFamily: 'PrentendardJP',
       ),
     ];
@@ -44,39 +45,38 @@ class LanguageSwitcher extends ConsumerWidget {
       orElse: () => localeOptions.first,
     );
 
-    return Padding(
-      padding: EdgeInsets.all(8.r),
-      child: SizedBox(
-          height: 44.h,
-          // width: 162.w,
-          child: PopupMenuButton<Locale>(
-            padding: EdgeInsets.zero,
-            offset: const Offset(0, 0),
-            position: PopupMenuPosition.under,
-            onSelected: (Locale locale) {
-              EasyLocalization.of(context)!.setLocale(locale);
-            },
-            color: Colors.white,
-            itemBuilder: (BuildContext context) => <PopupMenuItem<Locale>>[
-              for (final option in localeOptions)
-                PopupMenuItem<Locale>(
-                    value: option.locale,
-                    child: MenuWidget(
-                      option: option,
-                      isSelected: false,
-                    ))
-            ],
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(9.r),
-                color: Colors.white,
-              ),
-              child: MenuWidget(
-                option: selectedOption,
-                isSelected: true,
-              ),
+    return PopupMenuButton<Locale>(
+      padding: EdgeInsets.zero,
+      offset: const Offset(0, 0),
+      position: PopupMenuPosition.under,
+      onSelected: (Locale locale) {
+        EasyLocalization.of(context)!.setLocale(locale);
+      },
+      color: Colors.white,
+      itemBuilder: (BuildContext context) => <PopupMenuItem<Locale>>[
+        for (final option in localeOptions)
+          PopupMenuItem<Locale>(
+            value: option.locale,
+            height: 44.h,
+            child: MenuWidget(
+              option: option,
+              isSelected: false,
             ),
-          )),
+          )
+      ],
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(6.r),
+          color: Colors.white,
+        ),
+        height: 44.h,
+        width: 162.w,
+        padding: EdgeInsets.only(top: 8.r, left: 12.r, right: 10.r, bottom: 8.r),
+        child: MenuWidget(
+          option: selectedOption,
+          isSelected: true,
+        ),
+      ),
     );
   }
 }
@@ -94,23 +94,20 @@ class MenuWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Padding(
-              padding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 12.w),
-              child: Image.asset(
-                option.flag,
-                width: 32.w,
-                height: 24.h,
-              ),
+            SvgPicture.asset(
+              option.flag,
+              width: 32.w,
+              height: 24.h,
             ),
+            SizedBox(width: 8.w),
             Text(
               option.name,
               style: TextStyle(
-                fontSize: 20.sp,
+                fontSize: 18.sp,
                 fontWeight: FontWeight.w500,
                 color: Colors.black,
                 fontFamily: option.fontFamily,
@@ -119,14 +116,11 @@ class MenuWidget extends StatelessWidget {
           ],
         ),
         if (isSelected) ...[
-          SizedBox(width: 20.w),
-          Icon(
-            Icons.keyboard_arrow_down,
-            size: 20,
-            color: Colors.black,
+          SvgPicture.asset(
+            'assets/icons/arrow_down.svg',
+            width: 24.w,
           ),
         ],
-        SizedBox(width: 20.w),
       ],
     );
   }

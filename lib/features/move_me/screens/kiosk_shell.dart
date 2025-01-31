@@ -90,6 +90,7 @@ class ContentsShell extends ConsumerWidget {
                 children: [
                   const Spacer(),
                   KioskNavigatorButton(),
+                  SizedBox(width: 30.w),
                 ],
               ),
             ),
