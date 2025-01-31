@@ -13,4 +13,8 @@ enum PrintedStatus {
   refunded_after_printed,
   @JsonValue('REFUNDED_BEFORE_PRINTED')
   refunded_before_printed,
+  @JsonValue('REFUNDED_FAILED_AFTER_PRINTED')
+  refunded_failed_after_printed,
+  @JsonValue('REFUNDED_FAILED_BEFORE_PRINTED')
+  refunded_failed_before_printed,
 }
