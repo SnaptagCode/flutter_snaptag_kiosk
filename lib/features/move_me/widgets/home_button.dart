@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
 class HomeButton extends ConsumerWidget {
@@ -14,20 +15,41 @@ class HomeButton extends ConsumerWidget {
     final currentPath = GoRouterState.of(context).matchedLocation;
     final isPrinting = currentPath == '/print';
 
-    return Padding(
-      padding: EdgeInsets.all(8.0.r),
+    return InkWell(
+      onTap: isPrinting
+          ? null
+          : () {
+              const PhotoCardUploadRouteData().go(context);
+            },
       child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(6.r),
+          color: Colors.white,
+        ),
         height: 44.h,
         width: 162.w,
-        decoration: context.homeNavigationDecoration,
-        child: InkWell(
-          onTap: isPrinting
-              ? null
-              : () {
-                  const PhotoCardUploadRouteData().go(context);
-                },
-          child: Image.asset(
-            SnaptagImages.iconHome,
+        child: Center(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SvgPicture.asset(
+                'assets/icons/home.svg',
+                width: 28.w,
+                height: 28.h,
+              ),
+              SizedBox(
+                width: 10.w,
+              ),
+              Text(
+                'HOME',
+                style: TextStyle(
+                  color: Colors.grey[900],
+                  fontSize: 18.sp,
+                  fontWeight: FontWeight.w500,
+                ),
+              )
+            ],
           ),
         ),
       ),

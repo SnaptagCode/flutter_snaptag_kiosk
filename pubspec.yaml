@@ -45,6 +45,7 @@ dependencies:
   http: ^1.2.2
   image: ^4.5.2
   file_picker: ^8.1.7
+  flutter_svg: ^2.0.17
 
 
 dev_dependencies:
@@ -64,8 +65,10 @@ flutter:
   uses-material-design: true
 
   assets:
-    - assets/lang/
+    - assets/icons/
     - assets/images/
+    - assets/labcurity/
+    - assets/lang/
     - assets/luca/
     
   fonts:
