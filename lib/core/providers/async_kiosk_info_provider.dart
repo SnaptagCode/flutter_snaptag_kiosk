@@ -25,6 +25,7 @@ class AsyncKioskInfo extends _$AsyncKioskInfo {
 
       // API를 통해 최신 정보 가져오기
       final kioskRepo = ref.read(kioskRepositoryProvider);
+      await kioskRepo.healthCheck();
       final response = await kioskRepo.getKioskMachineInfo(
         currentSettings.kioskMachineId,
       );
@@ -34,20 +35,18 @@ class AsyncKioskInfo extends _$AsyncKioskInfo {
       final imageStorage = ref.read(imageStorageProvider);
       if (response.mainImageUrl.isNotEmpty && response.topBannerUrl.isNotEmpty) {
         await imageStorage.clearDirectory(DirectoryPaths.settingImages);
-
         final body = await imageStorage.saveImage(DirectoryPaths.settingImages, response.mainImageUrl, 'body');
         await yamlRepo.updateImagePaths(bodyPath: body);
         final header = await imageStorage.saveImage(DirectoryPaths.settingImages, response.topBannerUrl, 'header');
         await yamlRepo.updateImagePaths(headerPath: header);
       }
 
+      await ref.read(frontPhotoListProvider.notifier).fetch();
+
       return response;
     } catch (e) {
-      if (e is KioskException) {
-        rethrow;
-      } else {
-        throw Exception('Failed to fetch and update kiosk info: $e');
-      }
+      logger.e('Failed to fetch kiosk info', error: e);
+      rethrow;
     }
   }
 

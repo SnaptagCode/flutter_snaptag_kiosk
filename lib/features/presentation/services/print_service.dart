@@ -105,7 +105,7 @@ class PrintService extends _$PrintService {
 
       return processedImage;
     } catch (e) {
-      throw Exception('Failed to prepare back image: ${e.toString()}');
+      rethrow;
     }
   }
 
@@ -148,7 +148,7 @@ class PrintService extends _$PrintService {
       final response = await ref.read(kioskRepositoryProvider).createPrintStatus(request: request);
       return (printedPhotoCardId: response.printedPhotoCardId);
     } catch (e) {
-      throw Exception('Failed to create print job');
+      rethrow;
     }
   }
 
@@ -164,7 +164,7 @@ class PrintService extends _$PrintService {
           .read(kioskRepositoryProvider)
           .updatePrintStatus(printedPhotoCardId: printedPhotoCardId, request: request);
     } catch (e) {
-      throw Exception('Failed to update print status');
+      rethrow;
     }
   }
 
@@ -178,7 +178,7 @@ class PrintService extends _$PrintService {
             embeddedFile: embedded,
           );
     } catch (e) {
-      throw Exception('Failed to execute print');
+      rethrow;
     } finally {
       if (await embedded.exists()) {
         await embedded.delete();
