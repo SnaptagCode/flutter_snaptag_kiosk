@@ -13,6 +13,7 @@ class _UnitTestScreenState extends ConsumerState<UnitTestScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(

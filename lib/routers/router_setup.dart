@@ -53,7 +53,10 @@ class MaterialRouteData extends GoRouteData {
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) {
     return NoTransitionPage(
-      child: const MaterialScreen(),
+      child: Scaffold(
+        appBar: AppBar(),
+        body: const MaterialScreen(),
+      ),
     );
   }
 }

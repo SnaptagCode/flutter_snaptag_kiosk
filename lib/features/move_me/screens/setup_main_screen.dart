@@ -104,10 +104,10 @@ class SetupMainScreen extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      _navigatorCard(context, label: 'Debug', onTap: () => UnitTestRouteData().go(context)),
+                      _navigatorCard(context, label: 'Unit Test', onTap: () => UnitTestRouteData().go(context)),
                       _navigatorCard(context, label: 'Material', onTap: () => MaterialRouteData().go(context)),
                       _navigatorCard(context,
-                          label: 'Kiosk Components', onTap: () => KioskComponentsRouteData().go(context)),
+                          label: 'Kiosk\nComponents', onTap: () => KioskComponentsRouteData().go(context)),
                     ],
                   ),
               ],
