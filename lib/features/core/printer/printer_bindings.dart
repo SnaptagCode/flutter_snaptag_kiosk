@@ -3,9 +3,8 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:ffi/ffi.dart';
-import 'package:flutter_snaptag_kiosk/core/utils/logger_service.dart';
+import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:image/image.dart' as img;
-import 'package:path/path.dart' as path;
 
 // DLL 함수 시그니처 정의
 typedef R600LibInitNative = Uint32 Function();
@@ -173,9 +172,7 @@ class PrinterBindings {
 
   PrinterBindings() {
     // DLL 로드
-    final exeDir = Directory.current;
-    final dllSource = path.join(exeDir.path, 'assets', 'luca', 'libDSRetransfer600App.dll');
-    _dll = DynamicLibrary.open(dllSource);
+    _dll = DynamicLibrary.open(FilePaths.printerDLL.buildPath);
 
     // 함수 바인딩
     _libInit = _dll.lookupFunction<R600LibInitNative, R600LibInit>('R600LibInit');

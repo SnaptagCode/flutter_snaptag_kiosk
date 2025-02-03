@@ -30,15 +30,14 @@ class AsyncKioskInfo extends _$AsyncKioskInfo {
       );
 
       // API 응답으로 yaml 파일 업데이트
-
-      final imageStorage = ref.read(imageStorageProvider);
       await yamlRepo.saveSettings(response);
-      if (response.mainImageUrl.isNotEmpty) {
-        final body = await imageStorage.saveImage(DirectoryPaths.settings, response.mainImageUrl, 'body');
+      final imageStorage = ref.read(imageStorageProvider);
+      if (response.mainImageUrl.isNotEmpty && response.topBannerUrl.isNotEmpty) {
+        await imageStorage.clearDirectory(DirectoryPaths.settingImages);
+
+        final body = await imageStorage.saveImage(DirectoryPaths.settingImages, response.mainImageUrl, 'body');
         await yamlRepo.updateImagePaths(bodyPath: body);
-      }
-      if (response.topBannerUrl.isNotEmpty) {
-        final header = await imageStorage.saveImage(DirectoryPaths.settings, response.topBannerUrl, 'header');
+        final header = await imageStorage.saveImage(DirectoryPaths.settingImages, response.topBannerUrl, 'header');
         await yamlRepo.updateImagePaths(headerPath: header);
       }
 

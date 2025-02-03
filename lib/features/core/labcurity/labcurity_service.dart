@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_snaptag_kiosk/core/constants/directory_paths.dart';
 import 'package:flutter_snaptag_kiosk/domain/entities/entities.dart';
 import 'package:intl/intl.dart';
 import 'package:path/path.dart' as path;
@@ -32,18 +33,16 @@ class LabcurityService {
 
     final dateTime = DateTime.now();
     final formattedDateTime = DateFormat('yyyyMMdd_HHmmss').format(dateTime);
-    final formattedDate = DateFormat('yyyyMMdd').format(dateTime);
 
-    final currentDirPath = Directory.current.path;
-    final embedDirPath = path.join(currentDirPath, 'embed');
-    final tempDirPath = path.join(currentDirPath, 'temp', formattedDate);
+    final outputDirPath = DirectoryPaths.output.buildPath;
+    final inputDirPath = DirectoryPaths.input.buildPath;
 
-    await _ensureDirectoryExists(embedDirPath);
-    await _ensureDirectoryExists(tempDirPath);
+    await _ensureDirectoryExists(outputDirPath);
+    await _ensureDirectoryExists(inputDirPath);
 
-    final outputFilePath = path.join(embedDirPath, '$formattedDateTime.$extension');
-    final inputFilePath = path.join(tempDirPath, '${formattedDateTime}_input_image.$extension');
-    final labcurityPath = path.join(Directory.current.path, 'assets', 'labcurity', 'labcurity_key.txt');
+    final outputFilePath = path.join(outputDirPath, '$formattedDateTime.$extension');
+    final inputFilePath = path.join(inputDirPath, '$formattedDateTime.$extension');
+    final labcurityPath = FilePaths.labcurityKey.buildPath;
 
     try {
       await File(inputFilePath).writeAsBytes(imageBytes);

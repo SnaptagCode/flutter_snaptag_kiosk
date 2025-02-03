@@ -11,9 +11,7 @@ part 'front_photo_list.g.dart';
 class FrontPhotoList extends _$FrontPhotoList {
   @override
   List<String> build() {
-    final target = path.join(Directory.current.path, DirectoryPaths.frontImages.name);
-
-    final directory = Directory(target);
+    final directory = Directory(DirectoryPaths.frontImages.buildPath);
     // 디렉토리가 존재하지 않으면 빈 리스트 반환
     if (!directory.existsSync()) {
       return [];
