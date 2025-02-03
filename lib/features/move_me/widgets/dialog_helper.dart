@@ -4,6 +4,13 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:go_router/go_router.dart';
 
+///
+/// [Figma](https://www.figma.com/design/8IDM2KJtqAYWm2IsmytU5W/%ED%82%A4%EC%98%A4%EC%8A%A4%ED%81%AC_%EB%94%94%EC%9E%90%EC%9D%B8_%EA%B3%B5%EC%9C%A0%EC%9A%A9?node-id=943-15366&m=dev)
+/// 고정 값
+/// - `backgroundColor` : #FFFFFF
+/// - `title` : #000000
+/// - `message` : #000000
+///
 class DialogHelper {
   static Future<bool> _showKioskDialog(
     BuildContext context, {
@@ -16,7 +23,7 @@ class DialogHelper {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          backgroundColor: Colors.white, // 고정값
+          backgroundColor: Colors.white,
           insetPadding: EdgeInsets.symmetric(horizontal: 100.w),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20.r),
@@ -25,14 +32,14 @@ class DialogHelper {
             child: Text(
               title,
               style: context.typography.kioskAlert1B.copyWith(
-                color: Colors.black, // 고정값
+                color: Colors.black,
               ),
             ),
           ),
           content: Text(
             message,
             style: context.typography.kioskAlert2M.copyWith(
-              color: Colors.black, // 고정값
+              color: Colors.black,
             ),
             textAlign: TextAlign.center,
           ),
