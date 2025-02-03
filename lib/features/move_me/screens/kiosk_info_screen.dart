@@ -34,7 +34,6 @@ class KioskInfoScreen extends ConsumerWidget {
                 KioskInfoTextWidget(info: info),
               ],
             ),
-            FrontImagesAction(),
           ],
         ),
       ),

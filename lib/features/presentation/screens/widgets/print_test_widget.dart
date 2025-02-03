@@ -5,7 +5,6 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_snaptag_kiosk/features/core/printer/card_printer.dart';
-import 'package:flutter_snaptag_kiosk/features/core/printer/printer_bindings.dart';
 import 'package:flutter_snaptag_kiosk/features/move_me/providers/front_photo_list.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -140,8 +139,6 @@ class PrintTestWidget extends ConsumerWidget {
             color: Colors.red.shade100,
             child: Row(
               children: [
-                const Icon(Icons.error_outline, color: Colors.red),
-                const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     '프린터 오류: ${printerState.error.toString()}',
@@ -187,43 +184,6 @@ class PrintTestWidget extends ConsumerWidget {
             ElevatedButton(
               onPressed: () => ref.read(processedImageProvider.notifier).clear(),
               child: const Text('Clear Images'),
-            ),
-          ],
-        ),
-        const Divider(),
-        Text('에러 테스트', style: Theme.of(context).textTheme.titleMedium),
-        Wrap(
-          spacing: 8,
-          children: [
-            ElevatedButton(
-              onPressed: () async {
-                // 잘못된 파일 경로로 프린트 시도
-                await ref.read(printerStateProvider.notifier).printImage(
-                      frontImagePath: 'invalid/path/image.jpg',
-                      embeddedFile: File('nonexistent.png'),
-                    );
-              },
-              child: const Text('잘못된 파일 경로'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                // 프린터 연결 강제 해제
-                ref.read(printerStateProvider.notifier).build();
-                ref.read(printerStateProvider.notifier).printImage(
-                      frontImagePath: '',
-                      embeddedFile: File(''),
-                    );
-              },
-              child: const Text('프린터 연결 에러'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                // DLL 로드 실패 시뮬레이션
-                final bindings = PrinterBindings();
-                bindings.clearLibrary();
-                bindings.initLibrary();
-              },
-              child: const Text('DLL 에러'),
             ),
           ],
         ),

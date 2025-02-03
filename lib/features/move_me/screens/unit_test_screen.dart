@@ -19,6 +19,8 @@ class _UnitTestScreenState extends ConsumerState<UnitTestScreen> {
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Text('프론트 이미지', style: Theme.of(context).textTheme.headlineSmall),
+            FrontImagesAction(),
             Text('결제 테스트', style: Theme.of(context).textTheme.headlineSmall),
             PaymentTestWidget(),
             Text('Labcurity 이미지 테스트', style: Theme.of(context).textTheme.headlineSmall),
