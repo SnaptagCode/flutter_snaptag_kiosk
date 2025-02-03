@@ -9,26 +9,26 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:window_manager/window_manager.dart';
 
-void main() async {
+void main() {
   if (kDebugMode) {
     F.appFlavor = Flavor.dev;
   } else {
     F.appFlavor = Flavor.prod;
   }
-  WidgetsFlutterBinding.ensureInitialized();
-  await windowManagerSetting();
-
-  final yamlStorage = await YamlStorageService.initialize();
-  final imageStorage = await ImageStorageService.initialize();
-
-  await EasyLocalization.ensureInitialized();
-
-  // 에러 핸들러 초기화
-  await AppErrorHandler.initialize();
 
   // Zone으로 감싸서 모든 비동기 에러도 캐치
   runZonedGuarded(
-    () {
+    () async {
+      WidgetsFlutterBinding.ensureInitialized();
+      await windowManagerSetting();
+
+      final yamlStorage = await YamlStorageService.initialize();
+      final imageStorage = await ImageStorageService.initialize();
+
+      await EasyLocalization.ensureInitialized();
+
+      // 에러 핸들러 초기화
+      await AppErrorHandler.initialize();
       runApp(
         EasyLocalization(
           supportedLocales: const [
