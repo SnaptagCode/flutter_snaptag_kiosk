@@ -68,14 +68,14 @@ class FrontPhotoList extends _$FrontPhotoList {
       // API를 통해 이미지 목록 가져오기
       final kioskRepo = ref.read(kioskRepositoryProvider);
       final NominatedPhotoList response = await kioskRepo.getFrontPhotoList(currentSettings.kioskEventId);
-      final data = await saveImages(response);
+      final data = await _saveImages(response);
       state = data;
     } catch (e) {
       state = [];
     }
   }
 
-  Future<List<String>> saveImages(NominatedPhotoList photoList) async {
+  Future<List<String>> _saveImages(NominatedPhotoList photoList) async {
     final List<String> frontPhotoPaths = [];
     // 이미지 저장소 준비
     final imageStorage = ref.read(imageStorageProvider);
@@ -104,7 +104,7 @@ class FrontPhotoList extends _$FrontPhotoList {
 
     try {
       // 파일명에서 정보 추출
-      final result = getPhotoInfo(randomPath);
+      final result = _getPhotoInfo(randomPath);
 
       if (result != null) {
         return (
@@ -123,7 +123,7 @@ class FrontPhotoList extends _$FrontPhotoList {
   }
 
   // 특정 이미지의 정보를 추출하는 메서드
-  ({int id, int code, int embeddingProductId})? getPhotoInfo(String imagePath) {
+  ({int id, int code, int embeddingProductId})? _getPhotoInfo(String imagePath) {
     try {
       final fileName = path.basenameWithoutExtension(imagePath);
       final parts = fileName.split('_');

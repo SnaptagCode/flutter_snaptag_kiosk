@@ -1,8 +1,12 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 
-class KioskInfoTextWidget extends StatelessWidget {
-  const KioskInfoTextWidget({
+class KioskInfoWidget extends ConsumerWidget {
+  const KioskInfoWidget({
     super.key,
     required this.info,
   });
@@ -10,7 +14,8 @@ class KioskInfoTextWidget extends StatelessWidget {
   final KioskMachineInfo info;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final List<String> frontPhotoListState = ref.watch(frontPhotoListProvider);
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -36,7 +41,17 @@ class KioskInfoTextWidget extends StatelessWidget {
             ),
           ),
         ),
-        Row(),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(children: [
+            for (final photo in frontPhotoListState)
+              Image.file(
+                File(photo),
+                width: ScreenUtil().screenWidth / 10,
+                fit: BoxFit.cover,
+              ),
+          ]),
+        ),
         Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.center,
