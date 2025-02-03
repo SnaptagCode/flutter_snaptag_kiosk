@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:go_router/go_router.dart';
-import 'package:material_components/material_components.dart';
+import 'package:material_components/material_screen.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-part 'router.admin.dart';
 part 'router.g.dart';
-part 'router.kiosk.dart';
+part 'router_kiosk.dart';
+part 'router_setup.dart';
 
 final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -15,14 +15,15 @@ final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
 GoRouter router(Ref ref) {
   return GoRouter(
     navigatorKey: rootNavigatorKey,
-    initialLocation: '/kiosk/qr',
+    initialLocation: '/setup',
     routes: $appRoutes,
+    debugLogDiagnostics: true,
     observers: <NavigatorObserver>[NavObserver()],
   );
 }
 
 @TypedGoRoute<SplashRoute>(
-  path: '/splash',
+  path: '/',
 )
 class SplashRoute extends GoRouteData {
   const SplashRoute();

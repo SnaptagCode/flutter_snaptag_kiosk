@@ -40,10 +40,8 @@ class KioskShell extends ConsumerWidget {
           ],
         ),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerTop,
-      floatingActionButton: TripleTapFloatingButton(
-        isSetup: false,
-      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
+      floatingActionButton: TripleTapFloatingButton(),
     );
   }
 }

@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_snaptag_kiosk/core/constants/image_paths.dart';
 import 'package:flutter_svg/svg.dart';
 
 class LanguageSwitcher extends ConsumerWidget {
@@ -24,17 +25,17 @@ class LanguageSwitcher extends ConsumerWidget {
       LocaleOption(
         locale: const Locale('ko', 'KR'),
         name: '한국어',
-        flag: 'assets/icons/flag_kr.svg',
+        flag: SnaptagSvg.flagKr,
       ),
       LocaleOption(
         locale: const Locale('en', 'US'),
         name: 'English',
-        flag: 'assets/icons/flag_us.svg',
+        flag: SnaptagSvg.flagUs,
       ),
       LocaleOption(
         locale: const Locale('ja', 'JP'),
         name: '日本語',
-        flag: 'assets/icons/flag_jp.svg',
+        flag: SnaptagSvg.flagJp,
         fontFamily: 'PrentendardJP',
       ),
     ];
@@ -117,7 +118,7 @@ class MenuWidget extends StatelessWidget {
         ),
         if (isSelected) ...[
           SvgPicture.asset(
-            'assets/icons/arrow_down.svg',
+            SnaptagSvg.arrowDown,
             width: 24.w,
           ),
         ],

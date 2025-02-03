@@ -34,7 +34,7 @@ class HomeButton extends ConsumerWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               SvgPicture.asset(
-                'assets/icons/home.svg',
+                SnaptagSvg.home,
                 width: 28.w,
                 height: 28.h,
               ),

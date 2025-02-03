@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
-import 'package:http/http.dart' as http;
 import 'package:loader_overlay/loader_overlay.dart';
 
 class PhotoCardPreviewScreen extends ConsumerStatefulWidget {
@@ -18,22 +17,10 @@ class PhotoCardPreviewScreen extends ConsumerStatefulWidget {
 class _PhotoCardPreviewScreenState extends ConsumerState<PhotoCardPreviewScreen> {
   Future<void> _handlePaymentError(Object error, StackTrace stack) async {
     logger.e('Payment error occurred', error: error, stackTrace: stack);
-
-    if (error is http.ClientException) {
-      await DialogHelper.showCustomDialog(
-        context,
-        title: error.runtimeType.toString(),
-        message: error.toString(),
-        buttonText: LocaleKeys.sub01_btn_done.tr(),
-      );
-      return;
-    } else {
-      await DialogHelper.showPurchaseFailedDialog(
-        context,
-        exception: error as Exception,
-      );
-      return;
-    }
+    await DialogHelper.showPurchaseFailedDialog(
+      context,
+    );
+    return;
   }
 
   @override

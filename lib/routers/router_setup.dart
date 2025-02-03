@@ -2,23 +2,26 @@ part of 'router.dart';
 
 final GlobalKey<NavigatorState> setupNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'setup');
 
-@TypedShellRoute<SetupShellRouteData>(
-  routes: <TypedRoute<RouteData>>[
-    TypedGoRoute<PaymentHistoryRouteData>(path: '/payment-history'),
-    TypedGoRoute<UnitTestRouteData>(path: '/unit-test'),
-    TypedGoRoute<MaterialRouteData>(path: '/material-components'),
-    TypedGoRoute<KioskComponentsRouteData>(path: '/kiosk-components'),
-    TypedGoRoute<KioskInfoRouteData>(path: '/kiosk-info'),
+@TypedGoRoute<SetupMainRouteData>(
+  path: '/setup',
+  routes: [
+    TypedGoRoute<PaymentHistoryRouteData>(path: 'payment-history'),
+    TypedGoRoute<UnitTestRouteData>(path: 'unit-test'),
+    TypedGoRoute<MaterialRouteData>(path: 'material-components'),
+    TypedGoRoute<KioskComponentsRouteData>(path: 'kiosk-components'),
+    TypedGoRoute<KioskInfoRouteData>(path: 'kiosk-info'),
   ],
 )
-class SetupShellRouteData extends ShellRouteData {
-  const SetupShellRouteData();
+class SetupMainRouteData extends GoRouteData {
+  const SetupMainRouteData();
 
   static final GlobalKey<NavigatorState> $navigatorKey = setupNavigatorKey;
 
   @override
-  Widget builder(BuildContext context, GoRouterState state, Widget navigator) {
-    return SetupShell(child: navigator);
+  Page<void> buildPage(BuildContext context, GoRouterState state) {
+    return NoTransitionPage(
+      child: SetupMainScreen(),
+    );
   }
 }
 
