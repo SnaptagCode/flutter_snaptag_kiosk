@@ -1,9 +1,8 @@
 import 'dart:ffi';
-import 'dart:io';
 
 import 'package:ffi/ffi.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:path/path.dart' as path;
+import 'package:flutter_snaptag_kiosk/core/constants/directory_paths.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'labcurity_bindings.dart';
@@ -20,8 +19,7 @@ class LabcurityLibrary {
   late final GetLabCodeImageFullWDart _getLabCodeImageFullW;
 
   LabcurityLibrary() {
-    final exeDir = Directory.current;
-    final dllSource = path.join(exeDir.path, 'assets', 'labcurity', 'LabCode_x64.dll');
+    final dllSource = FilePaths.labcurityDLL.buildPath;
     _dll = DynamicLibrary.open(dllSource);
 
     _getLabCodeImageFullW =

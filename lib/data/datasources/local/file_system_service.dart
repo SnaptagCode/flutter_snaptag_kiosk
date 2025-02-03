@@ -12,7 +12,7 @@ class FileSystemService {
   static final instance = FileSystemService._();
 
   String getFilePath(DirectoryPaths directory, {String? fileName}) {
-    return path.join(Directory.current.path, directory.name, fileName);
+    return path.join(directory.buildPath, fileName);
   }
 
   Future<void> ensureDirectoryExists(DirectoryPaths directory) async {
