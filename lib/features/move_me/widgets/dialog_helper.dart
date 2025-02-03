@@ -12,7 +12,65 @@ import 'package:go_router/go_router.dart';
 /// - `message` : #000000
 ///
 class DialogHelper {
-  static Future<bool> _showKioskDialog(
+  static Future<bool> showSetupDialog(
+    BuildContext context, {
+    required String title,
+    String cancelButtonText = '취소',
+    String confirmButtonText = '확인',
+  }) async {
+    return await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Colors.white,
+          insetPadding: EdgeInsets.symmetric(horizontal: 100.w),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20.r),
+          ),
+          title: Center(
+            child: Text(
+              title,
+              style: context.typography.kioskAlert1B.copyWith(
+                color: Colors.black,
+              ),
+            ),
+          ),
+          actions: [
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () {
+                      Navigator.of(context).pop(false);
+                    },
+                    style: context.setupDialogCancelButtonStyle,
+                    child: Text(
+                      cancelButtonText,
+                    ),
+                  ),
+                ),
+                SizedBox(width: 12.w),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).pop(true);
+                    },
+                    style: context.setupDialogConfirmButtonStyle,
+                    child: Text(
+                      confirmButtonText,
+                    ),
+                  ),
+                ),
+              ],
+            )
+          ],
+        );
+      },
+    );
+  }
+
+  static Future<bool> _showOneButtonKioskDialog(
     BuildContext context, {
     required String title,
     required String message,
@@ -75,7 +133,7 @@ class DialogHelper {
       required String message,
       required String buttonText,
       VoidCallback? onButtonPressed}) async {
-    await _showKioskDialog(
+    await _showOneButtonKioskDialog(
       context,
       title: title,
       message: message,
@@ -85,7 +143,7 @@ class DialogHelper {
   }
 
   static Future<void> showPrintCompleteDialog(BuildContext context) async {
-    await _showKioskDialog(
+    await _showOneButtonKioskDialog(
       context,
       title: LocaleKeys.alert_title_print_complete.tr(),
       message: LocaleKeys.alert_txt_print_complete.tr(),
@@ -94,7 +152,7 @@ class DialogHelper {
   }
 
   static Future<void> showErrorDialog(BuildContext context) async {
-    await _showKioskDialog(
+    await _showOneButtonKioskDialog(
       context,
       title: LocaleKeys.alert_title_authNum_error.tr(),
       message: LocaleKeys.alert_txt_authNum_error.tr(),
@@ -104,7 +162,7 @@ class DialogHelper {
 
   static Future<void> showPurchaseFailedDialog(BuildContext context, {Exception? exception}) async {
     final error = exception.toString().isNotEmpty ? '\n\n${exception.toString()}' : null;
-    await _showKioskDialog(
+    await _showOneButtonKioskDialog(
       context,
       title: LocaleKeys.alert_title_purchase_failure.tr(),
       message: '${LocaleKeys.alert_txt_purchase_failure.tr()}$error',
@@ -114,7 +172,7 @@ class DialogHelper {
 
   static Future<bool> showPrintErrorDialog(BuildContext context, {Exception? exception}) async {
     final error = exception.toString().isNotEmpty ? '\n\n${exception.toString()}' : null;
-    return await _showKioskDialog(
+    return await _showOneButtonKioskDialog(
       context,
       title: LocaleKeys.alert_title_print_failure.tr(),
       message: '${LocaleKeys.alert_txt_print_failure.tr()}$error',

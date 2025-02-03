@@ -1,16 +1,17 @@
 part of 'router.dart';
 
 final GlobalKey<NavigatorState> kioskNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'kiosk');
+
 final GlobalKey<NavigatorState> contentsNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'kiosk-contents');
 
 @TypedShellRoute<KioskShellRouteData>(
   routes: [
     TypedShellRoute<ContentsShellRouteData>(
       routes: <TypedRoute<RouteData>>[
-        TypedGoRoute<PhotoCardUploadRouteData>(path: '/kiosk/qr'),
-        TypedGoRoute<CodeVerificationRouteData>(path: '/kiosk/code-verification'),
-        TypedGoRoute<PhotoCardPreviewRouteData>(path: '/kiosk/preview'),
-        TypedGoRoute<PrintProcessRouteData>(path: '/kiosk/print-process'),
+        TypedGoRoute<PhotoCardUploadRouteData>(path: '/kiosk-qr'),
+        TypedGoRoute<CodeVerificationRouteData>(path: '/kiosk-code-verification'),
+        TypedGoRoute<PhotoCardPreviewRouteData>(path: '/kiosk-preview'),
+        TypedGoRoute<PrintProcessRouteData>(path: '/kiosk-print-process'),
       ],
     )
   ],
