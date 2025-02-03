@@ -3,7 +3,6 @@ import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_snaptag_kiosk/core/extensions/extensions.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:palette_generator/palette_generator.dart';
 
@@ -17,36 +16,38 @@ class KioskThemeService {
     final primary = kioskColors.buttonColor;
 
     Color? backgroundColor = await _extractBackgroundColor();
+    late ColorScheme colorScheme;
     if (backgroundColor != null) {
       // ColorScheme 생성
-      final colorScheme = ColorScheme.fromSeed(
+      colorScheme = ColorScheme.fromSeed(
         seedColor: primary,
         brightness: ThemeData.estimateBrightnessForColor(backgroundColor),
         surface: backgroundColor,
       );
-
-      return ThemeData(
-        fontFamily: fontFamily,
-        colorScheme: colorScheme,
-        extensions: [
-          kioskColors,
-          KioskTypography.basic, // 기존 타이포그래피 유지
-        ],
-      );
     } else {
-      return ThemeData(
-        fontFamily: fontFamily,
-        colorScheme: ColorScheme.fromSwatch(
-          primarySwatch: _createMaterialColor(primary),
-          accentColor: kioskColors.buttonTextColor,
-          brightness: Brightness.light,
-        ),
-        extensions: [
-          kioskColors,
-          KioskTypography.basic, // 기존 타이포그래피 유지
-        ],
+      colorScheme = ColorScheme.fromSwatch(
+        primarySwatch: _createMaterialColor(primary),
+        accentColor: kioskColors.buttonTextColor,
+        brightness: Brightness.light,
       );
     }
+    return ThemeData(
+      fontFamily: fontFamily,
+      colorScheme: colorScheme,
+      appBarTheme: AppBarTheme(
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.transparent,
+        foregroundColor: Colors.black,
+        shadowColor: Colors.black.withOpacity(.5),
+        elevation: 6,
+        titleTextStyle: KioskTypography.basic.kioskInput2B.copyWith(color: Colors.black),
+      ),
+      // ✅ : extensions에 추가해도 적용되진 않음
+      extensions: [
+        kioskColors,
+        KioskTypography.basic, // 기존 타이포그래피 유지
+      ],
+    );
   }
 
   KioskColors _createKioskColors() {

@@ -15,10 +15,6 @@ class SetupMainScreen extends ConsumerWidget {
       // F2F2F2
       backgroundColor: Color(0xFFF2F2F2),
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        surfaceTintColor: Colors.white,
-        elevation: 6,
-        shadowColor: Colors.black.withOpacity(.5),
         centerTitle: false,
         title: SvgPicture.asset(
           SnaptagSvg.snaptagLogo,

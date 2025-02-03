@@ -23,6 +23,7 @@ class App extends ConsumerWidget {
             locale: context.locale,
             themeMode: ThemeMode.light,
             theme: themeData.copyWith(
+              //XXX : 삭제 금지 - extensions를 추가로 등록해주지 않으면 themeNotifierProvider영역에서 등록된 extensions는 누락됨
               extensions: [
                 ...themeData.extensions.values,
               ],
