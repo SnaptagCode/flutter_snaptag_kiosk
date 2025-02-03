@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 
 class FrontImagesAction extends ConsumerWidget {
@@ -33,9 +34,28 @@ class FrontImagesAction extends ConsumerWidget {
                   }
                 }
               },
-              child: const Text('Call API'),
-            ), // 이미지 삭제 버튼
-
+              child: const Text('GET'),
+            ),
+            const SizedBox(width: 8),
+            ElevatedButton(
+              onPressed: () async {
+                try {
+                  ref.read(imageStorageProvider).clearDirectory(DirectoryPaths.frontImages);
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('이미지 삭제 성공!')),
+                    );
+                  }
+                } catch (e) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('이미지 삭제 실패: $e')),
+                    );
+                  }
+                }
+              },
+              child: const Text('CLEAR'),
+            ),
             FilePathActions(
               directory: DirectoryPaths.frontImages,
             ),
@@ -49,8 +69,7 @@ class FrontImagesAction extends ConsumerWidget {
             for (final photo in frontPhotoListState)
               Image.file(
                 File(photo),
-                width: 200,
-                height: 300,
+                width: ScreenUtil().screenWidth / 10,
                 fit: BoxFit.cover,
               ),
           ],
