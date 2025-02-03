@@ -13,7 +13,7 @@ part 'labcurity_image_test.g.dart';
 @riverpod
 class LabcurityImageTest extends _$LabcurityImageTest {
   @override
-  Future<Uint8List?> build() {
+  Future<File?> build() {
     return Future.value(null);
   }
 
@@ -59,7 +59,7 @@ class LabcurityImageTestWidget extends ConsumerWidget {
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
-                Image.memory(
+                Image.file(
                   processedImage,
                   height: 300,
                   fit: BoxFit.contain,
