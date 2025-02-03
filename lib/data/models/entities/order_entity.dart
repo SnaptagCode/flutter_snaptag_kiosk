@@ -9,6 +9,7 @@ class OrderEntity with _$OrderEntity {
   factory OrderEntity({
     required int orderId,
     required int kioskMachineId,
+    required String eventName,
     required String photoAuthNumber,
     required String? paymentAuthNumber,
     required double amount,

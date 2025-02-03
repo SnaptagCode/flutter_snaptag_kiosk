@@ -11,4 +11,6 @@ enum OrderStatus {
   refunded,
   @JsonValue('REFUNDED_FAILED')
   refunded_failed,
+  @JsonValue('REFUNDED_FAILED_BEFORE_PRINTED')
+  refunded_failed_before_printed,
 }

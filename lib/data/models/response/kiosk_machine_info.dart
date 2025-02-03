@@ -16,10 +16,10 @@ class KioskMachineInfo with _$KioskMachineInfo {
     @Default('') String mainImageUrl,
     @Default('#FF0000') String mainButtonColor,
     @Default('#FFFFFF') String buttonTextColor,
+    @Default('#CCCCCC') String keyPadColor,
     @Default('#000000') String couponTextColor,
     @Default('#000000') String mainTextColor,
     @Default('#0000FF') String popupButtonColor,
-    @Default('#CCCCCC') String keyPadColor,
   }) = _KioskMachineInfo;
 
   factory KioskMachineInfo.fromJson(Map<String, dynamic> json) => _$KioskMachineInfoFromJson(json);
