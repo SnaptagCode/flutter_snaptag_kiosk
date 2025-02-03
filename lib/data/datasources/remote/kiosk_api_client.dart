@@ -12,7 +12,7 @@ abstract class KioskApiClient {
 
   // Health Check
   @GET('/v1/health-check')
-  Future<void> healthCheck();
+  Future<String> healthCheck();
 
   // Machine APIs
   @GET('/v1/machine/info')
