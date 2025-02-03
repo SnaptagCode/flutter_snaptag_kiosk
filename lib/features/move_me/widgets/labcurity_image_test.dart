@@ -68,30 +68,6 @@ class LabcurityImageTestWidget extends ConsumerWidget {
             ],
           ),
         ),
-        const Divider(),
-        Text('에러 테스트', style: Theme.of(context).textTheme.titleMedium),
-        Wrap(
-          spacing: 8,
-          children: [
-            ElevatedButton(
-              onPressed: () async {
-                await ref.read(labcurityImageTestProvider.notifier).embedImage(
-                      Uint8List(0), // 빈 이미지로 에러 유발
-                    );
-              },
-              child: const Text('잘못된 이미지'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                ref.read(labcurityServiceProvider).embedImage(
-                      Uint8List.fromList([1, 2, 3]), // 손상된 이미지 데이터
-                      const LabcurityImageConfig(size: -1), // 잘못된 설정
-                    );
-              },
-              child: const Text('잘못된 설정'),
-            ),
-          ],
-        ),
       ],
     );
   }

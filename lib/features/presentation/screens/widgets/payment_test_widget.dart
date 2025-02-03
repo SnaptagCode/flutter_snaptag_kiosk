@@ -181,36 +181,6 @@ class PaymentTestWidget extends ConsumerWidget {
                   ),
                 ],
                 const Divider(),
-                Text('에러 테스트', style: Theme.of(context).textTheme.titleMedium),
-                Wrap(
-                  spacing: 8,
-                  children: [
-                    ElevatedButton(
-                      onPressed: () {
-                        ref.read(paymentRepositoryProvider).approve(
-                              totalAmount: -1, // 잘못된 금액으로 에러 유발
-                            );
-                      },
-                      child: const Text('승인 실패'),
-                    ),
-                    ElevatedButton(
-                      onPressed: () {
-                        ref.read(paymentRepositoryProvider).cancel(
-                              totalAmount: 1000,
-                              originalApprovalNo: "invalid",
-                              originalApprovalDate: "invalid",
-                            );
-                      },
-                      child: const Text('취소 실패'),
-                    ),
-                    ElevatedButton(
-                      onPressed: () {
-                        throw Exception('강제 네트워크 에러');
-                      },
-                      child: const Text('네트워크 에러'),
-                    ),
-                  ],
-                ),
               ],
             ),
           ),
@@ -222,11 +192,7 @@ class PaymentTestWidget extends ConsumerWidget {
               title: const Text('승인 정보'),
               subtitle: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('승인번호: ${approvalInfo.approvalNo}'),
-                  Text('승인일자: ${approvalInfo.tradeTime}'),
-                  Text('거래고유번호: ${approvalInfo.tradeUniqueNo}'),
-                ],
+                children: [Text(approvalInfo.toString())],
               ),
             ),
           ),
