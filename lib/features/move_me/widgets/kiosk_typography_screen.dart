@@ -44,23 +44,28 @@ class _TypographyDisplay extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
+              ColoredBox(
+                color: context.theme.colorScheme.primary.withOpacity(0.3),
+                child: Text.rich(
+                  TextSpan(
+                    text: '$name : ',
+                    children: <TextSpan>[
+                      TextSpan(
+                        text: 'sub01_btn_done'.tr(),
+                      ),
+                    ],
+                  ),
+                  style: style,
+                ),
+              ),
               Text.rich(
                 TextSpan(
-                  text: '$name : ',
-                  children: <TextSpan>[
-                    TextSpan(
-                      text: 'sub01_btn_done'.tr(),
-                    ),
-                    TextSpan(
-                      text: '\n\nSize: ${style.fontSize?.toStringAsFixed(1)}sp, '
-                          'Weight: ${style.fontWeight}, '
-                          'Height: ${style.height?.toStringAsFixed(1)}, '
-                          'Letter Spacing: ${style.letterSpacing?.toStringAsFixed(2)}',
-                      style: context.theme.textTheme.bodySmall,
-                    ),
-                  ],
+                  text: 'Size: ${style.fontSize?.toStringAsFixed(1)}sp, '
+                      'Weight: ${style.fontWeight}, '
+                      'Height: ${style.height?.toStringAsFixed(1)}, '
+                      'Letter Spacing: ${style.letterSpacing?.toStringAsFixed(2)}',
+                  style: context.theme.textTheme.bodySmall,
                 ),
-                style: style,
               ),
             ],
           ),

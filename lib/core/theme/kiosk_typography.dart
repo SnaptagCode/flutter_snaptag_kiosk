@@ -87,7 +87,6 @@ class KioskTypography extends ThemeExtension<KioskTypography> {
       fontSize: 40.sp,
       fontWeight: FontWeight.w700,
       letterSpacing: -0.4,
-      height: 1.0,
     ),
     kioskInput3B: TextStyle(
       fontSize: 30.sp,

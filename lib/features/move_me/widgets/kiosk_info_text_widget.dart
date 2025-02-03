@@ -15,30 +15,28 @@ class KioskInfoTextWidget extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Text(
-          'Kiosk ID: ${info.kioskMachineId}',
-          style: Theme.of(context).textTheme.headlineMedium,
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              children: [
+                Text(
+                  'KioskID ${info.kioskMachineId} - EventID ${info.kioskEventId}',
+                  style: Theme.of(context).textTheme.headlineSmall,
+                ),
+                Text(
+                  '${info.kioskMachineName} - ${info.kioskMachineDescription}',
+                  style: Theme.of(context).textTheme.headlineSmall,
+                ),
+                Text(
+                  '${info.printedEventName} - ${info.photoCardPrice}',
+                  style: Theme.of(context).textTheme.headlineSmall,
+                ),
+              ],
+            ),
+          ),
         ),
-        Text(
-          'Name: ${info.kioskMachineName}',
-          style: Theme.of(context).textTheme.headlineMedium,
-        ),
-        Text(
-          'Description: ${info.kioskMachineDescription}',
-          style: Theme.of(context).textTheme.headlineMedium,
-        ),
-        Text(
-          'Event ID: ${info.kioskEventId}',
-          style: Theme.of(context).textTheme.headlineMedium,
-        ),
-        Text(
-          'Price: ${info.photoCardPrice}',
-          style: Theme.of(context).textTheme.headlineMedium,
-        ),
-        Text(
-          'Printed Event Name: ${info.printedEventName}',
-          style: Theme.of(context).textTheme.headlineMedium,
-        ),
+        Row(),
         Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.center,

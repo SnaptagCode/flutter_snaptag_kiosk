@@ -12,7 +12,9 @@ class KioskInfoScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Kiosk Info'),
+        title: const Text('이벤트 미리보기'),
+        backgroundColor: Colors.white.withOpacity(0.7),
+        shadowColor: Colors.transparent,
         actions: [
           IconButton(
             onPressed: () {
@@ -23,7 +25,6 @@ class KioskInfoScreen extends ConsumerWidget {
         ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
         child: Column(
           children: [
             Image.network(info.topBannerUrl),
