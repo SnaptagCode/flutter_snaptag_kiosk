@@ -89,7 +89,7 @@ class PrintService extends _$PrintService {
     try {
       final response = await ImageHelper().getImageBytes(backPhoto.formattedBackPhotoCardUrl);
 
-      final processedImage = await ref.read(labcurityServiceProvider).embedImage(
+      final File processedImage = await ref.read(labcurityServiceProvider).embedImage(
             response.data,
             LabcurityImageConfig(
               size: 3,
@@ -103,14 +103,7 @@ class PrintService extends _$PrintService {
             ),
           );
 
-      if (processedImage == null) {
-        throw Exception('Failed to process back image with Labcurity');
-      }
-
-      final tempFile = File('${DateTime.now().millisecondsSinceEpoch}_processed.png');
-      await tempFile.writeAsBytes(processedImage);
-
-      return tempFile;
+      return processedImage;
     } catch (e) {
       throw Exception('Failed to prepare back image: ${e.toString()}');
     }

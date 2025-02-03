@@ -22,7 +22,7 @@ class LabcurityService {
 
   LabcurityService(this._library);
 
-  Future<Uint8List?> embedImage(Uint8List imageBytes, [LabcurityImageConfig? config]) async {
+  Future<File> embedImage(Uint8List imageBytes, [LabcurityImageConfig? config]) async {
     config ??= const LabcurityImageConfig();
 
     final extension = _getImageExtension(imageBytes);
@@ -65,7 +65,7 @@ class LabcurityService {
       if (result == 0) {
         final outputFile = File(outputFilePath);
         if (await outputFile.exists()) {
-          return await outputFile.readAsBytes();
+          return outputFile;
         }
       }
       throw Exception('Failed to process image. Error code: $result');
@@ -81,8 +81,8 @@ class LabcurityService {
     }
   }
 
-  Future<void> _cleanupFiles(String inputFilePath) async {
-    final inputFile = File(inputFilePath);
+  Future<void> _cleanupFiles(String filePath) async {
+    final inputFile = File(filePath);
     if (await inputFile.exists()) {
       await inputFile.delete();
     }
