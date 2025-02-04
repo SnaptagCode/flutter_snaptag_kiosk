@@ -26,8 +26,19 @@ class PaymentApiClient {
 
     // EUC-KR 디코딩
     final decode = cp949.decodeString(broken);
-    final paymentResponse = json.decode(decode)..addAll({'ksnet': '$callback($decode)'});
+    final trim = trimValues(json.decode(decode));
+    final paymentResponse = trim..addAll({'KSNET': '$callback($trim)'});
     logger.d(paymentResponse);
     return PaymentResponse.fromJson(paymentResponse);
+  }
+
+  // 모든 String 값의 공백을 trim
+  Map<String, dynamic> trimValues(Map<String, dynamic> json) {
+    return json.map((key, value) {
+      if (value is String) {
+        return MapEntry(key, value.trim());
+      }
+      return MapEntry(key, value);
+    });
   }
 }

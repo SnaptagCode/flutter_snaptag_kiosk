@@ -17,29 +17,23 @@ class PaymentService extends _$PaymentService {
       final orderResponse = await _createOrder();
       ref.read(createOrderInfoProvider.notifier).update(orderResponse);
 
-      try {
-        // 3. 결제 승인
-        final paymentResponse = await _approvePayment(ref.read(storageServiceProvider).settings.photoCardPrice);
+      // 3. 결제 승인
 
-        if (!paymentResponse.isSuccess) {
-          throw Exception('Payment failed: ${paymentResponse.errorMessage} (${paymentResponse.res})');
-        }
-        ref.read(paymentResponseStateProvider.notifier).update(paymentResponse);
+      final Invoice invoice = Invoice.calculate(ref.read(storageServiceProvider).settings.photoCardPrice);
+      final paymentResponse = await ref.read(paymentRepositoryProvider).approve(
+            totalAmount: invoice.total,
+          );
 
-        // 4. 주문 상태 업데이트
-        final response = await _updateOrder(OrderStatus.completed);
-
-        // 5. 프린트 정보 업데이트 (completed 상태일 때만)
-        if (response.status == OrderStatus.completed) {
-          ref.read(backPhotoForPrintInfoProvider.notifier).update(response.backPhotoForPrint);
-        }
-      } catch (e) {
-        await _updateOrder(OrderStatus.failed);
-        rethrow;
-      }
+      ref.read(paymentResponseStateProvider.notifier).update(paymentResponse);
     } catch (e) {
       logger.e('Payment process failed', error: e);
       rethrow;
+    } finally {
+      final response = await _updateOrder();
+      // 5. 프린트 정보 업데이트 (completed 상태일 때만)
+      if (response.status == OrderStatus.completed && response.backPhotoForPrint != null) {
+        ref.read(backPhotoForPrintInfoProvider.notifier).update(response.backPhotoForPrint!);
+      }
     }
   }
 
@@ -55,12 +49,11 @@ class PaymentService extends _$PaymentService {
             originalApprovalNo: approvalInfo.approvalNo ?? '',
             originalApprovalDate: approvalInfo.tradeTime?.substring(0, 6) ?? '',
           );
-
-      await _updateOrder(OrderStatus.refunded);
     } catch (e) {
       logger.e('Refund failed', error: e);
-      await _updateOrder(OrderStatus.refunded_failed);
       rethrow;
+    } finally {
+      await _updateOrder();
     }
   }
 
@@ -94,18 +87,7 @@ class PaymentService extends _$PaymentService {
     return await ref.read(kioskRepositoryProvider).createOrderStatus(request);
   }
 
-  Future<PaymentResponse> _approvePayment(int total) async {
-    try {
-      final Invoice invoice = Invoice.calculate(total);
-      return await ref.read(paymentRepositoryProvider).approve(
-            totalAmount: invoice.total,
-          );
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  Future<UpdateOrderResponse> _updateOrder(OrderStatus status) async {
+  Future<UpdateOrderResponse> _updateOrder() async {
     try {
       final settings = ref.watch(storageServiceProvider).settings;
       final backPhoto = ref.watch(verifyPhotoCardProvider).value;
@@ -116,13 +98,13 @@ class PaymentService extends _$PaymentService {
         kioskMachineId: settings.kioskMachineId,
         photoAuthNumber: backPhoto?.photoAuthNumber ?? '',
         amount: settings.photoCardPrice,
-        status: status,
+        status: approval?.orderState ?? OrderStatus.failed,
         approvalNumber: approval?.approvalNo ?? '',
         purchaseAuthNumber: approval?.approvalNo ?? '',
         uniqueNumber: approval?.approvalNo ?? '',
         authSeqNumber: approval?.tradeUniqueNo ?? '',
         tradeNumber: approval?.tradeUniqueNo ?? '',
-        detail: approval?.toJson().toString() ?? '',
+        detail: approval?.KSNET.toString() ?? '{}',
       );
 
       final orderId = ref.watch(createOrderInfoProvider)?.orderId;

@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_snaptag_kiosk/lib.dart';
+import 'package:flutter_snaptag_kiosk/core/errors/server_exception.dart';
+import 'package:flutter_snaptag_kiosk/core/utils/logger_service.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
 final dioProvider = Provider.family<Dio, String>((ref, baseUrl) {
@@ -18,18 +19,18 @@ final dioProvider = Provider.family<Dio, String>((ref, baseUrl) {
     // Response를 받은 후에 실행됩니다.
     // 예를 들어, 상태 코드에 따라 오류 처리를 할 수 있습니다.
     onResponse: (Response response, ResponseInterceptorHandler handler) {
-      if (response.statusCode == 200) {
-        return handler.next(response);
-      } else {
+      logger.d('${response.statusCode} \n${response.data}');
+      if (response.statusCode != null && response.statusCode! ~/ 100 != 2) {
         final newError = DioException(
           requestOptions: response.requestOptions,
           response: response,
-          message: response.data!['message'], //표시할 메시지
+          message: response.data!['message'], // 표시할 메시지
           error: response.data!['code'], // 사용자 정의 오류 메시지
         );
         // interceptor onError로 전달
         return handler.reject(newError, true);
       }
+      return handler.next(response);
     },
     // Error가 발생했을 때 실행됩니다.
     // 예를 들어, 네트워크 오류 처리를 할 수 있습니다.
