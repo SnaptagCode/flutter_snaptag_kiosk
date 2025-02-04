@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
@@ -25,24 +27,17 @@ class PaymentResponse with _$PaymentResponse {
     @JsonKey(name: 'KSNET') String? ksnet,
   }) = _PaymentResponse;
 
-  factory PaymentResponse.fromJson(Map<String, dynamic> json) => _$PaymentResponseFromJson(_trimValues(json));
-
-  bool get isSuccess => res == '0000';
-
-  String get errorMessage => msg?.trim() ?? '결제 처리 중 오류가 발생했습니다.';
-}
-
-// 모든 String 값의 공백을 trim
-Map<String, dynamic> _trimValues(Map<String, dynamic> json) {
-  return json.map((key, value) {
-    if (value is String) {
-      return MapEntry(key, value.trim());
-    }
-    return MapEntry(key, value);
-  });
+  factory PaymentResponse.fromJson(Map<String, dynamic> json) => _$PaymentResponseFromJson(json);
 }
 
 extension PaymentResponseExtension on PaymentResponse {
+  /// 이미 취소된 거래
+  bool get isAlreadyCanceled => respCode == '7001';
+
+  bool get isSuccess => res == '0000' && respCode == '0000';
+
+  Map<String, dynamic> get KSNET => json.decode(ksnet ?? '{}');
+
   ///
   /// 0: 실패
   ///

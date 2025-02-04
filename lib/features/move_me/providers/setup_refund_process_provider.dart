@@ -7,60 +7,70 @@ part 'setup_refund_process_provider.g.dart';
 @riverpod
 class SetupRefundProcess extends _$SetupRefundProcess {
   @override
-  FutureOr<void> build() {
+  FutureOr<PaymentResponse?> build() {
     return null;
   }
 
   Future<void> startRefund(OrderEntity order) async {
-    state = const AsyncLoading();
     if (order.paymentAuthNumber == null) {
       throw Exception('No payment auth number available');
     }
     if (order.completedAt == null) {
       throw Exception('No completed date available');
     }
-    await AsyncValue.guard(() async {
+
+    try {
       final Invoice invoice = Invoice.calculate(order.amount.toInt());
-      PaymentResponse response = await ref.read(paymentRepositoryProvider).cancel(
-          totalAmount: invoice.total,
-          originalApprovalNo: order.paymentAuthNumber ?? '',
-          originalApprovalDate: DateFormat('yyMMdd').format(order.completedAt!));
+      state = const AsyncValue.loading();
 
-      await _updateOrderStatus(OrderStatus.refunded, order, response);
-    });
+      final response = await ref.read(paymentRepositoryProvider).cancel(
+            totalAmount: invoice.total,
+            originalApprovalNo: order.paymentAuthNumber ?? '',
+            originalApprovalDate: DateFormat('yyMMdd').format(order.completedAt!),
+          );
 
-    if (state.hasError) {
-      /**
-       await updateOrder(
-        OrderStatus.refunded_failed,
-        order,
-      );
-       */
+      // 응답을 상태로 저장
+      state = AsyncValue.data(response);
+    } catch (e) {
+      state = AsyncValue.error(e, StackTrace.current);
+      rethrow;
+    } finally {
+      await _updateOrderStatus(order);
     }
   }
 
-  Future<void> _updateOrderStatus(OrderStatus status, OrderEntity order, PaymentResponse payment) async {
-    state = const AsyncLoading();
-    state = await AsyncValue.guard(() async {
+  Future<void> _updateOrderStatus(OrderEntity order) async {
+    late UpdateOrderRequest request;
+    try {
+      final payment = state.value;
+
       final kioskEventId = ref.watch(storageServiceProvider).settings.kioskEventId;
-      final request = UpdateOrderRequest(
+
+      request = UpdateOrderRequest(
         kioskEventId: kioskEventId,
         kioskMachineId: order.kioskMachineId,
         photoAuthNumber: order.photoAuthNumber,
         amount: order.amount.toInt(),
-        status: status,
-        approvalNumber: payment.approvalNo ?? '',
-        purchaseAuthNumber: payment.approvalNo ?? '',
-        uniqueNumber: payment.approvalNo ?? '',
-        authSeqNumber: payment.tradeUniqueNo ?? '',
-        tradeNumber: payment.tradeUniqueNo ?? '',
-        detail: payment.toJson().toString(),
+        status: payment?.orderState ?? OrderStatus.refunded_failed,
+        approvalNumber: order.paymentAuthNumber ?? '',
+        purchaseAuthNumber: order.paymentAuthNumber ?? '',
+        authSeqNumber: order.paymentAuthNumber ?? '',
+        detail: payment?.KSNET.toString() ?? '{}',
       );
-      final orderId = ref.watch(createOrderInfoProvider)?.orderId;
-      if (orderId == null) {
-        throw Exception('No order id available');
+    } catch (e) {
+      rethrow;
+    } finally {
+      /// 이미 취소된 거래
+      if (state.value?.respCode == '7001') {
+        await ref.read(kioskRepositoryProvider).updateOrderStatus(
+              order.orderId.toInt(),
+              request.copyWith(status: OrderStatus.refunded),
+            );
       }
-      await ref.read(kioskRepositoryProvider).updateOrderStatus(orderId.toInt(), request);
-    });
+      await ref.read(kioskRepositoryProvider).updateOrderStatus(
+            order.orderId.toInt(),
+            request,
+          );
+    }
   }
 }

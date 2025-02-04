@@ -8,7 +8,7 @@ part 'back_photo_for_print.g.dart';
 class BackPhotoForPrint with _$BackPhotoForPrint {
   const factory BackPhotoForPrint({
     required int backPhotoCardId,
-    required int nominatedBackPhotoCardId,
+    @JsonKey(defaultValue: 0) required int nominatedBackPhotoCardId,
     required int kioskEventId,
     required int embeddingProductId,
     required String photoAuthNumber,
