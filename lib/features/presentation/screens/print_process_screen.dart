@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
-import 'package:loader_overlay/loader_overlay.dart';
 
 class PrintProcessScreen extends ConsumerStatefulWidget {
   const PrintProcessScreen({super.key});
@@ -15,24 +14,8 @@ class PrintProcessScreen extends ConsumerStatefulWidget {
 class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
   @override
   Widget build(BuildContext context) {
-    final printProcess = ref.watch(printProcessScreenProviderProvider);
-    if (printProcess.isLoading) {
-      if (!context.loaderOverlay.visible) context.loaderOverlay.show();
-    } else {
-      if (context.loaderOverlay.visible) context.loaderOverlay.hide();
-    }
-
     // listen 부분에서는 로딩 오버레이 처리를 제거
     ref.listen(printProcessScreenProviderProvider, (previous, next) async {
-      if (next.isLoading && !context.loaderOverlay.visible) {
-        context.loaderOverlay.show();
-        return;
-      }
-
-      if (context.loaderOverlay.visible) {
-        context.loaderOverlay.hide();
-      }
-
       if (!next.isLoading) {
         // 로딩이 아닐 때만 처리
         await next.when(
