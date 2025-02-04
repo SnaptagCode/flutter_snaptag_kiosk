@@ -26,8 +26,8 @@ class PaymentApiClient {
 
     // EUC-KR 디코딩
     final decode = cp949.decodeString(broken);
-
-    logger.d(decode);
-    return PaymentResponse.fromJson(json.decode(decode));
+    final paymentResponse = json.decode(decode)..addAll({'ksnet': '$callback($decode)'});
+    logger.d(paymentResponse);
+    return PaymentResponse.fromJson(paymentResponse);
   }
 }
