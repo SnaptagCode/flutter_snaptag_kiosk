@@ -101,9 +101,7 @@ class PaymentService extends _$PaymentService {
         status: approval?.orderState ?? OrderStatus.failed,
         approvalNumber: approval?.approvalNo ?? '',
         purchaseAuthNumber: approval?.approvalNo ?? '',
-        uniqueNumber: approval?.approvalNo ?? '',
-        authSeqNumber: approval?.tradeUniqueNo ?? '',
-        tradeNumber: approval?.tradeUniqueNo ?? '',
+        authSeqNumber: approval?.approvalNo ?? '',
         detail: approval?.KSNET.toString() ?? '{}',
       );
 

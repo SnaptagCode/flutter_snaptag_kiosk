@@ -1,5 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_snaptag_kiosk/domain/entities/invoice.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -63,8 +62,8 @@ class PaymentRepository {
       );
 
       return response;
-    } catch (e, s) {
-      throw Exception('Failed to request payment: $e\n$s');
+    } catch (e) {
+      rethrow;
     }
   }
 }

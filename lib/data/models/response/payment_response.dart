@@ -20,6 +20,8 @@ class PaymentResponse with _$PaymentResponse {
     @JsonKey(name: 'RES') required String res,
     @JsonKey(name: 'RESPCODE') String? respCode,
     @JsonKey(name: 'MSG') String? msg,
+    @JsonKey(name: 'MESSAGE1') String? message1,
+    @JsonKey(name: 'MESSAGE2') String? message2,
     @JsonKey(name: 'TELEGRAMFLAG') String? telegramFlag,
     @JsonKey(name: 'TRADEUNIQUENO') String? tradeUniqueNo,
     @JsonKey(name: 'TRADETIME') String? tradeTime,
@@ -45,7 +47,7 @@ extension PaymentResponseExtension on PaymentResponse {
   ///
   /// 2: 기타 오류
   ///
-  int get status {
+  int get code {
     // RES 코드 체크 (주요 오류 상태)
     switch (res) {
       case '1000':
@@ -108,7 +110,7 @@ extension PaymentResponseExtension on PaymentResponse {
 
   OrderStatus get orderState {
     if (requestType == 1) {
-      switch (status) {
+      switch (code) {
         case 1:
           return OrderStatus.completed;
         case 2:
@@ -117,7 +119,7 @@ extension PaymentResponseExtension on PaymentResponse {
           return OrderStatus.failed;
       }
     } else if (requestType == 2) {
-      switch (status) {
+      switch (code) {
         case 1:
           return OrderStatus.refunded;
         case 2:

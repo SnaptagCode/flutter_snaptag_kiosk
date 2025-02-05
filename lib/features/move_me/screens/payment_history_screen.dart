@@ -15,175 +15,132 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
   @override
   Widget build(BuildContext context) {
     ref.listen(setupRefundProcessProvider, (prev, next) {
-      print('counter changed $next');
+      next.whenOrNull(
+        error: (error, stack) async {
+          await DialogHelper.showRefundFailDialog(context);
+        },
+        data: (response) async {
+          if (response != null && response.code == 1) {
+            await DialogHelper.showRefundSuccessDialog(context);
+          } else if (response != null) {
+            await DialogHelper.showRefundFailDialog(context);
+          }
+        },
+      );
     });
-
     final ordersPage = ref.watch(ordersPageProvider());
-    final themeData = ThemeData(
-      colorSchemeSeed: Colors.amberAccent,
-      brightness: Brightness.light,
-    );
 
-    return Theme(
-      data: themeData,
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('출력 내역'),
-          centerTitle: true,
-          scrolledUnderElevation: 0,
-        ),
-        body: ordersPage.when(
-          data: (response) {
-            return Column(
-              children: [
-                SizedBox(
-                  width: 438.w,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Text(
-                        DateFormat('yyyy.MM.dd').format(DateTime.now()),
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: Color(0xFF1C1C1C),
-                          fontSize: 32.sp,
-                          fontWeight: FontWeight.w700,
+    return Scaffold(
+      backgroundColor: Color(0xFFF2F2F2),
+      appBar: AppBar(
+        title: const Text('출력 내역'),
+      ),
+      body: ordersPage.when(
+        data: (response) {
+          return Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              SizedBox(
+                height: 130.w,
+              ),
+              SizedBox(
+                width: 438.w,
+                child: DateWidget(),
+              ),
+              SizedBox(
+                height: 60.w,
+              ),
+              DataTable(
+                columnSpacing: 15.0,
+                horizontalMargin: 0,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8.r),
+                ),
+                headingTextStyle: TextStyle(
+                  color: Color(0xFF757575),
+                  fontSize: 18.sp,
+                ),
+                headingRowColor: WidgetStateColor.resolveWith(
+                  (states) => Color(0xFFF6F7F8),
+                ),
+                dataTextStyle: TextStyle(
+                  color: Color(0xFF414448),
+                  fontSize: 16.sp,
+                ),
+                columns: columns,
+                rows: response.list.map((order) {
+                  return DataRow(
+                    color: WidgetStateColor.resolveWith((states) => Colors.white),
+                    cells: [
+                      DataCell(
+                        Center(
+                          child: Text(
+                            order.completedAt != null
+                                ? DateFormat('yyyy.MM.dd hh:mm').format(
+                                    order.completedAt!,
+                                  )
+                                : '',
+                          ),
                         ),
                       ),
-                      Container(
-                        padding: const EdgeInsets.only(top: 4, left: 2, right: 1, bottom: 4),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Text(
-                              '-',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: Color(0xFF1C1C1C),
-                                fontSize: 32.sp,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ],
+                      DataCell(
+                        Center(
+                          child: Text(
+                            order.eventName.length > 20 ? '${order.eventName.substring(0, 20)}...' : order.eventName,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
                       ),
-                      Text(
-                        DateFormat('yyyy.MM.dd').format(DateTime.now().subtract(const Duration(days: 14))),
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: Color(0xFF1C1C1C),
-                          fontSize: 32.sp,
-                          fontWeight: FontWeight.w700,
-                        ),
+                      DataCell(
+                        Center(child: Text(NumberFormat('#,###').format(order.amount.toInt()))),
+                      ),
+                      DataCell(
+                        Center(child: Text(_getOrderState(order.orderStatus))),
+                      ),
+                      DataCell(
+                        Center(child: _getRefundWidget(context, order)),
+                      ),
+                      DataCell(
+                        Center(child: Text(isPrinted(order.printedStatus) ? 'O' : 'X')),
+                      ),
+                      DataCell(
+                        Center(child: Text(order.photoAuthNumber)),
+                      ),
+                      DataCell(
+                        Center(child: Text(order.paymentAuthNumber ?? '')),
                       ),
                     ],
-                  ),
-                ),
-                Padding(
-                  padding: EdgeInsets.all(16.r),
-                  child: Card(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(8.r)),
-                      side: BorderSide(width: 1, color: Color(0xFFE6E8EB)),
-                    ),
-                    child: SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: DataTable(
-                        decoration: BoxDecoration(
-                          color: Color(0xFFF6F7F8),
-                          borderRadius: BorderRadius.circular(8.r),
-                        ),
-                        headingTextStyle: TextStyle(
-                          color: Color(0xFF757575),
-                          fontSize: 18.sp,
-                        ),
-                        dataTextStyle: TextStyle(
-                          color: Color(0xFF414448),
-                          fontSize: 16.sp,
-                        ),
-                        columns: columns,
-                        rows: response.list.map((order) {
-                          return DataRow(
-                            color: WidgetStateColor.resolveWith((states) => Colors.white),
-                            cells: [
-                              DataCell(
-                                Center(
-                                  child: Text(
-                                    order.completedAt != null
-                                        ? DateFormat('yyyy.MM.dd hh:mm').format(
-                                            order.completedAt!,
-                                          )
-                                        : '',
-                                  ),
-                                ),
-                              ),
-                              DataCell(
-                                Center(
-                                  child: Text(
-                                    order.eventName.length > 20
-                                        ? '${order.eventName.substring(0, 20)}...'
-                                        : order.eventName,
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                              ),
-                              DataCell(
-                                Center(child: Text(NumberFormat('#,###').format(order.amount.toInt()))),
-                              ),
-                              DataCell(
-                                Center(child: Text(_getOrderState(order.orderStatus))),
-                              ),
-                              DataCell(
-                                Center(child: _getRefundWidget(context, order)),
-                              ),
-                              DataCell(
-                                Center(child: Text(isPrinted(order.printedStatus) ? 'O' : 'X')),
-                              ),
-                              DataCell(
-                                Center(child: Text(order.photoAuthNumber)),
-                              ),
-                              DataCell(
-                                Center(child: Text(order.paymentAuthNumber ?? '')),
-                              ),
-                            ],
-                          );
-                        }).toList(),
-                      ),
-                    ),
-                  ),
-                ),
-                PaginationControls(
-                  currentPage: response.paging.currentPage,
-                  totalPages: (response.paging.totalCount / response.paging.pageSize).ceil(),
-                  onPageChanged: (newPage) {
-                    ref.read(ordersPageProvider().notifier).goToPage(newPage);
-                  },
-                ),
-              ],
-            );
-          },
-          loading: () => Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const CircularProgressIndicator(),
-                const SizedBox(height: 16),
-                Text(
-                  'Loading orders...',
-                  style: Theme.of(context).textTheme.bodyLarge,
-                ),
-              ],
-            ),
+                  );
+                }).toList(),
+              ),
+              PaginationControls(
+                currentPage: response.paging.currentPage,
+                totalPages: (response.paging.totalCount / response.paging.pageSize).ceil(),
+                onPageChanged: (newPage) {
+                  ref.read(ordersPageProvider().notifier).goToPage(newPage);
+                },
+              ),
+            ],
+          );
+        },
+        loading: () => Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const CircularProgressIndicator(),
+              const SizedBox(height: 16),
+              Text(
+                'Loading orders...',
+                style: Theme.of(context).textTheme.bodyLarge,
+              ),
+            ],
           ),
-          error: (error, stack) => GeneralErrorWidget(
-            exception: error as Exception,
-            onRetry: () => ref.refresh(ordersPageProvider()),
-          ),
+        ),
+        error: (error, stack) => GeneralErrorWidget(
+          exception: error as Exception,
+          onRetry: () => ref.refresh(ordersPageProvider()),
         ),
       ),
     );
@@ -363,6 +320,50 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
   }
 }
 
+class DateWidget extends StatelessWidget {
+  const DateWidget({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Text(
+          DateFormat('yyyy.MM.dd').format(DateTime.now()),
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: Color(0xFF1C1C1C),
+            fontSize: 32.sp,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        Text(
+          '-',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: Color(0xFF1C1C1C),
+            fontSize: 32.sp,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        Text(
+          DateFormat('yyyy.MM.dd').format(DateTime.now().subtract(const Duration(days: 14))),
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: Color(0xFF1C1C1C),
+            fontSize: 32.sp,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 // PaginationControls 위젯은 이전과 동일
 class PaginationControls extends StatelessWidget {
   final int currentPage;
@@ -385,22 +386,22 @@ class PaginationControls extends StatelessWidget {
 
       for (int i = startPage; i <= endPage; i++) {
         buttons.add(
-          InkWell(
-            onTap: i != currentPage ? () => onPageChanged(i) : null,
-            child: Chip(
-              label: Text(
-                i.toString(),
-                style: TextStyle(
-                  color: i == currentPage ? Colors.white : Colors.black,
-                  fontSize: 14,
-                ),
-              ),
-              backgroundColor: i == currentPage ? Color(0xFFA671EA) : Colors.transparent,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(4),
-                side: BorderSide(color: Colors.transparent),
+          ActionChip(
+            padding: EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+            labelPadding: EdgeInsets.zero,
+            label: Text(
+              i.toString(),
+              style: TextStyle(
+                color: i == currentPage ? Colors.white : Colors.black,
+                fontSize: 14,
               ),
             ),
+            backgroundColor: i == currentPage ? Color(0xFFA671EA) : Color(0xFFF2F2F2),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(4),
+              side: BorderSide(color: Colors.transparent),
+            ),
+            onPressed: () => onPageChanged(i),
           ),
         );
       }
