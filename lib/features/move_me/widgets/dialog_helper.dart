@@ -230,7 +230,7 @@ class DialogHelper {
   }
 
   static Future<void> showPurchaseFailedDialog(BuildContext context, {Exception? exception}) async {
-    final error = exception.toString().isNotEmpty ? '\n\n${exception.toString()}' : null;
+    final error = exception != null && F.appFlavor == Flavor.dev ? '\n\n${exception.toString()}' : null;
     await _showOneButtonKioskDialog(
       context,
       title: LocaleKeys.alert_title_purchase_failure.tr(),
@@ -240,7 +240,7 @@ class DialogHelper {
   }
 
   static Future<bool> showPrintErrorDialog(BuildContext context, {Exception? exception}) async {
-    final error = exception.toString().isNotEmpty ? '\n\n${exception.toString()}' : null;
+    final error = exception != null && F.appFlavor == Flavor.dev ? '\n\n${exception.toString()}' : null;
     return await _showOneButtonKioskDialog(
       context,
       title: LocaleKeys.alert_title_print_failure.tr(),
