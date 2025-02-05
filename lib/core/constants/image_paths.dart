@@ -42,4 +42,8 @@ class SnaptagSvg {
   static const String error = 'assets/icons/error.svg';
 
   static const String success = 'assets/icons/success.svg';
+
+  static const String refresh = 'assets/icons/refresh.svg';
+
+  static const String arrowBack = 'assets/icons/arrow_back.svg';
 }

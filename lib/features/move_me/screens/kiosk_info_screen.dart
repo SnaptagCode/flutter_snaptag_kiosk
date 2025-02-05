@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class KioskInfoScreen extends ConsumerWidget {
   const KioskInfoScreen({super.key});
@@ -10,6 +12,13 @@ class KioskInfoScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
+        leading: IconButton(
+          padding: EdgeInsets.only(left: 30.w),
+          icon: SvgPicture.asset(SnaptagSvg.arrowBack),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
         title: const Text('이벤트 미리보기'),
         excludeHeaderSemantics: false,
         backgroundColor: Colors.white.withOpacity(0.7),
@@ -22,7 +31,9 @@ class KioskInfoScreen extends ConsumerWidget {
                 await ref.read(asyncKioskInfoProvider.notifier).refresh();
               }
             },
-            icon: const Icon(Icons.refresh),
+            icon: SvgPicture.asset(
+              'assets/icons/refresh.svg',
+            ),
           ),
         ],
       ),

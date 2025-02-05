@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
+import 'package:flutter_svg/svg.dart';
 
 class PaymentHistoryScreen extends ConsumerStatefulWidget {
   const PaymentHistoryScreen({super.key});
@@ -33,6 +34,13 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
     return Scaffold(
       backgroundColor: Color(0xFFF2F2F2),
       appBar: AppBar(
+        leading: IconButton(
+          padding: EdgeInsets.only(left: 30.w),
+          icon: SvgPicture.asset(SnaptagSvg.arrowBack),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
         title: const Text('출력 내역'),
       ),
       body: ordersPage.when(

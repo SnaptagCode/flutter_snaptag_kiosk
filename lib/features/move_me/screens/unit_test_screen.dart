@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
+import 'package:flutter_svg/svg.dart';
 
 class UnitTestScreen extends ConsumerStatefulWidget {
   const UnitTestScreen({super.key});
@@ -13,7 +15,15 @@ class _UnitTestScreenState extends ConsumerState<UnitTestScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(
+        leading: IconButton(
+          padding: EdgeInsets.only(left: 30.w),
+          icon: SvgPicture.asset(SnaptagSvg.arrowBack),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
