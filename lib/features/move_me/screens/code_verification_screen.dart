@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_snaptag_kiosk/core/providers/sound_provider.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
-import 'package:just_audio/just_audio.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 
 class CodeVerificationScreen extends ConsumerWidget {
@@ -52,11 +51,7 @@ class CodeVerificationScreen extends ConsumerWidget {
           LocaleKeys.sub01_txt_01.tr(),
           style: context.typography.kioskBody1B,
         ),
-        ...[
-          LocaleKeys.sub01_txt_02.tr().isNotEmpty
-              ? SizedBox(height: 12.h)
-              : SizedBox(height: 0)
-        ],
+        ...[LocaleKeys.sub01_txt_02.tr().isNotEmpty ? SizedBox(height: 12.h) : SizedBox(height: 0)],
         Text(
           LocaleKeys.sub01_txt_02.tr(),
           style: context.typography.kioskBody1B,
@@ -104,8 +99,7 @@ class _InputDisplay extends ConsumerWidget {
                   child: Text(
                     keypadState,
                     textAlign: TextAlign.center,
-                    style: context.typography.kioskInput1B
-                        .copyWith(color: Colors.black),
+                    style: context.typography.kioskInput1B.copyWith(color: Colors.black),
                   ),
                 ),
               ]),
