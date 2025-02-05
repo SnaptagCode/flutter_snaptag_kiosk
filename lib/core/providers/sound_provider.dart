@@ -1,15 +1,8 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_snaptag_kiosk/core/constants/image_paths.dart';
-import 'package:just_audio/just_audio.dart';
-
-final beepPlayingProvider = FutureProvider<void>((ref) async {
-  final player = AudioPlayer();
-  player.setAsset(SnaptagSounds.beep);
-  player.play();
-});
+import 'package:flutter_soloud/flutter_soloud.dart';
 
 Future<void> playSound() async {
-  final AudioPlayer _audioPlayer = AudioPlayer();
-  _audioPlayer.setAsset(SnaptagSounds.beep);
-  await _audioPlayer.play();
+  final soloud = SoLoud.instance;
+  await soloud.init();
+  final source = await soloud.loadAsset('assets/sounds/blop.mp3');
+  await soloud.play(source);
 }
