@@ -52,7 +52,7 @@ class SetupRefundProcess extends _$SetupRefundProcess {
       approvalNumber: order.paymentAuthNumber ?? '',
       purchaseAuthNumber: order.paymentAuthNumber ?? '',
       authSeqNumber: order.paymentAuthNumber ?? '',
-      detail: payment?.KSNET.toString() ?? '{}',
+      detail: payment?.KSNET ?? '{}',
     );
 
     if (payment?.respCode == '7001') {

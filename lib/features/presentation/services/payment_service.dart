@@ -18,10 +18,9 @@ class PaymentService extends _$PaymentService {
       ref.read(createOrderInfoProvider.notifier).update(orderResponse);
 
       // 3. 결제 승인
-
-      final Invoice invoice = Invoice.calculate(ref.read(storageServiceProvider).settings.photoCardPrice);
+      final price = ref.read(storageServiceProvider).settings.photoCardPrice;
       final paymentResponse = await ref.read(paymentRepositoryProvider).approve(
-            totalAmount: invoice.total,
+            totalAmount: price,
           );
 
       ref.read(paymentResponseStateProvider.notifier).update(paymentResponse);
@@ -43,9 +42,9 @@ class PaymentService extends _$PaymentService {
       if (approvalInfo == null) {
         throw Exception('No payment approval info available');
       }
-
+      final price = ref.read(storageServiceProvider).settings.photoCardPrice;
       await ref.read(paymentRepositoryProvider).cancel(
-            totalAmount: ref.read(storageServiceProvider).settings.photoCardPrice,
+            totalAmount: price,
             originalApprovalNo: approvalInfo.approvalNo ?? '',
             originalApprovalDate: approvalInfo.tradeTime?.substring(0, 6) ?? '',
           );
@@ -102,7 +101,7 @@ class PaymentService extends _$PaymentService {
         approvalNumber: approval?.approvalNo ?? '',
         purchaseAuthNumber: approval?.approvalNo ?? '',
         authSeqNumber: approval?.approvalNo ?? '',
-        detail: approval?.KSNET.toString() ?? '{}',
+        detail: approval?.KSNET ?? '{}',
       );
 
       final orderId = ref.watch(createOrderInfoProvider)?.orderId;

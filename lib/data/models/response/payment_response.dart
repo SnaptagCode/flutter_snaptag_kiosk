@@ -38,7 +38,10 @@ extension PaymentResponseExtension on PaymentResponse {
 
   bool get isSuccess => res == '0000' && respCode == '0000';
 
-  Map<String, dynamic> get KSNET => json.decode(ksnet ?? '{}');
+  String get KSNET {
+    Map<String, dynamic> data = {"KSNET": ksnet};
+    return jsonEncode(data);
+  }
 
   ///
   /// 0: 실패
