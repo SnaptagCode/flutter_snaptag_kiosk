@@ -26,7 +26,9 @@ class KioskShell extends ConsumerWidget {
                 ref.watch(storageServiceProvider).settings.topBannerUrl,
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) {
-                  return const Text('이미지를 찾을 수 없습니다.');
+                  return Center(
+                    child: const Text('이미지를 찾을 수 없습니다.'),
+                  );
                 },
               ),
             ),
@@ -52,6 +54,8 @@ class ContentsShell extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final hasNetworkError = ref.watch(backgroundImageProvider);
+    final settings = ref.watch(storageServiceProvider).settings;
     return LoaderOverlay(
       overlayWidgetBuilder: (dynamic progress) {
         return Center(
@@ -66,12 +70,24 @@ class ContentsShell extends ConsumerWidget {
       },
       child: DecoratedBox(
         decoration: BoxDecoration(
-          image: DecorationImage(
-            image: NetworkImage(
-              ref.watch(storageServiceProvider).settings.mainImageUrl,
-            ),
-            fit: BoxFit.cover,
-          ),
+          image: !hasNetworkError
+              ? DecorationImage(
+                  image: NetworkImage(settings.mainImageUrl),
+                  onError: (Object e, StackTrace? stackTrace) {
+                    debugPrint(
+                      "Could not load the network image, showing fallback instead. Error: ${e.toString()}",
+                    );
+                    if (stackTrace != null) {
+                      debugPrint(stackTrace.toString());
+                    }
+                    ref.read(backgroundImageProvider.notifier).setNetworkError();
+                  },
+                  fit: BoxFit.cover,
+                )
+              : DecorationImage(
+                  image: const AssetImage('assets/images/fallback_body.jpg'),
+                  fit: BoxFit.cover,
+                ),
         ),
         child: Column(
           children: [
