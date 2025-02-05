@@ -9,17 +9,17 @@ import 'printer_bindings.dart';
 
 part 'card_printer.g.dart';
 
-enum PrinterStatus { ready, busy, error }
+enum LucaPrinterStatus { ready, busy, error }
 
 @Riverpod(keepAlive: true)
-class PrinterState extends _$PrinterState {
+class PrinterService extends _$PrinterService {
   late final PrinterBindings _bindings;
 
   @override
-  FutureOr<PrinterStatus> build() async {
+  FutureOr<LucaPrinterStatus> build() async {
     _bindings = PrinterBindings();
     await _initializePrinter();
-    return PrinterStatus.ready;
+    return LucaPrinterStatus.ready;
   }
 
   Future<void> _initializePrinter() async {
@@ -114,7 +114,7 @@ class PrinterState extends _$PrinterState {
       logger.d('7. Ejecting card...');
       _bindings.ejectCard();
 
-      state = const AsyncValue.data(PrinterStatus.ready);
+      state = const AsyncValue.data(LucaPrinterStatus.ready);
     } catch (e, stack) {
       logger.d('Print error: $e\nStack: $stack');
       state = AsyncValue.error(e, stack);
@@ -144,6 +144,7 @@ class PrinterState extends _$PrinterState {
       height: 0,
       noAbsoluteBlack: true,
     );
+
     logger.d('Committing canvas...');
     buffer.write(_commitCanvas());
   }

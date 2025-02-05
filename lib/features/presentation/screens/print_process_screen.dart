@@ -14,8 +14,28 @@ class PrintProcessScreen extends ConsumerStatefulWidget {
 class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
   @override
   Widget build(BuildContext context) {
+    /**
+         final printProcess = ref.watch(printProcessScreenProviderProvider);
+    if (printProcess.isLoading) {
+      if (!context.loaderOverlay.visible) context.loaderOverlay.show();
+    } else {
+      if (context.loaderOverlay.visible) context.loaderOverlay.hide();
+    }
+     */
+
     // listen 부분에서는 로딩 오버레이 처리를 제거
     ref.listen(printProcessScreenProviderProvider, (previous, next) async {
+      /**
+            if (next.isLoading && !context.loaderOverlay.visible) {
+        context.loaderOverlay.show();
+        return;
+      }
+
+      if (context.loaderOverlay.visible) {
+        context.loaderOverlay.hide();
+      }
+       */
+
       if (!next.isLoading) {
         // 로딩이 아닐 때만 처리
         await next.when(
@@ -31,8 +51,9 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
 
             await DialogHelper.showPrintErrorDialog(
               context,
-              exception: Exception(error.toString()),
+              exception: error is Exception ? error : null,
             );
+            PhotoCardUploadRouteData().go(context);
           },
           loading: () => null,
           data: (_) async {

@@ -125,7 +125,7 @@ class PrintService extends _$PrintService {
       throw Exception('No payment approval info available');
     }
 
-    final printerState = ref.read(printerStateProvider);
+    final printerState = ref.read(printerServiceProvider);
     if (printerState.hasError) {
       throw Exception('Printer is not ready');
     }
@@ -173,7 +173,7 @@ class PrintService extends _$PrintService {
     required File embedded,
   }) async {
     try {
-      await ref.read(printerStateProvider.notifier).printImage(
+      await ref.read(printerServiceProvider.notifier).printImage(
             frontImagePath: frontPhotoPath,
             embeddedFile: embedded,
           );

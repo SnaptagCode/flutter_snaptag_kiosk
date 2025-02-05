@@ -53,7 +53,7 @@ class ProcessedImage extends _$ProcessedImage {
     await tempFile.writeAsBytes(state.backImage!);
 
     try {
-      await ref.read(printerStateProvider.notifier).printImage(
+      await ref.read(printerServiceProvider.notifier).printImage(
             frontImagePath: state.frontPath!,
             embeddedFile: tempFile,
           );
@@ -75,7 +75,7 @@ class PrintTestWidget extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final processedImages = ref.watch(processedImageProvider);
-    final printerState = ref.watch(printerStateProvider);
+    final printerState = ref.watch(printerServiceProvider);
     final canPrint = processedImages.frontPath != null && processedImages.backImage != null && !printerState.isLoading;
 
     return Column(
@@ -147,7 +147,7 @@ class PrintTestWidget extends ConsumerWidget {
                 ),
                 IconButton(
                   icon: const Icon(Icons.refresh),
-                  onPressed: () => ref.refresh(printerStateProvider),
+                  onPressed: () => ref.refresh(printerServiceProvider),
                 ),
               ],
             ),
