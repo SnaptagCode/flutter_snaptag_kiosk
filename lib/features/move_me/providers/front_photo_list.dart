@@ -59,15 +59,14 @@ class FrontPhotoList extends _$FrontPhotoList {
     try {
       await ref.read(imageStorageProvider).clearDirectory(DirectoryPaths.frontImages);
 
-      final yamlRepo = ref.read(storageServiceProvider);
-      final currentSettings = yamlRepo.settings;
+      final kioskEventId = ref.read(storageServiceProvider).settings.kioskEventId;
 
-      if (currentSettings.kioskEventId == 0) {
+      if (kioskEventId == 0) {
         throw KioskException(KioskErrorType.missingEventId);
       }
       // API를 통해 이미지 목록 가져오기
       final kioskRepo = ref.read(kioskRepositoryProvider);
-      final NominatedPhotoList response = await kioskRepo.getFrontPhotoList(currentSettings.kioskEventId);
+      final NominatedPhotoList response = await kioskRepo.getFrontPhotoList(kioskEventId);
       final data = await _saveImages(response);
       state = data;
     } catch (e) {

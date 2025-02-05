@@ -11,43 +11,36 @@ class App extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(routerProvider);
-    final kioskInfo = ref.watch(asyncKioskInfoProvider);
-    return kioskInfo.when(
-      data: (info) {
-        final theme = ref.watch(themeNotifierProvider);
-        return theme.when(
-          data: (themeData) => MaterialApp.router(
-            debugShowCheckedModeBanner: false,
-            localizationsDelegates: context.localizationDelegates,
-            supportedLocales: context.supportedLocales,
-            locale: context.locale,
-            themeMode: ThemeMode.light,
-            theme: themeData.copyWith(
-              //XXX : 삭제 금지 - extensions를 추가로 등록해주지 않으면 themeNotifierProvider영역에서 등록된 extensions는 누락됨
-              extensions: [
-                ...themeData.extensions.values,
-              ],
-            ),
-            routerConfig: router,
-            scrollBehavior: const MaterialScrollBehavior().copyWith(
-              scrollbars: false,
-              dragDevices: {
-                PointerDeviceKind.mouse,
-                PointerDeviceKind.touch,
-              },
-            ),
-            builder: (context, child) {
-              return _flavorBanner(
-                child: child!,
-                ref: ref,
-                show: F.appFlavor == Flavor.dev,
-              );
-            },
-          ),
-          loading: () => const _LoadingApp(),
-          error: (error, stack) => _ErrorApp(error: error),
-        );
-      },
+    final theme = ref.watch(themeNotifierProvider);
+    return theme.when(
+      data: (themeData) => MaterialApp.router(
+        debugShowCheckedModeBanner: false,
+        localizationsDelegates: context.localizationDelegates,
+        supportedLocales: context.supportedLocales,
+        locale: context.locale,
+        themeMode: ThemeMode.light,
+        theme: themeData.copyWith(
+          //XXX : 삭제 금지 - extensions를 추가로 등록해주지 않으면 themeNotifierProvider영역에서 등록된 extensions는 누락됨
+          extensions: [
+            ...themeData.extensions.values,
+          ],
+        ),
+        routerConfig: router,
+        scrollBehavior: const MaterialScrollBehavior().copyWith(
+          scrollbars: false,
+          dragDevices: {
+            PointerDeviceKind.mouse,
+            PointerDeviceKind.touch,
+          },
+        ),
+        builder: (context, child) {
+          return _flavorBanner(
+            child: child!,
+            ref: ref,
+            show: F.appFlavor == Flavor.dev,
+          );
+        },
+      ),
       loading: () => const _LoadingApp(),
       error: (error, stack) => _ErrorApp(error: error),
     );
@@ -98,27 +91,6 @@ class _ErrorApp extends ConsumerWidget {
       home: Scaffold(
         body: Center(
           child: Builder(builder: (context) {
-            if (error is KioskException) {
-              final kioskError = error as KioskException;
-              return Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text(kioskError.type.value),
-                  FilePathActions(
-                    directory: kioskError.type == KioskErrorType.missingMachineId
-                        ? DirectoryPaths.settings
-                        : DirectoryPaths.frontImages,
-                  ),
-                  ElevatedButton(
-                    onPressed: () {
-                      ref.refresh(asyncKioskInfoProvider);
-                    },
-                    child: Text('Retry'),
-                  ),
-                ],
-              );
-            }
             return GeneralErrorWidget(
               exception: error as Exception,
               onRetry: () => ref.refresh(asyncKioskInfoProvider),

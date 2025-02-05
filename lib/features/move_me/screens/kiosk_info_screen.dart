@@ -7,9 +7,6 @@ class KioskInfoScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // 비동기 상태 감시
-    final info = ref.watch(storageServiceProvider).settings;
-
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -30,17 +27,63 @@ class KioskInfoScreen extends ConsumerWidget {
         ],
       ),
       extendBodyBehindAppBar: true,
-      body: Column(
-        children: [
-          Image.network(info.topBannerUrl),
-          Stack(
-            alignment: Alignment.center,
+      body: ref.watch(asyncKioskInfoProvider).when(
+        data: (info) {
+          return Column(
             children: [
-              Image.network(info.mainImageUrl),
-              if (F.appFlavor == Flavor.dev) KioskInfoWidget(info: info),
+              Image.network(
+                info.topBannerUrl,
+                errorBuilder: (context, error, stackTrace) {
+                  return Center(
+                    child: const Text('이미지를 찾을 수 없습니다.'),
+                  );
+                },
+              ),
+              Stack(
+                alignment: Alignment.center,
+                children: [
+                  Image.network(
+                    info.mainImageUrl,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Center(
+                        child: const Text('이미지를 찾을 수 없습니다.'),
+                      );
+                    },
+                  ),
+                  if (F.appFlavor == Flavor.dev) KioskInfoWidget(info: info),
+                ],
+              ),
             ],
-          ),
-        ],
+          );
+        },
+        error: (error, stack) {
+          if (error is KioskException) {
+            return Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(error.type.value),
+                FilePathActions(
+                  directory: error.type == KioskErrorType.missingMachineId
+                      ? DirectoryPaths.settings
+                      : DirectoryPaths.frontImages,
+                ),
+                ElevatedButton(
+                  onPressed: () => ref.refresh(asyncKioskInfoProvider),
+                  child: Text('Retry'),
+                ),
+              ],
+            );
+          } else {
+            return GeneralErrorWidget(
+              exception: error as Exception,
+              onRetry: () => ref.refresh(asyncKioskInfoProvider),
+            );
+          }
+        },
+        loading: () {
+          return const Center(child: CircularProgressIndicator());
+        },
       ),
     );
   }

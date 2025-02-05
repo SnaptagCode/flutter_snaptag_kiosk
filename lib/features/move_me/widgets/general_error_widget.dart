@@ -15,40 +15,40 @@ class GeneralErrorWidget extends StatelessWidget {
   String _getErrorMessage(Exception? e) {
     logger.e('Error occurred', error: e);
     if (e is ServerException) {
-      return '${e.serverError.res.message}\n${e.serverError.statusCode}';
+      return '${e.serverError.res.message}\n\n${e.serverError.statusCode}';
     } else if (e is DioException) {
-      return 'DioException 발생: ${e.message}';
-    } else if (e != null) {
-      return '알 수 없는 오류가 발생했습니다.\n${e.toString()}';
+      return '${e.message}';
     }
-    return '오류가 발생했습니다.';
+    return '오류가 발생했습니다.\n관리자에게 문의해주세요.';
   }
 
   @override
   Widget build(BuildContext context) {
     final errorMessage = _getErrorMessage(exception);
 
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Icon(
-          Icons.error_outline,
-          size: 48,
-          color: Theme.of(context).colorScheme.error,
-        ),
-        const SizedBox(height: 16),
-        Text(
-          errorMessage,
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(height: 1.6),
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: 16),
-        ElevatedButton(
-          onPressed: onRetry, // onRetry 안전하게 호출
-          child: const Text('재시도'),
-        ),
-      ],
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.error_outline,
+            size: 48,
+            color: Theme.of(context).colorScheme.error,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            errorMessage,
+            style: context.typography.kioskAlert1B,
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: onRetry, // onRetry 안전하게 호출
+            child: const Text('재시도'),
+          ),
+        ],
+      ),
     );
   }
 }
