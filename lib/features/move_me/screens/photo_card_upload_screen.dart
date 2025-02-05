@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_snaptag_kiosk/core/providers/sound_provider.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
@@ -54,6 +55,7 @@ class PhotoCardUploadScreen extends ConsumerWidget {
             LocaleKeys.main_btn_txt.tr(),
           ),
           onPressed: () async {
+            playSound();
             CodeVerificationRouteData().go(context);
           },
         ),

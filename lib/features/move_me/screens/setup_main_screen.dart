@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_snaptag_kiosk/core/providers/sound_provider.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -70,19 +71,26 @@ class SetupMainScreen extends ConsumerWidget {
                       context,
                       label: '이벤트\n미리보기',
                       assetName: SnaptagSvg.eventPreview,
-                      onTap: () => KioskInfoRouteData().go(context),
+                      onTap: () {
+                        playSound();
+                        KioskInfoRouteData().go(context);
+                      },
                     ),
                     _navigatorCard(
                       context,
                       label: '출력 내역',
                       assetName: SnaptagSvg.payment,
-                      onTap: () => PaymentHistoryRouteData().go(context),
+                      onTap: () {
+                        playSound();
+                        PaymentHistoryRouteData().go(context);
+                      },
                     ),
                     _navigatorCard(
                       context,
                       label: '이벤트\n실행',
                       assetName: SnaptagSvg.eventRun,
                       onTap: () async {
+                        playSound();
                         final result = await DialogHelper.showSetupDialog(
                           context,
                           title: '이벤트를 실행합니다.',
@@ -99,10 +107,19 @@ class SetupMainScreen extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      _navigatorCard(context, label: 'Unit Test', onTap: () => UnitTestRouteData().go(context)),
-                      _navigatorCard(context, label: 'Material', onTap: () => MaterialRouteData().go(context)),
-                      _navigatorCard(context,
-                          label: 'Kiosk\nComponents', onTap: () => KioskComponentsRouteData().go(context)),
+                      _navigatorCard(context, label: 'Unit Test', onTap: () {
+                        playSound();
+                        UnitTestRouteData().go(context);
+                      }),
+                      _navigatorCard(context, label: 'Material', onTap: () {
+                        playSound();
+                        MaterialRouteData().go(context);
+                      }),
+                      _navigatorCard(context, label: 'Kiosk\nComponents',
+                          onTap: () {
+                        playSound();
+                        KioskComponentsRouteData().go(context);
+                      }),
                     ],
                   ),
               ],
@@ -113,7 +130,8 @@ class SetupMainScreen extends ConsumerWidget {
     );
   }
 
-  Widget _navigatorCard(BuildContext context, {required String label, String? assetName, void Function()? onTap}) {
+  Widget _navigatorCard(BuildContext context,
+      {required String label, String? assetName, void Function()? onTap}) {
     return SizedBox(
       width: 260.w,
       height: 342.h,
