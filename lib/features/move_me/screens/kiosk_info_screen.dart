@@ -19,8 +19,11 @@ class KioskInfoScreen extends ConsumerWidget {
         shadowColor: Colors.transparent,
         actions: [
           IconButton(
-            onPressed: () {
-              ref.read(asyncKioskInfoProvider.notifier).refresh();
+            onPressed: () async {
+              final result = await DialogHelper.showSetupDialog(context, title: '최신 이벤트로 새로고침 됩니다.');
+              if (result == true) {
+                await ref.read(asyncKioskInfoProvider.notifier).refresh();
+              }
             },
             icon: const Icon(Icons.refresh),
           ),
@@ -34,7 +37,7 @@ class KioskInfoScreen extends ConsumerWidget {
             alignment: Alignment.center,
             children: [
               Image.network(info.mainImageUrl),
-              KioskInfoWidget(info: info),
+              if (F.appFlavor == Flavor.dev) KioskInfoWidget(info: info),
             ],
           ),
         ],

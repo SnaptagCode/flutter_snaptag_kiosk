@@ -12,7 +12,6 @@ class SetupMainScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
-      // F2F2F2
       backgroundColor: Color(0xFFF2F2F2),
       appBar: AppBar(
         centerTitle: false,
