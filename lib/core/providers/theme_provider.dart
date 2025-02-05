@@ -19,12 +19,14 @@ class ThemeNotifier extends _$ThemeNotifier {
       fontFamily: fontFamily,
       colorScheme: colorScheme,
       appBarTheme: AppBarTheme(
-          backgroundColor: Colors.white,
-          surfaceTintColor: Colors.transparent,
-          foregroundColor: Colors.black,
-          shadowColor: Colors.black.withOpacity(.5),
-          elevation: 6,
-          titleTextStyle: KioskTypography.color().kioskInput2B),
+        centerTitle: true,
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.transparent,
+        foregroundColor: Colors.black,
+        shadowColor: Colors.black.withOpacity(.5),
+        elevation: 6,
+        titleTextStyle: KioskTypography.color().kioskInput2B,
+      ),
     );
   }
 
