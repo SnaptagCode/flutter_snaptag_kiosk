@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class KioskComponentsScreen extends ConsumerWidget {
   const KioskComponentsScreen({super.key});
@@ -8,7 +10,15 @@ class KioskComponentsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(
+        leading: IconButton(
+          padding: EdgeInsets.only(left: 30.w),
+          icon: SvgPicture.asset(SnaptagSvg.arrowBack),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
