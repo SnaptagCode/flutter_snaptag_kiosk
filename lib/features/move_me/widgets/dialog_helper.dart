@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
 ///
@@ -12,6 +13,74 @@ import 'package:go_router/go_router.dart';
 /// - `message` : #000000
 ///
 class DialogHelper {
+  static Future<bool> showRefundFailDialog(
+    BuildContext context,
+  ) async {
+    return await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Colors.white,
+          insetPadding: EdgeInsets.symmetric(horizontal: 100.w),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20.r),
+          ),
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SvgPicture.asset(
+                SnaptagSvg.error,
+                width: 44.w,
+                height: 44.w,
+              ),
+              SizedBox(width: 20.w),
+              Text(
+                '환불이 실패했습니다.',
+                style: context.typography.kioskAlert1B.copyWith(
+                  color: Colors.black,
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  static Future<bool> showRefundSuccessDialog(
+    BuildContext context,
+  ) async {
+    return await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Colors.white,
+          insetPadding: EdgeInsets.symmetric(horizontal: 100.w),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20.r),
+          ),
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SvgPicture.asset(
+                SnaptagSvg.success,
+                width: 44.w,
+                height: 44.4,
+              ),
+              SizedBox(width: 20.w),
+              Text(
+                '환불이 완료되었습니다.',
+                style: context.typography.kioskAlert1B.copyWith(
+                  color: Colors.black,
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   static Future<bool> showSetupDialog(
     BuildContext context, {
     required String title,

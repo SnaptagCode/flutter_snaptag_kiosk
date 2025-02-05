@@ -38,4 +38,8 @@ class SnaptagSvg {
   static const String snaptagIcon = 'assets/icons/snaptag_icon.svg';
 
   static const String snaptagLogo = 'assets/icons/snaptag_logo.svg';
+
+  static const String error = 'assets/icons/error.svg';
+
+  static const String success = 'assets/icons/success.svg';
 }
