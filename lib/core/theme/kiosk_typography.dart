@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_snaptag_kiosk/core/theme/kiosk_colors.dart';
 
 class KioskTypography extends ThemeExtension<KioskTypography> {
   const KioskTypography({
@@ -28,84 +29,84 @@ class KioskTypography extends ThemeExtension<KioskTypography> {
   final TextStyle kioskInput2B;
   final TextStyle kioskInput3B;
 
-  static final basic = KioskTypography(
-    kioskBtn1B: TextStyle(
-      fontSize: 34.sp,
-      fontWeight: FontWeight.w700,
-      color: Colors.black,
-      letterSpacing: -0.34,
-      height: 1.0,
-    ),
-    kioskBody1B: TextStyle(
-      fontSize: 32.sp,
-      fontWeight: FontWeight.w600,
-      color: Colors.black,
-      letterSpacing: -0.64,
-      height: 1.0,
-    ),
-    kioskBody2B: TextStyle(
-      fontSize: 26.sp,
-      fontWeight: FontWeight.w600,
-      color: Colors.black,
-      letterSpacing: -0.52,
-      height: 1.0,
-    ),
-    kioksNum1SB: TextStyle(
-      fontSize: 54.sp,
-      fontWeight: FontWeight.w600,
-      color: Colors.black,
-      letterSpacing: 0,
-      height: 1.0,
-    ),
-    kioskNum2B: TextStyle(
-      fontSize: 42.sp,
-      fontWeight: FontWeight.w700,
-      color: Colors.black,
-      letterSpacing: -0.42,
-      height: 1.0,
-    ),
-    kioskAlert1B: TextStyle(
-      fontSize: 42.sp,
-      fontWeight: FontWeight.w700,
-      color: Colors.black,
-      letterSpacing: 0.84,
-      height: 1.0,
-    ),
-    kioskAlert2M: TextStyle(
-      fontSize: 28.sp,
-      fontWeight: FontWeight.w500,
-      color: Colors.black,
-      letterSpacing: 0.56,
-      height: 1.4,
-    ),
-    kioskAlertBtnB: TextStyle(
-      fontSize: 34.sp,
-      fontWeight: FontWeight.w700,
-      color: Colors.black,
-      letterSpacing: -0.34,
-      height: 1.0,
-    ),
-    kioskInput1B: TextStyle(
-      fontSize: 42.sp,
-      fontWeight: FontWeight.w700,
-      color: Colors.black,
-      letterSpacing: 10,
-      height: 1.0,
-    ),
-    kioskInput2B: TextStyle(
-      fontSize: 40.sp,
-      fontWeight: FontWeight.w700,
-      color: Colors.black,
-      letterSpacing: -0.4,
-    ),
-    kioskInput3B: TextStyle(
-      fontSize: 30.sp,
-      fontWeight: FontWeight.w700,
-      color: Colors.black,
-      letterSpacing: -0.3,
-      height: 1.0,
-    ),
-  );
+  factory KioskTypography.color({KioskColors colors = KioskColors.basic}) => KioskTypography(
+        kioskBtn1B: TextStyle(
+          fontSize: 34.sp,
+          fontWeight: FontWeight.w700,
+          color: Colors.black,
+          letterSpacing: -0.34,
+          height: 1.0,
+        ),
+        kioskBody1B: TextStyle(
+          fontSize: 32.sp,
+          fontWeight: FontWeight.w600,
+          color: colors.textColor,
+          letterSpacing: -0.64,
+          height: 1.0,
+        ),
+        kioskBody2B: TextStyle(
+          fontSize: 26.sp,
+          fontWeight: FontWeight.w600,
+          color: colors.textColor,
+          letterSpacing: -0.52,
+          height: 1.0,
+        ),
+        kioksNum1SB: TextStyle(
+          fontSize: 54.sp,
+          fontWeight: FontWeight.w600,
+          color: Colors.black,
+          letterSpacing: 0,
+          height: 1.0,
+        ),
+        kioskNum2B: TextStyle(
+          fontSize: 42.sp,
+          fontWeight: FontWeight.w700,
+          color: Colors.black,
+          letterSpacing: -0.42,
+          height: 1.0,
+        ),
+        kioskAlert1B: TextStyle(
+          fontSize: 42.sp,
+          fontWeight: FontWeight.w700,
+          color: Colors.black,
+          letterSpacing: 0.84,
+          height: 1.0,
+        ),
+        kioskAlert2M: TextStyle(
+          fontSize: 28.sp,
+          fontWeight: FontWeight.w500,
+          color: Colors.black,
+          letterSpacing: 0.56,
+          height: 1.4,
+        ),
+        kioskAlertBtnB: TextStyle(
+          fontSize: 34.sp,
+          fontWeight: FontWeight.w700,
+          color: Colors.white,
+          letterSpacing: -0.34,
+          height: 1.0,
+        ),
+        kioskInput1B: TextStyle(
+          fontSize: 42.sp,
+          fontWeight: FontWeight.w700,
+          color: Colors.black,
+          letterSpacing: 10,
+          height: 1.0,
+        ),
+        kioskInput2B: TextStyle(
+          fontSize: 40.sp,
+          fontWeight: FontWeight.w700,
+          color: Colors.black,
+          letterSpacing: -0.4,
+        ),
+        kioskInput3B: TextStyle(
+          fontSize: 30.sp,
+          fontWeight: FontWeight.w700,
+          color: Colors.black,
+          letterSpacing: -0.3,
+          height: 1.0,
+        ),
+      );
 
   @override
   KioskTypography copyWith({

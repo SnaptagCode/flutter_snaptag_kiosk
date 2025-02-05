@@ -62,7 +62,7 @@ class FrontPhotoList extends _$FrontPhotoList {
       final kioskEventId = ref.read(storageServiceProvider).settings.kioskEventId;
 
       if (kioskEventId == 0) {
-        throw KioskException(KioskErrorType.missingEventId);
+        throw Exception('No kiosk event id available');
       }
       // API를 통해 이미지 목록 가져오기
       final kioskRepo = ref.read(kioskRepositoryProvider);

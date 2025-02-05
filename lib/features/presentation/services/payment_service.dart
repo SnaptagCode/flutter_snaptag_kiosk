@@ -61,7 +61,7 @@ class PaymentService extends _$PaymentService {
     final backPhoto = ref.watch(verifyPhotoCardProvider).value;
 
     if (settings.kioskEventId == 0) {
-      throw Exception(KioskErrorType.missingEventId);
+      throw Exception('No kiosk event id available');
     }
     if (settings.photoCardPrice <= 0) {
       throw Exception('Invalid photo card price');
