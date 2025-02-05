@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_snaptag_kiosk/core/providers/sound_provider.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
@@ -111,6 +112,7 @@ class DialogHelper {
                 Expanded(
                   child: OutlinedButton(
                     onPressed: () {
+                      playSound();
                       Navigator.of(context).pop(false);
                     },
                     style: context.setupDialogCancelButtonStyle,
@@ -123,6 +125,7 @@ class DialogHelper {
                 Expanded(
                   child: ElevatedButton(
                     onPressed: () {
+                      playSound();
                       Navigator.of(context).pop(true);
                     },
                     style: context.setupDialogConfirmButtonStyle,
@@ -229,8 +232,11 @@ class DialogHelper {
     );
   }
 
-  static Future<void> showPurchaseFailedDialog(BuildContext context, {Exception? exception}) async {
-    final error = exception != null && F.appFlavor == Flavor.dev ? '\n\n${exception.toString()}' : null;
+  static Future<void> showPurchaseFailedDialog(BuildContext context,
+      {Exception? exception}) async {
+    final error = exception != null && F.appFlavor == Flavor.dev
+        ? '\n\n${exception.toString()}'
+        : null;
     await _showOneButtonKioskDialog(
       context,
       title: LocaleKeys.alert_title_purchase_failure.tr(),
@@ -239,8 +245,11 @@ class DialogHelper {
     );
   }
 
-  static Future<bool> showPrintErrorDialog(BuildContext context, {Exception? exception}) async {
-    final error = exception != null && F.appFlavor == Flavor.dev ? '\n\n${exception.toString()}' : null;
+  static Future<bool> showPrintErrorDialog(BuildContext context,
+      {Exception? exception}) async {
+    final error = exception != null && F.appFlavor == Flavor.dev
+        ? '\n\n${exception.toString()}'
+        : null;
     return await _showOneButtonKioskDialog(
       context,
       title: LocaleKeys.alert_title_print_failure.tr(),

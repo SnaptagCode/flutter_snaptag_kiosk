@@ -14,6 +14,12 @@ class SnaptagImages {
   static const String loading = 'assets/images/loading.gif';
 }
 
+class SnaptagSounds {
+  SnaptagSounds._();
+
+  static const String beep = 'assets/sounds/blop.mp3';
+}
+
 class SnaptagSvg {
   SnaptagSvg._();
 
