@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_components/material_screen.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -20,7 +18,6 @@ GoRouter router(Ref ref) {
     initialLocation: '/setup',
     routes: $appRoutes,
     debugLogDiagnostics: true,
-    observers: <NavigatorObserver>[NavObserver()],
   );
 }
 

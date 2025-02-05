@@ -40,7 +40,7 @@ void main() {
           path: 'assets/lang',
           fallbackLocale: const Locale('ko', 'KR'),
           child: ProviderScope(
-            observers: [RiverpodLogger()],
+            // observers: [RiverpodLogger()],
             overrides: [
               storageServiceProvider.overrideWithValue(yamlStorage),
               imageStorageProvider.overrideWithValue(imageStorage),
