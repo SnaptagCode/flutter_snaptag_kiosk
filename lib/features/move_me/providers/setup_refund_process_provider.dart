@@ -7,9 +7,7 @@ part 'setup_refund_process_provider.g.dart';
 @riverpod
 class SetupRefundProcess extends _$SetupRefundProcess {
   @override
-  FutureOr<PaymentResponse?> build() {
-    return null;
-  }
+  FutureOr<PaymentResponse?> build() => null;
 
   Future<void> startRefund(OrderEntity order) async {
     if (order.paymentAuthNumber == null) {
@@ -29,44 +27,41 @@ class SetupRefundProcess extends _$SetupRefundProcess {
             originalApprovalDate: DateFormat('yyMMdd').format(order.completedAt!),
           );
 
-      // 응답을 상태로 저장
       state = AsyncValue.data(response);
+      await _updateOrderStatus(order);
+
+      // 현재 페이지 정보를 가져와서 동일한 페이지로 새로고침
+      final currentPage = ref.read(ordersPageProvider()).requireValue.paging.currentPage;
+      ref.read(ordersPageProvider().notifier).goToPage(currentPage);
     } catch (e) {
       state = AsyncValue.error(e, StackTrace.current);
       rethrow;
-    } finally {
-      await _updateOrderStatus(order);
     }
   }
 
   Future<void> _updateOrderStatus(OrderEntity order) async {
-    late UpdateOrderRequest request;
-    try {
-      final payment = state.value;
+    final payment = state.value;
+    final kioskEventId = ref.watch(storageServiceProvider).settings.kioskEventId;
 
-      final kioskEventId = ref.watch(storageServiceProvider).settings.kioskEventId;
+    final request = UpdateOrderRequest(
+      kioskEventId: kioskEventId,
+      kioskMachineId: order.kioskMachineId,
+      photoAuthNumber: order.photoAuthNumber,
+      amount: order.amount.toInt(),
+      status: payment?.orderState ?? OrderStatus.refunded_failed,
+      approvalNumber: order.paymentAuthNumber ?? '',
+      purchaseAuthNumber: order.paymentAuthNumber ?? '',
+      authSeqNumber: order.paymentAuthNumber ?? '',
+      detail: payment?.KSNET.toString() ?? '{}',
+    );
 
-      request = UpdateOrderRequest(
-        kioskEventId: kioskEventId,
-        kioskMachineId: order.kioskMachineId,
-        photoAuthNumber: order.photoAuthNumber,
-        amount: order.amount.toInt(),
-        status: payment?.orderState ?? OrderStatus.refunded_failed,
-        approvalNumber: order.paymentAuthNumber ?? '',
-        purchaseAuthNumber: order.paymentAuthNumber ?? '',
-        authSeqNumber: order.paymentAuthNumber ?? '',
-        detail: payment?.KSNET.toString() ?? '{}',
-      );
-    } catch (e) {
-      rethrow;
-    } finally {
-      /// 이미 취소된 거래
-      if (state.value?.respCode == '7001') {
-        await ref.read(kioskRepositoryProvider).updateOrderStatus(
-              order.orderId.toInt(),
-              request.copyWith(status: OrderStatus.refunded),
-            );
-      }
+    if (payment?.respCode == '7001') {
+      // 이미 취소된 거래
+      await ref.read(kioskRepositoryProvider).updateOrderStatus(
+            order.orderId.toInt(),
+            request.copyWith(status: OrderStatus.refunded),
+          );
+    } else {
       await ref.read(kioskRepositoryProvider).updateOrderStatus(
             order.orderId.toInt(),
             request,

@@ -19,7 +19,6 @@ final dioProvider = Provider.family<Dio, String>((ref, baseUrl) {
     // Response를 받은 후에 실행됩니다.
     // 예를 들어, 상태 코드에 따라 오류 처리를 할 수 있습니다.
     onResponse: (Response response, ResponseInterceptorHandler handler) {
-      logger.d('${response.statusCode} \n${response.data}');
       if (response.statusCode != null && response.statusCode! ~/ 100 != 2) {
         final newError = DioException(
           requestOptions: response.requestOptions,
