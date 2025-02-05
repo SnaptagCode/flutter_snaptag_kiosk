@@ -15,8 +15,14 @@ class KioskInfoScreen extends ConsumerWidget {
         leading: IconButton(
           padding: EdgeInsets.only(left: 30.w),
           icon: SvgPicture.asset(SnaptagSvg.arrowBack),
-          onPressed: () {
-            Navigator.pop(context);
+          onPressed: () async {
+            final result = await DialogHelper.showSetupDialog(
+              context,
+              title: '메인페이지로 이동합니다.',
+            );
+            if (result) {
+              Navigator.pop(context);
+            }
           },
         ),
         title: const Text('이벤트 미리보기'),
