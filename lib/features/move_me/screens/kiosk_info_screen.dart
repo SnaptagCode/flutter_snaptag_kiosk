@@ -68,29 +68,10 @@ class KioskInfoScreen extends ConsumerWidget {
           );
         },
         error: (error, stack) {
-          if (error is KioskException) {
-            return Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Text(error.type.value),
-                FilePathActions(
-                  directory: error.type == KioskErrorType.missingMachineId
-                      ? DirectoryPaths.settings
-                      : DirectoryPaths.frontImages,
-                ),
-                ElevatedButton(
-                  onPressed: () => ref.refresh(asyncKioskInfoProvider),
-                  child: Text('Retry'),
-                ),
-              ],
-            );
-          } else {
-            return GeneralErrorWidget(
-              exception: error as Exception,
-              onRetry: () => ref.refresh(asyncKioskInfoProvider),
-            );
-          }
+          return GeneralErrorWidget(
+            exception: error as Exception,
+            onRetry: () => ref.refresh(asyncKioskInfoProvider),
+          );
         },
         loading: () {
           return const Center(child: CircularProgressIndicator());

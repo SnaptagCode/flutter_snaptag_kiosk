@@ -82,7 +82,11 @@ extension ButtonStyles on BuildContext {
       backgroundColor: kioskColors.keypadButtonColor,
       foregroundColor: Colors.white,
       shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10.r), side: BorderSide(width: 1.w, color: kioskColors.buttonColor)),
+          borderRadius: BorderRadius.circular(10.r),
+          side: BorderSide(
+            width: 1.w,
+            color: kioskColors.buttonColor,
+          )),
       textStyle: typography.kioksNum1SB);
 
   ///

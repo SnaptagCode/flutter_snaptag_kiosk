@@ -1,4 +1,41 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_snaptag_kiosk/lib.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+part 'kiosk_colors.g.dart';
+
+@riverpod
+class KioskColorsNotifier extends _$KioskColorsNotifier {
+  @override
+  KioskColors build() {
+    // theme 프로바이더를 watch
+    final kiosk = ref.watch(asyncKioskInfoProvider);
+
+    return kiosk.when(
+      data: (info) {
+        return KioskColors(
+          buttonColor: _parseColor(info.mainButtonColor),
+          buttonTextColor: _parseColor(info.buttonTextColor),
+          keypadButtonColor: _parseColor(info.keyPadColor),
+          couponTextColor: _parseColor(info.couponTextColor),
+          textColor: _parseColor(info.mainTextColor),
+          popupButtonColor: _parseColor(info.popupButtonColor),
+        );
+      },
+      loading: () => KioskColors.basic,
+      error: (_, __) => KioskColors.basic,
+    );
+  }
+
+  Color _parseColor(String hexColor) {
+    if (hexColor.isEmpty) return Colors.black;
+    try {
+      return Color(int.parse(hexColor.replaceFirst('#', '0xff')));
+    } catch (e) {
+      return Colors.black;
+    }
+  }
+}
 
 class KioskColors extends ThemeExtension<KioskColors> {
   const KioskColors({
@@ -24,12 +61,12 @@ class KioskColors extends ThemeExtension<KioskColors> {
   final Color popupButtonColor;
 
   static const basic = KioskColors(
-    buttonColor: Color(0xFFD05598), // #ffffff
+    buttonColor: Color.fromARGB(255, 13, 96, 32), // #ffffff
     buttonTextColor: Color(0xFFFFFFFF), // #1C1C1C
     keypadButtonColor: Color(0xFF232323), // #797B80
     couponTextColor: Color(0xFFFFFFFF), // #ffffff
     textColor: Color(0xFF232323), // #ADADAD
-    popupButtonColor: Color(0xFFD05598), // #1C1C1C
+    popupButtonColor: Color.fromARGB(255, 13, 96, 32), // #1C1C1C
   );
 
   @override

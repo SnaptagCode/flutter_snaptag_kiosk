@@ -20,7 +20,7 @@ class AsyncKioskInfo extends _$AsyncKioskInfo {
 
       // kioskMachineId가 없는 경우 예외 발생
       if (currentSettings.kioskMachineId == 0) {
-        throw KioskException(KioskErrorType.missingMachineId);
+        throw Exception('No kiosk machine id available');
       }
 
       // API를 통해 최신 정보 가져오기
@@ -42,7 +42,6 @@ class AsyncKioskInfo extends _$AsyncKioskInfo {
   }
 
   Future<void> refresh() async {
-    state = const AsyncValue.loading();
-    state = AsyncValue.data(await _fetchAndUpdateKioskInfo());
+    state = await AsyncValue.guard(() => _fetchAndUpdateKioskInfo());
   }
 }
