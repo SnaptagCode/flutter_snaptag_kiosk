@@ -34,6 +34,7 @@ class PrinterBindings {
   late final R600SetFont _setFont;
   late final R600SetTextIsStrong _setTextIsStrong;
   late final R600DrawImage _drawImage;
+  late final R600IsFeederNoEmpty _isFeederNoEmpty;
 
   PrinterBindings() {
     // DLL 로드
@@ -62,6 +63,7 @@ class PrinterBindings {
     _drawWaterMark = _dll.lookupFunction<R600DrawWaterMarkNative, R600DrawWaterMark>('R600DrawWaterMark');
     _setFont = _dll.lookupFunction<R600SetFontNative, R600SetFont>('R600SetFont');
     _setTextIsStrong = _dll.lookupFunction<R600SetTextIsStrongNative, R600SetTextIsStrong>('R600SetTextIsStrong');
+    _isFeederNoEmpty = _dll.lookupFunction<R600IsFeederNoEmptyNative, R600IsFeederNoEmpty>('R600IsFeederNoEmpty');
   }
 
   int initLibrary() {
@@ -447,6 +449,20 @@ class PrinterBindings {
     final result = _setTextIsStrong(isStrong);
     if (result != 0) {
       throw Exception('Failed to set text strength');
+    }
+  }
+
+  bool checkFeederStatus() {
+    final feederStatusPtr = calloc<Int32>();
+    try {
+      final result = _isFeederNoEmpty(feederStatusPtr);
+      if (result != 0) {
+        final error = getErrorInfo(result);
+        throw Exception('Failed to check feeder status: $error');
+      }
+      return feederStatusPtr.value != 0;
+    } finally {
+      calloc.free(feederStatusPtr);
     }
   }
 }

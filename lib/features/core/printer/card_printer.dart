@@ -9,17 +9,14 @@ import 'printer_bindings.dart';
 
 part 'card_printer.g.dart';
 
-enum LucaPrinterStatus { ready, busy, error }
-
 @Riverpod(keepAlive: true)
 class PrinterService extends _$PrinterService {
   late final PrinterBindings _bindings;
 
   @override
-  FutureOr<LucaPrinterStatus> build() async {
+  FutureOr<void> build() async {
     _bindings = PrinterBindings();
     await _initializePrinter();
-    return LucaPrinterStatus.ready;
   }
 
   Future<void> _initializePrinter() async {
@@ -58,10 +55,16 @@ class PrinterService extends _$PrinterService {
   }) async {
     try {
       state = const AsyncValue.loading();
+      // 피더 상태 체크 추가
+      logger.d('Checking feeder status...');
+      final hasCard = _bindings.checkFeederStatus();
+      if (!hasCard) {
+        throw Exception('Card feeder is empty');
+      }
 
       logger.d('1. Checking card position...');
-      final hasCard = _bindings.checkCardPosition();
-      if (hasCard) {
+      final hasCardInPrinter = _bindings.checkCardPosition();
+      if (hasCardInPrinter) {
         logger.d('Card found, ejecting...');
         _bindings.ejectCard();
       }
@@ -113,11 +116,9 @@ class PrinterService extends _$PrinterService {
 
       logger.d('7. Ejecting card...');
       _bindings.ejectCard();
-
-      state = const AsyncValue.data(LucaPrinterStatus.ready);
     } catch (e, stack) {
       logger.d('Print error: $e\nStack: $stack');
-      state = AsyncValue.error(e, stack);
+      rethrow;
     }
   }
 

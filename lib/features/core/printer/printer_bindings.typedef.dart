@@ -108,3 +108,6 @@ typedef R600DrawImageNative = Uint32 Function(
     Double dX, Double dY, Double dWidth, Double dHeight, Pointer<Utf8> szImgFilePath, Int32 nSetNoAbsoluteBlack);
 typedef R600DrawImage = int Function(
     double dX, double dY, double dWidth, double dHeight, Pointer<Utf8> szImgFilePath, int nSetNoAbsoluteBlack);
+
+typedef R600IsFeederNoEmptyNative = Uint32 Function(Pointer<Int32>);
+typedef R600IsFeederNoEmpty = int Function(Pointer<Int32>);
