@@ -55,7 +55,8 @@ class PhotoCardUploadScreen extends ConsumerWidget {
             LocaleKeys.main_btn_txt.tr(),
           ),
           onPressed: () async {
-            SoundManager().playSound();
+            await SoundManager().playSound();
+
             ;
             CodeVerificationRouteData().go(context);
           },
