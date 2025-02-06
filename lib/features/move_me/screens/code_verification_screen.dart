@@ -2,7 +2,6 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_snaptag_kiosk/core/providers/sound_provider.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 
@@ -28,7 +27,7 @@ class CodeVerificationScreen extends ConsumerWidget {
         next.whenOrNull(
           error: (error, stack) async {
             await DialogHelper.showErrorDialog(context);
-            logger.e('Error verifying photo card: $error stacktrace $stack');
+            FileLogger.warning('Error verifying photo card: $error stacktrace $stack');
             // 에러 시 입력값 초기화
             ref.read(authCodeProvider.notifier).clear();
           },

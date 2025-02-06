@@ -26,9 +26,7 @@ void main() {
       final imageStorage = await ImageStorageService.initialize();
 
       await EasyLocalization.ensureInitialized();
-
-      // 에러 핸들러 초기화
-      await AppErrorHandler.initialize();
+      FileLogger.initialize('');
       runApp(
         EasyLocalization(
           supportedLocales: const [
@@ -56,14 +54,10 @@ void main() {
       );
     },
     (error, stack) {
-      AppErrorHandler.logError('ZONED_ERROR', error, stack);
+      String msg = "ZONED_ERROR : $error\n$stack";
+      FileLogger.severe(msg);
     },
   );
-
-  // 주기적으로 오래된 로그 정리
-  Timer.periodic(const Duration(days: 1), (_) {
-    AppErrorHandler.cleanOldLogs();
-  });
 }
 
 Future<void> windowManagerSetting() async {

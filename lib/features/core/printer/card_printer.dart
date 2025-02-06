@@ -2,7 +2,7 @@ import 'dart:ffi' as ffi; // ffi 임포트 확인
 import 'dart:io';
 
 import 'package:ffi/ffi.dart'; // Utf8 사용을 위한 임포트
-import 'package:flutter_snaptag_kiosk/core/utils/logger_service.dart';
+import 'package:flutter_snaptag_kiosk/core/utils/file_logger.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'printer_bindings.dart';
@@ -29,7 +29,7 @@ class PrinterService extends _$PrinterService {
       if (!connected) {
         throw Exception('Failed to connect printer');
       }
-      logger.d('Printer connected successfully');
+      FileLogger.info('Printer connected successfully');
 
       // 3. 리본 설정
       // 레거시 코드와 동일하게 setRibbonOpt 호출
@@ -42,9 +42,9 @@ class PrinterService extends _$PrinterService {
         throw Exception('Failed to ensure printer ready');
       }
 
-      logger.d('Printer initialization completed');
+      FileLogger.info('Printer initialization completed');
     } catch (e) {
-      logger.d('Printer initialization error: $e');
+      FileLogger.info('Printer initialization error: $e');
       rethrow;
     }
   }
@@ -56,32 +56,32 @@ class PrinterService extends _$PrinterService {
     try {
       state = const AsyncValue.loading();
       // 피더 상태 체크 추가
-      logger.d('Checking feeder status...');
+      FileLogger.info('Checking feeder status...');
       final hasCard = _bindings.checkFeederStatus();
       if (!hasCard) {
         throw Exception('Card feeder is empty');
       }
 
-      logger.d('1. Checking card position...');
+      FileLogger.info('1. Checking card position...');
       final hasCardInPrinter = _bindings.checkCardPosition();
       if (hasCardInPrinter) {
-        logger.d('Card found, ejecting...');
+        FileLogger.info('Card found, ejecting...');
         _bindings.ejectCard();
       }
 
-      logger.d('2. Preparing front canvas...');
+      FileLogger.info('2. Preparing front canvas...');
       final frontBuffer = StringBuffer();
 
       try {
         await _prepareAndDrawImage(frontBuffer, frontImagePath, true);
       } catch (e, stack) {
-        logger.d('Error in front canvas preparation: $e\nStack: $stack');
+        FileLogger.info('Error in front canvas preparation: $e\nStack: $stack');
         throw Exception('Failed to prepare front canvas: $e');
       }
 
       StringBuffer? rearBuffer;
 
-      logger.d('3. Loading and rotating rear image...');
+      FileLogger.info('3. Loading and rotating rear image...');
       final rearImage = await embeddedFile.readAsBytes();
       final rotatedRearImage = _bindings.flipImage180(rearImage);
       // 임시 파일로 저장
@@ -90,34 +90,34 @@ class PrinterService extends _$PrinterService {
       await File(rotatedRearPath).writeAsBytes(rotatedRearImage);
 
       try {
-        logger.d('4. Preparing rear canvas...');
+        FileLogger.info('4. Preparing rear canvas...');
         rearBuffer = StringBuffer();
 
         try {
           await _prepareAndDrawImage(rearBuffer, rotatedRearPath, false);
         } catch (e, stack) {
-          logger.d('Error in rear canvas preparation: $e\nStack: $stack');
+          FileLogger.info('Error in rear canvas preparation: $e\nStack: $stack');
           throw Exception('Failed to prepare rear canvas: $e');
         }
       } finally {
         await File(rotatedRearPath).delete().catchError((_) {
-          logger.d('Failed to delete rotated rear image');
+          FileLogger.info('Failed to delete rotated rear image');
         });
       }
 
-      logger.d('5. Injecting card...');
+      FileLogger.info('5. Injecting card...');
       _bindings.injectCard();
 
-      logger.d('6. Printing card...');
+      FileLogger.info('6. Printing card...');
       _bindings.printCard(
         frontImageInfo: frontBuffer.toString(),
         backImageInfo: rearBuffer.toString(),
       );
 
-      logger.d('7. Ejecting card...');
+      FileLogger.info('7. Ejecting card...');
       _bindings.ejectCard();
     } catch (e, stack) {
-      logger.d('Print error: $e\nStack: $stack');
+      FileLogger.info('Print error: $e\nStack: $stack');
       rethrow;
     }
   }
@@ -126,7 +126,7 @@ class PrinterService extends _$PrinterService {
     _bindings.setCanvasOrientation(true);
     _bindings.prepareCanvas(isColor: true);
 
-    logger.d('Drawing image...');
+    FileLogger.info('Drawing image...');
     _bindings.drawImage(
       imagePath: imagePath,
       x: -1,
@@ -135,7 +135,7 @@ class PrinterService extends _$PrinterService {
       height: 88.0,
       noAbsoluteBlack: true,
     );
-    logger.d('Drawing empty text...');
+    FileLogger.info('Drawing empty text...');
     // 제거 시 이미지 출력이 안됨
     _bindings.drawText(
       text: '',
@@ -146,7 +146,7 @@ class PrinterService extends _$PrinterService {
       noAbsoluteBlack: true,
     );
 
-    logger.d('Committing canvas...');
+    FileLogger.info('Committing canvas...');
     buffer.write(_commitCanvas());
   }
 

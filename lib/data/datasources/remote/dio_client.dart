@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_snaptag_kiosk/core/errors/server_exception.dart';
-import 'package:flutter_snaptag_kiosk/core/utils/logger_service.dart';
+import 'package:flutter_snaptag_kiosk/core/utils/file_logger.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
 final dioProvider = Provider.family<Dio, String>((ref, baseUrl) {
@@ -39,7 +39,7 @@ final dioProvider = Provider.family<Dio, String>((ref, baseUrl) {
           // ServerException으로 wrapping
           return handler.reject(ServerException.fromDioError(err));
         } catch (e) {
-          logger.i('ServerError 파싱 실패: $e');
+          FileLogger.info('ServerError 파싱 실패: $e');
         }
       }
       return handler.next(err); // 원래 에러 전달

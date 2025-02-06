@@ -53,7 +53,7 @@ class ImageStorageService {
         final filePath = await saveImage(directory, photo.embedUrl, fileName);
         filePaths.add(filePath);
       } catch (e) {
-        logger.e('이미지 저장 중 오류가 발생했습니다: $e');
+        FileLogger.warning('이미지 저장 중 오류가 발생했습니다: $e');
       }
     }
     return filePaths;

@@ -18,7 +18,7 @@ class PhotoCardPreviewScreenProvider extends _$PhotoCardPreviewScreenProvider {
       try {
         await ref.read(paymentServiceProvider.notifier).refund();
       } catch (refundError) {
-        logger.e('Payment and refund failed', error: refundError);
+        FileLogger.warning('Payment and refund failed', error: refundError);
       }
       state = AsyncValue.error(e, stack);
     }
