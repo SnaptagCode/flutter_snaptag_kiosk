@@ -2,10 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-<<<<<<< HEAD
-=======
 import 'package:flutter_snaptag_kiosk/core/utils/sound_manager.dart';
->>>>>>> b5d7f61 (SoLoud 재사용 및 wav 로 오디오 파일 포맷 형식 변경)
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 
@@ -31,7 +28,8 @@ class CodeVerificationScreen extends ConsumerWidget {
         next.whenOrNull(
           error: (error, stack) async {
             await DialogHelper.showErrorDialog(context);
-            FileLogger.warning('Error verifying photo card: $error stacktrace $stack');
+            FileLogger.warning(
+                'Error verifying photo card: $error stacktrace $stack');
             // 에러 시 입력값 초기화
             ref.read(authCodeProvider.notifier).clear();
           },
@@ -157,7 +155,7 @@ class _NumericPad extends ConsumerWidget {
     if (index == 9) {
       return ElevatedButton(
         style: context.keypadNumberStyle,
-        onPressed: () {
+        onPressed: () async {
           SoundManager().playSound();
           ref.read(authCodeProvider.notifier).removeLast();
         },
@@ -173,7 +171,7 @@ class _NumericPad extends ConsumerWidget {
     if (index == 10) {
       return ElevatedButton(
         style: context.keypadNumberStyle,
-        onPressed: () {
+        onPressed: () async {
           SoundManager().playSound();
           ;
           ref.read(authCodeProvider.notifier).addNumber('0');
@@ -184,7 +182,7 @@ class _NumericPad extends ConsumerWidget {
     if (index == 11) {
       return ElevatedButton(
         style: context.keypadCompleteStyle,
-        onPressed: () {
+        onPressed: () async {
           SoundManager().playSound();
           ;
           final code = ref.read(authCodeProvider);
@@ -197,7 +195,7 @@ class _NumericPad extends ConsumerWidget {
     }
     return ElevatedButton(
       style: context.keypadNumberStyle,
-      onPressed: () {
+      onPressed: () async {
         SoundManager().playSound();
         ;
         ref.read(authCodeProvider.notifier).addNumber('${index + 1}');
