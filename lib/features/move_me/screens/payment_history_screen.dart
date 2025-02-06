@@ -2,7 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_snaptag_kiosk/core/providers/sound_provider.dart';
+import 'package:flutter_snaptag_kiosk/core/utils/sound_manager.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_svg/svg.dart';
 
@@ -10,7 +10,8 @@ class PaymentHistoryScreen extends ConsumerStatefulWidget {
   const PaymentHistoryScreen({super.key});
 
   @override
-  ConsumerState<ConsumerStatefulWidget> createState() => _PaymentHistoryScreenState();
+  ConsumerState<ConsumerStatefulWidget> createState() =>
+      _PaymentHistoryScreenState();
 }
 
 class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
@@ -86,7 +87,8 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
                 columns: columns,
                 rows: response.list.map((order) {
                   return DataRow(
-                    color: WidgetStateColor.resolveWith((states) => Colors.white),
+                    color:
+                        WidgetStateColor.resolveWith((states) => Colors.white),
                     cells: [
                       DataCell(
                         Center(
@@ -102,14 +104,18 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
                       DataCell(
                         Center(
                           child: Text(
-                            order.eventName.length > 20 ? '${order.eventName.substring(0, 20)}...' : order.eventName,
+                            order.eventName.length > 20
+                                ? '${order.eventName.substring(0, 20)}...'
+                                : order.eventName,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
                       ),
                       DataCell(
-                        Center(child: Text(NumberFormat('#,###').format(order.amount.toInt()))),
+                        Center(
+                            child: Text(NumberFormat('#,###')
+                                .format(order.amount.toInt()))),
                       ),
                       DataCell(
                         Center(child: Text(_getOrderState(order.orderStatus))),
@@ -118,7 +124,9 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
                         Center(child: _getRefundWidget(context, order)),
                       ),
                       DataCell(
-                        Center(child: Text(isPrinted(order.printedStatus) ? 'O' : 'X')),
+                        Center(
+                            child: Text(
+                                isPrinted(order.printedStatus) ? 'O' : 'X')),
                       ),
                       DataCell(
                         Center(child: Text(order.photoAuthNumber)),
@@ -132,7 +140,9 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
               ),
               PaginationControls(
                 currentPage: response.paging.currentPage,
-                totalPages: (response.paging.totalCount / response.paging.pageSize).ceil(),
+                totalPages:
+                    (response.paging.totalCount / response.paging.pageSize)
+                        .ceil(),
                 onPageChanged: (newPage) {
                   ref.read(ordersPageProvider().notifier).goToPage(newPage);
                 },
@@ -289,7 +299,9 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
                   confirmButtonText: '환불 진행',
                 );
                 if (result2) {
-                  await ref.read(setupRefundProcessProvider.notifier).startRefund(order);
+                  await ref
+                      .read(setupRefundProcessProvider.notifier)
+                      .startRefund(order);
                 }
               },
             );
@@ -312,7 +324,8 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
                 ),
               ),
               onPressed: () async {
-                playSound();
+                SoundManager().playSound();
+                ;
                 final result1 = await DialogHelper.showSetupDialog(
                   context,
                   title: '환불을 진행합니다.',
@@ -327,7 +340,9 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
                   confirmButtonText: '환불 진행',
                 );
                 if (result2) {
-                  await ref.read(setupRefundProcessProvider.notifier).startRefund(order);
+                  await ref
+                      .read(setupRefundProcessProvider.notifier)
+                      .startRefund(order);
                 }
               },
             );
@@ -367,7 +382,8 @@ class DateWidget extends StatelessWidget {
           ),
         ),
         Text(
-          DateFormat('yyyy.MM.dd').format(DateTime.now().subtract(const Duration(days: 14))),
+          DateFormat('yyyy.MM.dd')
+              .format(DateTime.now().subtract(const Duration(days: 14))),
           textAlign: TextAlign.center,
           style: TextStyle(
             color: Color(0xFF1C1C1C),
@@ -397,7 +413,8 @@ class PaginationControls extends StatelessWidget {
   Widget build(BuildContext context) {
     List<Widget> pageButtons() {
       List<Widget> buttons = [];
-      int startPage = (currentPage - 5).clamp(1, totalPages > 10 ? totalPages - 9 : 1);
+      int startPage =
+          (currentPage - 5).clamp(1, totalPages > 10 ? totalPages - 9 : 1);
       int endPage = (startPage + 9).clamp(startPage, totalPages);
 
       for (int i = startPage; i <= endPage; i++) {
@@ -412,7 +429,8 @@ class PaginationControls extends StatelessWidget {
                 fontSize: 14,
               ),
             ),
-            backgroundColor: i == currentPage ? Color(0xFFA671EA) : Color(0xFFF2F2F2),
+            backgroundColor:
+                i == currentPage ? Color(0xFFA671EA) : Color(0xFFF2F2F2),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(4),
               side: BorderSide(color: Colors.transparent),
@@ -438,7 +456,8 @@ class PaginationControls extends StatelessWidget {
             const SizedBox(width: 8),
             // Previous page button
             InkWell(
-              onTap: currentPage > 1 ? () => onPageChanged(currentPage - 1) : null,
+              onTap:
+                  currentPage > 1 ? () => onPageChanged(currentPage - 1) : null,
               child: const Icon(Icons.chevron_left),
             ),
             const SizedBox(width: 8),
@@ -447,13 +466,17 @@ class PaginationControls extends StatelessWidget {
             const SizedBox(width: 8),
             // Next page button
             InkWell(
-              onTap: currentPage < totalPages ? () => onPageChanged(currentPage + 1) : null,
+              onTap: currentPage < totalPages
+                  ? () => onPageChanged(currentPage + 1)
+                  : null,
               child: const Icon(Icons.chevron_right),
             ),
             const SizedBox(width: 8),
             // Last page button
             InkWell(
-              onTap: currentPage < totalPages ? () => onPageChanged(totalPages) : null,
+              onTap: currentPage < totalPages
+                  ? () => onPageChanged(totalPages)
+                  : null,
               child: const Icon(Icons.keyboard_double_arrow_right_sharp),
             ),
           ],

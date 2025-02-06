@@ -2,6 +2,10 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+<<<<<<< HEAD
+=======
+import 'package:flutter_snaptag_kiosk/core/utils/sound_manager.dart';
+>>>>>>> b5d7f61 (SoLoud 재사용 및 wav 로 오디오 파일 포맷 형식 변경)
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 
@@ -50,7 +54,11 @@ class CodeVerificationScreen extends ConsumerWidget {
           LocaleKeys.sub01_txt_01.tr(),
           style: context.typography.kioskBody1B,
         ),
-        ...[LocaleKeys.sub01_txt_02.tr().isNotEmpty ? SizedBox(height: 12.h) : SizedBox(height: 0)],
+        ...[
+          LocaleKeys.sub01_txt_02.tr().isNotEmpty
+              ? SizedBox(height: 12.h)
+              : SizedBox(height: 0)
+        ],
         Text(
           LocaleKeys.sub01_txt_02.tr(),
           style: context.typography.kioskBody1B,
@@ -98,7 +106,8 @@ class _InputDisplay extends ConsumerWidget {
                   child: Text(
                     keypadState,
                     textAlign: TextAlign.center,
-                    style: context.typography.kioskInput1B.copyWith(color: Colors.black),
+                    style: context.typography.kioskInput1B
+                        .copyWith(color: Colors.black),
                   ),
                 ),
               ]),
@@ -149,7 +158,7 @@ class _NumericPad extends ConsumerWidget {
       return ElevatedButton(
         style: context.keypadNumberStyle,
         onPressed: () {
-          playSound();
+          SoundManager().playSound();
           ref.read(authCodeProvider.notifier).removeLast();
         },
         child: SizedBox(
@@ -165,7 +174,8 @@ class _NumericPad extends ConsumerWidget {
       return ElevatedButton(
         style: context.keypadNumberStyle,
         onPressed: () {
-          playSound();
+          SoundManager().playSound();
+          ;
           ref.read(authCodeProvider.notifier).addNumber('0');
         },
         child: Text('0'),
@@ -175,7 +185,8 @@ class _NumericPad extends ConsumerWidget {
       return ElevatedButton(
         style: context.keypadCompleteStyle,
         onPressed: () {
-          playSound();
+          SoundManager().playSound();
+          ;
           final code = ref.read(authCodeProvider);
           if (ref.read(authCodeProvider.notifier).isValid()) {
             ref.read(verifyPhotoCardProvider.notifier).verify(code);
@@ -187,7 +198,8 @@ class _NumericPad extends ConsumerWidget {
     return ElevatedButton(
       style: context.keypadNumberStyle,
       onPressed: () {
-        playSound();
+        SoundManager().playSound();
+        ;
         ref.read(authCodeProvider.notifier).addNumber('${index + 1}');
       },
       child: Text('${index + 1}'),

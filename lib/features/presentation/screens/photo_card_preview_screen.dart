@@ -3,6 +3,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_snaptag_kiosk/core/utils/sound_manager.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 
@@ -11,12 +12,14 @@ class PhotoCardPreviewScreen extends ConsumerStatefulWidget {
     super.key,
   });
   @override
-  ConsumerState<PhotoCardPreviewScreen> createState() => _PhotoCardPreviewScreenState();
+  ConsumerState<PhotoCardPreviewScreen> createState() =>
+      _PhotoCardPreviewScreenState();
 }
 
-class _PhotoCardPreviewScreenState extends ConsumerState<PhotoCardPreviewScreen> {
+class _PhotoCardPreviewScreenState
+    extends ConsumerState<PhotoCardPreviewScreen> {
   Future<void> _handlePaymentError(Object error, StackTrace stack) async {
-    FileLogger.warning('Payment error occurred', error: error, stackTrace: stack);
+    logger.e('Payment error occurred', error: error, stackTrace: stack);
     await DialogHelper.showPurchaseFailedDialog(
       context,
     );
@@ -41,11 +44,22 @@ class _PhotoCardPreviewScreenState extends ConsumerState<PhotoCardPreviewScreen>
 
         // 에러/성공 처리
         await next.when(
-          error: _handlePaymentError,
+          error: (_, __) async {
+            await DialogHelper.showPurchaseFailedDialog(
+              context,
+            );
+            return;
+          },
           loading: () => null,
-          data: (_) {
-            // 결제 성공 처리
-            PrintProcessRouteData().go(context);
+          data: (_) async {
+            final order = ref.watch(updateOrderInfoProvider)?.status;
+            if (order == OrderStatus.completed) {
+              PrintProcessRouteData().go(context);
+            } else {
+              await DialogHelper.showPurchaseFailedDialog(
+                context,
+              );
+            }
           },
         );
       },
@@ -93,8 +107,11 @@ class _PhotoCardPreviewScreenState extends ConsumerState<PhotoCardPreviewScreen>
               ElevatedButton(
                 style: context.paymentButtonStyle,
                 onPressed: () {
-                  playSound();
-                  ref.read(photoCardPreviewScreenProviderProvider.notifier).payment();
+                  SoundManager().playSound();
+                  ;
+                  ref
+                      .read(photoCardPreviewScreenProviderProvider.notifier)
+                      .payment();
                 },
                 child: Text(LocaleKeys.sub02_btn_pay.tr()),
               ),

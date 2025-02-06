@@ -29,6 +29,7 @@ class PaymentService extends _$PaymentService {
       rethrow;
     } finally {
       final response = await _updateOrder();
+      ref.read(updateOrderInfoProvider.notifier).update(response);
       // 5. 프린트 정보 업데이트 (completed 상태일 때만)
       if (response.status == OrderStatus.completed && response.backPhotoForPrint != null) {
         ref.read(backPhotoForPrintInfoProvider.notifier).update(response.backPhotoForPrint!);
