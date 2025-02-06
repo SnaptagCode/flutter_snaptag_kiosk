@@ -25,7 +25,7 @@ class PaymentService extends _$PaymentService {
 
       ref.read(paymentResponseStateProvider.notifier).update(paymentResponse);
     } catch (e) {
-      logger.e('Payment process failed', error: e);
+      FileLogger.warning('Payment process failed', error: e);
       rethrow;
     } finally {
       final response = await _updateOrder();
@@ -49,7 +49,7 @@ class PaymentService extends _$PaymentService {
             originalApprovalDate: approvalInfo.tradeTime?.substring(0, 6) ?? '',
           );
     } catch (e) {
-      logger.e('Refund failed', error: e);
+      FileLogger.warning('Refund failed', error: e);
       rethrow;
     } finally {
       await _updateOrder();
@@ -91,23 +91,21 @@ class PaymentService extends _$PaymentService {
       final settings = ref.watch(storageServiceProvider).settings;
       final backPhoto = ref.watch(verifyPhotoCardProvider).value;
       final approval = ref.watch(paymentResponseStateProvider);
-
-      final request = UpdateOrderRequest(
-        kioskEventId: settings.kioskEventId,
-        kioskMachineId: settings.kioskMachineId,
-        photoAuthNumber: backPhoto?.photoAuthNumber ?? '',
-        amount: settings.photoCardPrice,
-        status: approval?.orderState ?? OrderStatus.failed,
-        approvalNumber: approval?.approvalNo ?? '',
-        purchaseAuthNumber: approval?.approvalNo ?? '',
-        authSeqNumber: approval?.approvalNo ?? '',
-        detail: approval?.KSNET ?? '{}',
-      );
-
       final orderId = ref.watch(createOrderInfoProvider)?.orderId;
       if (orderId == null) {
         throw Exception('No order id available');
       }
+      final request = UpdateOrderRequest(
+        kioskEventId: settings.kioskEventId,
+        kioskMachineId: settings.kioskMachineId,
+        photoAuthNumber: backPhoto?.photoAuthNumber ?? '-',
+        amount: settings.photoCardPrice,
+        status: approval?.orderState ?? OrderStatus.failed,
+        approvalNumber: approval?.approvalNo ?? '-',
+        purchaseAuthNumber: approval?.approvalNo ?? '-',
+        authSeqNumber: approval?.approvalNo ?? '-',
+        detail: approval?.KSNET ?? '{}',
+      );
 
       return await ref.read(kioskRepositoryProvider).updateOrderStatus(orderId.toInt(), request);
     } catch (e) {

@@ -101,11 +101,11 @@ class PrinterBindings {
 
   // 캔버스 준비 함수
   void prepareCanvas({bool isColor = true}) {
-    logger.d('PrepareCanvas called with isColor: $isColor');
+    FileLogger.info('PrepareCanvas called with isColor: $isColor');
     // 첫 번째 파라미터: chromatic mode (0: monochrome, 1: color)
     // 두 번째 파라미터: monochrome mode (0: default)
     final result = _prepareCanvas(isColor ? 0 : 1, 0);
-    logger.d('PrepareCanvas result: $result');
+    FileLogger.info('PrepareCanvas result: $result');
 
     if (result != 0) {
       final error = getErrorInfo(result);
@@ -122,13 +122,13 @@ class PrinterBindings {
     required double height,
     bool noAbsoluteBlack = true,
   }) {
-    logger.d('Drawing image from path: $imagePath'); // 경로 확인
-    logger.d('Image file exists: ${File(imagePath).existsSync()}'); // 파일 존재 확인
+    FileLogger.info('Drawing image from path: $imagePath'); // 경로 확인
+    FileLogger.info('Image file exists: ${File(imagePath).existsSync()}'); // 파일 존재 확인
 
     final pathPointer = imagePath.toNativeUtf8();
     try {
       final result = _drawImage(x, y, width, height, pathPointer.cast(), noAbsoluteBlack ? 1 : 0);
-      logger.d('DrawImage result: $result'); // 결과 코드 확인
+      FileLogger.info('DrawImage result: $result'); // 결과 코드 확인
       if (result != 0) {
         final error = getErrorInfo(result);
         throw Exception('Failed to draw image: $error (code: $result)');
@@ -252,7 +252,7 @@ class PrinterBindings {
       );
 
       if (result != 0) {
-        logger.d('Query printer status failed with code: $result'); // 디버그용
+        FileLogger.info('Query printer status failed with code: $result'); // 디버그용
         return null; // null 반환으로 변경
       }
 
@@ -268,7 +268,7 @@ class PrinterBindings {
         subStatus: pSubStatus.value,
       );
     } catch (e) {
-      logger.d('Error in getPrinterStatus: $e'); // 디버그용
+      FileLogger.info('Error in getPrinterStatus: $e'); // 디버그용
       return null; // 예외 발생 시 null 반환
     } finally {
       calloc.free(pChassisTemp);
@@ -339,29 +339,29 @@ class PrinterBindings {
       // 먼저 이전 상태를 정리
       _libInit();
 
-      logger.d('Enumerating USB printer...'); // 디버그 로그 추가
+      FileLogger.info('Enumerating USB printer...'); // 디버그 로그 추가
       // USB 프린터만 사용
       int result = _enumUsbPrt(enumListPtr.cast(), listLenPtr, numPtr);
       if (result != 0) {
-        logger.d('Failed to enumerate printer: $result');
+        FileLogger.info('Failed to enumerate printer: $result');
         return false;
       }
 
-      logger.d('Setting USB timeout...'); // 디버그 로그 추가
+      FileLogger.info('Setting USB timeout...'); // 디버그 로그 추가
       result = _usbSetTimeout(3000, 3000);
       if (result != 0) {
-        logger.d('Failed to set USB timeout: $result');
+        FileLogger.info('Failed to set USB timeout: $result');
         return false;
       }
 
-      logger.d('Selecting printer...'); // 디버그 로그 추가
+      FileLogger.info('Selecting printer...'); // 디버그 로그 추가
       result = _selectPrinter(enumListPtr.cast());
       if (result != 0) {
-        logger.d('Failed to select printer: $result');
+        FileLogger.info('Failed to select printer: $result');
         return false;
       }
 
-      logger.d('Printer connected successfully'); // 디버그 로그 추가
+      FileLogger.info('Printer connected successfully'); // 디버그 로그 추가
       return true;
     } finally {
       calloc.free(enumListPtr);
@@ -377,16 +377,16 @@ class PrinterBindings {
       try {
         int result = _isPrtHaveCard(flag);
         if (result != 0) {
-          logger.d('Failed to check card position');
+          FileLogger.info('Failed to check card position');
           return false;
         }
 
         // 카드가 있다면 배출
         if (flag.value != 0) {
-          logger.d('Card is in the printer, ejecting...');
+          FileLogger.info('Card is in the printer, ejecting...');
           result = _cardEject(0); // 왼쪽으로 배출
           if (result != 0) {
-            logger.d('Failed to eject card');
+            FileLogger.info('Failed to eject card');
             return false;
           }
         }
@@ -395,7 +395,7 @@ class PrinterBindings {
         calloc.free(flag);
       }
     } catch (e) {
-      logger.d('Error in ensurePrinterReady: $e');
+      FileLogger.info('Error in ensurePrinterReady: $e');
       return false;
     }
   }

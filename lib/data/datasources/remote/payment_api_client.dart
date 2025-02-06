@@ -28,7 +28,7 @@ class PaymentApiClient {
     final decode = cp949.decodeString(broken);
     final trim = trimValues(json.decode(decode));
     final paymentResponse = trim..addAll({'KSNET': '$callback($trim)'});
-    logger.d(paymentResponse);
+    FileLogger.info(paymentResponse.toString());
     return PaymentResponse.fromJson(paymentResponse);
   }
 

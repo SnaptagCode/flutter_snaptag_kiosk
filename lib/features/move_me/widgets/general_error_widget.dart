@@ -13,7 +13,7 @@ class GeneralErrorWidget extends StatelessWidget {
   final void Function()? onRetry;
 
   String _getErrorMessage(Exception? e) {
-    logger.e('Error occurred', error: e);
+    FileLogger.warning('Error occurred', error: e);
     if (e is ServerException) {
       return '${e.serverError.res.message}\n\n${e.serverError.statusCode}';
     } else if (e is DioException) {
