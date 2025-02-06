@@ -3,9 +3,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_snaptag_kiosk/core/providers/sound_provider.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
-
 import 'package:loader_overlay/loader_overlay.dart';
 
 class PhotoCardPreviewScreen extends ConsumerStatefulWidget {
@@ -18,7 +16,7 @@ class PhotoCardPreviewScreen extends ConsumerStatefulWidget {
 
 class _PhotoCardPreviewScreenState extends ConsumerState<PhotoCardPreviewScreen> {
   Future<void> _handlePaymentError(Object error, StackTrace stack) async {
-    logger.e('Payment error occurred', error: error, stackTrace: stack);
+    FileLogger.warning('Payment error occurred', error: error, stackTrace: stack);
     await DialogHelper.showPurchaseFailedDialog(
       context,
     );

@@ -50,7 +50,7 @@ class YamlStorageService {
         final yamlEditor = YamlEditor('');
         yamlEditor.update([], _settings.toJson());
         await file.writeAsString(yamlEditor.toString());
-        logger.d('설정 파일이 없어 새로 생성되었습니다: $filePath');
+        FileLogger.info('설정 파일이 없어 새로 생성되었습니다: $filePath');
         return;
       }
 
@@ -82,9 +82,9 @@ class YamlStorageService {
       yamlEditor.update([], data);
       await file.writeAsString(yamlEditor.toString());
       _settings = info;
-      logger.d('설정이 저장되었습니다: $filePath');
+      FileLogger.info('설정이 저장되었습니다: $filePath');
     } catch (e, stack) {
-      logger.e('설정 저장 중 오류 발생', error: e, stackTrace: stack);
+      FileLogger.warning('설정 저장 중 오류 발생', error: e, stackTrace: stack);
       throw StorageException(
         StorageErrorType.saveError,
         path: filePath,
