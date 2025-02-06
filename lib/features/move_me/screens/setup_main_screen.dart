@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_snaptag_kiosk/core/providers/sound_provider.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -115,8 +114,7 @@ class SetupMainScreen extends ConsumerWidget {
                         playSound();
                         MaterialRouteData().go(context);
                       }),
-                      _navigatorCard(context, label: 'Kiosk\nComponents',
-                          onTap: () {
+                      _navigatorCard(context, label: 'Kiosk\nComponents', onTap: () {
                         playSound();
                         KioskComponentsRouteData().go(context);
                       }),
@@ -130,17 +128,16 @@ class SetupMainScreen extends ConsumerWidget {
     );
   }
 
-  Widget _navigatorCard(BuildContext context,
-      {required String label, String? assetName, void Function()? onTap}) {
-    return SizedBox(
-      width: 260.w,
-      height: 342.h,
-      child: Card(
-        elevation: 0,
-        color: Colors.white,
-        shape: RoundedRectangleBorder(
-          side: BorderSide(
-            //#E6E8EB
+  Widget _navigatorCard(BuildContext context, {required String label, String? assetName, void Function()? onTap}) {
+    return Padding(
+      padding: EdgeInsets.all(8.w),
+      child: Container(
+        width: 260.w,
+        height: 342.h,
+        padding: EdgeInsets.only(top: 50.w),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border.all(
             color: Color(0xFFE6E8EB),
           ),
           borderRadius: const BorderRadius.all(Radius.circular(12)),
@@ -148,29 +145,26 @@ class SetupMainScreen extends ConsumerWidget {
         child: InkWell(
           borderRadius: const BorderRadius.all(Radius.circular(12)),
           onTap: onTap,
-          child: Padding(
-            padding: EdgeInsets.only(top: 50.w),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                if (assetName != null) ...[
-                  SvgPicture.asset(
-                    assetName,
-                    width: 100.w,
-                    height: 100.w,
-                  )
-                ],
-                SizedBox(height: 50.w),
-                Align(
-                  alignment: Alignment.bottomCenter,
-                  child: Text(
-                    label,
-                    textAlign: TextAlign.center,
-                    style: context.typography.kioskInput2B,
-                  ),
-                ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              if (assetName != null) ...[
+                SvgPicture.asset(
+                  assetName,
+                  width: 100.w,
+                  height: 100.w,
+                )
               ],
-            ),
+              SizedBox(height: 50.w),
+              Align(
+                alignment: Alignment.bottomCenter,
+                child: Text(
+                  label,
+                  textAlign: TextAlign.center,
+                  style: context.typography.kioskInput2B,
+                ),
+              ),
+            ],
           ),
         ),
       ),
