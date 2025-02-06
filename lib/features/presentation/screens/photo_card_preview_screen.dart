@@ -15,14 +15,6 @@ class PhotoCardPreviewScreen extends ConsumerStatefulWidget {
 }
 
 class _PhotoCardPreviewScreenState extends ConsumerState<PhotoCardPreviewScreen> {
-  Future<void> _handlePaymentError(Object error, StackTrace stack) async {
-    FileLogger.warning('Payment error occurred', error: error, stackTrace: stack);
-    await DialogHelper.showPurchaseFailedDialog(
-      context,
-    );
-    return;
-  }
-
   @override
   Widget build(BuildContext context) {
     ref.listen<AsyncValue<void>>(
@@ -41,11 +33,22 @@ class _PhotoCardPreviewScreenState extends ConsumerState<PhotoCardPreviewScreen>
 
         // 에러/성공 처리
         await next.when(
-          error: _handlePaymentError,
+          error: (_, __) async {
+            await DialogHelper.showPurchaseFailedDialog(
+              context,
+            );
+            return;
+          },
           loading: () => null,
-          data: (_) {
-            // 결제 성공 처리
-            PrintProcessRouteData().go(context);
+          data: (_) async {
+            final order = ref.watch(updateOrderInfoProvider)?.status;
+            if (order == OrderStatus.completed) {
+              PrintProcessRouteData().go(context);
+            } else {
+              await DialogHelper.showPurchaseFailedDialog(
+                context,
+              );
+            }
           },
         );
       },
