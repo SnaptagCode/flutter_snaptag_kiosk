@@ -17,7 +17,7 @@ class SnaptagImages {
 class SnaptagSounds {
   SnaptagSounds._();
 
-  static const String beep = 'assets/sounds/blop.mp3';
+  static const String beep = 'assets/sounds/blop.wav';
 }
 
 class SnaptagSvg {

@@ -1,7 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_snaptag_kiosk/core/providers/sound_provider.dart';
+import 'package:flutter_snaptag_kiosk/core/utils/sound_manager.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
@@ -112,7 +112,8 @@ class DialogHelper {
                 Expanded(
                   child: OutlinedButton(
                     onPressed: () {
-                      playSound();
+                      SoundManager().playSound();
+                      ;
                       Navigator.of(context).pop(false);
                     },
                     style: context.setupDialogCancelButtonStyle,
@@ -125,7 +126,8 @@ class DialogHelper {
                 Expanded(
                   child: ElevatedButton(
                     onPressed: () {
-                      playSound();
+                      SoundManager().playSound();
+                      ;
                       Navigator.of(context).pop(true);
                     },
                     style: context.setupDialogConfirmButtonStyle,
@@ -241,7 +243,20 @@ class DialogHelper {
       context,
       title: LocaleKeys.alert_title_purchase_failure.tr(),
       message: '${LocaleKeys.alert_txt_purchase_failure.tr()}$error',
-      buttonText: LocaleKeys.alert_btn_purchase_failure.tr(),
+      buttonText: LocaleKeys.alert_btn_print_complete.tr(),
+    );
+  }
+
+  static Future<void> showPurchaseRetryDialog(BuildContext context,
+      {Exception? exception}) async {
+    final error = exception != null && F.appFlavor == Flavor.dev
+        ? '\n\n${exception.toString()}'
+        : null;
+    await _showOneButtonKioskDialog(
+      context,
+      title: '결제 실패',
+      message: '결제에 실패했습니다.$error',
+      buttonText: '다시 시도',
     );
   }
 
