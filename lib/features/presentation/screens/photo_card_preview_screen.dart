@@ -107,7 +107,8 @@ class _PhotoCardPreviewScreenState
               ElevatedButton(
                 style: context.paymentButtonStyle,
                 onPressed: () async {
-                  SoundManager().playSound();
+                  await SoundManager().playSound();
+
                   ;
                   ref
                       .read(photoCardPreviewScreenProviderProvider.notifier)

@@ -324,7 +324,8 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
                 ),
               ),
               onPressed: () async {
-                SoundManager().playSound();
+                await SoundManager().playSound();
+
                 ;
                 final result1 = await DialogHelper.showSetupDialog(
                   context,

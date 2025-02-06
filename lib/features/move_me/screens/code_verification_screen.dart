@@ -156,7 +156,8 @@ class _NumericPad extends ConsumerWidget {
       return ElevatedButton(
         style: context.keypadNumberStyle,
         onPressed: () async {
-          SoundManager().playSound();
+          await SoundManager().playSound();
+
           ref.read(authCodeProvider.notifier).removeLast();
         },
         child: SizedBox(
@@ -172,8 +173,8 @@ class _NumericPad extends ConsumerWidget {
       return ElevatedButton(
         style: context.keypadNumberStyle,
         onPressed: () async {
-          SoundManager().playSound();
-          ;
+          await SoundManager().playSound();
+
           ref.read(authCodeProvider.notifier).addNumber('0');
         },
         child: Text('0'),
@@ -183,7 +184,8 @@ class _NumericPad extends ConsumerWidget {
       return ElevatedButton(
         style: context.keypadCompleteStyle,
         onPressed: () async {
-          SoundManager().playSound();
+          await SoundManager().playSound();
+
           ;
           final code = ref.read(authCodeProvider);
           if (ref.read(authCodeProvider.notifier).isValid()) {
@@ -196,7 +198,8 @@ class _NumericPad extends ConsumerWidget {
     return ElevatedButton(
       style: context.keypadNumberStyle,
       onPressed: () async {
-        SoundManager().playSound();
+        await SoundManager().playSound();
+
         ;
         ref.read(authCodeProvider.notifier).addNumber('${index + 1}');
       },
