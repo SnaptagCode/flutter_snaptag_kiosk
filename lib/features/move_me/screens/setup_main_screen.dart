@@ -72,7 +72,8 @@ class SetupMainScreen extends ConsumerWidget {
                       label: '이벤트\n미리보기',
                       assetName: SnaptagSvg.eventPreview,
                       onTap: () async {
-                        SoundManager().playSound();
+                        await SoundManager().playSound();
+
                         ;
                         KioskInfoRouteData().go(context);
                       },
@@ -82,7 +83,8 @@ class SetupMainScreen extends ConsumerWidget {
                       label: '출력 내역',
                       assetName: SnaptagSvg.payment,
                       onTap: () async {
-                        SoundManager().playSound();
+                        await SoundManager().playSound();
+
                         ;
                         PaymentHistoryRouteData().go(context);
                       },
@@ -92,7 +94,8 @@ class SetupMainScreen extends ConsumerWidget {
                       label: '이벤트\n실행',
                       assetName: SnaptagSvg.eventRun,
                       onTap: () async {
-                        SoundManager().playSound();
+                        await SoundManager().playSound();
+
                         ;
                         final result = await DialogHelper.showSetupDialog(
                           context,
@@ -112,19 +115,21 @@ class SetupMainScreen extends ConsumerWidget {
                     children: [
                       _navigatorCard(context, label: 'Unit Test',
                           onTap: () async {
-                        SoundManager().playSound();
+                        await SoundManager().playSound();
+
                         ;
                         UnitTestRouteData().go(context);
                       }),
                       _navigatorCard(context, label: 'Material',
                           onTap: () async {
-                        SoundManager().playSound();
+                        await SoundManager().playSound();
+
                         ;
                         MaterialRouteData().go(context);
                       }),
                       _navigatorCard(context, label: 'Kiosk\nComponents',
                           onTap: () async {
-                        SoundManager().playSound();
+                        await SoundManager().playSound();
 
                         KioskComponentsRouteData().go(context);
                       }),
