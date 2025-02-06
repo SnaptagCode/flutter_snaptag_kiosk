@@ -106,7 +106,7 @@ class _PhotoCardPreviewScreenState
               SizedBox(width: 20.w),
               ElevatedButton(
                 style: context.paymentButtonStyle,
-                onPressed: () {
+                onPressed: () async {
                   SoundManager().playSound();
                   ;
                   ref

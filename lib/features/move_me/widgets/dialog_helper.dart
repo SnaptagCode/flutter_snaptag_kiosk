@@ -111,7 +111,7 @@ class DialogHelper {
               children: [
                 Expanded(
                   child: OutlinedButton(
-                    onPressed: () {
+                    onPressed: () async {
                       SoundManager().playSound();
                       ;
                       Navigator.of(context).pop(false);
@@ -125,9 +125,8 @@ class DialogHelper {
                 SizedBox(width: 12.w),
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: () {
+                    onPressed: () async {
                       SoundManager().playSound();
-                      ;
                       Navigator.of(context).pop(true);
                     },
                     style: context.setupDialogConfirmButtonStyle,
