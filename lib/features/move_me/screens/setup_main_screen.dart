@@ -71,7 +71,7 @@ class SetupMainScreen extends ConsumerWidget {
                       context,
                       label: '이벤트\n미리보기',
                       assetName: SnaptagSvg.eventPreview,
-                      onTap: () {
+                      onTap: () async {
                         SoundManager().playSound();
                         ;
                         KioskInfoRouteData().go(context);
@@ -81,7 +81,7 @@ class SetupMainScreen extends ConsumerWidget {
                       context,
                       label: '출력 내역',
                       assetName: SnaptagSvg.payment,
-                      onTap: () {
+                      onTap: () async {
                         SoundManager().playSound();
                         ;
                         PaymentHistoryRouteData().go(context);
@@ -110,18 +110,20 @@ class SetupMainScreen extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      _navigatorCard(context, label: 'Unit Test', onTap: () {
+                      _navigatorCard(context, label: 'Unit Test',
+                          onTap: () async {
                         SoundManager().playSound();
                         ;
                         UnitTestRouteData().go(context);
                       }),
-                      _navigatorCard(context, label: 'Material', onTap: () {
+                      _navigatorCard(context, label: 'Material',
+                          onTap: () async {
                         SoundManager().playSound();
                         ;
                         MaterialRouteData().go(context);
                       }),
                       _navigatorCard(context, label: 'Kiosk\nComponents',
-                          onTap: () {
+                          onTap: () async {
                         SoundManager().playSound();
 
                         KioskComponentsRouteData().go(context);
