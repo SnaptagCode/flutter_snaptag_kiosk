@@ -51,14 +51,19 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
 
             await DialogHelper.showPrintErrorDialog(
               context,
-              exception: error is Exception ? error : null,
+              onButtonPressed: () {
+                PhotoCardUploadRouteData().go(context);
+              },
             );
-            PhotoCardUploadRouteData().go(context);
           },
           loading: () => null,
           data: (_) async {
-            await DialogHelper.showPrintCompleteDialog(context);
-            PhotoCardUploadRouteData().go(context);
+            await DialogHelper.showPrintCompleteDialog(
+              context,
+              onButtonPressed: () {
+                PhotoCardUploadRouteData().go(context);
+              },
+            );
           },
         );
       }
