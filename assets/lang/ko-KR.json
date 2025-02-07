@@ -19,7 +19,7 @@
   "alert_btn_print_complete": "확인",
   "alert_title_purchase_failure": "결제 실패",
   "alert_txt_purchase_failure": "결제가 정상적으로 완료되지 않았습니다.\r\n결제 수단을 확인하거나 홈으로 이동해 주세요.",
-  "alert_btn_purchase_failure": "돌아가기",
+  "alert_btn_purchase_failure": "확인",
   "alert_title_print_failure": "출력 실패",
   "alert_txt_print_failure": "출력이 정상적으로 이루어지지 않아 결제 금액이\r\n환불됩니다. 환불이 이루어지지 않은 경우,\r\n관리자에게 문의해 주시길 바랍니다.\r\n이용에 불편을 드려 죄송합니다.",
   "alert_btn_print_failure": "확인"
