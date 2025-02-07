@@ -9,7 +9,7 @@ class SnaptagImages {
 
   static const String close = 'assets/images/close.png';
 
-  static const String printLoading = 'assets/images/print_loading.gif';
+  static const String printLoading = 'assets/images/print_loading.png';
 
   static const String loading = 'assets/images/loading.gif';
 }
