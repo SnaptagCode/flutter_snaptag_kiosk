@@ -151,6 +151,7 @@ class DialogHelper {
   }) async {
     await showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
           backgroundColor: Colors.white,
@@ -214,12 +215,16 @@ class DialogHelper {
     );
   }
 
-  static Future<void> showPrintCompleteDialog(BuildContext context) async {
+  static Future<void> showPrintCompleteDialog(
+    BuildContext context, {
+    VoidCallback? onButtonPressed,
+  }) async {
     await _showOneButtonKioskDialog(
       context,
       title: LocaleKeys.alert_title_print_complete.tr(),
       message: LocaleKeys.alert_txt_print_complete.tr(),
       buttonText: LocaleKeys.alert_btn_print_complete.tr(),
+      onButtonPressed: onButtonPressed,
     );
   }
 
@@ -241,12 +246,16 @@ class DialogHelper {
     );
   }
 
-  static Future<bool> showPrintErrorDialog(BuildContext context) async {
+  static Future<bool> showPrintErrorDialog(
+    BuildContext context, {
+    VoidCallback? onButtonPressed,
+  }) async {
     return await _showOneButtonKioskDialog(
       context,
       title: LocaleKeys.alert_title_print_failure.tr(),
       message: LocaleKeys.alert_txt_print_failure.tr(),
       buttonText: LocaleKeys.alert_btn_print_failure.tr(),
+      onButtonPressed: onButtonPressed,
     );
   }
 }
