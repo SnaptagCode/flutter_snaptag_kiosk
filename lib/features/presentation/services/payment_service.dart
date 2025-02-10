@@ -25,7 +25,7 @@ class PaymentService extends _$PaymentService {
 
       ref.read(paymentResponseStateProvider.notifier).update(paymentResponse);
     } catch (e) {
-      FileLogger.warning('Payment process failed', error: e);
+      logger.e('Payment process failed', error: e);
       rethrow;
     } finally {
       final response = await _updateOrder();
@@ -50,7 +50,7 @@ class PaymentService extends _$PaymentService {
             originalApprovalDate: approvalInfo.tradeTime?.substring(0, 6) ?? '',
           );
     } catch (e) {
-      FileLogger.warning('Refund failed', error: e);
+      logger.e('Refund failed', error: e);
       rethrow;
     } finally {
       await _updateOrder();
