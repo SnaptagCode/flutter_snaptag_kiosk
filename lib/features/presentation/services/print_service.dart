@@ -55,12 +55,12 @@ class PrintService extends _$PrintService {
         );
       } catch (e, stack) {
         // 프린트 실패 처리
-        FileLogger.warning('Print failure', error: e, stackTrace: stack);
+        logger.e('Print failure', error: e, stackTrace: stack);
         await _updatePrintStatus(printJobInfo.printedPhotoCardId, PrintedStatus.failed);
         rethrow;
       }
     } catch (e) {
-      FileLogger.warning('Print process failed', error: e);
+      logger.e('Print process failed', error: e);
       rethrow;
     }
   }

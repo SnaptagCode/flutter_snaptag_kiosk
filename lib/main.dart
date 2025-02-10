@@ -26,7 +26,7 @@ void main() {
       final imageStorage = await ImageStorageService.initialize();
 
       await EasyLocalization.ensureInitialized();
-      FileLogger.initialize('');
+
       runApp(
         EasyLocalization(
           supportedLocales: const [
@@ -55,7 +55,6 @@ void main() {
     },
     (error, stack) {
       String msg = "ZONED_ERROR : $error\n$stack";
-      FileLogger.severe(msg);
     },
   );
 }
