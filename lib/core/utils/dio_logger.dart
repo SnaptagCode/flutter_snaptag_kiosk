@@ -100,9 +100,7 @@ class DioLogger extends Interceptor {
         }
       }
     }
-    if (sendHook != null) {
-      sendHook!(_buffer.toString());
-    }
+    sendHook?.call(_buffer.toString());
     handler.next(options);
   }
 
@@ -136,9 +134,7 @@ class DioLogger extends Interceptor {
         _printBoxed(header: 'DioError ║ ${err.type}', text: err.message);
       }
     }
-    if (sendHook != null) {
-      sendHook!(_buffer.toString());
-    }
+    sendHook?.call(_buffer.toString());
     handler.next(err);
   }
 
@@ -170,9 +166,7 @@ class DioLogger extends Interceptor {
       logPrint('║');
       _printLine('╚');
     }
-    if (sendHook != null) {
-      sendHook!(_buffer.toString());
-    }
+    sendHook?.call(_buffer.toString());
     handler.next(response);
   }
 

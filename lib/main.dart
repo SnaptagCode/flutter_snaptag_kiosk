@@ -15,13 +15,17 @@ void main() {
   } else {
     F.appFlavor = Flavor.prod;
   }
+  final slackCall = SlackLogService();
 
   // Zone으로 감싸서 모든 비동기 에러도 캐치
   runZonedGuarded(
     () async {
       WidgetsFlutterBinding.ensureInitialized();
       await windowManagerSetting();
-
+      // ✅ FlutterError 로그 자동 감지
+      FlutterError.onError = (FlutterErrorDetails details) {
+        slackCall.writeLog("[FLUTTER ERROR] ${details.exceptionAsString()}");
+      };
       final yamlStorage = await YamlStorageService.initialize();
       final imageStorage = await ImageStorageService.initialize();
 
@@ -53,8 +57,8 @@ void main() {
         ),
       );
     },
-    (error, stack) {
-      String msg = "ZONED_ERROR : $error\n$stack";
+    (error, stackTrace) {
+      slackCall.writeLog("[ZONE ERROR] $error\nStackTrace: $stackTrace");
     },
   );
 }
