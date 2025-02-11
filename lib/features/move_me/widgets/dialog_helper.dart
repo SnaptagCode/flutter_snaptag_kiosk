@@ -226,6 +226,16 @@ class DialogHelper {
     );
   }
 
+  static Future<void> showPrintCompleteIsWinedDialog(
+      BuildContext context) async {
+    await _showOneButtonKioskDialog(
+      context,
+      title: "당첨",
+      message: "당첨 되셨습니다!!",
+      buttonText: LocaleKeys.alert_btn_print_complete.tr(),
+    );
+  }
+
   static Future<void> showErrorDialog(BuildContext context) async {
     await _showOneButtonKioskDialog(
       context,
