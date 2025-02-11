@@ -48,6 +48,7 @@ dependencies:
   flutter_svg: ^2.0.17
   flutter_soloud: ^2.1.7
   flutter_dotenv: ^5.2.1
+  pretty_dio_logger: ^1.4.0
 
 
 dev_dependencies:
