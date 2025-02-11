@@ -40,7 +40,8 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
         // 로딩이 아닐 때만 처리
         await next.when(
           error: (error, stack) async {
-            FileLogger.warning('Print process error', error: error, stackTrace: stack);
+            FileLogger.warning('Print process error',
+                error: error, stackTrace: stack);
 
             // 에러 발생 시 환불 처리
             try {
@@ -56,8 +57,12 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
             PhotoCardUploadRouteData().go(context);
           },
           loading: () => null,
-          data: (_) async {
-            await DialogHelper.showPrintCompleteDialog(context);
+          data: (isWin) async {
+            if (isWin) {
+              await DialogHelper.showPrintCompleteIsWinedDialog(context);
+            } else {
+              await DialogHelper.showPrintCompleteDialog(context);
+            }
             PhotoCardUploadRouteData().go(context);
           },
         );

@@ -6,9 +6,9 @@ part 'print_process_screen_provider.g.dart';
 @riverpod
 class PrintProcessScreenProvider extends _$PrintProcessScreenProvider {
   @override
-  FutureOr<void> build() async {
+  FutureOr<bool> build() async {
     try {
-      await ref.read(printServiceProvider.notifier).print();
+      return await ref.read(printServiceProvider.notifier).print();
     } catch (e) {
       rethrow;
     }
