@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
+import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
 final dioProvider = Provider.family<Dio, String>((ref, baseUrl) {
   final dio = Dio()
@@ -9,6 +10,13 @@ final dioProvider = Provider.family<Dio, String>((ref, baseUrl) {
     ..options.receiveTimeout = const Duration(seconds: 30);
   dio.interceptors.add(
     DioLogger(sendHook: SlackLogService().sendLogToSlack),
+  );
+  dio.interceptors.add(
+    PrettyDioLogger(
+      requestHeader: true,
+      requestBody: true,
+      responseHeader: true,
+    ),
   );
   dio.interceptors.add(QueuedInterceptorsWrapper(
     // Request가 보내기 전에 실행됩니다.
