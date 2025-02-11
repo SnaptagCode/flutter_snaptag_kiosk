@@ -49,3 +49,6 @@ app.*.map.json
 /web/
 /windows/
 /test/
+
+# 보안
+*.env
