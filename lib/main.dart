@@ -24,7 +24,7 @@ void main() {
       await windowManagerSetting();
       // ✅ FlutterError 로그 자동 감지
       FlutterError.onError = (FlutterErrorDetails details) {
-        slackCall.writeLog("[FLUTTER ERROR] ${details.exceptionAsString()}");
+        slackCall.sendLogToSlack("[FLUTTER ERROR] ${details.exceptionAsString()}");
       };
       final yamlStorage = await YamlStorageService.initialize();
       final imageStorage = await ImageStorageService.initialize();
@@ -58,7 +58,7 @@ void main() {
       );
     },
     (error, stackTrace) {
-      slackCall.writeLog("[ZONE ERROR] $error\nStackTrace: $stackTrace");
+      slackCall.sendLogToSlack("[ZONE ERROR] $error\nStackTrace: $stackTrace");
     },
   );
 }

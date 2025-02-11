@@ -12,7 +12,7 @@ class SlackLogService {
   }
 
   final String slackWebhookUrl =
-      "https://hooks.slack.com/services/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"; // Webhook URL
+      "https://hooks.slack.com/services/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"; // Webhook URL
   void init() {
     sendLogToSlack("🚀 Flutter App Started!");
   }
@@ -26,16 +26,14 @@ class SlackLogService {
         headers: {"Content-Type": "application/json"},
         body: payload,
       );
-      log(response.body);
+
       if (response.statusCode != 200) {
-        log("❌ Slack Webhook 오류: ${response.statusCode} - ${response.body}");
+        log("❌ Slack Webhook 오류: ${response.body}");
+        log("curl -X POST -H \"Content-Type: application/json\" -d '$payload' $slackWebhookUrl");
       }
     } catch (e) {
       log("❌ Slack Webhook 오류: $e");
+      log("curl -X POST -H \"Content-Type: application/json\" -d '$payload' $slackWebhookUrl");
     }
-  }
-
-  void writeLog(String message) {
-    sendLogToSlack(message);
   }
 }
