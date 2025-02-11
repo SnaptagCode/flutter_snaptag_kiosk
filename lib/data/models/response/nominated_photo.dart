@@ -11,7 +11,10 @@ class NominatedPhoto with _$NominatedPhoto {
     required int code,
     required String originUrl,
     required String embedUrl,
+    required int selectionWeight,
+    required bool isWin,
   }) = _NominatedPhoto;
 
-  factory NominatedPhoto.fromJson(Map<String, dynamic> json) => _$NominatedPhotoFromJson(json);
+  factory NominatedPhoto.fromJson(Map<String, dynamic> json) =>
+      _$NominatedPhotoFromJson(json);
 }

@@ -21,9 +21,7 @@ class ProcessedImage extends _$ProcessedImage {
     // 1. 랜덤 이미지 선택
     final frontPhotoList = ref.read(frontPhotoListProvider.notifier);
     final randomPhoto = await frontPhotoList.getRandomPhoto();
-    if (randomPhoto == null) {
-      throw Exception('No front images available');
-    }
+
     state = (frontPath: randomPhoto.path, backImage: state?.backImage);
   }
 
@@ -76,7 +74,9 @@ class PrintTestWidget extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final processedImages = ref.watch(processedImageProvider);
     final printerState = ref.watch(printerServiceProvider);
-    final canPrint = processedImages.frontPath != null && processedImages.backImage != null && !printerState.isLoading;
+    final canPrint = processedImages.frontPath != null &&
+        processedImages.backImage != null &&
+        !printerState.isLoading;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -100,7 +100,9 @@ class PrintTestWidget extends ConsumerWidget {
                   ),
                   const SizedBox(height: 8),
                   ElevatedButton(
-                    onPressed: () => ref.read(processedImageProvider.notifier).selectRandomImage(),
+                    onPressed: () => ref
+                        .read(processedImageProvider.notifier)
+                        .selectRandomImage(),
                     child: const Text('Random Front Image'),
                   ),
                 ],
@@ -123,7 +125,9 @@ class PrintTestWidget extends ConsumerWidget {
                   ),
                   const SizedBox(height: 8),
                   ElevatedButton(
-                    onPressed: () => ref.read(processedImageProvider.notifier).selectBackImage(),
+                    onPressed: () => ref
+                        .read(processedImageProvider.notifier)
+                        .selectBackImage(),
                     child: const Text('Select Back Image'),
                   ),
                 ],
@@ -160,7 +164,9 @@ class PrintTestWidget extends ConsumerWidget {
               onPressed: canPrint
                   ? () async {
                       try {
-                        await ref.read(processedImageProvider.notifier).printImages();
+                        await ref
+                            .read(processedImageProvider.notifier)
+                            .printImages();
                         if (context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(content: Text('인쇄가 완료되었습니다')),
@@ -182,7 +188,8 @@ class PrintTestWidget extends ConsumerWidget {
             ),
             const SizedBox(width: 16),
             ElevatedButton(
-              onPressed: () => ref.read(processedImageProvider.notifier).clear(),
+              onPressed: () =>
+                  ref.read(processedImageProvider.notifier).clear(),
               child: const Text('Clear Images'),
             ),
           ],
