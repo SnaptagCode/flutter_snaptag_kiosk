@@ -9,27 +9,7 @@ class RandomPhotoUtil {
     try {
       // 가중치 추출
       final parsedData = dataList
-          .map((filePath) {
-            final fileName = path.basenameWithoutExtension(filePath);
-            final parts = fileName.split('_');
-            final id = int.tryParse(parts[0]);
-            final code = int.tryParse(parts[1]);
-            final embeddingProductId = int.tryParse(parts[2]);
-            final weight = int.tryParse(parts[3]) ?? 0;
-            final isWin = parts[4] == '1';
-
-            if (id == null || code == null || embeddingProductId == null) {
-              return null;
-            }
-            return Seletedfrontphoto(
-              id: id,
-              code: code,
-              embeddingProductId: embeddingProductId,
-              weight: weight,
-              isWin: isWin,
-              path: filePath,
-            );
-          })
+          .map((filePath) => convertFromFileToObject(filePath))
           .where((item) => item != null)
           .toList(); // 유효한 값만 필터링
 
@@ -46,7 +26,38 @@ class RandomPhotoUtil {
         return randomValue < cumulativeWeight;
       }, orElse: () => null);
     } catch (e) {
-      // FileLogger.warning('이미지 정보 추출 중 오류가 발생했습니다: $e');
+      FileLogger.warning('이미지 정보 추출 중 오류가 발생했습니다: $e');
+      return null;
+    }
+  }
+
+  static Seletedfrontphoto? convertFromFileToObject(String filePath) {
+    try {
+      final fileName = path.basenameWithoutExtension(filePath);
+      final parts = fileName.split('_');
+      final id = int.tryParse(parts[0]);
+      final code = int.tryParse(parts[1]);
+      final embeddingProductId = int.tryParse(parts[2]);
+      final weight = int.tryParse(parts[3]);
+      final isWin = parts[4] == '1';
+
+      if (id == null ||
+          code == null ||
+          weight == null ||
+          embeddingProductId == null) {
+        throw Exception('Invalid file name format, $filePath');
+      }
+
+      return Seletedfrontphoto(
+        id: id,
+        code: code,
+        embeddingProductId: embeddingProductId,
+        weight: weight,
+        isWin: isWin,
+        path: filePath,
+      );
+    } catch (e) {
+      FileLogger.warning('filePath: $filePath || 이미지 정보 추출 중 오류가 발생했습니다: $e');
       return null;
     }
   }

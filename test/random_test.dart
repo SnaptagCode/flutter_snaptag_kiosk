@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:flutter_snaptag_kiosk/core/utils/file_logger.dart';
 import 'package:flutter_snaptag_kiosk/core/utils/random/random_photo_util.dart';
 import 'package:flutter_snaptag_kiosk/domain/entities/SeletedFrontPhoto.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -6,8 +9,10 @@ void main() {
   late List<String> testData;
 
   setUp(() {
+    FileLogger.initialize('');
+
     testData = [
-      "1_123_1234_500_1.png",
+      "1_123_1234_100_1.png",
       "2_456_7890_200_1.png",
       "3_987_6543_300_1.png",
       "4_987_6543_400_1.png",
@@ -86,6 +91,26 @@ void main() {
       sortedMap.forEach((key, value) {
         print("$key -> ${value / totalTrials * 100}% 선택됨");
       });
+    });
+
+    // ✅ 6. FrontPhotoList 의 File -> List<String> 변환 검증
+    test('convertFromFileToObject 변환 후 null 값이 제거되는지 확인', () {
+      final testFiles = [
+        File("1_123_1234_100_1.png"),
+        File("3_123_1234_100_.png"),
+        File(""),
+      ];
+
+      final result = testFiles
+          .map((file) =>
+              RandomPhotoUtil.convertFromFileToObject(file.path)?.path)
+          .where((path) => path != null)
+          .cast<String>()
+          .toList();
+
+      // ✅ 결과 검증
+      expect(result, isA<List<String>>()); // ✅ `List<String>`인지 확인
+      expect(result.first, "1_123_1234_100_1.png"); // ✅ 예상된 path
     });
   });
 }
