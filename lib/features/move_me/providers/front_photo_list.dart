@@ -34,27 +34,13 @@ class FrontPhotoList extends _$FrontPhotoList {
             extension.endsWith('.png');
       });
 
-      // FrontPhotoPath 객체로 변환
-      return files.map((file) {
-        // 파일명이 '{id}_{code}_{embeddingProductId}.확장자' 형식인 경우
-        // 파일명에서 id, code embeddingProductId 추출 시도
-        final fileName = path.basenameWithoutExtension(file.path);
-        final parts = fileName.split('_');
-        if (parts.length == 3) {
-          final id = int.tryParse(parts[0]);
-          final code = int.tryParse(parts[1]);
-          final embeddingProductId = int.tryParse(parts[2]);
-          if (id != null && code != null && embeddingProductId != null) {
-            return file.path;
-          } else {
-            // exception
-            throw Exception('Invalid file name format: $fileName');
-          }
-        } else {
-          // exception
-          throw Exception('Invalid file name format: $fileName');
-        }
-      }).toList();
+      // List<String> 로 변환 String : path
+      return files
+          .map((file) =>
+              RandomPhotoUtil.convertFromFileToObject(file.path)?.path)
+          .where((path) => path != null)
+          .cast<String>()
+          .toList();
     } catch (e) {
       FileLogger.warning('이미지 목록을 불러오는 중 오류가 발생했습니다: $e');
       return [];
@@ -91,9 +77,7 @@ class FrontPhotoList extends _$FrontPhotoList {
     // 각 이미지 다운로드 및 저장
     for (var photo in photoList.list) {
       try {
-        // '{id}_{code}_{embeddingProductId}.확장자' 형식
-        final fileName =
-            '${photo.id}_${photo.code}_${photo.embeddingProductId}_${photo.selectionWeight}_${photo.isWin ? 1 : 0}';
+        final fileName = photo.getFileName();
         final filePath = await imageStorage.saveImage(
             DirectoryPaths.frontImages, photo.embedUrl, fileName);
 
