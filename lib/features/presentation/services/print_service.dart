@@ -12,55 +12,51 @@ class PrintService extends _$PrintService {
 
   Future<void> print() async {
     try {
-      // 사전 검증
-      // throw Exception('Printer not ready');
-      _validatePrintRequirements();
+      await _handlePrintProcess();
+    } catch (e, stack) {
+      logger.e('PrintService.print failure', error: e, stackTrace: stack);
+      rethrow;
+    }
+  }
 
-      // 프론트 이미지
-      final frontPhotoInfo = await _prepareFrontPhoto();
-      // throw Exception('No front images available');
+  Future<void> _handlePrintProcess() async {
+    // 1. 사전 검증
+    _validatePrintRequirements();
 
-      // 백 이미지 다운로드/처리
-      final embeddedBackImage = await _prepareBackImage();
-      // throw Exception('Failed to download back image');
+    // 2. 프론트 이미지 준비
+    final frontPhotoInfo = await _prepareFrontPhoto();
 
-      // 프린트 작업 생성
-      // throw Exception('Failed to create print job');
-      final printJobInfo = await _createPrintJob(
-        frontPhotoCardId: frontPhotoInfo.id,
-        backPhotoCardId: ref.read(verifyPhotoCardProvider).value?.backPhotoCardId ?? 0,
-        file: embeddedBackImage,
-      );
+    // 3. 백 이미지 준비
+    final embeddedBackImage = await _prepareBackImage();
 
-      try {
-        // 4. 프린트 상태 업데이트 (시작)
-        // throw Exception('Failed to update print status');
-        await _updatePrintStatus(
-          printJobInfo.printedPhotoCardId,
-          PrintedStatus.started,
-        );
+    // 4. 프린트 작업 생성
+    final printJobInfo = await _createPrintJob(
+      frontPhotoCardId: frontPhotoInfo.id,
+      backPhotoCardId: ref.read(verifyPhotoCardProvider).value?.backPhotoCardId ?? 0,
+      file: embeddedBackImage,
+    );
 
-        // 5. 실제 프린트 실행
-        // throw Exception('Failed to execute print');
-        await _executePrint(
-          frontPhotoPath: frontPhotoInfo.path,
-          embedded: embeddedBackImage,
-        );
+    // 5. 프린트 진행 및 상태 업데이트
+    await _executePrintJob(
+      printJobInfo.printedPhotoCardId,
+      frontPhotoInfo.path,
+      embeddedBackImage,
+    );
+  }
 
-        // 6. 프린트 상태 업데이트 (완료)
-        // throw Exception('Failed to update print status');
-        await _updatePrintStatus(
-          printJobInfo.printedPhotoCardId,
-          PrintedStatus.completed,
-        );
-      } catch (e, stack) {
-        // 프린트 실패 처리
-        logger.e('Print failure', error: e, stackTrace: stack);
-        await _updatePrintStatus(printJobInfo.printedPhotoCardId, PrintedStatus.failed);
-        rethrow;
-      }
-    } catch (e) {
-      logger.e('Print process failed', error: e);
+  Future<void> _executePrintJob(int printedPhotoCardId, String frontPhotoPath, File embedded) async {
+    try {
+      // 프린트 상태 시작
+      await _updatePrintStatus(printedPhotoCardId, PrintedStatus.started);
+
+      // 실제 프린트 실행
+      await _executePrint(frontPhotoPath: frontPhotoPath, embedded: embedded);
+
+      // 프린트 상태 완료
+      await _updatePrintStatus(printedPhotoCardId, PrintedStatus.completed);
+    } catch (e, stack) {
+      logger.e('PrintService._executePrintJob failure', error: e, stackTrace: stack);
+      await _updatePrintStatus(printedPhotoCardId, PrintedStatus.failed);
       rethrow;
     }
   }
@@ -111,24 +107,14 @@ class PrintService extends _$PrintService {
 
   void _validatePrintRequirements() {
     final backPhotoForPrintInfo = ref.read(backPhotoForPrintInfoProvider);
-    if (backPhotoForPrintInfo == null) {
-      throw Exception('No back photo for print info available');
-    }
-
     final backPhotoCardResponseInfo = ref.watch(verifyPhotoCardProvider).value;
-    if (backPhotoCardResponseInfo == null) {
-      throw Exception('No back photo card response info available');
-    }
-
     final approvalInfo = ref.read(paymentResponseStateProvider);
-    if (approvalInfo == null) {
-      throw Exception('No payment approval info available');
-    }
-
     final printerState = ref.read(printerServiceProvider);
-    if (printerState.hasError) {
-      throw Exception('Printer is not ready');
-    }
+
+    if (backPhotoForPrintInfo == null) throw Exception('No back photo for print info available');
+    if (backPhotoCardResponseInfo == null) throw Exception('No back photo card response info available');
+    if (approvalInfo == null) throw Exception('No payment approval info available');
+    if (printerState.hasError) throw Exception('Printer is not ready');
   }
 
   Future<({int printedPhotoCardId})> _createPrintJob({
