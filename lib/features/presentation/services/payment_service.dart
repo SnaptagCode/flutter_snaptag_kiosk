@@ -25,7 +25,7 @@ class PaymentService extends _$PaymentService {
 
       ref.read(paymentResponseStateProvider.notifier).update(paymentResponse);
     } catch (e) {
-      FileLogger.warning('Payment process failed', error: e);
+      logger.e('Payment process failed', error: e);
       rethrow;
     } finally {
       final response = await _updateOrder();
@@ -44,13 +44,16 @@ class PaymentService extends _$PaymentService {
         throw Exception('No payment approval info available');
       }
       final price = ref.read(storageServiceProvider).settings.photoCardPrice;
-      await ref.read(paymentRepositoryProvider).cancel(
+      final paymentResponse = await ref.read(paymentRepositoryProvider).cancel(
             totalAmount: price,
             originalApprovalNo: approvalInfo.approvalNo ?? '',
             originalApprovalDate: approvalInfo.tradeTime?.substring(0, 6) ?? '',
           );
+      logger.i(
+          'respCode: ${approvalInfo.respCode} \trespCode: ${approvalInfo.respCode} \nORDER STATUS: ${approvalInfo.orderState}');
+      ref.read(paymentResponseStateProvider.notifier).update(paymentResponse);
     } catch (e) {
-      FileLogger.warning('Refund failed', error: e);
+      logger.e('Refund failed', error: e);
       rethrow;
     } finally {
       await _updateOrder();
@@ -96,6 +99,8 @@ class PaymentService extends _$PaymentService {
       if (orderId == null) {
         throw Exception('No order id available');
       }
+      logger.i(
+          'respCode: ${approval?.respCode} \trespCode: ${approval?.respCode} \nORDER STATUS: ${approval?.orderState}');
       final request = UpdateOrderRequest(
         kioskEventId: settings.kioskEventId,
         kioskMachineId: settings.kioskMachineId,

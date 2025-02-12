@@ -24,7 +24,7 @@ class VerifyPhotoCard extends _$VerifyPhotoCard {
             kioskEventId,
             code,
           );
-      FileLogger.info('BackPhotoCardResponse: ${response.toJson()}');
+      logger.i('BackPhotoCardResponse: ${response.toJson()}');
       return response;
     });
   }
