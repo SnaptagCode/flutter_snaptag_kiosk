@@ -11,7 +11,7 @@ class PaymentApiClient {
   Future<PaymentResponse> requestPayment(String callback, String request) async {
     // URL을 직접 구성 - 인코딩 없이
     final url = '$baseUrl?callback=$callback&REQ=$request';
-    print('\n=== Raw Payment Request URL ===\n$url');
+    logger.i('\n=== Raw Payment Request URL ===\n$url');
 
     final response = await http.get(
       Uri.parse(url),
@@ -28,7 +28,7 @@ class PaymentApiClient {
     final decode = cp949.decodeString(broken);
     final trim = trimValues(json.decode(decode));
     final paymentResponse = trim..addAll({'KSNET': '$callback($trim)'});
-    FileLogger.info(paymentResponse.toString());
+    logger.i(paymentResponse.toString());
     return PaymentResponse.fromJson(paymentResponse);
   }
 

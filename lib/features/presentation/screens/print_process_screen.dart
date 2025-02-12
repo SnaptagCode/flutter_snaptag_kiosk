@@ -40,13 +40,13 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
         // 로딩이 아닐 때만 처리
         await next.when(
           error: (error, stack) async {
-            FileLogger.warning('Print process error', error: error, stackTrace: stack);
+            logger.e('Print process error', error: error, stackTrace: stack);
 
             // 에러 발생 시 환불 처리
             try {
               await ref.read(paymentServiceProvider.notifier).refund();
             } catch (refundError) {
-              FileLogger.warning('Refund failed', error: refundError);
+              logger.e('Refund failed', error: refundError);
             }
 
             await DialogHelper.showPrintErrorDialog(
