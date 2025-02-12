@@ -21,6 +21,10 @@ class SlackLogService {
     if (slackWebhookUrl == null) {
       log("❌ Slack Webhook URL이 없습니다.");
       return;
+    }
+    if (message.isEmpty) {
+      log("❌ Slack Webhook 메시지가 없습니다.");
+      return;
     } else {
       final payload = jsonEncode({"text": message});
 
