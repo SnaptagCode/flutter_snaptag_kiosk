@@ -37,7 +37,7 @@ class PhotoCardUploadScreen extends ConsumerWidget {
           ),
           child: QrImageView(
             data:
-                '${F.qrCodePrefix}/${context.locale.languageCode}/${ref.watch(storageServiceProvider).settings.kioskEventId} ',
+                '${F.qrCodePrefix}/${context.locale.languageCode}/${ref.read(kioskInfoServiceProvider.notifier).settings.kioskEventId} ',
             size: 330.r,
             padding: EdgeInsets.all(20.r),
             version: QrVersions.auto,

@@ -18,7 +18,7 @@ class VerifyPhotoCard extends _$VerifyPhotoCard {
     state = const AsyncValue.loading();
 
     state = await AsyncValue.guard(() async {
-      final kioskEventId = ref.read(storageServiceProvider).settings.kioskEventId;
+      final kioskEventId = ref.read(kioskInfoServiceProvider.notifier).settings.kioskEventId;
 
       final response = await ref.read(kioskRepositoryProvider).getBackPhotoCard(
             kioskEventId,
