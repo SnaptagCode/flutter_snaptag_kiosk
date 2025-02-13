@@ -10,16 +10,10 @@ class AsyncKioskInfo extends _$AsyncKioskInfo {
     return _fetchAndUpdateKioskInfo();
   }
 
-  Future<KioskMachineInfo> _fetchAndUpdateKioskInfo() async {
+  Future<KioskMachineInfo> _fetchAndUpdateKioskInfo({int? machineId}) async {
     try {
-      final yamlRepo = ref.read(storageServiceProvider);
-
-      // 먼저 파일 재로드
-      await yamlRepo.reloadSettings();
-      final currentSettings = yamlRepo.settings;
-
       // kioskMachineId가 없는 경우 예외 발생
-      if (currentSettings.kioskMachineId == 0) {
+      if (machineId == null) {
         throw Exception('No kiosk machine id available');
       }
 
@@ -27,13 +21,13 @@ class AsyncKioskInfo extends _$AsyncKioskInfo {
       final kioskRepo = ref.read(kioskRepositoryProvider);
       await kioskRepo.healthCheck();
       final response = await kioskRepo.getKioskMachineInfo(
-        currentSettings.kioskMachineId,
+        machineId,
       );
 
-      // API 응답으로 yaml 파일 업데이트
-      await yamlRepo.saveSettings(response);
+      // API 응답으로 settings 업데이트
+      ref.read(kioskInfoServiceProvider.notifier).saveSettings(response);
 
-      await ref.read(frontPhotoListProvider.notifier).fetch();
+      ref.read(frontPhotoListProvider.notifier).fetch();
 
       return response;
     } catch (e) {
@@ -43,5 +37,10 @@ class AsyncKioskInfo extends _$AsyncKioskInfo {
 
   Future<void> refresh() async {
     state = await AsyncValue.guard(() => _fetchAndUpdateKioskInfo());
+  }
+
+  /// 새로운 머신 ID로 업데이트 후 새로고침
+  Future<void> refreshWithMachineId(int machineId) async {
+    state = await AsyncValue.guard(() => _fetchAndUpdateKioskInfo(machineId: machineId));
   }
 }

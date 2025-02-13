@@ -28,7 +28,7 @@ void main() async {
       FlutterError.onError = (FlutterErrorDetails details) {
         slackCall.sendLogToSlack("[FLUTTER ERROR] ${details.exceptionAsString()}");
       };
-      final yamlStorage = await YamlStorageService.initialize();
+
       final imageStorage = await ImageStorageService.initialize();
 
       await EasyLocalization.ensureInitialized();
@@ -44,9 +44,7 @@ void main() async {
           path: 'assets/lang',
           fallbackLocale: const Locale('ko', 'KR'),
           child: ProviderScope(
-            // observers: [RiverpodLogger()],
             overrides: [
-              storageServiceProvider.overrideWithValue(yamlStorage),
               imageStorageProvider.overrideWithValue(imageStorage),
             ],
             child: ScreenUtilInit(
