@@ -18,7 +18,7 @@ class PaymentService extends _$PaymentService {
       ref.read(createOrderInfoProvider.notifier).update(orderResponse);
 
       // 3. 결제 승인
-      final price = ref.read(storageServiceProvider).settings.photoCardPrice;
+      final price = ref.read(kioskInfoServiceProvider.notifier).settings.photoCardPrice;
       final paymentResponse = await ref.read(paymentRepositoryProvider).approve(
             totalAmount: price,
           );
@@ -43,7 +43,7 @@ class PaymentService extends _$PaymentService {
       if (approvalInfo == null) {
         throw Exception('No payment approval info available');
       }
-      final price = ref.read(storageServiceProvider).settings.photoCardPrice;
+      final price = ref.read(kioskInfoServiceProvider.notifier).settings.photoCardPrice;
       final paymentResponse = await ref.read(paymentRepositoryProvider).cancel(
             totalAmount: price,
             originalApprovalNo: approvalInfo.approvalNo ?? '',
@@ -61,7 +61,7 @@ class PaymentService extends _$PaymentService {
   }
 
   void _validatePaymentRequirements() {
-    final settings = ref.watch(storageServiceProvider).settings;
+    final settings = ref.read(kioskInfoServiceProvider.notifier).settings;
     final backPhoto = ref.watch(verifyPhotoCardProvider).value;
 
     if (settings.kioskEventId == 0) {
@@ -76,7 +76,7 @@ class PaymentService extends _$PaymentService {
   }
 
   Future<CreateOrderResponse> _createOrder() async {
-    final settings = ref.watch(storageServiceProvider).settings;
+    final settings = ref.read(kioskInfoServiceProvider.notifier).settings;
     final backPhoto = ref.watch(verifyPhotoCardProvider).value;
 
     final request = CreateOrderRequest(
@@ -92,7 +92,7 @@ class PaymentService extends _$PaymentService {
 
   Future<UpdateOrderResponse> _updateOrder() async {
     try {
-      final settings = ref.watch(storageServiceProvider).settings;
+      final settings = ref.read(kioskInfoServiceProvider.notifier).settings;
       final backPhoto = ref.watch(verifyPhotoCardProvider).value;
       final approval = ref.watch(paymentResponseStateProvider);
       final orderId = ref.watch(createOrderInfoProvider)?.orderId;
