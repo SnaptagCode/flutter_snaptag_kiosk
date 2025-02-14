@@ -41,7 +41,7 @@ class SetupRefundProcess extends _$SetupRefundProcess {
 
   Future<void> _updateOrderStatus(OrderEntity order) async {
     final payment = state.value;
-    final kioskEventId = ref.read(kioskInfoServiceProvider.notifier).settings.kioskEventId;
+    final kioskEventId = ref.read(kioskInfoServiceProvider).kioskEventId;
 
     final request = UpdateOrderRequest(
       kioskEventId: kioskEventId,

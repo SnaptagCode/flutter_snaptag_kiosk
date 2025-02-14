@@ -7,7 +7,7 @@ part 'payment_history_provider.g.dart';
 @riverpod
 class OrdersPage extends _$OrdersPage {
   final int _pageSize = 20;
-  int get kioskEventId => ref.read(kioskInfoServiceProvider.notifier).settings.kioskEventId;
+  int get kioskEventId => ref.read(kioskInfoServiceProvider).kioskEventId;
   @override
   Future<OrderListResponse> build({int page = 1}) async {
     final OrderListResponse response = await ref.read(kioskRepositoryProvider).getOrders(GetOrdersRequest(
