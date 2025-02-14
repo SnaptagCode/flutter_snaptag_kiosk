@@ -6,8 +6,8 @@ part 'kiosk_info_service.g.dart';
 @Riverpod(keepAlive: true)
 class KioskInfoService extends _$KioskInfoService {
   @override
-  KioskMachineInfo build() {
-    return KioskMachineInfo();
+  KioskMachineInfo? build() {
+    return null;
   }
 
   Future<KioskMachineInfo> _fetchAndUpdateKioskInfo({int? machineId}) async {
