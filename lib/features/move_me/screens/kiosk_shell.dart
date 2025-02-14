@@ -23,7 +23,7 @@ class KioskShell extends ConsumerWidget {
               height: 855.h,
               width: double.infinity,
               child: Image.network(
-                ref.read(kioskInfoServiceProvider.notifier).settings.topBannerUrl,
+                ref.read(kioskInfoServiceProvider).topBannerUrl,
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) {
                   return Center(
@@ -55,7 +55,7 @@ class ContentsShell extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final hasNetworkError = ref.watch(backgroundImageProvider);
-    final settings = ref.read(kioskInfoServiceProvider.notifier).settings;
+    final settings = ref.read(kioskInfoServiceProvider);
     return LoaderOverlay(
       overlayWidgetBuilder: (dynamic progress) {
         return Center(
