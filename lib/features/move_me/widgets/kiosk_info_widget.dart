@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -15,7 +13,7 @@ class KioskInfoWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final List<String> frontPhotoListState = ref.watch(frontPhotoListProvider);
+    final List<NominatedPhoto> frontPhotoListState = ref.watch(frontPhotoListProvider);
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -46,9 +44,10 @@ class KioskInfoWidget extends ConsumerWidget {
           child: Row(children: [
             for (final photo in frontPhotoListState)
               Image.file(
-                File(photo),
+                photo.safeEmbedImage,
                 width: ScreenUtil().screenWidth / 10,
                 fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) => const Icon(Icons.error),
               ),
           ]),
         ),

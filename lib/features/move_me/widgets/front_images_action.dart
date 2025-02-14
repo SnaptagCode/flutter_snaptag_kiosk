@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -10,7 +8,7 @@ class FrontImagesAction extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final List<String> frontPhotoListState = ref.watch(frontPhotoListProvider);
+    final List<NominatedPhoto> frontPhotoListState = ref.watch(frontPhotoListProvider);
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -40,7 +38,7 @@ class FrontImagesAction extends ConsumerWidget {
             ElevatedButton(
               onPressed: () async {
                 try {
-                  ref.read(imageStorageProvider).clearDirectory(DirectoryPaths.frontImages);
+                  ref.read(frontPhotoListProvider.notifier).clearDirectory();
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('이미지 삭제 성공!')),
@@ -68,9 +66,10 @@ class FrontImagesAction extends ConsumerWidget {
           children: [
             for (final photo in frontPhotoListState)
               Image.file(
-                File(photo),
+                photo.safeEmbedImage,
                 width: ScreenUtil().screenWidth / 10,
                 fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) => const Icon(Icons.error),
               ),
           ],
         ),

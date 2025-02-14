@@ -50,7 +50,7 @@ class PrinterService extends _$PrinterService {
   }
 
   Future<void> printImage({
-    required String frontImagePath,
+    required File frontFile,
     required File embeddedFile,
   }) async {
     try {
@@ -73,7 +73,7 @@ class PrinterService extends _$PrinterService {
       final frontBuffer = StringBuffer();
 
       try {
-        await _prepareAndDrawImage(frontBuffer, frontImagePath, true);
+        await _prepareAndDrawImage(frontBuffer, frontFile.path, true);
       } catch (e, stack) {
         logger.i('Error in front canvas preparation: $e\nStack: $stack');
         throw Exception('Failed to prepare front canvas: $e');
