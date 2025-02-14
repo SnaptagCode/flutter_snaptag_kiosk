@@ -10,6 +10,7 @@ class KioskInfoScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final info = ref.watch(kioskInfoServiceProvider);
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -62,7 +63,7 @@ class KioskInfoScreen extends ConsumerWidget {
 
               final result = await DialogHelper.showSetupDialog(context, title: '최신 이벤트로 새로고침 됩니다.');
               if (result == true) {
-                await ref.read(asyncKioskInfoProvider.notifier).refreshWithMachineId(int.parse(value));
+                await ref.read(kioskInfoServiceProvider.notifier).refreshWithMachineId(int.parse(value));
               }
             },
             icon: SvgPicture.asset(
@@ -72,44 +73,35 @@ class KioskInfoScreen extends ConsumerWidget {
         ],
       ),
       extendBodyBehindAppBar: true,
-      body: ref.watch(asyncKioskInfoProvider).when(
-        data: (info) {
-          return Column(
-            children: [
-              Image.network(
-                info.topBannerUrl,
-                errorBuilder: (context, error, stackTrace) {
-                  return Center(
-                    child: const Text('이미지를 찾을 수 없습니다.'),
-                  );
-                },
-              ),
-              Stack(
-                alignment: Alignment.center,
-                children: [
-                  Image.network(
-                    info.mainImageUrl,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Center(
-                        child: const Text('이미지를 찾을 수 없습니다.'),
-                      );
-                    },
-                  ),
-                  if (F.appFlavor == Flavor.dev) KioskInfoWidget(info: info),
-                ],
-              ),
-            ],
-          );
-        },
-        error: (error, stack) {
-          return GeneralErrorWidget(
-            exception: error as Exception,
-            onRetry: () => ref.refresh(asyncKioskInfoProvider),
-          );
-        },
-        loading: () {
-          return const Center(child: CircularProgressIndicator());
-        },
+      body: Column(
+        children: [
+          Image.network(
+            info.topBannerUrl,
+            errorBuilder: (context, error, stackTrace) {
+              return Flexible(
+                child: Center(
+                  child: const Text('topBannerUrl을 찾을 수 없습니다.'),
+                ),
+              );
+            },
+          ),
+          if (info.topBannerUrl.isNotEmpty)
+            Stack(
+              alignment: Alignment.center,
+              children: [
+                Image.network(
+                  info.mainImageUrl,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Flexible(
+                      flex: 3,
+                      child: const Text('mainImageUrl을 찾을 수 없습니다.'),
+                    );
+                  },
+                ),
+                if (F.appFlavor == Flavor.dev) KioskInfoWidget(info: info),
+              ],
+            ),
+        ],
       ),
     );
   }
