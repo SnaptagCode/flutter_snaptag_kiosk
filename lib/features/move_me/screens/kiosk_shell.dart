@@ -23,7 +23,7 @@ class KioskShell extends ConsumerWidget {
               height: 855.h,
               width: double.infinity,
               child: Image.network(
-                ref.read(kioskInfoServiceProvider).topBannerUrl,
+                ref.read(kioskInfoServiceProvider)?.topBannerUrl ?? '',
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) {
                   return Center(
@@ -72,7 +72,7 @@ class ContentsShell extends ConsumerWidget {
         decoration: BoxDecoration(
           image: !hasNetworkError
               ? DecorationImage(
-                  image: NetworkImage(settings.mainImageUrl),
+                  image: NetworkImage(settings?.mainImageUrl ?? ''),
                   onError: (Object e, StackTrace? stackTrace) {
                     debugPrint(
                       "Could not load the network image, showing fallback instead. Error: ${e.toString()}",
