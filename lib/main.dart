@@ -29,8 +29,6 @@ void main() async {
         slackCall.sendLogToSlack("[FLUTTER ERROR] ${details.exceptionAsString()}");
       };
 
-      final imageStorage = await ImageStorageService.initialize();
-
       await EasyLocalization.ensureInitialized();
 
       runApp(
@@ -44,9 +42,6 @@ void main() async {
           path: 'assets/lang',
           fallbackLocale: const Locale('ko', 'KR'),
           child: ProviderScope(
-            overrides: [
-              imageStorageProvider.overrideWithValue(imageStorage),
-            ],
             child: ScreenUtilInit(
               designSize: const Size(1080, 1920),
               minTextAdapt: true,
