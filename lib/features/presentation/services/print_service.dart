@@ -117,8 +117,8 @@ class PrintService extends _$PrintService {
   }) async {
     try {
       final request = CreatePrintRequest(
-        kioskMachineId: ref.read(kioskInfoServiceProvider.notifier).settings.kioskMachineId,
-        kioskEventId: ref.read(kioskInfoServiceProvider.notifier).settings.kioskEventId,
+        kioskMachineId: ref.read(kioskInfoServiceProvider).kioskMachineId,
+        kioskEventId: ref.read(kioskInfoServiceProvider).kioskEventId,
         frontPhotoCardId: frontPhotoCardId,
         backPhotoCardId: backPhotoCardId,
         file: file,
@@ -134,8 +134,8 @@ class PrintService extends _$PrintService {
   Future<void> _updatePrintStatus(int printedPhotoCardId, PrintedStatus status) async {
     try {
       final request = UpdatePrintRequest(
-        kioskMachineId: ref.read(kioskInfoServiceProvider.notifier).settings.kioskMachineId,
-        kioskEventId: ref.read(kioskInfoServiceProvider.notifier).settings.kioskEventId,
+        kioskMachineId: ref.read(kioskInfoServiceProvider).kioskMachineId,
+        kioskEventId: ref.read(kioskInfoServiceProvider).kioskEventId,
         status: status,
       );
 

@@ -10,23 +10,13 @@ class KioskInfoService extends _$KioskInfoService {
     return KioskMachineInfo();
   }
 
-  KioskMachineInfo _settings = KioskMachineInfo();
-
-  /// 현재 Kiosk 설정 반환
-  KioskMachineInfo get settings => _settings;
-
-  /// 설정값 저장 (메모리 캐시)
-  void saveSettings(KioskMachineInfo info) {
-    _settings = info;
-  }
-
   Future<KioskMachineInfo> _fetchAndUpdateKioskInfo({int? machineId}) async {
     try {
       // kioskMachineId가 없는 경우 예외 발생
       if (machineId == null) {
         throw Exception('No kiosk machine id available');
       }
-      saveSettings(KioskMachineInfo());
+      state = KioskMachineInfo();
       // API를 통해 최신 정보 가져오기
       final kioskRepo = ref.read(kioskRepositoryProvider);
 
@@ -34,8 +24,7 @@ class KioskInfoService extends _$KioskInfoService {
         machineId,
       );
 
-      // API 응답으로 settings 업데이트
-      ref.read(kioskInfoServiceProvider.notifier).saveSettings(response);
+      state = response;
 
       ref.read(frontPhotoListProvider.notifier).fetch();
 

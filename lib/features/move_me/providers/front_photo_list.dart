@@ -48,7 +48,7 @@ class FrontPhotoList extends _$FrontPhotoList {
     try {
       await ref.read(imageStorageProvider).clearDirectory(DirectoryPaths.frontImages);
 
-      final kioskEventId = ref.read(kioskInfoServiceProvider.notifier).settings.kioskEventId;
+      final kioskEventId = ref.read(kioskInfoServiceProvider).kioskEventId;
 
       if (kioskEventId == 0) {
         throw Exception('No kiosk event id available');

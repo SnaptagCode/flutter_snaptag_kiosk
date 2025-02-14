@@ -16,7 +16,7 @@ class PriceBox extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, ref) {
-    final photoCardPrice = ref.read(kioskInfoServiceProvider.notifier).settings.photoCardPrice;
+    final photoCardPrice = ref.read(kioskInfoServiceProvider).photoCardPrice;
     String priceValue = NumberFormat.currency(locale: 'ko_KR', symbol: '').format(photoCardPrice);
 
     String currency = context.locale.languageCode == 'ko' ? '원' : 'KRW';
