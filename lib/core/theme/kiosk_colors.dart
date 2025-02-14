@@ -10,7 +10,9 @@ class KioskColorsNotifier extends _$KioskColorsNotifier {
   KioskColors build() {
     // theme 프로바이더를 watch
     final kiosk = ref.watch(kioskInfoServiceProvider);
-
+    if (kiosk == null) {
+      return KioskColors.basic;
+    }
     return KioskColors(
       buttonColor: _parseColor(kiosk.mainButtonColor),
       buttonTextColor: _parseColor(kiosk.buttonTextColor),

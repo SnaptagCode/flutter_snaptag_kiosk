@@ -11,6 +11,7 @@ class KioskInfoScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final info = ref.watch(kioskInfoServiceProvider);
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -73,36 +74,52 @@ class KioskInfoScreen extends ConsumerWidget {
         ],
       ),
       extendBodyBehindAppBar: true,
-      body: Column(
-        children: [
-          Image.network(
-            info.topBannerUrl,
-            errorBuilder: (context, error, stackTrace) {
-              return Flexible(
-                child: Center(
-                  child: const Text('topBannerUrl을 찾을 수 없습니다.'),
+      body: Builder(builder: (context) {
+        if (info == null) {
+          return const Scaffold(
+            body: Center(
+              child: Text(
+                '진행중인\n이벤트가 없습니다.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 42,
+                  fontWeight: FontWeight.bold,
                 ),
-              );
-            },
-          ),
-          if (info.topBannerUrl.isNotEmpty)
-            Stack(
-              alignment: Alignment.center,
-              children: [
-                Image.network(
-                  info.mainImageUrl,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Flexible(
-                      flex: 3,
-                      child: const Text('mainImageUrl을 찾을 수 없습니다.'),
-                    );
-                  },
-                ),
-                if (F.appFlavor == Flavor.dev) KioskInfoWidget(info: info),
-              ],
+              ),
             ),
-        ],
-      ),
+          );
+        }
+        return Column(
+          children: [
+            Image.network(
+              info.topBannerUrl,
+              errorBuilder: (context, error, stackTrace) {
+                return Flexible(
+                  child: Center(
+                    child: const CircularProgressIndicator(),
+                  ),
+                );
+              },
+            ),
+            if (info.topBannerUrl.isNotEmpty)
+              Stack(
+                alignment: Alignment.center,
+                children: [
+                  Image.network(
+                    info.mainImageUrl,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Flexible(
+                        flex: 3,
+                        child: const CircularProgressIndicator(),
+                      );
+                    },
+                  ),
+                  if (F.appFlavor == Flavor.dev) KioskInfoWidget(info: info),
+                ],
+              ),
+          ],
+        );
+      }),
     );
   }
 }
