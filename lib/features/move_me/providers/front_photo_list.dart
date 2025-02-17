@@ -29,15 +29,12 @@ class FrontPhotoList extends _$FrontPhotoList {
           .where((file) {
         // 이미지 파일 확장자 체크
         final extension = file.path.toLowerCase();
-        return extension.endsWith('.jpg') ||
-            extension.endsWith('.jpeg') ||
-            extension.endsWith('.png');
+        return extension.endsWith('.jpg') || extension.endsWith('.jpeg') || extension.endsWith('.png');
       });
 
       // List<String> 로 변환 String : path
       return files
-          .map((file) =>
-              RandomPhotoUtil.convertFromFileToObject(file.path)?.path)
+          .map((file) => RandomPhotoUtil.convertFromFileToObject(file.path)?.path)
           .where((path) => path != null)
           .cast<String>()
           .toList();
@@ -49,20 +46,16 @@ class FrontPhotoList extends _$FrontPhotoList {
 
   Future<void> fetch() async {
     try {
-      await ref
-          .read(imageStorageProvider)
-          .clearDirectory(DirectoryPaths.frontImages);
+      await ref.read(imageStorageProvider).clearDirectory(DirectoryPaths.frontImages);
 
-      final kioskEventId =
-          ref.read(storageServiceProvider).settings.kioskEventId;
+      final kioskEventId = ref.read(storageServiceProvider).settings.kioskEventId;
 
       if (kioskEventId == 0) {
         throw Exception('No kiosk event id available');
       }
       // API를 통해 이미지 목록 가져오기
       final kioskRepo = ref.read(kioskRepositoryProvider);
-      final NominatedPhotoList response =
-          await kioskRepo.getFrontPhotoList(kioskEventId);
+      final NominatedPhotoList response = await kioskRepo.getFrontPhotoList(kioskEventId);
       final data = await _saveImages(response);
       state = data;
     } catch (e) {
@@ -78,8 +71,7 @@ class FrontPhotoList extends _$FrontPhotoList {
     for (var photo in photoList.list) {
       try {
         final fileName = photo.getFileName();
-        final filePath = await imageStorage.saveImage(
-            DirectoryPaths.frontImages, photo.embedUrl, fileName);
+        final filePath = await imageStorage.saveImage(DirectoryPaths.frontImages, photo.embedUrl, fileName);
 
         frontPhotoPaths.add(filePath);
       } catch (e) {

@@ -32,8 +32,7 @@ class PrintService extends _$PrintService {
     // 4. 프린트 작업 생성
     final printJobInfo = await _createPrintJob(
       frontPhotoCardId: frontPhotoInfo.id,
-      backPhotoCardId:
-          ref.read(verifyPhotoCardProvider).value?.backPhotoCardId ?? 0,
+      backPhotoCardId: ref.read(verifyPhotoCardProvider).value?.backPhotoCardId ?? 0,
       file: embeddedBackImage,
     );
 
@@ -45,8 +44,7 @@ class PrintService extends _$PrintService {
     );
   }
 
-  Future<void> _executePrintJob(
-      int printedPhotoCardId, String frontPhotoPath, File embedded) async {
+  Future<void> _executePrintJob(int printedPhotoCardId, String frontPhotoPath, File embedded) async {
     try {
       // 프린트 상태 시작
       await _updatePrintStatus(printedPhotoCardId, PrintedStatus.started);
@@ -57,8 +55,7 @@ class PrintService extends _$PrintService {
       // 프린트 상태 완료
       await _updatePrintStatus(printedPhotoCardId, PrintedStatus.completed);
     } catch (e, stack) {
-      logger.e('PrintService._executePrintJob failure',
-          error: e, stackTrace: stack);
+      logger.e('PrintService._executePrintJob failure', error: e, stackTrace: stack);
       await _updatePrintStatus(printedPhotoCardId, PrintedStatus.failed);
       rethrow;
     }
@@ -68,11 +65,7 @@ class PrintService extends _$PrintService {
     final frontPhotoList = ref.read(frontPhotoListProvider.notifier);
     final randomPhoto = await frontPhotoList.getRandomPhoto();
 
-    return (
-      path: randomPhoto.path,
-      id: randomPhoto.id,
-      isWin: randomPhoto.isWin
-    );
+    return (path: randomPhoto.path, id: randomPhoto.id, isWin: randomPhoto.isWin);
   }
 
   Future<File> _prepareBackImage() async {
@@ -83,23 +76,21 @@ class PrintService extends _$PrintService {
     final config = ref.watch(backPhotoForPrintInfoProvider);
 
     try {
-      final response = await ImageHelper()
-          .getImageBytes(backPhoto.formattedBackPhotoCardUrl);
+      final response = await ImageHelper().getImageBytes(backPhoto.formattedBackPhotoCardUrl);
 
-      final File processedImage =
-          await ref.read(labcurityServiceProvider).embedImage(
-                response.data,
-                LabcurityImageConfig(
-                  size: 3,
-                  strength: 16,
-                  alphaCode: config?.versionCode ?? 1,
-                  bravoCode: config?.countryCode ?? 0,
-                  charlieCode: config?.industryCode ?? 0,
-                  deltaCode: config?.customerCode ?? 0,
-                  echoCode: config?.projectCode ?? 0,
-                  foxtrotCode: config?.productCode ?? 1,
-                ),
-              );
+      final File processedImage = await ref.read(labcurityServiceProvider).embedImage(
+            response.data,
+            LabcurityImageConfig(
+              size: 3,
+              strength: 16,
+              alphaCode: config?.versionCode ?? 1,
+              bravoCode: config?.countryCode ?? 0,
+              charlieCode: config?.industryCode ?? 0,
+              deltaCode: config?.customerCode ?? 0,
+              echoCode: config?.projectCode ?? 0,
+              foxtrotCode: config?.productCode ?? 1,
+            ),
+          );
 
       return processedImage;
     } catch (e) {
@@ -113,12 +104,9 @@ class PrintService extends _$PrintService {
     final approvalInfo = ref.read(paymentResponseStateProvider);
     final printerState = ref.read(printerServiceProvider);
 
-    if (backPhotoForPrintInfo == null)
-      throw Exception('No back photo for print info available');
-    if (backPhotoCardResponseInfo == null)
-      throw Exception('No back photo card response info available');
-    if (approvalInfo == null)
-      throw Exception('No payment approval info available');
+    if (backPhotoForPrintInfo == null) throw Exception('No back photo for print info available');
+    if (backPhotoCardResponseInfo == null) throw Exception('No back photo card response info available');
+    if (approvalInfo == null) throw Exception('No payment approval info available');
     if (printerState.hasError) throw Exception('Printer is not ready');
   }
 
@@ -129,35 +117,31 @@ class PrintService extends _$PrintService {
   }) async {
     try {
       final request = CreatePrintRequest(
-        kioskMachineId:
-            ref.watch(storageServiceProvider).settings.kioskMachineId,
+        kioskMachineId: ref.watch(storageServiceProvider).settings.kioskMachineId,
         kioskEventId: ref.watch(storageServiceProvider).settings.kioskEventId,
         frontPhotoCardId: frontPhotoCardId,
         backPhotoCardId: backPhotoCardId,
         file: file,
       );
 
-      final response = await ref
-          .read(kioskRepositoryProvider)
-          .createPrintStatus(request: request);
+      final response = await ref.read(kioskRepositoryProvider).createPrintStatus(request: request);
       return (printedPhotoCardId: response.printedPhotoCardId);
     } catch (e) {
       rethrow;
     }
   }
 
-  Future<void> _updatePrintStatus(
-      int printedPhotoCardId, PrintedStatus status) async {
+  Future<void> _updatePrintStatus(int printedPhotoCardId, PrintedStatus status) async {
     try {
       final request = UpdatePrintRequest(
-        kioskMachineId:
-            ref.watch(storageServiceProvider).settings.kioskMachineId,
+        kioskMachineId: ref.watch(storageServiceProvider).settings.kioskMachineId,
         kioskEventId: ref.watch(storageServiceProvider).settings.kioskEventId,
         status: status,
       );
 
-      await ref.read(kioskRepositoryProvider).updatePrintStatus(
-          printedPhotoCardId: printedPhotoCardId, request: request);
+      await ref
+          .read(kioskRepositoryProvider)
+          .updatePrintStatus(printedPhotoCardId: printedPhotoCardId, request: request);
     } catch (e) {
       rethrow;
     }
