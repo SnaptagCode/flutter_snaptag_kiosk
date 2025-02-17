@@ -25,7 +25,8 @@ void main() {
     test(
         'getRandomWeighted should return a non-null value when given valid data',
         () {
-      Seletedfrontphoto? result = RandomPhotoUtil.getRandomWeighted(testData);
+      Seletedfrontphoto? result =
+          RandomPhotoUtil.getRandomPhotoByWeight(testData);
 
       expect(result, isNotNull);
       expect(result, isA<Seletedfrontphoto>());
@@ -34,7 +35,8 @@ void main() {
     // ✅ 2. 빈 리스트 입력 시 `null` 반환 확인
     test('getRandomWeighted should return null when given an empty list', () {
       List<String> testData = [];
-      Seletedfrontphoto? result = RandomPhotoUtil.getRandomWeighted(testData);
+      Seletedfrontphoto? result =
+          RandomPhotoUtil.getRandomPhotoByWeight(testData);
       expect(result, isNull);
     });
 
@@ -48,7 +50,8 @@ void main() {
         "2_456_7890.png"
       ];
 
-      Seletedfrontphoto? result = RandomPhotoUtil.getRandomWeighted(testData);
+      Seletedfrontphoto? result =
+          RandomPhotoUtil.getRandomPhotoByWeight(testData);
       expect(result, isNull);
     });
 
@@ -56,7 +59,8 @@ void main() {
     test(
         'getRandomWeighted should return a valid object for a single random execution',
         () {
-      Seletedfrontphoto? result = RandomPhotoUtil.getRandomWeighted(testData);
+      Seletedfrontphoto? result =
+          RandomPhotoUtil.getRandomPhotoByWeight(testData);
 
       if (result != null) {
         print(
@@ -75,7 +79,7 @@ void main() {
       const int totalTrials = 10000;
 
       for (int i = 0; i < totalTrials; i++) {
-        final result = RandomPhotoUtil.getRandomWeighted(testData);
+        final result = RandomPhotoUtil.getRandomPhotoByWeight(testData);
         if (result != null) {
           selectionCounts[result.path] =
               (selectionCounts[result.path] ?? 0) + 1;

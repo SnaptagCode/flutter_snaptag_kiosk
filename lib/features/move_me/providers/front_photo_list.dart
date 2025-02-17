@@ -96,7 +96,7 @@ class FrontPhotoList extends _$FrontPhotoList {
 
     try {
       // 파일명에서 정보 추출
-      final result = RandomPhotoUtil.getRandomWeighted(state);
+      final result = RandomPhotoUtil.getRandomPhotoByWeight(state);
 
       if (result != null) {
         return result;

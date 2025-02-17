@@ -10,7 +10,7 @@ class PrintService extends _$PrintService {
   @override
   FutureOr<bool> build() => false;
 
-  Future<bool> print() async {
+  Future<void> print() async {
     try {
       // 사전 검증
       // throw Exception('Printer not ready');
@@ -54,8 +54,6 @@ class PrintService extends _$PrintService {
           printJobInfo.printedPhotoCardId,
           PrintedStatus.completed,
         );
-
-        return frontPhotoInfo.isWin;
       } catch (e, stack) {
         // 프린트 실패 처리
         FileLogger.warning('Print failure', error: e, stackTrace: stack);

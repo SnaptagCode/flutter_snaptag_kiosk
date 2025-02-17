@@ -5,7 +5,7 @@ import 'package:path/path.dart' as path;
 import 'package:flutter_snaptag_kiosk/domain/entities/SeletedFrontPhoto.dart';
 
 class RandomPhotoUtil {
-  static Seletedfrontphoto? getRandomWeighted(List<String> dataList) {
+  static Seletedfrontphoto? getRandomPhotoByWeight(List<String> dataList) {
     try {
       // 가중치 추출
       final parsedData = dataList
@@ -45,7 +45,7 @@ class RandomPhotoUtil {
           code == null ||
           weight == null ||
           embeddingProductId == null) {
-        throw Exception('Invalid file name format, $filePath');
+        throw Exception('Invalid file name format');
       }
 
       return Seletedfrontphoto(
@@ -57,12 +57,15 @@ class RandomPhotoUtil {
         path: filePath,
       );
     } catch (e) {
-      FileLogger.warning('filePath: $filePath || 이미지 정보 추출 중 오류가 발생했습니다: $e');
+      FileLogger.warning('filePath: $filePath 이미지 정보 추출 중 오류가 발생했습니다: $e');
       return null;
     }
   }
 
-  // 특정 이미지의 정보를 추출하는 메서드
+  /// 특정 이미지의 정보를 추출하는 메서드
+  /// ❌ 이 메서드는 더 이상 사용되지 않습니다.
+  /// ✅ 대신 `getRandomPhotoByWeight()`를 사용하세요.
+  /// @deprecated since version 2.0.1
   static ({int id, int code, int embeddingProductId})? _getPhotoInfo(
       String imagePath) {
     try {

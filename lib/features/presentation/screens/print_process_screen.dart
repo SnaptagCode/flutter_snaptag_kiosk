@@ -57,12 +57,8 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
             PhotoCardUploadRouteData().go(context);
           },
           loading: () => null,
-          data: (isWin) async {
-            if (isWin) {
-              await DialogHelper.showPrintCompleteIsWinedDialog(context);
-            } else {
-              await DialogHelper.showPrintCompleteDialog(context);
-            }
+          data: (_) async {
+            await DialogHelper.showPrintCompleteDialog(context);
             PhotoCardUploadRouteData().go(context);
           },
         );
