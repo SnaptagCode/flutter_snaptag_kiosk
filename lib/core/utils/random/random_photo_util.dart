@@ -1,8 +1,8 @@
 import 'dart:math';
 
 import 'package:flutter_snaptag_kiosk/core/utils/logger_service.dart';
-import 'package:path/path.dart' as path;
 import 'package:flutter_snaptag_kiosk/domain/entities/SeletedFrontPhoto.dart';
+import 'package:path/path.dart' as path;
 
 class RandomPhotoUtil {
   static Seletedfrontphoto? getRandomPhotoByWeight(List<String> dataList) {
@@ -41,10 +41,7 @@ class RandomPhotoUtil {
       final weight = int.tryParse(parts[3]);
       final isWin = parts[4] == '1';
 
-      if (id == null ||
-          code == null ||
-          weight == null ||
-          embeddingProductId == null) {
+      if (id == null || code == null || weight == null || embeddingProductId == null) {
         throw Exception('Invalid file name format');
       }
 
@@ -66,8 +63,7 @@ class RandomPhotoUtil {
   /// ❌ 이 메서드는 더 이상 사용되지 않습니다.
   /// ✅ 대신 `getRandomPhotoByWeight()`를 사용하세요.
   /// @deprecated since version 2.0.1
-  static ({int id, int code, int embeddingProductId})? _getPhotoInfo(
-      String imagePath) {
+  static ({int id, int code, int embeddingProductId})? _getPhotoInfo(String imagePath) {
     try {
       final fileName = path.basenameWithoutExtension(imagePath);
       final parts = fileName.split('_');
