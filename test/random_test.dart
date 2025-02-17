@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:flutter_snaptag_kiosk/core/utils/file_logger.dart';
 import 'package:flutter_snaptag_kiosk/core/utils/random/random_photo_util.dart';
 import 'package:flutter_snaptag_kiosk/domain/entities/SeletedFrontPhoto.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -9,8 +8,6 @@ void main() {
   late List<String> testData;
 
   setUp(() {
-    FileLogger.initialize('');
-
     testData = [
       "1_123_1234_100_1.png",
       "2_456_7890_200_1.png",

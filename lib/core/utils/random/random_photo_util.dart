@@ -1,6 +1,6 @@
 import 'dart:math';
 
-import 'package:flutter_snaptag_kiosk/core/utils/file_logger.dart';
+import 'package:flutter_snaptag_kiosk/core/utils/logger_service.dart';
 import 'package:path/path.dart' as path;
 import 'package:flutter_snaptag_kiosk/domain/entities/SeletedFrontPhoto.dart';
 
@@ -26,7 +26,7 @@ class RandomPhotoUtil {
         return randomValue < cumulativeWeight;
       }, orElse: () => null);
     } catch (e) {
-      FileLogger.warning('이미지 정보 추출 중 오류가 발생했습니다: $e');
+      logger.e('이미지 정보 추출 중 오류가 발생했습니다: $e');
       return null;
     }
   }
@@ -57,7 +57,7 @@ class RandomPhotoUtil {
         path: filePath,
       );
     } catch (e) {
-      FileLogger.warning('filePath: $filePath 이미지 정보 추출 중 오류가 발생했습니다: $e');
+      logger.e('filePath: $filePath 이미지 정보 추출 중 오류가 발생했습니다: $e');
       return null;
     }
   }
@@ -87,7 +87,7 @@ class RandomPhotoUtil {
       }
       throw Exception('Invalid file name format: $fileName');
     } catch (e) {
-      FileLogger.warning('이미지 정보 추출 중 오류가 발생했습니다: $e');
+      logger.e('이미지 정보 추출 중 오류가 발생했습니다: $e');
       return null;
     }
   }
