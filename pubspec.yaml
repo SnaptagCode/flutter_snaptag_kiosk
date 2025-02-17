@@ -13,7 +13,7 @@ dependencies:
   # Network
   dio: ^5.7.0
   retrofit: ^4.4.1
-  pretty_dio_logger: ^1.4.0
+
 
   # State Management
   flutter_riverpod: ^2.6.1
@@ -47,6 +47,8 @@ dependencies:
   file_picker: ^8.1.7
   flutter_svg: ^2.0.17
   flutter_soloud: ^2.1.7
+  flutter_dotenv: ^5.2.1
+  pretty_dio_logger: ^1.4.0
 
 
 dev_dependencies:
@@ -67,6 +69,7 @@ flutter:
   uses-material-design: true
 
   assets:
+    - assets/.env
     - assets/icons/
     - assets/images/
     - assets/labcurity/

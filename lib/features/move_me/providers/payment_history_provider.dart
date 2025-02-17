@@ -14,7 +14,7 @@ class OrdersPage extends _$OrdersPage {
           pageSize: _pageSize,
           currentPage: page,
         ));
-    FileLogger.info('response: $response');
+    logger.i('response: $response');
     return response;
   }
 

@@ -113,8 +113,6 @@ class DialogHelper {
                   child: OutlinedButton(
                     onPressed: () async {
                       await SoundManager().playSound();
-
-                      ;
                       Navigator.of(context).pop(false);
                     },
                     style: context.setupDialogCancelButtonStyle,
@@ -128,7 +126,6 @@ class DialogHelper {
                   child: ElevatedButton(
                     onPressed: () async {
                       await SoundManager().playSound();
-
                       Navigator.of(context).pop(true);
                     },
                     style: context.setupDialogConfirmButtonStyle,
@@ -154,6 +151,7 @@ class DialogHelper {
   }) async {
     await showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
           backgroundColor: Colors.white,
@@ -217,12 +215,16 @@ class DialogHelper {
     );
   }
 
-  static Future<void> showPrintCompleteDialog(BuildContext context) async {
+  static Future<void> showPrintCompleteDialog(
+    BuildContext context, {
+    VoidCallback? onButtonPressed,
+  }) async {
     await _showOneButtonKioskDialog(
       context,
       title: LocaleKeys.alert_title_print_complete.tr(),
       message: LocaleKeys.alert_txt_print_complete.tr(),
       buttonText: LocaleKeys.alert_btn_print_complete.tr(),
+      onButtonPressed: onButtonPressed,
     );
   }
 
@@ -235,42 +237,25 @@ class DialogHelper {
     );
   }
 
-  static Future<void> showPurchaseFailedDialog(BuildContext context,
-      {Exception? exception}) async {
-    final error = exception != null && F.appFlavor == Flavor.dev
-        ? '\n\n${exception.toString()}'
-        : null;
+  static Future<void> showPurchaseFailedDialog(BuildContext context) async {
     await _showOneButtonKioskDialog(
       context,
       title: LocaleKeys.alert_title_purchase_failure.tr(),
-      message: '${LocaleKeys.alert_txt_purchase_failure.tr()}$error',
-      buttonText: LocaleKeys.alert_btn_print_complete.tr(),
+      message: LocaleKeys.alert_txt_purchase_failure.tr(),
+      buttonText: LocaleKeys.alert_btn_purchase_failure.tr(),
     );
   }
 
-  static Future<void> showPurchaseRetryDialog(BuildContext context,
-      {Exception? exception}) async {
-    final error = exception != null && F.appFlavor == Flavor.dev
-        ? '\n\n${exception.toString()}'
-        : null;
-    await _showOneButtonKioskDialog(
-      context,
-      title: '결제 실패',
-      message: '결제에 실패했습니다.$error',
-      buttonText: '다시 시도',
-    );
-  }
-
-  static Future<bool> showPrintErrorDialog(BuildContext context,
-      {Exception? exception}) async {
-    final error = exception != null && F.appFlavor == Flavor.dev
-        ? '\n\n${exception.toString()}'
-        : null;
+  static Future<bool> showPrintErrorDialog(
+    BuildContext context, {
+    VoidCallback? onButtonPressed,
+  }) async {
     return await _showOneButtonKioskDialog(
       context,
       title: LocaleKeys.alert_title_print_failure.tr(),
-      message: '${LocaleKeys.alert_txt_print_failure.tr()}$error',
+      message: LocaleKeys.alert_txt_print_failure.tr(),
       buttonText: LocaleKeys.alert_btn_print_failure.tr(),
+      onButtonPressed: onButtonPressed,
     );
   }
 }

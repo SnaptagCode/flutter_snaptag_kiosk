@@ -36,7 +36,7 @@ class ImageHelper {
   }
 
   String getFileExtensionFromContentType(String? contentType) {
-    FileLogger.info('Content-Type: $contentType');
+    logger.i('Content-Type: $contentType');
     switch (contentType?.toLowerCase()) {
       case 'image/jpeg':
         return '.jpg';

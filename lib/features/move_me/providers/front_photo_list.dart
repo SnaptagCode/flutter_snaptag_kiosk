@@ -42,7 +42,7 @@ class FrontPhotoList extends _$FrontPhotoList {
           .cast<String>()
           .toList();
     } catch (e) {
-      FileLogger.warning('이미지 목록을 불러오는 중 오류가 발생했습니다: $e');
+      logger.e('이미지 목록을 불러오는 중 오류가 발생했습니다: $e');
       return [];
     }
   }
@@ -83,7 +83,7 @@ class FrontPhotoList extends _$FrontPhotoList {
 
         frontPhotoPaths.add(filePath);
       } catch (e) {
-        FileLogger.warning('이미지 저장 중 오류가 발생했습니다: $e');
+        logger.e('이미지 저장 중 오류가 발생했습니다: $e');
       }
     }
     return frontPhotoPaths;
@@ -104,7 +104,7 @@ class FrontPhotoList extends _$FrontPhotoList {
 
       throw Exception('Invalid file name format: ${result?.path}');
     } catch (e) {
-      FileLogger.warning('이미지 정보 추출 중 오류가 발생했습니다: $e');
+      logger.e('이미지 정보 추출 중 오류가 발생했습니다: $e');
       throw Exception('Failed to get random photo');
     }
   }
