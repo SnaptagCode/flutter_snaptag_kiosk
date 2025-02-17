@@ -1,4 +1,4 @@
-class Seletedfrontphoto {
+class SelectedFrontPhoto {
   final int id;
   final int code;
   final int embeddingProductId;
@@ -6,7 +6,7 @@ class Seletedfrontphoto {
   final bool isWin;
   final String path;
 
-  Seletedfrontphoto({
+  SelectedFrontPhoto({
     required this.id,
     required this.code,
     required this.embeddingProductId,
