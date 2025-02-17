@@ -8,6 +8,10 @@ class PaymentResponseState extends _$PaymentResponseState {
   @override
   PaymentResponse? build() => null;
 
-  void update(PaymentResponse response) => state = response;
+  void update(PaymentResponse response) {
+    SlackLogService().sendLogToSlack('PaymentResponseState.update: $response');
+    state = response;
+  }
+
   void reset() => state = null;
 }

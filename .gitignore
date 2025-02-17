@@ -48,3 +48,6 @@ app.*.map.json
 
 /web/
 /windows/
+
+# 보안
+*.env

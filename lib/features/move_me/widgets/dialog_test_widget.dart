@@ -23,9 +23,25 @@ class DialogTestWidget extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         ElevatedButton(
-          onPressed: () => DialogHelper.showPrintErrorDialog(context),
+          onPressed: () => DialogHelper.showPrintErrorDialog(
+            context,
+            onButtonPressed: () {
+              PhotoCardUploadRouteData().go(context);
+            },
+          ),
           style: context.dialogButtonStyle,
           child: Text('Show Print Error Dialog'),
+        ),
+        const SizedBox(height: 16),
+        ElevatedButton(
+          onPressed: () => DialogHelper.showPrintCompleteDialog(
+            context,
+            onButtonPressed: () {
+              PhotoCardUploadRouteData().go(context);
+            },
+          ),
+          style: context.dialogButtonStyle,
+          child: Text('Show Print Complete Dialog'),
         ),
       ],
     );

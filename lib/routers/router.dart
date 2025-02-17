@@ -15,7 +15,7 @@ final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
 GoRouter router(Ref ref) {
   return GoRouter(
     navigatorKey: rootNavigatorKey,
-    initialLocation: '/setup',
+    initialLocation: SetupMainRouteData().location,
     routes: $appRoutes,
     debugLogDiagnostics: true,
   );

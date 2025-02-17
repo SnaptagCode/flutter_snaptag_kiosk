@@ -40,111 +40,135 @@ class SetupMainScreen extends ConsumerWidget {
           SizedBox(width: 30.w),
         ],
       ),
-      body: LayoutBuilder(builder: (context, constraints) {
-        return Stack(
+      body: Container(
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage(SnaptagImages.setupBackground),
+            fit: BoxFit.fill,
+          ),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Positioned(
-              left: 712.w,
-              top: 1411.h - AppBar().preferredSize.height,
-              child: SvgPicture.asset(
-                SnaptagSvg.snaptagIcon,
-                width: 476.w,
-                height: 569.h,
+            Center(
+              child: Text(
+                '관리자 모드',
+                style: context.typography.kioksNum1SB,
               ),
             ),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+            SizedBox(height: 50.h),
+            Row(
               crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Center(
-                  child: Text(
-                    '관리자 모드',
-                    style: context.typography.kioksNum1SB,
+                SizedBox(
+                  width: 260.w,
+                  height: 342.h,
+                  child: SetupMainCard(
+                    label: '이벤트\n미리보기',
+                    assetName: SnaptagSvg.eventPreview,
+                    onTap: () async {
+                      await SoundManager().playSound();
+
+                      KioskInfoRouteData().go(context);
+                    },
                   ),
                 ),
-                SizedBox(height: 50.h),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    _navigatorCard(
-                      context,
-                      label: '이벤트\n미리보기',
-                      assetName: SnaptagSvg.eventPreview,
-                      onTap: () async {
-                        await SoundManager().playSound();
+                SizedBox(
+                  width: 260.w,
+                  height: 342.h,
+                  child: SetupMainCard(
+                    label: '출력 내역',
+                    assetName: SnaptagSvg.payment,
+                    onTap: () async {
+                      await SoundManager().playSound();
 
-                        ;
-                        KioskInfoRouteData().go(context);
-                      },
-                    ),
-                    _navigatorCard(
-                      context,
-                      label: '출력 내역',
-                      assetName: SnaptagSvg.payment,
-                      onTap: () async {
-                        await SoundManager().playSound();
-
-                        ;
-                        PaymentHistoryRouteData().go(context);
-                      },
-                    ),
-                    _navigatorCard(
-                      context,
-                      label: '이벤트\n실행',
-                      assetName: SnaptagSvg.eventRun,
-                      onTap: () async {
-                        await SoundManager().playSound();
-
-                        ;
-                        final result = await DialogHelper.showSetupDialog(
-                          context,
-                          title: '이벤트를 실행합니다.',
-                        );
-                        if (result) {
-                          PhotoCardUploadRouteData().go(context);
-                        }
-                      },
-                    ),
-                  ],
-                ),
-                if (F.appFlavor == Flavor.dev)
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      _navigatorCard(context, label: 'Unit Test',
-                          onTap: () async {
-                        await SoundManager().playSound();
-
-                        ;
-                        UnitTestRouteData().go(context);
-                      }),
-                      _navigatorCard(context, label: 'Material',
-                          onTap: () async {
-                        await SoundManager().playSound();
-
-                        ;
-                        MaterialRouteData().go(context);
-                      }),
-                      _navigatorCard(context, label: 'Kiosk\nComponents',
-                          onTap: () async {
-                        await SoundManager().playSound();
-
-                        KioskComponentsRouteData().go(context);
-                      }),
-                    ],
+                      PaymentHistoryRouteData().go(context);
+                    },
                   ),
+                ),
+                SizedBox(
+                  width: 260.w,
+                  height: 342.h,
+                  child: SetupMainCard(
+                    label: '이벤트\n실행',
+                    assetName: SnaptagSvg.eventRun,
+                    onTap: () async {
+                      await SoundManager().playSound();
+
+                      final result = await DialogHelper.showSetupDialog(
+                        context,
+                        title: '이벤트를 실행합니다.',
+                      );
+                      if (result) {
+                        PhotoCardUploadRouteData().go(context);
+                      }
+                    },
+                  ),
+                ),
               ],
             ),
+            if (F.appFlavor == Flavor.dev)
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SizedBox(
+                    width: 260.w,
+                    height: 342.h,
+                    child: SetupMainCard(
+                        label: 'Unit Test',
+                        onTap: () async {
+                          await SoundManager().playSound();
+
+                          UnitTestRouteData().go(context);
+                        }),
+                  ),
+                  SizedBox(
+                    width: 260.w,
+                    height: 342.h,
+                    child: SetupMainCard(
+                        label: 'Material',
+                        onTap: () async {
+                          await SoundManager().playSound();
+
+                          MaterialRouteData().go(context);
+                        }),
+                  ),
+                  SizedBox(
+                    width: 260.w,
+                    height: 342.h,
+                    child: SetupMainCard(
+                        label: 'Kiosk\nComponents',
+                        onTap: () async {
+                          await SoundManager().playSound();
+
+                          KioskComponentsRouteData().go(context);
+                        }),
+                  ),
+                ],
+              ),
           ],
-        );
-      }),
+        ),
+      ),
     );
   }
+}
 
-  Widget _navigatorCard(BuildContext context,
-      {required String label, String? assetName, void Function()? onTap}) {
+class SetupMainCard extends StatelessWidget {
+  final String label;
+  final String? assetName;
+  final void Function()? onTap;
+  const SetupMainCard({
+    super.key,
+    required this.label,
+    this.assetName,
+    this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.all(8.w),
       child: Container(
@@ -166,7 +190,7 @@ class SetupMainScreen extends ConsumerWidget {
             children: [
               if (assetName != null) ...[
                 SvgPicture.asset(
-                  assetName,
+                  assetName ?? '',
                   width: 100.w,
                   height: 100.w,
                 )
