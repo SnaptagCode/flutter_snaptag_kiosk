@@ -4,7 +4,7 @@ import 'dart:math';
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter_snaptag_kiosk/core/utils/random/random_photo_util.dart';
-import 'package:flutter_snaptag_kiosk/domain/entities/SeletedFrontPhoto.dart';
+import 'package:flutter_snaptag_kiosk/domain/entities/selected_front_photo.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:path/path.dart' as path;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -70,7 +70,7 @@ class FrontPhotoList extends _$FrontPhotoList {
     // 각 이미지 다운로드 및 저장
     for (var photo in photoList.list) {
       try {
-        final fileName = photo.getFileName();
+        final fileName = photo.getFileName;
         final filePath = await imageStorage.saveImage(DirectoryPaths.frontImages, photo.embedUrl, fileName);
 
         frontPhotoPaths.add(filePath);
@@ -81,7 +81,7 @@ class FrontPhotoList extends _$FrontPhotoList {
     return frontPhotoPaths;
   }
 
-  Future<Seletedfrontphoto> getRandomPhoto() async {
+  Future<SelectedFrontPhoto> getRandomPhoto() async {
     if (state.isEmpty) {
       throw Exception('No front images available');
     }
