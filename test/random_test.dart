@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter_snaptag_kiosk/core/utils/random/random_photo_util.dart';
-import 'package:flutter_snaptag_kiosk/domain/entities/SeletedFrontPhoto.dart';
+import 'package:flutter_snaptag_kiosk/domain/entities/selected_front_photo.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -20,16 +20,16 @@ void main() {
   group('RandomPhotoUtil Probability Test', () {
     // ✅ 1. 유효한 데이터에서 랜덤 값 반환 확인
     test('getRandomWeighted should return a non-null value when given valid data', () {
-      Seletedfrontphoto? result = RandomPhotoUtil.getRandomPhotoByWeight(testData);
+      SelectedFrontPhoto? result = RandomPhotoUtil.getRandomPhotoByWeight(testData);
 
       expect(result, isNotNull);
-      expect(result, isA<Seletedfrontphoto>());
+      expect(result, isA<SelectedFrontPhoto>());
     });
 
     // ✅ 2. 빈 리스트 입력 시 `null` 반환 확인
     test('getRandomWeighted should return null when given an empty list', () {
       List<String> testData = [];
-      Seletedfrontphoto? result = RandomPhotoUtil.getRandomPhotoByWeight(testData);
+      SelectedFrontPhoto? result = RandomPhotoUtil.getRandomPhotoByWeight(testData);
       expect(result, isNull);
     });
 
@@ -37,13 +37,13 @@ void main() {
     test('getRandomWeighted should return null when given invalid formatted data', () {
       List<String> testData = ["invalid_filename.png", "1_123.png", "2_456_7890.png"];
 
-      Seletedfrontphoto? result = RandomPhotoUtil.getRandomPhotoByWeight(testData);
+      SelectedFrontPhoto? result = RandomPhotoUtil.getRandomPhotoByWeight(testData);
       expect(result, isNull);
     });
 
     // ✅ 4. 단일 실행 결과 확인
     test('getRandomWeighted should return a valid object for a single random execution', () {
-      Seletedfrontphoto? result = RandomPhotoUtil.getRandomPhotoByWeight(testData);
+      SelectedFrontPhoto? result = RandomPhotoUtil.getRandomPhotoByWeight(testData);
 
       if (result != null) {
         print("Selected photo: ID=${result.id}, Code=${result.code}, Path=${result.path}");

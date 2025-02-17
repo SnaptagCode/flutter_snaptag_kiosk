@@ -8,7 +8,7 @@ part 'print_service.g.dart';
 @riverpod
 class PrintService extends _$PrintService {
   @override
-  FutureOr<bool> build() => false;
+  FutureOr<void> build() => null;
 
   Future<void> print() async {
     try {
