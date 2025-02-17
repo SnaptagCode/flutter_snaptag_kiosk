@@ -9,7 +9,9 @@ class SnaptagImages {
 
   static const String close = 'assets/images/close.png';
 
-  static const String printLoading = 'assets/images/print_loading.gif';
+  static const String printLoading = 'assets/images/print_loading.png';
+
+  static const String setupBackground = 'assets/images/setup_background.png';
 
   static const String loading = 'assets/images/loading.gif';
 }
@@ -40,8 +42,6 @@ class SnaptagSvg {
   static const String off = 'assets/icons/off.svg';
 
   static const String payment = 'assets/icons/payment.svg';
-
-  static const String snaptagIcon = 'assets/icons/snaptag_icon.svg';
 
   static const String snaptagLogo = 'assets/icons/snaptag_logo.svg';
 

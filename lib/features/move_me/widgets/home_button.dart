@@ -13,7 +13,7 @@ class HomeButton extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final currentPath = GoRouterState.of(context).matchedLocation;
-    final isPrinting = currentPath == '/print';
+    final isPrinting = currentPath == PrintProcessRouteData().location;
 
     return InkWell(
       onTap: isPrinting

@@ -1,7 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_snaptag_kiosk/core/errors/server_exception.dart';
-import 'package:flutter_snaptag_kiosk/core/utils/file_logger.dart';
+import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
 final dioProvider = Provider.family<Dio, String>((ref, baseUrl) {
@@ -9,7 +8,19 @@ final dioProvider = Provider.family<Dio, String>((ref, baseUrl) {
     ..options.baseUrl = baseUrl
     ..options.connectTimeout = const Duration(seconds: 30)
     ..options.receiveTimeout = const Duration(seconds: 30);
-  dio.interceptors.add(PrettyDioLogger());
+  dio.interceptors.add(
+    DioLogger(
+      sendHook: SlackLogService().sendLogToSlack,
+      request: false,
+    ),
+  );
+  dio.interceptors.add(
+    PrettyDioLogger(
+      requestHeader: true,
+      requestBody: true,
+      responseHeader: true,
+    ),
+  );
   dio.interceptors.add(QueuedInterceptorsWrapper(
     // Request가 보내기 전에 실행됩니다.
     // 예를 들어, 헤더를 설정하거나 요청을 변환할 수 있습니다.
@@ -39,7 +50,7 @@ final dioProvider = Provider.family<Dio, String>((ref, baseUrl) {
           // ServerException으로 wrapping
           return handler.reject(ServerException.fromDioError(err));
         } catch (e) {
-          FileLogger.info('ServerError 파싱 실패: $e');
+          logger.i('ServerError 파싱 실패: $e');
         }
       }
       return handler.next(err); // 원래 에러 전달
