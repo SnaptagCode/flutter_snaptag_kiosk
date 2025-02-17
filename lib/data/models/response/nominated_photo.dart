@@ -15,13 +15,11 @@ class NominatedPhoto with _$NominatedPhoto {
     required bool isWin,
   }) = _NominatedPhoto;
 
-  factory NominatedPhoto.fromJson(Map<String, dynamic> json) =>
-      _$NominatedPhotoFromJson(json);
+  factory NominatedPhoto.fromJson(Map<String, dynamic> json) => _$NominatedPhotoFromJson(json);
 }
 
 // '{id}_{code}_{embeddingProductId}_{selectedWeight}_{isWin}.확장자' 형식
 // - isWin 은 true 일 때 1, false 일 때 0
 extension ObjectToFileName on NominatedPhoto {
-  String getFileName() =>
-      '${id}_${code}_${embeddingProductId}_${selectionWeight}_${isWin ? 1 : 0}';
+  String getFileName() => '${id}_${code}_${embeddingProductId}_${selectionWeight}_${isWin ? 1 : 0}';
 }
