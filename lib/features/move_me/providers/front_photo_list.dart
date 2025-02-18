@@ -48,9 +48,9 @@ class FrontPhotoList extends _$FrontPhotoList {
     try {
       await ref.read(imageStorageProvider).clearDirectory(DirectoryPaths.frontImages);
 
-      final kioskEventId = ref.read(kioskInfoServiceProvider)?.kioskEventId;
+      final kioskEventId = ref.read(storageServiceProvider).settings.kioskEventId;
 
-      if (kioskEventId == null) {
+      if (kioskEventId == 0) {
         throw Exception('No kiosk event id available');
       }
       // API를 통해 이미지 목록 가져오기

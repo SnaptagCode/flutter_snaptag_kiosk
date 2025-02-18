@@ -38,6 +38,8 @@ dependencies:
   palette_generator: ^0.3.3+5
   loader_overlay: ^5.0.0
   url_launcher: ^6.3.1
+  material_components:
+    path: ./material_components
   faker: ^2.2.0
   window_manager: ^0.4.3
   http: ^1.2.2
