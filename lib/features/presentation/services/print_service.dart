@@ -61,18 +61,11 @@ class PrintService extends _$PrintService {
     }
   }
 
-  Future<({String path, int id})> _prepareFrontPhoto() async {
+  Future<({String path, int id, bool isWin})> _prepareFrontPhoto() async {
     final frontPhotoList = ref.read(frontPhotoListProvider.notifier);
     final randomPhoto = await frontPhotoList.getRandomPhoto();
 
-    if (randomPhoto == null) {
-      throw Exception('No front images available');
-    }
-
-    return (
-      path: randomPhoto.path,
-      id: randomPhoto.id,
-    );
+    return (path: randomPhoto.path, id: randomPhoto.id, isWin: randomPhoto.isWin);
   }
 
   Future<File> _prepareBackImage() async {
