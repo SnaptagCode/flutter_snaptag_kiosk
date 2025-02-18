@@ -96,7 +96,7 @@ class _ErrorApp extends ConsumerWidget {
           child: Builder(builder: (context) {
             return GeneralErrorWidget(
               exception: error as Exception,
-              onRetry: () => ref.refresh(kioskInfoServiceProvider),
+              onRetry: () => ref.refresh(asyncKioskInfoProvider),
             );
           }),
         ),

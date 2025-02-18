@@ -129,6 +129,17 @@ class SetupMainScreen extends ConsumerWidget {
                     width: 260.w,
                     height: 342.h,
                     child: SetupMainCard(
+                        label: 'Material',
+                        onTap: () async {
+                          await SoundManager().playSound();
+
+                          MaterialRouteData().go(context);
+                        }),
+                  ),
+                  SizedBox(
+                    width: 260.w,
+                    height: 342.h,
+                    child: SetupMainCard(
                         label: 'Kiosk\nComponents',
                         onTap: () async {
                           await SoundManager().playSound();

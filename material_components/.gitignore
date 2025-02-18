@@ -32,8 +32,6 @@ migrate_working_dir/
 .pub-cache/
 .pub/
 /build/
-*.g.dart
-*.freezed.dart
 
 # Symbolication related
 app.*.symbols
@@ -45,9 +43,3 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
-
-/web/
-/windows/
-
-# 보안
-*.env
