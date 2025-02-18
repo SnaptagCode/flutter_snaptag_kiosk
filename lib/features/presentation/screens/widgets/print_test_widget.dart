@@ -21,9 +21,7 @@ class ProcessedImage extends _$ProcessedImage {
     // 1. 랜덤 이미지 선택
     final frontPhotoList = ref.read(frontPhotoListProvider.notifier);
     final randomPhoto = await frontPhotoList.getRandomPhoto();
-    if (randomPhoto == null) {
-      throw Exception('No front images available');
-    }
+
     state = (frontPath: randomPhoto.path, backImage: state?.backImage);
   }
 

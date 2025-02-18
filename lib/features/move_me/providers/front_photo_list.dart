@@ -1,6 +1,10 @@
+import 'dart:ffi';
 import 'dart:io';
 import 'dart:math';
 
+import 'package:flutter/rendering.dart';
+import 'package:flutter_snaptag_kiosk/core/utils/random/random_photo_util.dart';
+import 'package:flutter_snaptag_kiosk/domain/entities/selected_front_photo.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:path/path.dart' as path;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -28,27 +32,12 @@ class FrontPhotoList extends _$FrontPhotoList {
         return extension.endsWith('.jpg') || extension.endsWith('.jpeg') || extension.endsWith('.png');
       });
 
-      // FrontPhotoPath 객체로 변환
-      return files.map((file) {
-        // 파일명이 '{id}_{code}_{embeddingProductId}.확장자' 형식인 경우
-        // 파일명에서 id, code embeddingProductId 추출 시도
-        final fileName = path.basenameWithoutExtension(file.path);
-        final parts = fileName.split('_');
-        if (parts.length == 3) {
-          final id = int.tryParse(parts[0]);
-          final code = int.tryParse(parts[1]);
-          final embeddingProductId = int.tryParse(parts[2]);
-          if (id != null && code != null && embeddingProductId != null) {
-            return file.path;
-          } else {
-            // exception
-            throw Exception('Invalid file name format: $fileName');
-          }
-        } else {
-          // exception
-          throw Exception('Invalid file name format: $fileName');
-        }
-      }).toList();
+      // List<String> 로 변환 String : path
+      return files
+          .map((file) => RandomPhotoUtil.convertFromFileToObject(file.path)?.path)
+          .where((path) => path != null)
+          .cast<String>()
+          .toList();
     } catch (e) {
       logger.e('이미지 목록을 불러오는 중 오류가 발생했습니다: $e');
       return [];
@@ -81,8 +70,7 @@ class FrontPhotoList extends _$FrontPhotoList {
     // 각 이미지 다운로드 및 저장
     for (var photo in photoList.list) {
       try {
-        // '{id}_{code}_{embeddingProductId}.확장자' 형식
-        final fileName = '${photo.id}_${photo.code}_${photo.embeddingProductId}';
+        final fileName = photo.getFileName;
         final filePath = await imageStorage.saveImage(DirectoryPaths.frontImages, photo.embedUrl, fileName);
 
         frontPhotoPaths.add(filePath);
@@ -93,57 +81,23 @@ class FrontPhotoList extends _$FrontPhotoList {
     return frontPhotoPaths;
   }
 
-  Future<({String path, int id, int code, int embeddingProductId})> getRandomPhoto() async {
+  Future<SelectedFrontPhoto> getRandomPhoto() async {
     if (state.isEmpty) {
       throw Exception('No front images available');
     }
 
-    final random = Random();
-    final randomPath = state[random.nextInt(state.length)];
-
     try {
       // 파일명에서 정보 추출
-      final result = _getPhotoInfo(randomPath);
+      final result = RandomPhotoUtil.getRandomPhotoByWeight(state);
 
       if (result != null) {
-        return (
-          id: result.id,
-          code: result.code,
-          embeddingProductId: result.embeddingProductId,
-          path: randomPath,
-        );
+        return result;
       }
 
-      throw Exception('Invalid file name format: $randomPath');
+      throw Exception('Invalid file name format: ${result?.path}');
     } catch (e) {
       logger.e('이미지 정보 추출 중 오류가 발생했습니다: $e');
       throw Exception('Failed to get random photo');
-    }
-  }
-
-  // 특정 이미지의 정보를 추출하는 메서드
-  ({int id, int code, int embeddingProductId})? _getPhotoInfo(String imagePath) {
-    try {
-      final fileName = path.basenameWithoutExtension(imagePath);
-      final parts = fileName.split('_');
-
-      if (parts.length == 3) {
-        final id = int.tryParse(parts[0]);
-        final code = int.tryParse(parts[1]);
-        final embeddingProductId = int.tryParse(parts[2]);
-
-        if (id != null && code != null && embeddingProductId != null) {
-          return (
-            id: id,
-            code: code,
-            embeddingProductId: embeddingProductId,
-          );
-        }
-      }
-      throw Exception('Invalid file name format: $fileName');
-    } catch (e) {
-      logger.e('이미지 정보 추출 중 오류가 발생했습니다: $e');
-      return null;
     }
   }
 }
