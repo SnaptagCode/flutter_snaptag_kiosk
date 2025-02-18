@@ -151,7 +151,6 @@ class _NumericPad extends ConsumerWidget {
         style: context.keypadNumberStyle,
         onPressed: () async {
           await SoundManager().playSound();
-
           ref.read(authCodeProvider.notifier).removeLast();
         },
         child: SizedBox(
@@ -168,7 +167,6 @@ class _NumericPad extends ConsumerWidget {
         style: context.keypadNumberStyle,
         onPressed: () async {
           await SoundManager().playSound();
-
           ref.read(authCodeProvider.notifier).addNumber('0');
         },
         child: Text('0'),
@@ -179,8 +177,6 @@ class _NumericPad extends ConsumerWidget {
         style: context.keypadCompleteStyle,
         onPressed: () async {
           await SoundManager().playSound();
-
-          ;
           final code = ref.read(authCodeProvider);
           if (ref.read(authCodeProvider.notifier).isValid()) {
             ref.read(verifyPhotoCardProvider.notifier).verify(code);
@@ -193,8 +189,6 @@ class _NumericPad extends ConsumerWidget {
       style: context.keypadNumberStyle,
       onPressed: () async {
         await SoundManager().playSound();
-
-        ;
         ref.read(authCodeProvider.notifier).addNumber('${index + 1}');
       },
       child: Text('${index + 1}'),

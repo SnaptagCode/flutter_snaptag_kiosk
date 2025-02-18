@@ -108,8 +108,6 @@ class _PhotoCardPreviewScreenState
                 style: context.paymentButtonStyle,
                 onPressed: () async {
                   await SoundManager().playSound();
-
-                  ;
                   ref
                       .read(photoCardPreviewScreenProviderProvider.notifier)
                       .payment();
