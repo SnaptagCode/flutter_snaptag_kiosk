@@ -2,7 +2,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'print_type_provider.g.dart';
 
-@riverpod
+@Riverpod(keepAlive: true)
 class PrintType extends _$PrintType {
   @override
   PrintMode build() => PrintMode.duplex;
