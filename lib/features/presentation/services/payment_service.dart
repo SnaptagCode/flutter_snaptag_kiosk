@@ -11,14 +11,22 @@ class PaymentService extends _$PaymentService {
   Future<void> processPayment() async {
     try {
       // 1. 사전 검증
-      _validatePaymentRequirements();
+      final settings = ref.read(kioskInfoServiceProvider);
+      final backPhoto = ref.watch(verifyPhotoCardProvider).value;
+
+      if (settings == null) {
+        throw Exception('No kiosk settings available');
+      }
+      if (backPhoto == null) {
+        throw Exception('No back photo available');
+      }
 
       // 2. 주문 생성
       final orderResponse = await _createOrder();
       ref.read(createOrderInfoProvider.notifier).update(orderResponse);
 
       // 3. 결제 승인
-      final price = ref.read(storageServiceProvider).settings.photoCardPrice;
+      final price = ref.read(kioskInfoServiceProvider)!.photoCardPrice;
       final paymentResponse = await ref.read(paymentRepositoryProvider).approve(
             totalAmount: price,
           );
@@ -43,7 +51,7 @@ class PaymentService extends _$PaymentService {
       if (approvalInfo == null) {
         throw Exception('No payment approval info available');
       }
-      final price = ref.read(storageServiceProvider).settings.photoCardPrice;
+      final price = ref.read(kioskInfoServiceProvider)!.photoCardPrice;
       final paymentResponse = await ref.read(paymentRepositoryProvider).cancel(
             totalAmount: price,
             originalApprovalNo: approvalInfo.approvalNo ?? '',
@@ -60,27 +68,12 @@ class PaymentService extends _$PaymentService {
     }
   }
 
-  void _validatePaymentRequirements() {
-    final settings = ref.watch(storageServiceProvider).settings;
-    final backPhoto = ref.watch(verifyPhotoCardProvider).value;
-
-    if (settings.kioskEventId == 0) {
-      throw Exception('No kiosk event id available');
-    }
-    if (settings.photoCardPrice <= 0) {
-      throw Exception('Invalid photo card price');
-    }
-    if (backPhoto == null) {
-      throw Exception('No back photo available');
-    }
-  }
-
   Future<CreateOrderResponse> _createOrder() async {
-    final settings = ref.watch(storageServiceProvider).settings;
+    final settings = ref.read(kioskInfoServiceProvider);
     final backPhoto = ref.watch(verifyPhotoCardProvider).value;
 
     final request = CreateOrderRequest(
-      kioskEventId: settings.kioskEventId,
+      kioskEventId: settings!.kioskEventId,
       kioskMachineId: settings.kioskMachineId,
       photoAuthNumber: backPhoto?.photoAuthNumber ?? '',
       amount: settings.photoCardPrice,
@@ -92,7 +85,7 @@ class PaymentService extends _$PaymentService {
 
   Future<UpdateOrderResponse> _updateOrder() async {
     try {
-      final settings = ref.watch(storageServiceProvider).settings;
+      final settings = ref.read(kioskInfoServiceProvider);
       final backPhoto = ref.watch(verifyPhotoCardProvider).value;
       final approval = ref.watch(paymentResponseStateProvider);
       final orderId = ref.watch(createOrderInfoProvider)?.orderId;
@@ -102,7 +95,7 @@ class PaymentService extends _$PaymentService {
       logger.i(
           'respCode: ${approval?.respCode} \trespCode: ${approval?.respCode} \nORDER STATUS: ${approval?.orderState}');
       final request = UpdateOrderRequest(
-        kioskEventId: settings.kioskEventId,
+        kioskEventId: settings!.kioskEventId,
         kioskMachineId: settings.kioskMachineId,
         photoAuthNumber: backPhoto?.photoAuthNumber ?? '-',
         amount: settings.photoCardPrice,
