@@ -9,21 +9,17 @@ class KioskColorsNotifier extends _$KioskColorsNotifier {
   @override
   KioskColors build() {
     // theme 프로바이더를 watch
-    final kiosk = ref.watch(asyncKioskInfoProvider);
-
-    return kiosk.when(
-      data: (info) {
-        return KioskColors(
-          buttonColor: _parseColor(info.mainButtonColor),
-          buttonTextColor: _parseColor(info.buttonTextColor),
-          keypadButtonColor: _parseColor(info.keyPadColor),
-          couponTextColor: _parseColor(info.couponTextColor),
-          textColor: _parseColor(info.mainTextColor),
-          popupButtonColor: _parseColor(info.popupButtonColor),
-        );
-      },
-      loading: () => KioskColors.basic,
-      error: (_, __) => KioskColors.basic,
+    final kiosk = ref.watch(kioskInfoServiceProvider);
+    if (kiosk == null) {
+      return KioskColors.basic;
+    }
+    return KioskColors(
+      buttonColor: _parseColor(kiosk.mainButtonColor),
+      buttonTextColor: _parseColor(kiosk.buttonTextColor),
+      keypadButtonColor: _parseColor(kiosk.keyPadColor),
+      couponTextColor: _parseColor(kiosk.couponTextColor),
+      textColor: _parseColor(kiosk.mainTextColor),
+      popupButtonColor: _parseColor(kiosk.popupButtonColor),
     );
   }
 
