@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_snaptag_kiosk/features/core/printer/card_printer.dart';
 import 'package:flutter_snaptag_kiosk/features/move_me/providers/front_photo_list.dart';
+import 'package:flutter_snaptag_kiosk/features/move_me/providers/page_print_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'print_test_widget.g.dart';
@@ -42,7 +43,23 @@ class ProcessedImage extends _$ProcessedImage {
     }
   }
 
-  Future<void> printImages() async {
+  Future<void> printImages(PagePrintType type) async {
+    if (type == PagePrintType.single) {
+      if (state.frontPath == null) {
+        throw Exception('Front image must be selected');
+      }
+
+      try {
+        await ref.read(printerServiceProvider.notifier).printImage(
+              frontImagePath: state.frontPath!,
+              embeddedFile: null,
+            );
+      } catch (e) {
+        print('printImages error: $e');
+      }
+      return;
+    }
+
     if (state.frontPath == null || state.backImage == null) {
       throw Exception('Both images must be selected');
     }
@@ -74,7 +91,10 @@ class PrintTestWidget extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final processedImages = ref.watch(processedImageProvider);
     final printerState = ref.watch(printerServiceProvider);
-    final canPrint = processedImages.frontPath != null && processedImages.backImage != null && !printerState.isLoading;
+    final pagePrintType = ref.watch(pagePrintProvider);
+    final canPrint = pagePrintType == PagePrintType.double
+        ? processedImages.frontPath != null && processedImages.backImage != null && !printerState.isLoading
+        : processedImages.frontPath != null && !printerState.isLoading;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -158,7 +178,7 @@ class PrintTestWidget extends ConsumerWidget {
               onPressed: canPrint
                   ? () async {
                       try {
-                        await ref.read(processedImageProvider.notifier).printImages();
+                        await ref.read(processedImageProvider.notifier).printImages(pagePrintType);
                         if (context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(content: Text('인쇄가 완료되었습니다')),
