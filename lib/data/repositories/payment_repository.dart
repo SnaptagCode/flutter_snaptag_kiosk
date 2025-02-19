@@ -19,7 +19,7 @@ class PaymentRepository {
   final Ref ref;
 
   String _getCallback() {
-    final kioskMachineId = ref.read(storageServiceProvider).settings.kioskMachineId;
+    final kioskMachineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId;
     final formattedMachineId = kioskMachineId.toString().padLeft(2, '0');
     return 'jsonp200911MI$formattedMachineId';
   }

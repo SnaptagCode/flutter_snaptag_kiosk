@@ -39,18 +39,18 @@ class PrintService extends _$PrintService {
     // 5. 프린트 진행 및 상태 업데이트
     await _executePrintJob(
       printJobInfo.printedPhotoCardId,
-      frontPhotoInfo.path,
+      frontPhotoInfo.safeEmbedImage,
       embeddedBackImage,
     );
   }
 
-  Future<void> _executePrintJob(int printedPhotoCardId, String frontPhotoPath, File embedded) async {
+  Future<void> _executePrintJob(int printedPhotoCardId, File frontPhoto, File embedded) async {
     try {
       // 프린트 상태 시작
       await _updatePrintStatus(printedPhotoCardId, PrintedStatus.started);
 
       // 실제 프린트 실행
-      await _executePrint(frontPhotoPath: frontPhotoPath, embedded: embedded);
+      await _executePrint(frontPhoto: frontPhoto, embedded: embedded);
 
       // 프린트 상태 완료
       await _updatePrintStatus(printedPhotoCardId, PrintedStatus.completed);
@@ -61,11 +61,11 @@ class PrintService extends _$PrintService {
     }
   }
 
-  Future<({String path, int id, bool isWin})> _prepareFrontPhoto() async {
+  Future<NominatedPhoto> _prepareFrontPhoto() async {
     final frontPhotoList = ref.read(frontPhotoListProvider.notifier);
     final randomPhoto = await frontPhotoList.getRandomPhoto();
 
-    return (path: randomPhoto.path, id: randomPhoto.id, isWin: randomPhoto.isWin);
+    return randomPhoto;
   }
 
   Future<File> _prepareBackImage() async {
@@ -117,8 +117,8 @@ class PrintService extends _$PrintService {
   }) async {
     try {
       final request = CreatePrintRequest(
-        kioskMachineId: ref.watch(storageServiceProvider).settings.kioskMachineId,
-        kioskEventId: ref.watch(storageServiceProvider).settings.kioskEventId,
+        kioskMachineId: ref.read(kioskInfoServiceProvider)!.kioskMachineId,
+        kioskEventId: ref.read(kioskInfoServiceProvider)!.kioskEventId,
         frontPhotoCardId: frontPhotoCardId,
         backPhotoCardId: backPhotoCardId,
         file: file,
@@ -134,8 +134,8 @@ class PrintService extends _$PrintService {
   Future<void> _updatePrintStatus(int printedPhotoCardId, PrintedStatus status) async {
     try {
       final request = UpdatePrintRequest(
-        kioskMachineId: ref.watch(storageServiceProvider).settings.kioskMachineId,
-        kioskEventId: ref.watch(storageServiceProvider).settings.kioskEventId,
+        kioskMachineId: ref.read(kioskInfoServiceProvider)!.kioskMachineId,
+        kioskEventId: ref.read(kioskInfoServiceProvider)!.kioskEventId,
         status: status,
       );
 
@@ -148,12 +148,12 @@ class PrintService extends _$PrintService {
   }
 
   Future<void> _executePrint({
-    required String frontPhotoPath,
+    required File frontPhoto,
     required File embedded,
   }) async {
     try {
       await ref.read(printerServiceProvider.notifier).printImage(
-            frontImagePath: frontPhotoPath,
+            frontFile: frontPhoto,
             embeddedFile: embedded,
           );
     } catch (e) {

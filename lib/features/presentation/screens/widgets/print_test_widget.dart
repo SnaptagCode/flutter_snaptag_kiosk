@@ -13,16 +13,15 @@ part 'print_test_widget.g.dart';
 @riverpod
 class ProcessedImage extends _$ProcessedImage {
   @override
-  ({String? frontPath, Uint8List? backImage}) build() {
-    return (frontPath: null, backImage: null);
+  ({File? frontFile, Uint8List? backImage}) build() {
+    return (frontFile: null, backImage: null);
   }
 
   Future<void> selectRandomImage() async {
     // 1. 랜덤 이미지 선택
     final frontPhotoList = ref.read(frontPhotoListProvider.notifier);
     final randomPhoto = await frontPhotoList.getRandomPhoto();
-
-    state = (frontPath: randomPhoto.path, backImage: state?.backImage);
+    state = (frontFile: randomPhoto.safeEmbedImage, backImage: state.backImage);
   }
 
   Future<void> selectBackImage() async {
@@ -33,9 +32,7 @@ class ProcessedImage extends _$ProcessedImage {
       );
 
       if (result != null && result.files.isNotEmpty) {
-        final file = File(result.files.single.path!);
-        final imageBytes = await file.readAsBytes();
-        state = (frontPath: state?.frontPath, backImage: imageBytes);
+        state = (frontFile: state.frontFile, backImage: result.files.single.bytes);
       }
     } catch (e) {
       debugPrint('Error picking or processing image: $e');
@@ -43,18 +40,20 @@ class ProcessedImage extends _$ProcessedImage {
   }
 
   Future<void> printImages() async {
-    if (state.frontPath == null || state.backImage == null) {
+    if (state.frontFile == null || state.backImage == null) {
       throw Exception('Both images must be selected');
     }
 
-    final tempFile = File('${state.frontPath}_processed.png');
+    final tempFile = File('${DateTime.now().millisecondsSinceEpoch}.png');
     await tempFile.writeAsBytes(state.backImage!);
 
     try {
       await ref.read(printerServiceProvider.notifier).printImage(
-            frontImagePath: state.frontPath!,
+            frontFile: state.frontFile!,
             embeddedFile: tempFile,
           );
+    } catch (e) {
+      rethrow;
     } finally {
       if (await tempFile.exists()) {
         await tempFile.delete();
@@ -63,7 +62,7 @@ class ProcessedImage extends _$ProcessedImage {
   }
 
   void clear() {
-    state = (frontPath: null, backImage: null);
+    state = (frontFile: null, backImage: null);
   }
 }
 
@@ -74,7 +73,7 @@ class PrintTestWidget extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final processedImages = ref.watch(processedImageProvider);
     final printerState = ref.watch(printerServiceProvider);
-    final canPrint = processedImages.frontPath != null && processedImages.backImage != null && !printerState.isLoading;
+    final canPrint = processedImages.frontFile != null && processedImages.backImage != null && !printerState.isLoading;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -92,8 +91,8 @@ class PrintTestWidget extends ConsumerWidget {
                     decoration: BoxDecoration(
                       border: Border.all(color: Colors.grey),
                     ),
-                    child: processedImages.frontPath != null
-                        ? Image.file(File(processedImages.frontPath!))
+                    child: processedImages.frontFile != null
+                        ? Image.file(processedImages.frontFile!)
                         : const Center(child: Text('No image selected')),
                   ),
                   const SizedBox(height: 8),
