@@ -21,6 +21,8 @@ class PaymentService extends _$PaymentService {
         throw Exception('No back photo available');
       }
 
+      ref.invalidate(paymentResponseStateProvider);
+      ref.invalidate(backPhotoForPrintInfoProvider);
       // 2. 주문 생성
       final orderResponse = await _createOrder();
       ref.read(createOrderInfoProvider.notifier).update(orderResponse);

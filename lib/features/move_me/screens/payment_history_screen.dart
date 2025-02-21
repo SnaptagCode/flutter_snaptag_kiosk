@@ -314,7 +314,6 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
               onPressed: () async {
                 await SoundManager().playSound();
 
-                ;
                 final result1 = await DialogHelper.showSetupDialog(
                   context,
                   title: '환불을 진행합니다.',
