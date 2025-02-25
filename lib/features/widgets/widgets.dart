@@ -1,3 +1,4 @@
+export 'code_keypad.dart';
 export 'dialog_helper.dart';
 export 'dialog_test_widget.dart';
 export 'file_path_actions.dart';
@@ -13,6 +14,8 @@ export 'kiosk_typography_screen.dart';
 export 'labcurity_image_test.dart';
 export 'language_switcher.dart';
 export 'localization_text_test_widget.dart';
+export 'payment_test_widget.dart';
 export 'price_box.dart';
+export 'print_test_widget.dart';
 export 'splash_screen.dart';
 export 'triple_tap_fab.dart';
