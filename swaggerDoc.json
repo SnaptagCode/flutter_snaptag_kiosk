@@ -1,0 +1,1210 @@
+{
+    "swaggerDoc": {
+      "openapi": "3.0.0",
+      "paths": {
+        "/v1/health-check": {
+          "get": {
+            "operationId": "KioskController_healthCheck",
+            "parameters": [],
+            "responses": {
+              "200": {
+                "description": ""
+              }
+            },
+            "tags": [
+              "Health Check"
+            ]
+          }
+        },
+        "/v1/machine/info": {
+          "get": {
+            "operationId": "MachineController_getKioskMachineInfo",
+            "summary": "키오스크 기기 정보 조회 API",
+            "parameters": [
+              {
+
+
+                "name": "kioskMachineId",
+                "required": true,
+                "in": "query",
+                "schema": {
+                  "type": "number"
+                }
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "$ref": "#/components/schemas/GetKioskMachineInfoResponseDto"
+                    }
+                  }
+                }
+              },
+              "400": {
+                "description": "이벤트에 사용 불가합니다. 이벤트와 기기 연결을 확인해주세요."
+              },
+              "404": {
+                "description": "키오스크 기기를 찾을 수 없습니다 || 키오스크 디자인을 찾을 수 없습니다"
+              }
+            },
+            "tags": [
+              "Kiosk Machine"
+            ]
+          }
+        },
+        "/v1/kiosk-event/front-photo-list": {
+          "get": {
+            "operationId": "KioskEventController_getFrontPhotoListByKioskEventId",
+            "summary": "(고정) 앞면 이미지 리스트 조회 API",
+            "parameters": [
+              {
+                "name": "kioskEventId",
+                "required": true,
+                "in": "query",
+                "schema": {
+                  "type": "number"
+                }
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "$ref": "#/components/schemas/GetFrontPhotoListResponseDto"
+                    }
+                  }
+                }
+              }
+            },
+            "tags": [
+              "Kiosk Event"
+            ]
+          }
+        },
+        "/v1/kiosk-event/back-photo": {
+          "get": {
+            "operationId": "KioskEventController_getBackPhotoCard",
+            "summary": "출력을 위한 뒷면 이미지 조회 API",
+            "parameters": [
+              {
+                "name": "kioskEventId",
+                "required": true,
+                "in": "query",
+                "schema": {
+                  "type": "number"
+                }
+              },
+              {
+                "name": "photoAuthNumber",
+                "required": true,
+                "in": "query",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "$ref": "#/components/schemas/GetBackPhotoCardResponseDto"
+                    }
+                  }
+                }
+              }
+            },
+            "tags": [
+              "Kiosk Event"
+            ]
+          }
+        },
+        "/v1/qr": {
+          "get": {
+            "operationId": "QrController_getQrWebInfo",
+            "summary": "QR 웹에서 필요한 정보 조회 API",
+            "parameters": [
+              {
+                "name": "kioskEventId",
+                "required": true,
+                "in": "query",
+                "schema": {
+                  "type": "number"
+                }
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "$ref": "#/components/schemas/GetQrWebInfoResponseDto"
+                    }
+                  }
+                }
+              }
+            },
+            "tags": [
+              "QR Web"
+            ]
+          }
+        },
+        "/v1/qr/back-photo": {
+          "get": {
+            "operationId": "QrController_getBackPhotoCardByPhotoAuthNumber",
+            "summary": "QR 웹에서 생성한 뒷면 이미지 조회 API",
+            "parameters": [
+              {
+                "name": "kioskEventId",
+                "required": true,
+                "in": "query",
+                "schema": {
+                  "type": "number"
+                }
+              },
+              {
+                "name": "backPhotoCardId",
+                "required": true,
+                "in": "query",
+                "schema": {
+                  "type": "number"
+                }
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "$ref": "#/components/schemas/GetBackPhotoCardResponseDto"
+                    }
+                  }
+                }
+              }
+            },
+            "tags": [
+              "QR Web"
+            ]
+          },
+          "post": {
+            "operationId": "QrController_createBackPhotoCard",
+            "summary": "QR 웹에서 이미지 업로드 또는 기존 뒷면 중 선택 API(각각 파일 혹은 이미지 아이디 필수)",
+            "parameters": [],
+            "requestBody": {
+              "required": true,
+              "content": {
+                "multipart/form-data": {
+                  "schema": {
+                    "$ref": "#/components/schemas/CreateBackPhotoRequestDto"
+                  }
+                }
+              }
+            },
+            "responses": {
+              "201": {
+                "description": "",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "$ref": "#/components/schemas/CreateBackPhotoResponseDto"
+                    }
+                  }
+                }
+              }
+            },
+            "tags": [
+              "QR Web"
+            ]
+          }
+        },
+        "/v1/order/list": {
+          "get": {
+            "operationId": "OrderController_getOrderListByPage",
+            "summary": "키오스크 주문 목록 조회 API - 날짜는 KST 기준으로 리턴, 이전 14일까지만 조회 가능",
+            "parameters": [
+              {
+                "name": "pageSize",
+                "required": true,
+                "in": "query",
+                "schema": {
+                  "type": "number"
+                }
+              },
+              {
+                "name": "currentPage",
+                "required": true,
+                "in": "query",
+                "schema": {
+                  "type": "number"
+                }
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "$ref": "#/components/schemas/GetOrderListByPageResponseDto"
+                    }
+                  }
+                }
+              }
+            },
+            "tags": [
+              "Kiosk Order"
+            ]
+          }
+        },
+        "/v1/order": {
+          "post": {
+            "operationId": "OrderController_createOrder",
+            "summary": "키오스크 주문 생성 API",
+            "parameters": [],
+            "requestBody": {
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/CreateOrderRequestBody"
+                  }
+                }
+              }
+            },
+            "responses": {
+              "201": {
+                "description": "",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "$ref": "#/components/schemas/CreateOrderResponseDto"
+                    }
+                  }
+                }
+              }
+            },
+            "tags": [
+              "Kiosk Order"
+            ]
+          }
+        },
+        "/v1/order/{orderId}": {
+          "patch": {
+            "operationId": "OrderController_updateOrder",
+            "summary": "키오스크 주문 완료 API (주문 성공, 주문 실패, 주문 환불, 주문 환불 실패) | 주문 완료 시 시퀀스 발행",
+            "parameters": [
+              {
+                "name": "orderId",
+                "required": true,
+                "in": "path",
+                "schema": {
+                  "type": "number"
+                }
+              }
+            ],
+            "requestBody": {
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/UpdateOrderRequestBody"
+                  }
+                }
+              }
+            },
+            "responses": {
+              "200": {
+                "description": "",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "$ref": "#/components/schemas/UpdateOrderResponseDto"
+                    }
+                  }
+                }
+              }
+            },
+            "tags": [
+              "Kiosk Order"
+            ]
+          }
+        },
+        "/v1/print": {
+          "post": {
+            "operationId": "PrintController_createPrint",
+            "summary": "출력 데이터 생성 API",
+            "parameters": [],
+            "requestBody": {
+              "required": true,
+              "content": {
+                "multipart/form-data": {
+                  "schema": {
+                    "$ref": "#/components/schemas/CreatePrintRequestBody"
+                  }
+                }
+              }
+            },
+            "responses": {
+              "201": {
+                "description": "",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "$ref": "#/components/schemas/CreatePrintResponseDto"
+                    }
+                  }
+                }
+              }
+            },
+            "tags": [
+              "Kiosk Print"
+            ]
+          }
+        },
+        "/v1/print/{printedPhotoCardId}": {
+          "patch": {
+            "operationId": "PrintController_updatePrint",
+            "summary": "출력 상태 업데이트 API",
+            "parameters": [
+              {
+                "name": "printedPhotoCardId",
+                "required": true,
+                "in": "path",
+                "schema": {
+                  "type": "number"
+                }
+              }
+            ],
+            "requestBody": {
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/UpdatePrintRequestBody"
+                  }
+                }
+              }
+            },
+            "responses": {
+              "200": {
+                "description": "출력 시작 / 출력 종료 / 출력 실패",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "$ref": "#/components/schemas/UpdatePrintResponseDto"
+                    }
+                  }
+                }
+              }
+            },
+            "tags": [
+              "Kiosk Print"
+            ]
+          }
+        }
+      },
+      "info": {
+        "title": "[dev] kiosk api server document",
+        "description": "[dev] kiosk 서버 api 문서입니다",
+        "version": "1.0",
+        "contact": {}
+      },
+      "tags": [],
+      "servers": [],
+      "components": {
+        "securitySchemes": {
+          "bearer": {
+            "scheme": "bearer",
+            "bearerFormat": "JWT",
+            "type": "http"
+          }
+        },
+        "schemas": {
+          "GetKioskMachineInfoResponseDto": {
+            "type": "object",
+            "properties": {
+              "kioskEventId": {
+                "type": "number"
+              },
+              "kioskMachineId": {
+                "type": "number"
+              },
+              "kioskMachineName": {
+                "type": "string"
+              },
+              "kioskMachineDescription": {
+                "type": "string"
+              },
+              "photoCardPrice": {
+                "type": "number"
+              },
+              "cardMaterialType": {
+                "type": "string",
+                "enum": [
+                  "NORMAL",
+                  "METAL"
+                ]
+              },
+              "printedEventName": {
+                "type": "string"
+              },
+              "topBannerUrl": {
+                "type": "string"
+              },
+              "mainImageUrl": {
+                "type": "string"
+              },
+              "mainButtonColor": {
+                "type": "string"
+              },
+              "buttonTextColor": {
+                "type": "string"
+              },
+              "keyPadColor": {
+                "type": "string"
+              },
+              "couponTextColor": {
+                "type": "string"
+              },
+              "mainTextColor": {
+                "type": "string"
+              },
+              "popupButtonColor": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "kioskEventId",
+              "kioskMachineId",
+              "kioskMachineName",
+              "kioskMachineDescription",
+              "photoCardPrice",
+              "cardMaterialType",
+              "printedEventName",
+              "topBannerUrl",
+              "mainImageUrl",
+              "mainButtonColor",
+              "buttonTextColor",
+              "keyPadColor",
+              "couponTextColor",
+              "mainTextColor",
+              "popupButtonColor"
+            ]
+          },
+          "GetFrontPhotoTypeForSwagger": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "number"
+              },
+              "embeddingProductId": {
+                "type": "number"
+              },
+              "code": {
+                "type": "number"
+              },
+              "originUrl": {
+                "type": "string"
+              },
+              "embedUrl": {
+                "type": "string"
+              },
+              "selectionWeight": {
+                "type": "number"
+              },
+              "isWin": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "id",
+              "embeddingProductId",
+              "code",
+              "originUrl",
+              "embedUrl",
+              "selectionWeight",
+              "isWin"
+            ]
+          },
+          "GetFrontPhotoListResponseDto": {
+            "type": "object",
+            "properties": {
+              "list": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/GetFrontPhotoTypeForSwagger"
+                }
+              }
+            },
+            "required": [
+              "list"
+            ]
+          },
+          "GetBackPhotoCardResponseDto": {
+            "type": "object",
+            "properties": {
+              "kioskEventId": {
+                "type": "number"
+              },
+              "backPhotoCardId": {
+                "type": "number"
+              },
+              "nominatedBackPhotoCardId": {
+                "type": "number"
+              },
+              "embeddingProductId": {
+                "type": "number"
+              },
+              "photoAuthNumber": {
+                "type": "string"
+              },
+              "backPhotoCardOriginUrl": {
+                "type": "string"
+              },
+              "formattedBackPhotoCardUrl": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "kioskEventId",
+              "backPhotoCardId",
+              "embeddingProductId",
+              "photoAuthNumber",
+              "backPhotoCardOriginUrl",
+              "formattedBackPhotoCardUrl"
+            ]
+          },
+          "QrWebInfoPhotoTypeForSwagger": {
+            "type": "object",
+            "properties": {
+              "photoCardId": {
+                "type": "number"
+              },
+              "embeddingProductId": {
+                "type": "number"
+              },
+              "originUrl": {
+                "type": "string"
+              },
+              "formattedBase64": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "photoCardId",
+              "embeddingProductId",
+              "originUrl"
+            ]
+          },
+          "GetQrWebInfoResponseDto": {
+            "type": "object",
+            "properties": {
+              "kioskEventId": {
+                "type": "number"
+              },
+              "titleImageUrl": {
+                "type": "string"
+              },
+              "backgroundColor": {
+                "type": "string"
+              },
+              "textColor": {
+                "type": "string"
+              },
+              "buttonKeyColor": {
+                "type": "string"
+              },
+              "buttonTextColor": {
+                "type": "string"
+              },
+              "topIconColor": {
+                "type": "string"
+              },
+              "topBackgroundColor": {
+                "type": "string"
+              },
+              "authNumberBackgroundColor": {
+                "type": "string"
+              },
+              "authNumberTextColor": {
+                "type": "string"
+              },
+              "saveButtonColor": {
+                "type": "string"
+              },
+              "saveButtonTextColor": {
+                "type": "string"
+              },
+              "topImage": {
+                "type": "string"
+              },
+              "bottomImage": {
+                "type": "string"
+              },
+              "frontPhotoCardList": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/QrWebInfoPhotoTypeForSwagger"
+                }
+              },
+              "nominatedBackPhotoCardList": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/QrWebInfoPhotoTypeForSwagger"
+                }
+              }
+            },
+            "required": [
+              "kioskEventId",
+              "titleImageUrl",
+              "backgroundColor",
+              "textColor",
+              "buttonKeyColor",
+              "buttonTextColor",
+              "topIconColor",
+              "topBackgroundColor",
+              "authNumberBackgroundColor",
+              "authNumberTextColor",
+              "saveButtonColor",
+              "saveButtonTextColor",
+              "topImage",
+              "bottomImage",
+              "frontPhotoCardList",
+              "nominatedBackPhotoCardList"
+            ]
+          },
+          "CreateBackPhotoRequestDto": {
+            "type": "object",
+            "properties": {
+              "file": {
+                "type": "string",
+                "format": "binary"
+              },
+              "nominatedBackPhotoCardId": {
+                "type": "number"
+              },
+              "kioskEventId": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "kioskEventId"
+            ]
+          },
+          "CreateBackPhotoResponseDto": {
+            "type": "object",
+            "properties": {
+              "kioskEventId": {
+                "type": "number"
+              },
+              "backPhotoCardId": {
+                "type": "number"
+              },
+              "nominatedBackPhotoCardId": {
+                "type": "number"
+              },
+              "embeddingProductId": {
+                "type": "number"
+              },
+              "photoAuthNumber": {
+                "type": "string"
+              },
+              "backPhotoCardOriginUrl": {
+                "type": "string"
+              },
+              "formattedBackPhotoCardUrl": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "kioskEventId",
+              "backPhotoCardId",
+              "nominatedBackPhotoCardId",
+              "embeddingProductId",
+              "photoAuthNumber",
+              "backPhotoCardOriginUrl",
+              "formattedBackPhotoCardUrl"
+            ]
+          },
+          "GetOrderListForSwagger": {
+            "type": "object",
+            "properties": {
+              "orderId": {
+                "type": "number"
+              },
+              "kioskEventId": {
+                "type": "number"
+              },
+              "eventName": {
+                "type": "string"
+              },
+              "kioskMachineId": {
+                "type": "number"
+              },
+              "photoAuthNumber": {
+                "type": "string"
+              },
+              "paymentAuthNumber": {
+                "type": "string"
+              },
+              "amount": {
+                "type": "number"
+              },
+              "completedAt": {
+                "format": "date-time",
+                "type": "string"
+              },
+              "refundedAt": {
+                "format": "date-time",
+                "type": "string"
+              },
+              "orderStatus": {
+                "type": "string",
+                "enum": [
+                  "PENDING",
+                  "FAILED",
+                  "COMPLETED",
+                  "REFUNDED",
+                  "REFUNDED_FAILED"
+                ]
+              },
+              "printedStatus": {
+                "type": "string",
+                "enum": [
+                  "PENDING",
+                  "STARTED",
+                  "COMPLETED",
+                  "FAILED"
+                ]
+              }
+            },
+            "required": [
+              "orderId",
+              "kioskEventId",
+              "eventName",
+              "kioskMachineId",
+              "photoAuthNumber",
+              "paymentAuthNumber",
+              "amount",
+              "completedAt",
+              "refundedAt",
+              "orderStatus",
+              "printedStatus"
+            ]
+          },
+          "PagingTypeForSwagger": {
+            "type": "object",
+            "properties": {
+              "totalCount": {
+                "type": "number"
+              },
+              "pageSize": {
+                "type": "number"
+              },
+              "currentPage": {
+                "type": "number"
+              },
+              "canNext": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "totalCount",
+              "pageSize",
+              "currentPage",
+              "canNext"
+            ]
+          },
+          "GetOrderListByPageResponseDto": {
+            "type": "object",
+            "properties": {
+              "list": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/GetOrderListForSwagger"
+                }
+              },
+              "paging": {
+                "$ref": "#/components/schemas/PagingTypeForSwagger"
+              }
+            },
+            "required": [
+              "list",
+              "paging"
+            ]
+          },
+          "CreateOrderRequestBody": {
+            "type": "object",
+            "properties": {
+              "kioskEventId": {
+                "type": "number"
+              },
+              "kioskMachineId": {
+                "type": "number"
+              },
+              "photoAuthNumber": {
+                "type": "string"
+              },
+              "amount": {
+                "type": "number"
+              },
+              "tradeNumber": {
+                "type": "string"
+              },
+              "uniqueNumber": {
+                "type": "string"
+              },
+              "paymentType": {
+                "type": "string",
+                "enum": [
+                  "CARD"
+                ]
+              }
+            },
+            "required": [
+              "kioskEventId",
+              "kioskMachineId",
+              "photoAuthNumber",
+              "amount",
+              "paymentType"
+            ]
+          },
+          "CreateOrderResponseDto": {
+            "type": "object",
+            "properties": {
+              "orderId": {
+                "type": "number"
+              },
+              "kioskEventId": {
+                "type": "number"
+              },
+              "kioskMachineId": {
+                "type": "number"
+              },
+              "backPhotoCardId": {
+                "type": "number"
+              },
+              "amount": {
+                "type": "number"
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "PENDING",
+                  "FAILED",
+                  "COMPLETED",
+                  "REFUNDED",
+                  "REFUNDED_FAILED"
+                ]
+              },
+              "paymentType": {
+                "type": "string",
+                "enum": [
+                  "CARD"
+                ]
+              }
+            },
+            "required": [
+              "orderId",
+              "kioskEventId",
+              "kioskMachineId",
+              "backPhotoCardId",
+              "amount",
+              "status",
+              "paymentType"
+            ]
+          },
+          "UpdateOrderRequestBody": {
+            "type": "object",
+            "properties": {
+              "kioskEventId": {
+                "type": "number"
+              },
+              "kioskMachineId": {
+                "type": "number"
+              },
+              "photoAuthNumber": {
+                "type": "string"
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "PENDING",
+                  "FAILED",
+                  "COMPLETED",
+                  "REFUNDED",
+                  "REFUNDED_FAILED"
+                ]
+              },
+              "amount": {
+                "type": "number"
+              },
+              "purchaseAuthNumber": {
+                "type": "string"
+              },
+              "tradeNumber": {
+                "type": "string"
+              },
+              "uniqueNumber": {
+                "type": "string"
+              },
+              "authSeqNumber": {
+                "type": "string"
+              },
+              "approvalNumber": {
+                "type": "string"
+              },
+              "detail": {
+                "type": "object"
+              }
+            },
+            "required": [
+              "kioskEventId",
+              "kioskMachineId",
+              "photoAuthNumber",
+              "status",
+              "amount",
+              "purchaseAuthNumber",
+              "authSeqNumber",
+              "approvalNumber",
+              "detail"
+            ]
+          },
+          "BackPhotoForPrintTypeForSwagger": {
+            "type": "object",
+            "properties": {
+              "backPhotoCardId": {
+                "type": "number"
+              },
+              "nominatedBackPhotoCardId": {
+                "type": "number"
+              },
+              "kioskEventId": {
+                "type": "number"
+              },
+              "embeddingProductId": {
+                "type": "number"
+              },
+              "photoAuthNumber": {
+                "type": "string"
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "PENDING",
+                  "STARTED",
+                  "COMPLETED",
+                  "FAILED",
+                  "REFUNDED_AFTER_PRINTED",
+                  "REFUNDED_BEFORE_PRINTED",
+                  "REFUNDED_FAILED_AFTER_PRINTED",
+                  "REFUNDED_FAILED_BEFORE_PRINTED"
+                ]
+              },
+              "formattedImageUrl": {
+                "type": "string"
+              },
+              "versionCode": {
+                "type": "number"
+              },
+              "countryCode": {
+                "type": "number"
+              },
+              "industryCode": {
+                "type": "number"
+              },
+              "customerCode": {
+                "type": "number"
+              },
+              "projectCode": {
+                "type": "number"
+              },
+              "productCode": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "backPhotoCardId",
+              "nominatedBackPhotoCardId",
+              "kioskEventId",
+              "embeddingProductId",
+              "photoAuthNumber",
+              "status",
+              "formattedImageUrl",
+              "versionCode",
+              "countryCode",
+              "industryCode",
+              "customerCode",
+              "projectCode",
+              "productCode"
+            ]
+          },
+          "UpdateOrderResponseDto": {
+            "type": "object",
+            "properties": {
+              "orderId": {
+                "type": "number"
+              },
+              "kioskEventId": {
+                "type": "number"
+              },
+              "kioskMachineId": {
+                "type": "number"
+              },
+              "amount": {
+                "type": "number"
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "PENDING",
+                  "FAILED",
+                  "COMPLETED",
+                  "REFUNDED",
+                  "REFUNDED_FAILED"
+                ]
+              },
+              "paymentType": {
+                "type": "string",
+                "enum": [
+                  "CARD"
+                ]
+              },
+              "kioskPaymentRecordId": {
+                "type": "number"
+              },
+              "backPhotoForPrint": {
+                "$ref": "#/components/schemas/BackPhotoForPrintTypeForSwagger"
+              }
+            },
+            "required": [
+              "orderId",
+              "kioskEventId",
+              "kioskMachineId",
+              "amount",
+              "status",
+              "paymentType",
+              "kioskPaymentRecordId",
+              "backPhotoForPrint"
+            ]
+          },
+          "CreatePrintRequestBody": {
+            "type": "object",
+            "properties": {
+              "kioskMachineId": {
+                "type": "number"
+              },
+              "kioskEventId": {
+                "type": "number"
+              },
+              "frontPhotoCardId": {
+                "type": "number"
+              },
+              "backPhotoCardId": {
+                "type": "number"
+              },
+              "file": {
+                "type": "string",
+                "format": "binary"
+              }
+            },
+            "required": [
+              "kioskMachineId",
+              "kioskEventId",
+              "frontPhotoCardId",
+              "backPhotoCardId"
+            ]
+          },
+          "CreatePrintResponseDto": {
+            "type": "object",
+            "properties": {
+              "kioskEventId": {
+                "type": "number"
+              },
+              "backPhotoId": {
+                "type": "number"
+              },
+              "printedPhotoCardId": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "kioskEventId",
+              "backPhotoId",
+              "printedPhotoCardId"
+            ]
+          },
+          "UpdatePrintRequestBody": {
+            "type": "object",
+            "properties": {
+              "kioskMachineId": {
+                "type": "number"
+              },
+              "kioskEventId": {
+                "type": "number"
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "PENDING",
+                  "STARTED",
+                  "COMPLETED",
+                  "FAILED",
+                  "REFUNDED_AFTER_PRINTED",
+                  "REFUNDED_BEFORE_PRINTED",
+                  "REFUNDED_FAILED_AFTER_PRINTED",
+                  "REFUNDED_FAILED_BEFORE_PRINTED"
+                ]
+              }
+            },
+            "required": [
+              "kioskMachineId",
+              "kioskEventId",
+              "status"
+            ]
+          },
+          "UpdatePrintResponseDto": {
+            "type": "object",
+            "properties": {
+              "printedPhotoCardId": {
+                "type": "number"
+              },
+              "kioskEventId": {
+                "type": "number"
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "PENDING",
+                  "STARTED",
+                  "COMPLETED",
+                  "FAILED",
+                  "REFUNDED_AFTER_PRINTED",
+                  "REFUNDED_BEFORE_PRINTED",
+                  "REFUNDED_FAILED_AFTER_PRINTED",
+                  "REFUNDED_FAILED_BEFORE_PRINTED"
+                ]
+              }
+            },
+            "required": [
+              "printedPhotoCardId",
+              "kioskEventId",
+              "status"
+            ]
+          }
+        }
+      }
+    },
+    "customOptions": {
+      "tagsSorter": "alpha",
+      "operationsSorter": "conventional"
+    }
+  }
