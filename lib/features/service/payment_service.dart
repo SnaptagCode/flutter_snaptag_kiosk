@@ -8,40 +8,39 @@ class PaymentService extends _$PaymentService {
   @override
   FutureOr<void> build() => null;
 
+  // UseCase를 read()하여 주입
+  late final PaymentUseCase _paymentUseCase = PaymentUseCase(ref: ref);
+
+  /// 기존 processPayment() -> UseCase 호출
   Future<void> processPayment() async {
     try {
-      // 1. 사전 검증
       final settings = ref.read(kioskInfoServiceProvider);
       final backPhoto = ref.watch(verifyPhotoCardProvider).value;
 
-      if (settings == null) {
-        throw Exception('No kiosk settings available');
+      if (settings == null || backPhoto == null) {
+        throw Exception('No kiosk settings or back photo');
       }
-      if (backPhoto == null) {
-        throw Exception('No back photo available');
+      final amount = settings.photoCardPrice;
+
+      // UseCase 호출
+      final result = await _paymentUseCase.processPayment(
+        kioskEventId: settings.kioskEventId,
+        kioskMachineId: settings.kioskMachineId,
+        photoAuthNumber: backPhoto.photoAuthNumber,
+        amount: amount,
+      );
+
+      // 1) PaymentResponse를 스테이트에 반영 (ex: UI에서 결제승인 정보 활용)
+      ref.read(paymentResponseStateProvider.notifier).update(result.$1);
+      // 2) UpdateOrderResponse를 통해 backPhotoForPrint가 있으면 저장
+      ref.read(updateOrderInfoProvider.notifier).update(result.$2);
+
+      if (result.$2.status == OrderStatus.completed && result.$2.backPhotoForPrint != null) {
+        ref.read(backPhotoForPrintInfoProvider.notifier).update(result.$2.backPhotoForPrint!);
       }
-
-      // 2. 주문 생성
-      final orderResponse = await _createOrder();
-      ref.read(createOrderInfoProvider.notifier).update(orderResponse);
-
-      // 3. 결제 승인
-      final price = ref.read(kioskInfoServiceProvider)!.photoCardPrice;
-      final paymentResponse = await ref.read(paymentRepositoryProvider).approve(
-            totalAmount: price,
-          );
-
-      ref.read(paymentResponseStateProvider.notifier).update(paymentResponse);
     } catch (e) {
       logger.e('Payment process failed', error: e);
       rethrow;
-    } finally {
-      final response = await _updateOrder();
-      ref.read(updateOrderInfoProvider.notifier).update(response);
-      // 5. 프린트 정보 업데이트 (completed 상태일 때만)
-      if (response.status == OrderStatus.completed && response.backPhotoForPrint != null) {
-        ref.read(backPhotoForPrintInfoProvider.notifier).update(response.backPhotoForPrint!);
-      }
     }
   }
 
@@ -49,65 +48,26 @@ class PaymentService extends _$PaymentService {
     try {
       final approvalInfo = ref.read(paymentResponseStateProvider);
       if (approvalInfo == null) {
-        throw Exception('No payment approval info available');
+        throw Exception('No payment approval info');
       }
-      final price = ref.read(kioskInfoServiceProvider)!.photoCardPrice;
-      final paymentResponse = await ref.read(paymentRepositoryProvider).cancel(
-            totalAmount: price,
-            originalApprovalNo: approvalInfo.approvalNo ?? '',
-            originalApprovalDate: approvalInfo.tradeTime?.substring(0, 6) ?? '',
-          );
-      logger.i(
-          'respCode: ${approvalInfo.respCode} \trespCode: ${approvalInfo.respCode} \nORDER STATUS: ${approvalInfo.orderState}');
-      ref.read(paymentResponseStateProvider.notifier).update(paymentResponse);
-    } catch (e) {
-      logger.e('Refund failed', error: e);
-      rethrow;
-    } finally {
-      await _updateOrder();
-    }
-  }
-
-  Future<CreateOrderResponse> _createOrder() async {
-    final settings = ref.read(kioskInfoServiceProvider);
-    final backPhoto = ref.watch(verifyPhotoCardProvider).value;
-
-    final request = CreateOrderRequest(
-      kioskEventId: settings!.kioskEventId,
-      kioskMachineId: settings.kioskMachineId,
-      photoAuthNumber: backPhoto?.photoAuthNumber ?? '',
-      amount: settings.photoCardPrice,
-      paymentType: PaymentType.card,
-    );
-
-    return await ref.read(kioskRepositoryProvider).createOrderStatus(request);
-  }
-
-  Future<UpdateOrderResponse> _updateOrder() async {
-    try {
       final settings = ref.read(kioskInfoServiceProvider);
-      final backPhoto = ref.watch(verifyPhotoCardProvider).value;
-      final approval = ref.watch(paymentResponseStateProvider);
-      final orderId = ref.watch(createOrderInfoProvider)?.orderId;
-      if (orderId == null) {
-        throw Exception('No order id available');
+      final orderId = ref.read(createOrderInfoProvider)?.orderId;
+      if (settings == null || orderId == null) {
+        throw Exception('No kiosk settings or order info');
       }
-      logger.i(
-          'respCode: ${approval?.respCode} \trespCode: ${approval?.respCode} \nORDER STATUS: ${approval?.orderState}');
-      final request = UpdateOrderRequest(
-        kioskEventId: settings!.kioskEventId,
+
+      final response = await _paymentUseCase.refundPayment(
+        kioskEventId: settings.kioskEventId,
         kioskMachineId: settings.kioskMachineId,
-        photoAuthNumber: backPhoto?.photoAuthNumber ?? '-',
         amount: settings.photoCardPrice,
-        status: approval?.orderState ?? OrderStatus.failed,
-        approvalNumber: approval?.approvalNo ?? '-',
-        purchaseAuthNumber: approval?.approvalNo ?? '-',
-        authSeqNumber: approval?.approvalNo ?? '-',
-        detail: approval?.KSNET ?? '{}',
+        originalApprovalNo: approvalInfo.approvalNo ?? '',
+        originalApprovalDate: approvalInfo.tradeTime?.substring(0, 6) ?? '',
+        orderId: orderId.toInt(),
       );
 
-      return await ref.read(kioskRepositoryProvider).updateOrderStatus(orderId.toInt(), request);
+      ref.read(paymentResponseStateProvider.notifier).update(response);
     } catch (e) {
+      logger.e('Refund failed', error: e);
       rethrow;
     }
   }
