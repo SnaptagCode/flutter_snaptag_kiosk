@@ -4,8 +4,8 @@ import 'dart:typed_data';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_snaptag_kiosk/features/core/printer/card_printer.dart';
-import 'package:flutter_snaptag_kiosk/features/move_me/providers/front_photo_list.dart';
+import 'package:flutter_snaptag_kiosk/features/presentation/providers/front_photo_list.dart';
+import 'package:flutter_snaptag_kiosk/infrastructure/printer/card_printer.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'print_test_widget.g.dart';

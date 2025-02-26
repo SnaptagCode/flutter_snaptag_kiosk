@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_snaptag_kiosk/features/move_me/screens/global_shell.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:go_router/go_router.dart';
 

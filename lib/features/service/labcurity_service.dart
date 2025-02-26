@@ -8,7 +8,7 @@ import 'package:intl/intl.dart';
 import 'package:path/path.dart' as path;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import 'labcurity_library.dart';
+import '../../infrastructure/labcurity/labcurity_library.dart';
 
 part 'labcurity_service.g.dart';
 
