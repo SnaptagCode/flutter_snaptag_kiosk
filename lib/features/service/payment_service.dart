@@ -14,6 +14,8 @@ class PaymentService extends _$PaymentService {
   /// 기존 processPayment() -> UseCase 호출
   Future<void> processPayment() async {
     try {
+      ref.invalidate(paymentResponseStateProvider);
+      ref.invalidate(backPhotoForPrintInfoProvider);
       final settings = ref.read(kioskInfoServiceProvider);
       final backPhoto = ref.watch(verifyPhotoCardProvider).value;
 
