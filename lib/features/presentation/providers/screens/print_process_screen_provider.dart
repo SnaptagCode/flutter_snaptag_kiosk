@@ -8,7 +8,7 @@ class PrintProcessScreenProvider extends _$PrintProcessScreenProvider {
   @override
   FutureOr<void> build() async {
     try {
-      await ref.read(printServiceProvider.notifier).print();
+      await ref.read(printServiceProvider.notifier).printCard();
     } catch (e) {
       rethrow;
     }

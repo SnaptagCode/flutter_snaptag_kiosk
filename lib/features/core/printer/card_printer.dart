@@ -2,6 +2,7 @@ import 'dart:ffi' as ffi; // ffi 임포트 확인
 import 'dart:io';
 
 import 'package:ffi/ffi.dart'; // Utf8 사용을 위한 임포트
+import 'package:flutter/foundation.dart';
 import 'package:flutter_snaptag_kiosk/core/utils/logger_service.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -61,6 +62,8 @@ class PrinterService extends _$PrinterService {
       if (!hasCard) {
         throw Exception('Card feeder is empty');
       }
+
+      // compute(, 'message');
 
       logger.i('1. Checking card position...');
       final hasCardInPrinter = _bindings.checkCardPosition();

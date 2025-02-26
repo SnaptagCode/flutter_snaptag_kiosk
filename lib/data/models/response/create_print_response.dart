@@ -9,6 +9,7 @@ class CreatePrintResponse with _$CreatePrintResponse {
     required int kioskEventId,
     required int backPhotoId,
     required int printedPhotoCardId,
+    required String formattedImageUrl,
   }) = _CreatePrintResponse;
 
   factory CreatePrintResponse.fromJson(Map<String, dynamic> json) => _$CreatePrintResponseFromJson(json);
