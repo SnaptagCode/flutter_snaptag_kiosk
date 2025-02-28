@@ -86,7 +86,7 @@ class PrinterBindings {
   }
 
   // 카드 위치 확인 함수
-  bool checkCardPosition() {
+  bool checkCardPosition(void _) {
     final flag = calloc<Uint8>();
     try {
       final result = _isPrtHaveCard(flag);
@@ -159,11 +159,17 @@ class PrinterBindings {
   }
 
   // 카드 투입 함수
-  void injectCard() {
+  void injectCard(void _) {
     final result = _cardInject(0); // 0: 기본 위치
     if (result != 0) {
       throw Exception('Failed to inject card');
     }
+  }
+
+  Future<void> asyncPrintCard(Map<String, dynamic> data) async {
+    String frontImageInfo = data['frontImageInfo'] as String;
+    String? backImageInfo = data['backImageInfo'] as String?;
+    printCard(frontImageInfo: frontImageInfo, backImageInfo: backImageInfo);
   }
 
   // 인쇄 함수
@@ -187,7 +193,7 @@ class PrinterBindings {
   }
 
   // 카드 배출 함수
-  void ejectCard() {
+  void ejectCard(void _) {
     final result = _cardEject(0); // 0: 왼쪽으로 배출
     if (result != 0) {
       throw Exception('Failed to eject card');
@@ -452,7 +458,7 @@ class PrinterBindings {
     }
   }
 
-  bool checkFeederStatus() {
+  bool checkFeederStatus(void _) {
     final feederStatusPtr = calloc<Int32>();
     try {
       final result = _isFeederNoEmpty(feederStatusPtr);

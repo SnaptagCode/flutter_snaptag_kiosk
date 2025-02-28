@@ -58,7 +58,7 @@ class PrinterService extends _$PrinterService {
       state = const AsyncValue.loading();
       // 피더 상태 체크 추가
       logger.i('Checking feeder status...');
-      final hasCard = _bindings.checkFeederStatus();
+      final hasCard = await compute(_bindings.checkFeederStatus, null);
       if (!hasCard) {
         throw Exception('Card feeder is empty');
       }
@@ -66,17 +66,24 @@ class PrinterService extends _$PrinterService {
       // compute(, 'message');
 
       logger.i('1. Checking card position...');
-      final hasCardInPrinter = _bindings.checkCardPosition();
+      final hasCardInPrinter = await compute(_bindings.checkCardPosition, null);
       if (hasCardInPrinter) {
         logger.i('Card found, ejecting...');
-        _bindings.ejectCard();
+        await compute(_bindings.ejectCard, null);
       }
 
       logger.i('2. Preparing front canvas...');
       final frontBuffer = StringBuffer();
 
       try {
-        await _prepareAndDrawImage(frontBuffer, frontFile.path, true);
+        final result = await compute(
+          _asyncPrepareAndDrawImage,
+          {
+            'imagePath': frontFile.path,
+            'isFront': true,
+          },
+        );
+        frontBuffer.write(result);
       } catch (e, stack) {
         logger.i('Error in front canvas preparation: $e\nStack: $stack');
         throw Exception('Failed to prepare front canvas: $e');
@@ -97,7 +104,14 @@ class PrinterService extends _$PrinterService {
         rearBuffer = StringBuffer();
 
         try {
-          await _prepareAndDrawImage(rearBuffer, rotatedRearPath, false);
+          String result = await compute(
+            _asyncPrepareAndDrawImage,
+            {
+              'imagePath': rotatedRearPath,
+              'isFront': false,
+            },
+          );
+          rearBuffer.write(result);
         } catch (e, stack) {
           logger.i('Error in rear canvas preparation: $e\nStack: $stack');
           throw Exception('Failed to prepare rear canvas: $e');
@@ -109,23 +123,29 @@ class PrinterService extends _$PrinterService {
       }
 
       logger.i('5. Injecting card...');
-      _bindings.injectCard();
+      await compute(_bindings.injectCard, null);
 
       logger.i('6. Printing card...');
-      _bindings.printCard(
-        frontImageInfo: frontBuffer.toString(),
-        backImageInfo: rearBuffer.toString(),
-      );
+      await compute(_bindings.asyncPrintCard, {
+        'frontImageInfo': frontBuffer.toString(),
+        'backImageInfo': rearBuffer.toString(),
+      });
 
       logger.i('7. Ejecting card...');
-      _bindings.ejectCard();
+      await compute(_bindings.ejectCard, null);
     } catch (e, stack) {
       logger.i('Print error: $e\nStack: $stack');
       rethrow;
     }
   }
 
-  Future<void> _prepareAndDrawImage(StringBuffer buffer, String imagePath, bool isFront) async {
+  Future<String> _asyncPrepareAndDrawImage(Map<String, dynamic> data) async {
+    String imagePath = data['imagePath'] as String;
+    bool isFront = data['isFront'] as bool;
+    return await _prepareAndDrawImage(imagePath, isFront);
+  }
+
+  Future<String> _prepareAndDrawImage(String imagePath, bool isFront) async {
     _bindings.setCanvasOrientation(true);
     _bindings.prepareCanvas(isColor: true);
 
@@ -150,7 +170,7 @@ class PrinterService extends _$PrinterService {
     );
 
     logger.i('Committing canvas...');
-    buffer.write(_commitCanvas());
+    return _commitCanvas();
   }
 
   // 프린터 상태 모니터링 메서드 추가
