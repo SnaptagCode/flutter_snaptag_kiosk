@@ -14,7 +14,6 @@ class UpdateOrderResponse with _$UpdateOrderResponse {
     required OrderStatus status,
     required PaymentType paymentType,
     required int kioskPaymentRecordId,
-    required BackPhotoForPrint? backPhotoForPrint,
   }) = _UpdateOrderResponse;
 
   factory UpdateOrderResponse.fromJson(Map<String, dynamic> json) => _$UpdateOrderResponseFromJson(json);

@@ -92,13 +92,7 @@ class _KioskRepository {
     required CreatePrintRequest request,
   }) async {
     try {
-      return await _apiClient.createPrint(
-        kioskMachineId: request.kioskMachineId,
-        kioskEventId: request.kioskEventId,
-        frontPhotoCardId: request.frontPhotoCardId,
-        backPhotoCardId: request.backPhotoCardId,
-        file: request.file,
-      );
+      return await _apiClient.createPrint(body: request.toJson());
     } catch (e) {
       rethrow;
     }

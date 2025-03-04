@@ -12,7 +12,6 @@ class CreatePrintRequest with _$CreatePrintRequest {
     required int kioskEventId,
     required int frontPhotoCardId,
     required int backPhotoCardId,
-    @JsonKey(includeToJson: false, includeFromJson: false) File? file,
   }) = _CreatePrintRequest;
   factory CreatePrintRequest.fromJson(Map<String, dynamic> json) => _$CreatePrintRequestFromJson(json);
 }

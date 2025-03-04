@@ -49,13 +49,8 @@ abstract class KioskApiClient {
   });
 
   @POST('/v1/print')
-  @MultiPart()
   Future<CreatePrintResponse> createPrint({
-    @Part(name: 'kioskMachineId') required int kioskMachineId,
-    @Part(name: 'kioskEventId') required int kioskEventId,
-    @Part(name: 'frontPhotoCardId') required int frontPhotoCardId,
-    @Part(name: 'backPhotoCardId') required int backPhotoCardId,
-    @Part(name: 'file') File? file,
+    @Body() required Map<String, dynamic> body,
   });
 
   @PATCH('/v1/print/{printedPhotoCardId}')
