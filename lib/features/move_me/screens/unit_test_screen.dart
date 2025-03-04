@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_snaptag_kiosk/features/move_me/widgets/pager_print_type_toggle.dart';
+import 'package:flutter_snaptag_kiosk/features/move_me/widgets/save_qr_image_button.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_svg/svg.dart';
 
@@ -33,6 +34,8 @@ class _UnitTestScreenState extends ConsumerState<UnitTestScreen> {
           children: [
             Text('양면 / 단면 설정', style: Theme.of(context).textTheme.headlineSmall),
             PagerPrintTypeToggle(),
+            Text('QR 이미지 저장', style: Theme.of(context).textTheme.headlineSmall),
+            SaveQrImageButton(),
             Text('프론트 이미지', style: Theme.of(context).textTheme.headlineSmall),
             FrontImagesAction(),
             Text('결제 테스트', style: Theme.of(context).textTheme.headlineSmall),
