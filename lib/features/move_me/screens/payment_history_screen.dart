@@ -84,7 +84,10 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
                   fontSize: 16.sp,
                 ),
                 columns: columns,
-                rows: response.list.map((order) {
+                rows: response.list
+                    .where((order) => order.kioskMachineId == ref.read(kioskInfoServiceProvider)?.kioskMachineId)
+                    .toList()
+                    .map((order) {
                   return DataRow(
                     color: WidgetStateColor.resolveWith((states) => Colors.white),
                     cells: [
