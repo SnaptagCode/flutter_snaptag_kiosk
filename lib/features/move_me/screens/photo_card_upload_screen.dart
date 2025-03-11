@@ -58,9 +58,8 @@ class PhotoCardUploadScreen extends ConsumerWidget {
           ),
           onPressed: () async {
             await SoundManager().playSound();
-
-            ;
-            CodeVerificationRouteData().go(context);
+            PrintProcessRouteData().go(context);
+            // CodeVerificationRouteData().go(context);
           },
         ),
       ],
