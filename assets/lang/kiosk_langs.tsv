@@ -14,6 +14,7 @@ sub02_txt_01	포토카드 이미지를 확인해 주세요.	フォトカード�
 sub02_btn_pay	결제하기	決済する	Pay Now	立即支付
 sub03_txt_01	포토카드를 출력 중입니다. 잠시만 기다려 주세요.	フォトカードを出力中です。 少々お待ちください.	The photo card is being printed. Please wait a moment.	照片卡正在打印中。请稍候。
 sub03_txt_02	카드가 출력되기까지 약 1분 정도의 시간이 소요됩니다.	カードが出力されるまで約1分程度の時間がかかります。	It takes about 1 minute for the card to print.	卡片打印大约需要1分钟。
+sub03_txt_03	출력 중에 카드를 빼지 마세요.	出力中にカードを抜かないでください。	Do not remove the card while printing.	打印过程中请勿取出卡片。
 alert_title_print_complete	출력 완료	出力完了	Print Completed	打印完成
 alert_txt_print_complete	포토카드 출력이 완료되었습니다.\r\n아래 포토카드 받는 곳에서 카드를 받아 가세요.\r\n감사합니다.	フォトカードの出力が完了しました。\r\n下のフォトカード\r\nを受け取るところからカードを受け取ってください。\r\nありがとうございます。	Your photo card has been printed!\r\nPlease check the output tray below.\r\nThank you!	您的照片卡已打印！\r\n请检查下面的输出托盘。\r\n谢谢！
 alert_btn_print_complete	확인	確認	OK	确定
