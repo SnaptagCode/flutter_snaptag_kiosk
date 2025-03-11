@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_snaptag_kiosk/core/constants/image_paths.dart';
 import 'package:flutter_snaptag_kiosk/features/core/printer/card_printer.dart';
 import 'package:flutter_snaptag_kiosk/features/move_me/providers/front_photo_list.dart';
 import 'package:flutter_snaptag_kiosk/features/move_me/providers/page_print_provider.dart';
@@ -92,6 +93,25 @@ class PrintTestWidget extends ConsumerWidget {
     final canPrint = pagePrintType == PagePrintType.double
         ? processedImages.frontFile != null && processedImages.backImage != null && !printerState.isLoading
         : processedImages.frontFile != null && !printerState.isLoading;
+
+    // ref.listen(printerServiceProvider, (previous, next) async {
+    //   if (next.isLoading) {
+    //     _showLoadingDialog(context);
+    //   } else {
+    //     if (Navigator.canPop(context)) {
+    //       Navigator.of(context, rootNavigator: true).pop();
+    //     }
+    //   }
+
+    //   if (next.hasError) {
+    //     ScaffoldMessenger.of(context).showSnackBar(
+    //       SnackBar(
+    //         content: Text('프린터 오류: ${next.error.toString()}'),
+    //         backgroundColor: Colors.red,
+    //       ),
+    //     );
+    //   }
+    // });
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -203,6 +223,29 @@ class PrintTestWidget extends ConsumerWidget {
           ],
         ),
       ],
+    );
+  }
+
+  void _showLoadingDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => Dialog(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Image.asset(
+                SnaptagImages.printLoading,
+                fit: BoxFit.fill,
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
