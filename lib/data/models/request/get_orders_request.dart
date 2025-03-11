@@ -8,6 +8,7 @@ class GetOrdersRequest with _$GetOrdersRequest {
   const factory GetOrdersRequest({
     required int pageSize,
     required int currentPage,
+    int? kioskMachineId,
   }) = _GetOrdersRequest;
 
   factory GetOrdersRequest.fromJson(Map<String, dynamic> json) => _$GetOrdersRequestFromJson(json);

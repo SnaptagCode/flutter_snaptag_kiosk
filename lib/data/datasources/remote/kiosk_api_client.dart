@@ -35,6 +35,7 @@ abstract class KioskApiClient {
   Future<OrderListResponse> getOrders({
     @Query('pageSize') required int pageSize,
     @Query('currentPage') required int currentPage,
+    @Query('kioskMachineId') int? kioskMachineId,
   });
 
   @POST('/v1/order')
