@@ -66,25 +66,34 @@ class KioskShell extends ConsumerWidget {
                           fit: BoxFit.cover,
                         ),
                 ),
-                child: Column(
+                child: Stack(
                   children: [
-                    // 앱바 영역
-                    SizedBox(
-                      height: 70.h,
-                      child: Row(
-                        children: [
-                          const Spacer(),
-                          KioskNavigatorButton(),
-                          SizedBox(width: 30.w),
-                        ],
+                    if (ref.watch(printProcessScreenProviderProvider).isLoading)
+                      Image.asset(
+                        SnaptagImages.printLoadingGIF,
+                        fit: BoxFit.fill,
                       ),
-                    ),
-                    SizedBox(
-                      height: 230.h,
-                    ),
-                    // 실제 콘텐츠
-                    Expanded(
-                      child: child,
+                    Column(
+                      children: [
+                        // 앱바 영역
+                        SizedBox(
+                          height: 70.h,
+                          child: Row(
+                            children: [
+                              const Spacer(),
+                              KioskNavigatorButton(),
+                              SizedBox(width: 30.w),
+                            ],
+                          ),
+                        ),
+                        SizedBox(
+                          height: 230.h,
+                        ),
+                        // 실제 콘텐츠
+                        Expanded(
+                          child: child,
+                        ),
+                      ],
                     ),
                   ],
                 ),
