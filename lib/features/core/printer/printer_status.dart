@@ -1,4 +1,5 @@
 class PrinterStatus {
+  final int machineId;
   final int mainCode;
   final int subCode;
   final int mainStatus;
@@ -10,6 +11,7 @@ class PrinterStatus {
   final int subStatus;
 
   const PrinterStatus({
+    required this.machineId,
     required this.mainCode,
     required this.subCode,
     required this.mainStatus,

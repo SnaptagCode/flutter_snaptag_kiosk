@@ -1,10 +1,12 @@
+import 'dart:ffi';
 import 'dart:io';
 import 'dart:ffi' as ffi; // ffi 임포트 확인
 import 'dart:isolate';
 import 'package:ffi/ffi.dart'; // Utf8 사용을 위한 임포트
-import 'package:flutter_snaptag_kiosk/core/utils/logger_service.dart';
 import 'package:flutter_snaptag_kiosk/features/core/printer/print_path.dart';
-import 'package:flutter_snaptag_kiosk/features/core/printer/printer_bindings.dart';
+import 'package:flutter_snaptag_kiosk/features/core/printer/printer_log.dart';
+import 'package:flutter_snaptag_kiosk/features/core/printer/ribbon_status.dart';
+import 'package:flutter_snaptag_kiosk/lib.dart';
 
 class PrinterIso {
   late final PrinterBindings _bindings;
@@ -63,9 +65,9 @@ class PrinterIso {
       final sendPort = await receivePort.first as SendPort;
       final responsePort = ReceivePort();
 
-      await responsePort.first;
-
       sendPort.send(PrintPath(frontPath: frontPath, backPath: rotatedRearPath));
+
+      await responsePort.first;
     } catch (e, stack) {
       logger.i('Print error: $e\nStack: $stack');
       rethrow;
@@ -206,5 +208,128 @@ class PrinterIso {
       calloc.free(strPtr);
       calloc.free(lenPtr);
     }
+  }
+
+  PrinterLog getPrinterLogData(int machineId, String? msg) {
+    final printerStatus = getPrinterStatus(machineId);
+    final ribbonStatus = getRbnAndFilmRemaining();
+    final isPrintingNow = checkCardPosition();
+    final isFeederEmpty = !checkFeederStatus();
+
+    return PrinterLog(
+        printerStatus: printerStatus,
+        ribbonStatus: ribbonStatus,
+        isPrintingNow: isPrintingNow,
+        isFeederEmpty: isFeederEmpty);
+  }
+
+  PrinterStatus? getPrinterStatus(int machineId) {
+    final status = _bindings.getPrinterStatus(machineId);
+
+    if (status != null) {
+      logger.i(
+          'Printer mainCode: ${status.mainCode}, subCode: ${status.subCode}, mainStatus: ${status.mainStatus}, errorStatus: ${status.errorStatus}, warningStatus: ${status.warningStatus}, chassisTemperature: ${status.chassisTemperature}, printHeadTemperature: ${status.printHeadTemperature}, heaterTemperature: ${status.heaterTemperature}, subStatus: ${status.subStatus}');
+    }
+    return status;
+  }
+
+  RibbonStatus? getRbnAndFilmRemaining() {
+    final status = _bindings.getRbnAndFilmRemaining();
+    logger.i("Printer ribbonRemaining: ${status?.rbnRemaining}, filmRemaining: ${status?.filmRemaining}");
+    return status;
+  }
+
+  bool checkCardPosition() {
+    final status = _bindings.checkCardPosition();
+    logger.i('Printer checkCardPosition: 카드 ${status == true ? "있음" : "없음"}');
+
+    return status;
+  }
+
+  bool checkFeederStatus() {
+    final status = _bindings.checkFeederStatus();
+    logger.i('Printer checkFeederStatus: 카드 공급기 ${status == true ? "있음" : "없음"}');
+    return status;
+  }
+
+  void getConnectPrintList() {
+    final result = _bindings.enumUsbPrinter();
+    logger.i('Printer getConnectPrintList: ${result.join(', ')}');
+  }
+
+  void ejectCard() {
+    try {
+      _bindings.ejectCard();
+      logger.i('Printer ejectCard');
+    } catch (e) {
+      logger.i('Printer ejectCard error: $e');
+    }
+  }
+
+  Future<void> printFrontImage({
+    required File? frontFile,
+    required File? embeddedFile,
+  }) async {
+    try {
+      if (frontFile == null && embeddedFile == null) {
+        throw Exception('There is nothing to print');
+      }
+
+      String? frontPath = frontFile?.path;
+      String? rotatedRearPath;
+
+      if (embeddedFile != null) {
+        rotatedRearPath = await rearImage(file: embeddedFile);
+      }
+
+      final receivePort = ReceivePort();
+      await Isolate.spawn(preDrawFront, receivePort.sendPort);
+
+      final sendPort = await receivePort.first as SendPort;
+      final responsePort = ReceivePort();
+
+      sendPort.send(PrintPath(frontPath: frontPath, backPath: rotatedRearPath));
+
+      await responsePort.first;
+    } catch (e, stack) {
+      logger.i('Print error: $e\nStack: $stack');
+      rethrow;
+    }
+  }
+
+  Future<void> preDrawFront(SendPort sendPort) async {
+    final port = ReceivePort();
+    sendPort.send(port.sendPort);
+
+    port.listen((message) async {
+      if (message is PrintPath) {
+        initializePrinter();
+
+        await printInit();
+
+        String? frontImageInfo;
+        String? behindImageInfo;
+
+        if (message.frontPath != null) {
+          frontImageInfo = await drawImage(path: message.frontPath!);
+        }
+
+        // if (message.backPath != null) {
+        //   behindImageInfo = await drawImage(path: message.backPath!);
+        // }
+
+        logger.i('5. Injecting card...');
+        _bindings.injectCard();
+
+        logger.i('6. Printing card...');
+        _bindings.printCard(
+          frontImageInfo: frontImageInfo,
+          backImageInfo: behindImageInfo,
+        );
+
+        logger.i('7. Ejecting card...');
+        _bindings.ejectCard(); // 3번으로 시도 해보기
+      }
+    });
   }
 }
