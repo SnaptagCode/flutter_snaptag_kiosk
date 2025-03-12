@@ -98,6 +98,12 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
             textAlign: TextAlign.center,
             style: context.typography.kioskBody2B,
           ),
+          SizedBox(height: 12.h),
+          Text(
+            LocaleKeys.sub03_txt_03.tr(),
+            textAlign: TextAlign.center,
+            style: context.typography.kioskBody2B,
+          ),
         ],
       ),
     );
