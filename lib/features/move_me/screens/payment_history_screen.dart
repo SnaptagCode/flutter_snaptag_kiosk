@@ -49,6 +49,15 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
           },
         ),
         title: const Text('출력 내역'),
+        actions: [
+          IconButton(
+            padding: EdgeInsets.only(left: 30.w),
+            icon: SvgPicture.asset(SnaptagSvg.home),
+            onPressed: () async {
+              //CodeVerificationRouteData().go(context);
+            },
+          ),
+        ],
       ),
       body: ordersPage.when(
         data: (response) {
