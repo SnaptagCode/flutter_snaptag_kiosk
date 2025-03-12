@@ -258,4 +258,18 @@ class DialogHelper {
       onButtonPressed: onButtonPressed,
     );
   }
+/* Admin 패스워드 실패시 다이얼로그
+  static Future<void> showAdminFailDialog(
+      BuildContext context, {
+        VoidCallback? onButtonPressed,
+      }) async {
+    await _showOneButtonKioskDialog(
+      context,
+      title: '비밀번호 오류',
+      message: '비밀번호를 다시 입력해주세요',
+      buttonText: LocaleKeys.alert_btn_print_complete.tr(),
+      onButtonPressed: onButtonPressed,
+    );
+  }
+ */
 }

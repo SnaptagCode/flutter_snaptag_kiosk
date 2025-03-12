@@ -49,6 +49,7 @@ class KioskInfoScreen extends ConsumerWidget {
                       width: 418.w,
                       height: 600.h,
                       child: AuthCodeKeypad(
+                        mode: ModeType.event,
                         onCompleted: (code) {
                           // 완료 시 실행할 로직
                           print("입력된 코드: $code");

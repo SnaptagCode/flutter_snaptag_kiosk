@@ -4,22 +4,35 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_snaptag_kiosk/core/utils/sound_manager.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 
+enum ModeType {event, admin}
+
 class AuthCodeKeypad extends StatefulWidget {
   const AuthCodeKeypad({
     super.key,
     required this.onCompleted,
+    required this.mode,
   });
 
   /// 코드 입력이 완료되었을 때 실행할 콜백 함수
   final Function(String code) onCompleted;
+  final ModeType mode;
 
   @override
   State<AuthCodeKeypad> createState() => _AuthCodeKeypadState();
 }
 
 class _AuthCodeKeypadState extends State<AuthCodeKeypad> {
-  static const int maxLength = 4; // 최대 입력 가능 길이
+  //static const int maxLength = 4; // 최대 입력 가능 길이
+  late final int maxLength;
   String _code = ''; // 입력된 코드 상태
+  bool _isObscured = false; //비밀번호 가림 설정 - false 도입시 위치 옮기기 필요 todo
+
+  @override
+  void initState(){
+    super.initState();
+    maxLength = (widget.mode == ModeType.admin) ? 6: 4;
+  }
+
 
   /// 숫자 추가
   void _addNumber(String number) {
@@ -58,7 +71,7 @@ class _AuthCodeKeypadState extends State<AuthCodeKeypad> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        _InputDisplay(code: _code, onClear: _clear),
+        _InputDisplay(code: _code, onClear: _clear, isObscured: _isObscured),
         SizedBox(height: 30.h),
         _NumericPad(
           onNumberPressed: _addNumber,
@@ -75,10 +88,12 @@ class _InputDisplay extends StatelessWidget {
   const _InputDisplay({
     required this.code,
     required this.onClear,
+    required this.isObscured,
   });
 
   final String code;
   final VoidCallback onClear;
+  final bool isObscured;
 
   @override
   Widget build(BuildContext context) {
@@ -91,7 +106,7 @@ class _InputDisplay extends StatelessWidget {
         children: [
           Center(
             child: Text(
-              code,
+              isObscured && ModeType.admin == ModeType.admin ? '*' * code.length : code,
               textAlign: TextAlign.center,
               style: context.typography.kioskInput1B.copyWith(color: Colors.black),
             ),
