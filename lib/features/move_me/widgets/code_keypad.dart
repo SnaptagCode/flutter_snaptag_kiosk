@@ -4,8 +4,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_snaptag_kiosk/core/utils/sound_manager.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 
-enum ModeType {event, admin}
-
 class AuthCodeKeypad extends StatefulWidget {
   const AuthCodeKeypad({
     super.key,
