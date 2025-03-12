@@ -37,9 +37,9 @@ class TripleTapFloatingButton extends ConsumerWidget {
             String correctPassword = _generateCurrentTimePin();
 
             if (enteredCode == correctPassword) {
-              SetupMainRouteData().go(context); // ✅ 비밀번호 일치 → 관리자 페이지 이동
+              SetupMainRouteData().go(context);
             } else {
-              //await showAdminFailDialog(context); // ❌ 비밀번호 불일치 → 오류 모달 표시
+              //await showAdminFailDialog(context); //비밀번호 불일치 → 오류 모달 표시
             }
           }
         });
