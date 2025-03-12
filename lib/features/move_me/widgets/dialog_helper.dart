@@ -263,7 +263,7 @@ class DialogHelper {
 
   static Future<String?> showKeypadDialog(
       BuildContext context, {
-        required ModeType mode, // ✅ 이벤트/관리자 모드 설정 가능
+        required ModeType mode,
       }) async {
     return await showDialog<String>(
       context: context,
@@ -282,7 +282,7 @@ class DialogHelper {
               mode: mode,
               onCompleted: (code) {
                 print("입력된 코드: $code");
-                Navigator.pop(context, code); // ✅ 비밀번호 입력 완료 후 다이얼로그 닫기
+                Navigator.pop(context, code);
               },
             ),
           ),
