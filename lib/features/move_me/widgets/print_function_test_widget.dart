@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_snaptag_kiosk/core/core.dart';
 import 'package:flutter_snaptag_kiosk/features/core/printer/printer_iso.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 
@@ -59,12 +58,11 @@ class PrintFunctionTestWidget extends ConsumerWidget {
           ),
           ElevatedButton(
             onPressed: () async {
-              _printerIso.printFrontImage(
-                frontFile: ref.read(processedImageProvider).frontFile,
-                embeddedFile: null,
-              );
+              final machinId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
+              logger.i("machindId: $machinId");
+              _printerIso.getPrinterLogData(machineId: machinId);
             },
-            child: Text('앞면 인쇄'),
+            child: Text('로깅'),
           ),
         ],
       ),

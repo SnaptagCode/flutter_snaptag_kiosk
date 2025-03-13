@@ -1,15 +1,15 @@
 import 'dart:ffi';
 import 'dart:io';
 import 'dart:ffi' as ffi; // ffi 임포트 확인
-import 'dart:isolate';
 import 'package:ffi/ffi.dart'; // Utf8 사용을 위한 임포트
+import 'package:flutter_snaptag_kiosk/core/isolate/isolate_manager.dart';
 import 'package:flutter_snaptag_kiosk/features/core/printer/print_path.dart';
 import 'package:flutter_snaptag_kiosk/features/core/printer/printer_log.dart';
 import 'package:flutter_snaptag_kiosk/features/core/printer/ribbon_status.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 
 class PrinterIso {
-  late final PrinterBindings _bindings;
+  late PrinterBindings _bindings;
 
   Future<void> initializePrinter() async {
     try {
@@ -59,68 +59,105 @@ class PrinterIso {
         rotatedRearPath = await rearImage(file: embeddedFile);
       }
 
-      final receivePort = ReceivePort();
-      await Isolate.spawn(_printImageIsolation, receivePort.sendPort);
+      IsolateManager<PrintPath, void>()
+          .runInIsolate(_printImageIsolate, PrintPath(frontPath: frontPath, backPath: rotatedRearPath));
 
-      final sendPort = await receivePort.first as SendPort;
-      final responsePort = ReceivePort();
+      // final receivePort = ReceivePort();
+      // await Isolate.spawn(_printImageIsolation, receivePort.sendPort);
 
-      sendPort.send(PrintPath(frontPath: frontPath, backPath: rotatedRearPath));
+      // final sendPort = await receivePort.first as SendPort;
+      // final responsePort = ReceivePort();
 
-      await responsePort.first;
+      // sendPort.send(PrintPath(frontPath: frontPath, backPath: rotatedRearPath));
+
+      // await responsePort.first;
     } catch (e, stack) {
       logger.i('Print error: $e\nStack: $stack');
       rethrow;
     }
   }
 
-  Future<void> _printImageIsolation(SendPort sendPort) async {
+  Future<void> _printImageIsolate(PrintPath printPath) async {
     try {
-      final port = ReceivePort();
-      sendPort.send(port.sendPort);
+      initializePrinter();
 
-      port.listen((message) async {
-        if (message is PrintPath) {
-          initializePrinter();
+      printInit();
 
-          await printInit();
+      String? frontImageInfo;
+      String? behindImageInfo;
 
-          String? frontImageInfo;
-          String? behindImageInfo;
+      if (printPath.frontPath != null) {
+        frontImageInfo = await drawImage(path: printPath.frontPath!);
+      }
 
-          if (message.frontPath != null) {
-            frontImageInfo = await drawImage(path: message.frontPath!);
-          }
+      if (printPath.backPath != null) {
+        behindImageInfo = await drawImage(path: printPath.backPath!);
+      }
 
-          if (message.backPath != null) {
-            behindImageInfo = await drawImage(path: message.backPath!);
-          }
+      logger.i('5. Injecting card...');
+      _bindings.injectCard();
 
-          logger.i('5. Injecting card...');
-          _bindings.injectCard();
+      logger.i('6. Printing card...');
+      _bindings.printCard(
+        frontImageInfo: frontImageInfo,
+        backImageInfo: behindImageInfo,
+      );
 
-          logger.i('6. Printing card...');
-          _bindings.printCard(
-            frontImageInfo: frontImageInfo,
-            backImageInfo: behindImageInfo,
-          );
-
-          logger.i('7. Ejecting card...');
-          _bindings.ejectCard();
-
-          sendPort.send(true);
-        }
-      }, onError: (error, stack) {
-        logger.i('_printImageIsolation error: $error\nStack: $stack');
-      }, onDone: () {
-        logger.i('_printImageIsolation done');
-      });
-    } catch (e) {
-      rethrow;
+      logger.i('7. Ejecting card...');
+      _bindings.ejectCard();
+    } catch (error, stack) {
+      logger.i('_printImageIsolation error: $error\nStack: $stack');
     }
   }
 
-  Future<void> printInit() async {
+  // Future<void> _printImageIsolation(SendPort sendPort) async {
+  //   try {
+  //     final port = ReceivePort();
+  //     sendPort.send(port.sendPort);
+
+  //     port.listen((message) async {
+  //       if (message is PrintPath) {
+  //         initializePrinter();
+
+  //         printInit();
+
+  //         String? frontImageInfo;
+  //         String? behindImageInfo;
+
+  //         if (message.frontPath != null) {
+  //           frontImageInfo = await drawImage(path: message.frontPath!);
+  //         }
+
+  //         if (message.backPath != null) {
+  //           behindImageInfo = await drawImage(path: message.backPath!);
+  //         }
+
+  //         logger.i('5. Injecting card...');
+  //         _bindings.injectCard();
+
+  //         logger.i('6. Printing card...');
+  //         _bindings.printCard(
+  //           frontImageInfo: frontImageInfo,
+  //           backImageInfo: behindImageInfo,
+  //         );
+
+  //         logger.i('7. Ejecting card...');
+  //         _bindings.ejectCard();
+
+  //         sendPort.send(true);
+  //       }
+  //     }, onError: (error, stack) {
+  //       Exception("Error in printImageIsolation: $error\nStack: $stack");
+  //       logger.i('_printImageIsolation error: $error\nStack: $stack');
+  //     }, onDone: () {
+  //       logger.i('_printImageIsolation done');
+  //     });
+  //   } catch (e) {
+  //     rethrow;
+  //   }
+  // }
+
+  void printInit() {
     try {
       // 피더 상태 체크 추가
       logger.i('Checking feeder status...');
@@ -210,17 +247,21 @@ class PrinterIso {
     }
   }
 
-  PrinterLog getPrinterLogData(int machineId, String? msg) {
+  PrinterLog getPrinterLogData({required int machineId}) {
     final printerStatus = getPrinterStatus(machineId);
     final ribbonStatus = getRbnAndFilmRemaining();
     final isPrintingNow = checkCardPosition();
     final isFeederEmpty = !checkFeederStatus();
 
+    logger.i(
+        'Printer status: $printerStatus, machineId: $machineId ribbon status: $ribbonStatus, isPrintingNow: $isPrintingNow, isFeederEmpty: $isFeederEmpty');
+
     return PrinterLog(
         printerStatus: printerStatus,
         ribbonStatus: ribbonStatus,
         isPrintingNow: isPrintingNow,
-        isFeederEmpty: isFeederEmpty);
+        isFeederEmpty: isFeederEmpty,
+        errorMsg: _bindings.getErrorInfo(printerStatus?.errorStatus ?? 0));
   }
 
   PrinterStatus? getPrinterStatus(int machineId) {
@@ -264,72 +305,5 @@ class PrinterIso {
     } catch (e) {
       logger.i('Printer ejectCard error: $e');
     }
-  }
-
-  Future<void> printFrontImage({
-    required File? frontFile,
-    required File? embeddedFile,
-  }) async {
-    try {
-      if (frontFile == null && embeddedFile == null) {
-        throw Exception('There is nothing to print');
-      }
-
-      String? frontPath = frontFile?.path;
-      String? rotatedRearPath;
-
-      if (embeddedFile != null) {
-        rotatedRearPath = await rearImage(file: embeddedFile);
-      }
-
-      final receivePort = ReceivePort();
-      await Isolate.spawn(preDrawFront, receivePort.sendPort);
-
-      final sendPort = await receivePort.first as SendPort;
-      final responsePort = ReceivePort();
-
-      sendPort.send(PrintPath(frontPath: frontPath, backPath: rotatedRearPath));
-
-      await responsePort.first;
-    } catch (e, stack) {
-      logger.i('Print error: $e\nStack: $stack');
-      rethrow;
-    }
-  }
-
-  Future<void> preDrawFront(SendPort sendPort) async {
-    final port = ReceivePort();
-    sendPort.send(port.sendPort);
-
-    port.listen((message) async {
-      if (message is PrintPath) {
-        initializePrinter();
-
-        await printInit();
-
-        String? frontImageInfo;
-        String? behindImageInfo;
-
-        if (message.frontPath != null) {
-          frontImageInfo = await drawImage(path: message.frontPath!);
-        }
-
-        // if (message.backPath != null) {
-        //   behindImageInfo = await drawImage(path: message.backPath!);
-        // }
-
-        logger.i('5. Injecting card...');
-        _bindings.injectCard();
-
-        logger.i('6. Printing card...');
-        _bindings.printCard(
-          frontImageInfo: frontImageInfo,
-          backImageInfo: behindImageInfo,
-        );
-
-        logger.i('7. Ejecting card...');
-        _bindings.ejectCard(); // 3번으로 시도 해보기
-      }
-    });
   }
 }
