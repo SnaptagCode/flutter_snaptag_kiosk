@@ -29,6 +29,7 @@ class _AuthCodeKeypadState extends State<AuthCodeKeypad> {
   void initState(){
     super.initState();
     maxLength = (widget.mode == ModeType.admin) ? 6: 4;
+    _isObscured = (widget.mode == ModeType.admin) ? true: false;
   }
 
 
