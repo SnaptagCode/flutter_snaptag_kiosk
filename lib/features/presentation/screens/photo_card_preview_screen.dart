@@ -116,6 +116,8 @@ class _PhotoCardPreviewScreenState
               ),
             ],
           ),
+          SizedBox(height: 30.h),
+          Text(LocaleKeys.sub03_txt_03.tr()),
         ],
       ),
     );
