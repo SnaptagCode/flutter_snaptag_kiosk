@@ -1,7 +1,10 @@
 import 'dart:io';
 import 'dart:isolate';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_snaptag_kiosk/core/constants/directory_paths.dart';
+import 'package:flutter_snaptag_kiosk/core/isolate/isolate_manager.dart';
+import 'package:flutter_snaptag_kiosk/core/utils/logger_service.dart';
 
 class FileTask {
   final int? sizeInMB;
@@ -10,16 +13,18 @@ class FileTask {
   FileTask(this.sizeInMB, this.outputPath);
 }
 
-class FileIoButton extends StatelessWidget {
+class FileIoButton extends ConsumerWidget {
   const FileIoButton({super.key});
 
+  get outputPath => null;
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Row(
       children: [
         ElevatedButton(
           onPressed: () async {
-            await runFileCreationInIsolate(100000);
+            IsolateManager<int, void>().runInIsolate(runFileCreation, 100000);
           },
           child: Text('시작'),
         ),
@@ -28,7 +33,33 @@ class FileIoButton extends StatelessWidget {
     );
   }
 
+  Future<void> runFileCreation(int sizeInMB) async {
+    logger.i("✅ $sizeInMB MB 파일 생성 시작");
+
+    final outputDirPath = DirectoryPaths.output.buildPath;
+    await _ensureDirectoryExists(outputDirPath);
+
+    final file = File('$outputDirPath/ioioio.txt');
+    final sink = file.openWrite();
+
+    // 🎯 1MB짜리 더미 데이터 생성
+    final dummyData = List.generate(1024, (_) => "Flutter Large File Test Data\n").join();
+    final size = sizeInMB;
+    for (int i = 0; i < size; i++) {
+      sink.writeln(dummyData);
+    }
+
+    logger.i("✅ runInIsolate size: $size dummyData: ${dummyData.length}");
+
+    await sink.flush();
+    await sink.close();
+
+    logger.i("✅ $sizeInMB MB 파일 생성 완료: $outputDirPath");
+  }
+
   Future<void> runFileCreationInIsolate(int sizeInMB) async {
+    logger.i("✅ $sizeInMB MB 파일 생성 시작");
+
     final outputDirPath = DirectoryPaths.output.buildPath;
     await _ensureDirectoryExists(outputDirPath);
 
@@ -41,7 +72,7 @@ class FileIoButton extends StatelessWidget {
     sendPort.send(FileTask(sizeInMB, outputDirPath));
     await responsePort.first;
 
-    print("✅ $sizeInMB MB 파일 생성 완료: $outputDirPath");
+    logger.i("✅ $sizeInMB MB 파일 생성 완료: $outputDirPath");
   }
 
   void _createLargeFileIsolate(SendPort sendPort) {
