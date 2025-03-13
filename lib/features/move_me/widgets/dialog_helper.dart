@@ -215,10 +215,17 @@ class DialogHelper {
     );
   }
 
-  static Future<void> showPrintCompleteDialog(
+  static Future<void> showPrintCompleteDialog( //3초 후 자동으로 닫히고 QR 화면으로 이동
     BuildContext context, {
     VoidCallback? onButtonPressed,
   }) async {
+    Future.delayed(const Duration(seconds: 3), () {
+
+      if (Navigator.of(context, rootNavigator: true).canPop()) {
+        PhotoCardUploadRouteData().go(context);
+        Navigator.of(context, rootNavigator: true).pop();
+      }
+    });
     await _showOneButtonKioskDialog(
       context,
       title: LocaleKeys.alert_title_print_complete.tr(),
