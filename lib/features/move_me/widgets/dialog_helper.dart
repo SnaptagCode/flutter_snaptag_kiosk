@@ -5,6 +5,7 @@ import 'package:flutter_snaptag_kiosk/core/utils/sound_manager.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_snaptag_kiosk/features/move_me/widgets/code_keypad.dart';
 
 ///
 /// [Figma](https://www.figma.com/design/8IDM2KJtqAYWm2IsmytU5W/%ED%82%A4%EC%98%A4%EC%8A%A4%ED%81%AC_%EB%94%94%EC%9E%90%EC%9D%B8_%EA%B3%B5%EC%9C%A0%EC%9A%A9?node-id=943-15366&m=dev)
@@ -13,6 +14,7 @@ import 'package:go_router/go_router.dart';
 /// - `title` : #000000
 /// - `message` : #000000
 ///
+
 class DialogHelper {
   static Future<bool> showRefundFailDialog(
     BuildContext context,
@@ -258,4 +260,49 @@ class DialogHelper {
       onButtonPressed: onButtonPressed,
     );
   }
+
+  static Future<String?> showKeypadDialog(
+      BuildContext context, {
+        required ModeType mode,
+      }) async {
+    return await showDialog<String>(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Colors.white,
+          insetPadding: EdgeInsets.symmetric(horizontal: 100.w),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20.r),
+          ),
+          content: SizedBox(
+            width: 418.w,
+            height: 600.h,
+            child: AuthCodeKeypad(
+              mode: mode,
+              onCompleted: (code) {
+                print("입력된 코드: $code");
+                Navigator.pop(context, code);
+              },
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+/* Admin 패스워드 실패시 다이얼로그
+  static Future<void> showAdminFailDialog(
+      BuildContext context, {
+        VoidCallback? onButtonPressed,
+      }) async {
+    await _showOneButtonKioskDialog(
+      context,
+      title: '비밀번호 오류',
+      message: '비밀번호를 다시 입력해주세요',
+      buttonText: LocaleKeys.alert_btn_print_complete.tr(),
+      onButtonPressed: onButtonPressed,
+    );
+  }
+ */
 }
