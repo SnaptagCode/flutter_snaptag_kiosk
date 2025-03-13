@@ -61,6 +61,7 @@ class _KioskRepository {
       return await _apiClient.getOrders(
         pageSize: request.pageSize,
         currentPage: request.currentPage,
+        kioskMachineId: request.kioskMachineId,
       );
     } catch (e) {
       rethrow;

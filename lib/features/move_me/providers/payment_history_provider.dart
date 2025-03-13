@@ -8,11 +8,14 @@ part 'payment_history_provider.g.dart';
 class OrdersPage extends _$OrdersPage {
   final int _pageSize = 15; //과거 20
   int get kioskEventId => ref.read(kioskInfoServiceProvider)?.kioskEventId ?? 0;
+  int get kioskMachineId => ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
+
   @override
   Future<OrderListResponse> build({int page = 1}) async {
     final OrderListResponse response = await ref.read(kioskRepositoryProvider).getOrders(GetOrdersRequest(
           pageSize: _pageSize,
           currentPage: page,
+          kioskMachineId: kioskMachineId,
         ));
     logger.i('response: $response');
     return response;
@@ -23,6 +26,7 @@ class OrdersPage extends _$OrdersPage {
     state = await AsyncValue.guard(() => ref.read(kioskRepositoryProvider).getOrders(GetOrdersRequest(
           pageSize: _pageSize,
           currentPage: newPage,
+          kioskMachineId: kioskMachineId,
         )));
   }
 }
