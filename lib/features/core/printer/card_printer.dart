@@ -3,6 +3,7 @@ import 'dart:io';
 
 // Utf8 사용을 위한 임포트
 import 'package:flutter_snaptag_kiosk/core/utils/logger_service.dart';
+import 'package:flutter_snaptag_kiosk/data/datasources/cache/cache.dart';
 import 'package:flutter_snaptag_kiosk/features/core/printer/printer_iso.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -25,6 +26,8 @@ class PrinterService extends _$PrinterService {
       state = const AsyncValue.loading();
       _printerIso.printImage(frontFile: frontFile, embeddedFile: embeddedFile);
     } catch (e, stack) {
+      final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
+      _printerIso.getPrinterLogData(machineId: machineId);
       logger.i('Print error: $e\nStack: $stack');
       rethrow;
     }

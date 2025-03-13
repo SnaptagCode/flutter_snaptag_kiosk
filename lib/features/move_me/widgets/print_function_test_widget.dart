@@ -66,6 +66,14 @@ class PrintFunctionTestWidget extends ConsumerWidget {
             },
             child: Text('앞면 인쇄'),
           ),
+          ElevatedButton(
+            onPressed: () async {
+              final machinId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
+              logger.i("machindId: $machinId");
+              _printerIso.getPrinterLogData(machineId: machinId);
+            },
+            child: Text('로깅'),
+          ),
         ],
       ),
     );

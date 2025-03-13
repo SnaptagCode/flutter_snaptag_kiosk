@@ -83,7 +83,7 @@ class PrinterIso {
         if (message is PrintPath) {
           initializePrinter();
 
-          await printInit();
+          printInit();
 
           String? frontImageInfo;
           String? behindImageInfo;
@@ -111,6 +111,7 @@ class PrinterIso {
           sendPort.send(true);
         }
       }, onError: (error, stack) {
+        Exception("Error in printImageIsolation: $error\nStack: $stack");
         logger.i('_printImageIsolation error: $error\nStack: $stack');
       }, onDone: () {
         logger.i('_printImageIsolation done');
@@ -120,7 +121,7 @@ class PrinterIso {
     }
   }
 
-  Future<void> printInit() async {
+  void printInit() {
     try {
       // 피더 상태 체크 추가
       logger.i('Checking feeder status...');
@@ -210,17 +211,21 @@ class PrinterIso {
     }
   }
 
-  PrinterLog getPrinterLogData(int machineId, String? msg) {
+  PrinterLog getPrinterLogData({required int machineId}) {
     final printerStatus = getPrinterStatus(machineId);
     final ribbonStatus = getRbnAndFilmRemaining();
     final isPrintingNow = checkCardPosition();
     final isFeederEmpty = !checkFeederStatus();
 
+    logger.i(
+        'Printer status: $printerStatus, machineId: $machineId ribbon status: $ribbonStatus, isPrintingNow: $isPrintingNow, isFeederEmpty: $isFeederEmpty');
+
     return PrinterLog(
         printerStatus: printerStatus,
         ribbonStatus: ribbonStatus,
         isPrintingNow: isPrintingNow,
-        isFeederEmpty: isFeederEmpty);
+        isFeederEmpty: isFeederEmpty,
+        errorMsg: _bindings.getErrorInfo(printerStatus?.errorStatus ?? 0));
   }
 
   PrinterStatus? getPrinterStatus(int machineId) {
@@ -305,7 +310,7 @@ class PrinterIso {
       if (message is PrintPath) {
         initializePrinter();
 
-        await printInit();
+        printInit();
 
         String? frontImageInfo;
         String? behindImageInfo;

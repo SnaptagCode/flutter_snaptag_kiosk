@@ -98,6 +98,8 @@ class PrinterBindings {
         throw Exception('Failed to check card position');
       }
       return flag.value != 0;
+    } catch (e) {
+      rethrow;
     } finally {
       calloc.free(flag);
     }
