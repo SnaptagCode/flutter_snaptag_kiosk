@@ -78,31 +78,39 @@ class PrinterBindings {
     final outputStr = calloc<Uint8>(500).cast<Utf8>();
     final len = calloc<Int32>();
     len.value = 500;
+    var error = "";
 
     try {
       final result = _getErrorInfo(errorCode, outputStr, len);
       if (result != 0) return 'Failed to get error info';
-      return outputStr.toDartString();
+
+      error = outputStr.toDartString();
+
+      logger.i('Error info: $error');
     } finally {
       calloc.free(outputStr);
       calloc.free(len);
     }
+
+    return error;
   }
 
   // 카드 위치 확인 함수
   bool checkCardPosition() {
     final flag = calloc<Uint8>(); // 0 없음 , 1 있음
+    var flagValue = false;
     try {
       final result = _isPrtHaveCard(flag); // 0 성공, 1 실패
       if (result != 0) {
         throw Exception('Failed to check card position');
       }
-      return flag.value != 0;
+      flagValue = flag.value != 0;
     } catch (e) {
       rethrow;
     } finally {
       calloc.free(flag);
     }
+    return flagValue;
   }
 
   // 캔버스 준비 함수
@@ -204,6 +212,8 @@ class PrinterBindings {
   RibbonStatus? getRbnAndFilmRemaining() {
     final rbnRemaining = calloc<Short>();
     final filmRemaining = calloc<Short>();
+    RibbonStatus? ribbonStatus;
+
     try {
       final result = _getRbnAndFilmRemaining(rbnRemaining, filmRemaining);
       if (result != 0) {
@@ -211,17 +221,18 @@ class PrinterBindings {
       }
       logger.i('Ribbon remaining: ${rbnRemaining.value}');
       logger.i('Film remaining: ${filmRemaining.value}');
-
-      return RibbonStatus(
+      ribbonStatus = RibbonStatus(
         rbnRemaining: rbnRemaining.value,
         filmRemaining: filmRemaining.value,
       );
     } catch (e) {
-      return null;
+      rethrow;
     } finally {
       calloc.free(rbnRemaining);
       calloc.free(filmRemaining);
     }
+
+    return ribbonStatus;
   }
 
   void setCanvasOrientation(bool isPortrait) {
@@ -267,6 +278,7 @@ class PrinterBindings {
     final pWarningStatus = calloc<Uint32>();
     final pMainCode = calloc<Uint8>();
     final pSubCode = calloc<Uint8>();
+    PrinterStatus? printerStatus;
 
     try {
       final result = _queryPrinterStatus(
@@ -286,7 +298,7 @@ class PrinterBindings {
         return null; // null 반환으로 변경
       }
 
-      return PrinterStatus(
+      printerStatus = PrinterStatus(
         machineId: machineId,
         mainCode: pMainCode.value,
         subCode: pSubCode.value,
@@ -312,6 +324,8 @@ class PrinterBindings {
       calloc.free(pMainCode);
       calloc.free(pSubCode);
     }
+
+    return printerStatus;
   }
 
   // USB 초기화 메서드 추가
@@ -414,18 +428,20 @@ class PrinterBindings {
   }
 
   bool ensurePrinterReady() {
+    bool flagValue = false;
     try {
       // 카드 존재 여부 확인
       final flag = calloc<Uint8>();
       try {
         int result = _isPrtHaveCard(flag);
+        flagValue = flag.value != 0;
         if (result != 0) {
           logger.i('Failed to check card position');
           return false;
         }
 
         // 카드가 있다면 배출
-        if (flag.value != 0) {
+        if (flagValue) {
           logger.i('Card is in the printer, ejecting...');
           result = _cardEject(0); // 왼쪽으로 배출
           if (result != 0) {
@@ -433,7 +449,6 @@ class PrinterBindings {
             return false;
           }
         }
-        return true;
       } finally {
         calloc.free(flag);
       }
@@ -441,6 +456,7 @@ class PrinterBindings {
       logger.i('Error in ensurePrinterReady: $e');
       return false;
     }
+    return true;
   }
 
   void clearLibrary() {
@@ -497,15 +513,17 @@ class PrinterBindings {
 
   bool checkFeederStatus() {
     final feederStatusPtr = calloc<Int32>(); // 0 : 비어있음, 1: 존재
+    bool feederStatus = false;
     try {
       final result = _isFeederNoEmpty(feederStatusPtr);
+      feederStatus = feederStatusPtr.value != 0;
       if (result != 0) {
         final error = getErrorInfo(result);
         throw Exception('Failed to check feeder status: $error');
       }
-      return feederStatusPtr.value != 0;
     } finally {
       calloc.free(feederStatusPtr);
     }
+    return feederStatus;
   }
 }
