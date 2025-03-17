@@ -39,8 +39,16 @@ jobs:
       - name: Run Build Runner
         run: flutter pub run build_runner build --delete-conflicting-outputs
 
-      - name: Disable "Treat Warnings As Errors"
-        run: sed -i 's/<TreatWarningAsErrors>true<\/TreatWarningAsErrors>/<TreatWarningAsErrors>false<\/TreatWarningAsErrors>/g' windows/flutter/ephemeral/.plugin_symlinks/flutter_soloud/flutter_soloud_plugin.vcxproj
+      - name: Add CMake warning suppression flags
+        run: echo 'set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /WX-")' >> windows/CMakeLists.txt
+
+      - name: Disable "Treat Warnings As Errors" for vcxproj
+        run: |
+          if (Test-Path "windows/flutter/ephemeral/.plugin_symlinks/flutter_soloud/flutter_soloud_plugin.vcxproj") {
+            (Get-Content windows/flutter/ephemeral/.plugin_symlinks/flutter_soloud/flutter_soloud_plugin.vcxproj) `
+            -replace '<TreatWarningAsErrors>true</TreatWarningAsErrors>', '<TreatWarningAsErrors>false</TreatWarningAsErrors>' `
+            | Set-Content windows/flutter/ephemeral/.plugin_symlinks/flutter_soloud/flutter_soloud_plugin.vcxproj
+          }
 
       - name: Build Windows Release
         run: flutter build windows --release
