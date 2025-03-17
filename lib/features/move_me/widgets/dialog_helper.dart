@@ -221,7 +221,7 @@ class DialogHelper {
     BuildContext context, {
     VoidCallback? onButtonPressed,
   }) async {
-    Future.delayed(const Duration(seconds: 3), () {
+    Future.delayed(const Duration(seconds: 2), () {
 
       if (Navigator.of(context, rootNavigator: true).canPop()) {
         PhotoCardUploadRouteData().go(context);
