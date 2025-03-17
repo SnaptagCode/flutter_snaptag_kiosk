@@ -62,8 +62,21 @@ jobs:
           flutter create --platforms=windows .
           flutter pub get
 
+      - name: List Build Directory
+        run: Get-ChildItem -Path build/windows/runner -Recurse
+
+      - name: Verify Build Artifacts Before Archiving
+        run: |
+          if (-Not (Test-Path "build/windows/runner/Release")) {
+            echo "Error: Release folder does not exist!"
+            exit 1
+          }
+
       - name: Build Windows Release
         run: flutter build windows --release
+
+      - name: Check Build Directory
+        run: Get-ChildItem -Path build/windows/runner/ -Name
 
       - name: Archive Build
         run: Compress-Archive -Path build\windows\runner\Release\* -DestinationPath test_release.zip
