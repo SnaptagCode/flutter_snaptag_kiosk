@@ -64,7 +64,7 @@ jobs:
 
       - name: Verify Build Artifacts Before Archiving
         run: |
-          if (-Not (Test-Path "build/windows/runner/Release")) {
+          if (-Not (Test-Path "build/windows/x64/runner/Release")) {
             echo "Error: Release folder does not exist!"
             exit 1
           }
@@ -73,10 +73,10 @@ jobs:
         run: flutter build windows --release
 
       - name: Check Build Directory
-        run: Get-ChildItem -Path build/windows/runner/ -Name
+        run: Get-ChildItem -Path build/windows/x64/runner/ -Name
 
       - name: List Build Directory
-        run: Get-ChildItem -Path build/windows/runner -Recurse
+        run: Get-ChildItem -Path build/windows/x64/runner -Recurse
 
       - name: Archive Build
         run: Compress-Archive -Path build/windows/x64/runner/Release/* -DestinationPath test_release.zip
