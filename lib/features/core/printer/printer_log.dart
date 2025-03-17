@@ -1,14 +1,19 @@
 import 'package:flutter_snaptag_kiosk/features/core/printer/printer_status.dart';
 import 'package:flutter_snaptag_kiosk/features/core/printer/ribbon_status.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-class PrinterLog {
-  PrinterStatus? printerStatus;
-  RibbonStatus? ribbonStatus;
-  bool? isPrintingNow;
-  bool? isFeederEmpty;
-  String? errorMsg;
+part 'printer_log.freezed.dart';
+part 'printer_log.g.dart';
 
-  PrinterLog.init();
+@freezed
+class PrinterLog with _$PrinterLog {
+  const factory PrinterLog({
+    @Default(null) PrinterStatus? printerStatus,
+    @Default(null) RibbonStatus? ribbonStatus,
+    @Default(null) bool? isPrintingNow,
+    @Default(null) bool? isFeederEmpty,
+    @Default(null) String? errorMsg,
+  }) = _PrinterLog;
 
-  PrinterLog(this.printerStatus, this.ribbonStatus, this.isFeederEmpty, this.isPrintingNow, this.errorMsg);
+  factory PrinterLog.fromJson(Map<String, dynamic> json) => _$PrinterLogFromJson(json);
 }

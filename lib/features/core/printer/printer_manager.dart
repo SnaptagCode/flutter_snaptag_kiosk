@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ffi';
 import 'dart:io';
 import 'dart:ffi' as ffi; // ffi 임포트 확인
@@ -8,8 +9,9 @@ import 'package:flutter_snaptag_kiosk/features/core/printer/printer_log.dart';
 import 'package:flutter_snaptag_kiosk/features/core/printer/ribbon_status.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 
-class PrinterIso {
+class PrinterManager {
   late PrinterBindings _bindings;
+  Timer? _timer;
 
   Future<void> initializePrinter() async {
     try {
@@ -192,22 +194,39 @@ class PrinterIso {
     return commitResult;
   }
 
-  PrinterLog getPrinterLogData({required int machineId}) {
-    try {
-      final printerStatus = getPrinterStatus(machineId);
-      final ribbonStatus = getRbnAndFilmRemaining();
-      final isPrintingNow = checkCardPosition();
-      final isFeederEmpty = !checkFeederStatus();
+  Future<PrinterLog> backgroundPrinterLogTask(int machineId) async {
+    final result = await IsolateManager<int, PrinterLog>().runInIsolate(getPrinterLogData, machineId);
+    return result ?? PrinterLog();
+  }
 
+  PrinterLog getPrinterLogData(int machineId) {
+    final bindings = PrinterBindings();
+
+    // 1. 초기화
+    bindings.clearLibrary();
+
+    // 2. 프린터 연결
+    bindings.connectPrinter();
+
+    try {
+      final printerStatus = bindings.getPrinterStatus(machineId);
+      final ribbonStatus = bindings.getRbnAndFilmRemaining();
+      final isPrintingNow = bindings.checkCardPosition();
+      final isFeederEmpty = !bindings.checkFeederStatus();
+      // final errorMsg = _bindings.getErrorInfo(printerStatus?.errorStatus ?? 0);
       logger.i(
           'Printer status: $printerStatus, machineId: $machineId ribbon status: $ribbonStatus, isPrintingNow: $isPrintingNow, isFeederEmpty: $isFeederEmpty');
 
-      return PrinterLog(printerStatus, ribbonStatus, isPrintingNow, isFeederEmpty,
-          _bindings.getErrorInfo(printerStatus?.errorStatus ?? 0));
+      return PrinterLog(
+          printerStatus: printerStatus,
+          ribbonStatus: ribbonStatus,
+          isPrintingNow: isPrintingNow,
+          isFeederEmpty: isFeederEmpty,
+          errorMsg: '');
     } catch (e) {
       logger.i('getPrinterLogData error: $e');
     }
-    return PrinterLog.init();
+    return PrinterLog();
   }
 
   PrinterStatus? getPrinterStatus(int machineId) {
