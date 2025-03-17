@@ -21,6 +21,9 @@ jobs:
           flutter-version: '3.29.1' # Flutter 버전에 맞게 수정
           channel: stable
 
+      - name: Clean Flutter Project
+        run: flutter clean
+
       - name: Enable Windows Build
         run: flutter config --enable-windows-desktop
 
@@ -62,15 +65,15 @@ jobs:
           flutter create --platforms=windows .
           flutter pub get
 
+      - name: Build Windows Release
+        run: flutter build windows --release
+
       - name: Verify Build Artifacts Before Archiving
         run: |
           if (-Not (Test-Path "build/windows/x64/runner/Release")) {
             echo "Error: Release folder does not exist!"
             exit 1
           }
-
-      - name: Build Windows Release
-        run: flutter build windows --release
 
       - name: Check Build Directory
         run: Get-ChildItem -Path build/windows/x64/runner/ -Name
