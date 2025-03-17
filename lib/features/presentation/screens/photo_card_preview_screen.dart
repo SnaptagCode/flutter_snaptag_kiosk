@@ -64,6 +64,7 @@ class _PhotoCardPreviewScreenState
         );
       },
     );
+    final kiosk = ref.watch(kioskInfoServiceProvider);
 
     return Center(
       child: Column(
@@ -115,6 +116,11 @@ class _PhotoCardPreviewScreenState
                 child: Text(LocaleKeys.sub02_btn_pay.tr()),
               ),
             ],
+          ),
+          SizedBox(height: 30.h),
+          Text(
+              LocaleKeys.sub03_txt_03.tr(),
+              style: context.typography.kioskBody2B.copyWith(color: Color(int.parse(kiosk?.couponTextColor.replaceFirst('#', '0xff') ?? '0xffffff'))),
           ),
         ],
       ),
