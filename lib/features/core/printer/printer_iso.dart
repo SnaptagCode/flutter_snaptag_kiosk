@@ -193,54 +193,78 @@ class PrinterIso {
   }
 
   PrinterLog getPrinterLogData({required int machineId}) {
-    final printerStatus = getPrinterStatus(machineId);
-    final ribbonStatus = getRbnAndFilmRemaining();
-    final isPrintingNow = checkCardPosition();
-    final isFeederEmpty = !checkFeederStatus();
+    try {
+      final printerStatus = getPrinterStatus(machineId);
+      final ribbonStatus = getRbnAndFilmRemaining();
+      final isPrintingNow = checkCardPosition();
+      final isFeederEmpty = !checkFeederStatus();
 
-    logger.i(
-        'Printer status: $printerStatus, machineId: $machineId ribbon status: $ribbonStatus, isPrintingNow: $isPrintingNow, isFeederEmpty: $isFeederEmpty');
+      logger.i(
+          'Printer status: $printerStatus, machineId: $machineId ribbon status: $ribbonStatus, isPrintingNow: $isPrintingNow, isFeederEmpty: $isFeederEmpty');
 
-    return PrinterLog(
-        printerStatus: printerStatus,
-        ribbonStatus: ribbonStatus,
-        isPrintingNow: isPrintingNow,
-        isFeederEmpty: isFeederEmpty,
-        errorMsg: _bindings.getErrorInfo(printerStatus?.errorStatus ?? 0));
+      return PrinterLog(printerStatus, ribbonStatus, isPrintingNow, isFeederEmpty,
+          _bindings.getErrorInfo(printerStatus?.errorStatus ?? 0));
+    } catch (e) {
+      logger.i('getPrinterLogData error: $e');
+    }
+    return PrinterLog.init();
   }
 
   PrinterStatus? getPrinterStatus(int machineId) {
-    final status = _bindings.getPrinterStatus(machineId);
+    try {
+      final status = _bindings.getPrinterStatus(machineId);
 
-    if (status != null) {
-      logger.i(
-          'Printer mainCode: ${status.mainCode}, subCode: ${status.subCode}, mainStatus: ${status.mainStatus}, errorStatus: ${status.errorStatus}, warningStatus: ${status.warningStatus}, chassisTemperature: ${status.chassisTemperature}, printHeadTemperature: ${status.printHeadTemperature}, heaterTemperature: ${status.heaterTemperature}, subStatus: ${status.subStatus}');
+      if (status != null) {
+        logger.i(
+            'Printer mainCode: ${status.mainCode}, subCode: ${status.subCode}, mainStatus: ${status.mainStatus}, errorStatus: ${status.errorStatus}, warningStatus: ${status.warningStatus}, chassisTemperature: ${status.chassisTemperature}, printHeadTemperature: ${status.printHeadTemperature}, heaterTemperature: ${status.heaterTemperature}, subStatus: ${status.subStatus}');
+      }
+      return status;
+    } catch (e) {
+      logger.i('getPrinterStatus error: $e');
     }
-    return status;
+    return null;
   }
 
   RibbonStatus? getRbnAndFilmRemaining() {
-    final status = _bindings.getRbnAndFilmRemaining();
-    logger.i("Printer ribbonRemaining: ${status?.rbnRemaining}, filmRemaining: ${status?.filmRemaining}");
-    return status;
+    try {
+      final status = _bindings.getRbnAndFilmRemaining();
+      logger.i("Printer ribbonRemaining: ${status?.rbnRemaining}, filmRemaining: ${status?.filmRemaining}");
+      return status;
+    } catch (e) {
+      logger.i('getRbnAndFilmRemaining error: $e');
+    }
+    return null;
   }
 
   bool checkCardPosition() {
-    final status = _bindings.checkCardPosition();
-    logger.i('Printer checkCardPosition: 카드 ${status == true ? "있음" : "없음"}');
-
-    return status;
+    try {
+      final status = _bindings.checkCardPosition();
+      logger.i('Printer checkCardPosition: 카드 ${status == true ? "있음" : "없음"}');
+      return status;
+    } catch (e) {
+      logger.i('checkCardPosition error: $e');
+    }
+    return false;
   }
 
   bool checkFeederStatus() {
-    final status = _bindings.checkFeederStatus();
-    logger.i('Printer checkFeederStatus: 카드 공급기 ${status == true ? "있음" : "없음"}');
-    return status;
+    try {
+      final status = _bindings.checkFeederStatus();
+      logger.i('Printer checkFeederStatus: 카드 공급기 ${status == true ? "있음" : "없음"}');
+      return status;
+    } catch (e) {
+      logger.i('checkFeederStatus error: $e');
+    }
+    return false;
   }
 
   void getConnectPrintList() {
-    final result = _bindings.enumUsbPrinter();
-    logger.i('Printer getConnectPrintList: ${result.join(', ')}');
+    try {
+      final result = _bindings.enumUsbPrinter();
+      logger.i('Printer getConnectPrintList: ${result.join(', ')}');
+    } catch (e) {
+      logger.i('getConnectPrintList error: $e');
+    }
   }
 
   void ejectCard() {
