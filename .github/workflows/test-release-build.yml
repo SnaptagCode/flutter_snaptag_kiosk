@@ -66,7 +66,7 @@ jobs:
           flutter pub get
 
       - name: Build Windows Release
-        run: flutter build windows --release --bundled-libraries
+        run: flutter build windows --release
 
       - name: Verify Build Artifacts Before Archiving
         run: |
@@ -80,6 +80,23 @@ jobs:
 
       - name: List Build Directory
         run: Get-ChildItem -Path build/windows/x64/runner -Recurse
+
+      - name: Copy VC++ Redistributable DLLs
+        run: |
+          $vs_versions = @("2022", "2019", "2017")
+          $found = $false
+          foreach ($version in $vs_versions) {
+            $dll_path = "C:\Program Files\Microsoft Visual Studio\$version\Community\VC\Redist\MSVC\"
+            if (Test-Path $dll_path) {
+              echo "Found Visual Studio $version, copying DLLs..."
+              Copy-Item -Path "$dll_path*x64*.dll" -Destination "build/windows/x64/runner/Release/" -Recurse -Force
+              $found = $true
+              break
+            }
+          }
+          if (-Not $found) {
+            echo "No Visual Studio installation found! Please install the VC++ redistributable."
+          }
 
       - name: Archive Build
         run: Compress-Archive -Path build/windows/x64/runner/Release/* -DestinationPath test_release.zip
