@@ -1,0 +1,47 @@
+name: Test Release Build (Windows)
+
+on:
+  push:
+    tags:
+      - 'test-v*' # test-v로 시작하는 태그에서 실행(실 버전에서는 v* 로)
+  workflow_dispatch: # 수동 실행도 가능하게 설정
+
+jobs:
+  build:
+    if: startsWith(github.ref, 'refs/tags/v') && github.ref_name == 'ci-test-build'
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.29.1' # Flutter 버전에 맞게 수정
+          channel: stable
+
+      - name: Install Dependencies
+        run: flutter pub get
+        
+      - name: Run Build Runner
+        run: flutter pub run build_runner build --delete-conflicting-outputs
+        
+      - name: Enable Windows Build
+        run: flutter config --enable-windows-desktop
+
+      - name: Build Windows Release
+        run: flutter build windows --release
+
+      - name: Archive Build
+        run: Compress-Archive -Path build\windows\runner\Release\* -DestinationPath test_release.zip
+
+      - name: Upload Release to GitHub
+        uses: softprops/action-gh-release@v1
+        with:
+          files: test_release.zip
+          body: "Automated test release build for Windows."
+          tag_name: ${{ github.ref_name }}
+          name: "Test Release - ${{ github.ref_name }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
