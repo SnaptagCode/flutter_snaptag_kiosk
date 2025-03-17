@@ -213,16 +213,16 @@ class PrinterManager {
       final ribbonStatus = bindings.getRbnAndFilmRemaining();
       final isPrintingNow = bindings.checkCardPosition();
       final isFeederEmpty = !bindings.checkFeederStatus();
-      // final errorMsg = _bindings.getErrorInfo(printerStatus?.errorStatus ?? 0);
+      final errorMsg = printerStatus.$2 == null ? '' : bindings.getErrorInfo(printerStatus.$2 ?? 0);
       logger.i(
           'Printer status: $printerStatus, machineId: $machineId ribbon status: $ribbonStatus, isPrintingNow: $isPrintingNow, isFeederEmpty: $isFeederEmpty');
 
       return PrinterLog(
-          printerStatus: printerStatus,
+          printerStatus: printerStatus.$1,
           ribbonStatus: ribbonStatus,
           isPrintingNow: isPrintingNow,
           isFeederEmpty: isFeederEmpty,
-          errorMsg: '');
+          errorMsg: errorMsg);
     } catch (e) {
       logger.i('getPrinterLogData error: $e');
     }
@@ -232,12 +232,7 @@ class PrinterManager {
   PrinterStatus? getPrinterStatus(int machineId) {
     try {
       final status = _bindings.getPrinterStatus(machineId);
-
-      if (status != null) {
-        logger.i(
-            'Printer mainCode: ${status.mainCode}, subCode: ${status.subCode}, mainStatus: ${status.mainStatus}, errorStatus: ${status.errorStatus}, warningStatus: ${status.warningStatus}, chassisTemperature: ${status.chassisTemperature}, printHeadTemperature: ${status.printHeadTemperature}, heaterTemperature: ${status.heaterTemperature}, subStatus: ${status.subStatus}');
-      }
-      return status;
+      return status.$1;
     } catch (e) {
       logger.i('getPrinterStatus error: $e');
     }
