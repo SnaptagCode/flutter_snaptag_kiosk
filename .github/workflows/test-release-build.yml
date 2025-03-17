@@ -21,17 +21,12 @@ jobs:
           flutter-version: '3.29.1' # Flutter 버전에 맞게 수정
           channel: stable
 
-      - name: Clean Flutter Project
-        run: flutter clean
-
-      - name: Enable Windows Build
-        run: flutter config --enable-windows-desktop
-
-      - name: Ensure Windows project exists
+      - name: Clean and Setup Windows Build
         run: |
-          if (-Not (Test-Path "windows")) {
-            flutter create .
-          }
+          flutter clean
+          flutter config --enable-windows-desktop
+          flutter create --platforms=windows .
+          flutter pub get
 
       - name: Create empty .env file if missing
         run: |
@@ -42,9 +37,6 @@ jobs:
       - name: Upgrade Flutter Packages
         run: flutter pub upgrade
 
-      - name: Install Dependencies
-        run: flutter pub get
-        
       - name: Run Build Runner
         run: flutter pub run build_runner build --delete-conflicting-outputs
 
@@ -58,12 +50,6 @@ jobs:
             -replace '<TreatWarningAsErrors>true</TreatWarningAsErrors>', '<TreatWarningAsErrors>false</TreatWarningAsErrors>' `
             | Set-Content windows/flutter/ephemeral/.plugin_symlinks/flutter_soloud/flutter_soloud_plugin.vcxproj
           }
-
-      - name: Ensure Windows project is clean
-        run: |
-          flutter clean
-          flutter create --platforms=windows .
-          flutter pub get
 
       - name: Build Windows Release
         run: flutter build windows --release
@@ -81,22 +67,39 @@ jobs:
       - name: List Build Directory
         run: Get-ChildItem -Path build/windows/x64/runner -Recurse
 
-      - name: Copy VC++ Redistributable DLLs
+      - name: Install Visual Studio Build Tools if Missing & Copy VC++ Redistributable
         run: |
-          $vs_versions = @("2022", "2019", "2017")
-          $found = $false
-          foreach ($version in $vs_versions) {
-            $dll_path = "C:\Program Files\Microsoft Visual Studio\$version\Community\VC\Redist\MSVC\"
-            if (Test-Path $dll_path) {
-              echo "Found Visual Studio $version, copying DLLs..."
-              Copy-Item -Path "$dll_path*x64*.dll" -Destination "build/windows/x64/runner/Release/" -Recurse -Force
-              $found = $true
-              break
-            }
+          $vswherePath = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+
+          if (-Not (Test-Path $vswherePath)) {
+              Write-Output "Visual Studio is not installed! Installing Visual Studio Build Tools..."
+              $vsInstallerUrl = "https://aka.ms/vs/17/release/vs_BuildTools.exe"
+              $vsInstallerPath = "$env:TEMP\vs_BuildTools.exe"
+              Invoke-WebRequest -Uri $vsInstallerUrl -OutFile $vsInstallerPath
+              Start-Process -FilePath $vsInstallerPath -ArgumentList "--quiet --wait --norestart --nocache --installPath C:\BuildTools --add Microsoft.VisualStudio.Workload.VCTools" -NoNewWindow -Wait
+              Write-Output "Visual Studio Build Tools installation completed!"
           }
-          if (-Not $found) {
-            echo "No Visual Studio installation found! Please install the VC++ redistributable."
+
+          if (Test-Path $vswherePath) {
+              $vsInstallPath = & $vswherePath -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
+              if ($vsInstallPath) {
+                  Write-Output "Found Visual Studio installation at: $vsInstallPath"
+                  $vcRedistPath = "$vsInstallPath\VC\Redist\MSVC"
+                  $latestRedistVersion = Get-ChildItem -Directory -Path $vcRedistPath | Sort-Object Name -Descending | Select-Object -First 1
+                  $latestRedistPath = "$vcRedistPath\$latestRedistVersion\x64\Microsoft.VC142.CRT"
+                  if (Test-Path $latestRedistPath) {
+                      Write-Output "Copying VC++ Redistributable DLLs from: $latestRedistPath"
+                      Copy-Item -Path "$latestRedistPath\*" -Destination "build/windows/x64/runner/Release" -Force
+                  } else {
+                      Write-Output "Warning: Could not find VC++ Redistributable DLLs in $latestRedistPath"
+                  }
+              } else {
+                  Write-Output "Error: Visual Studio installation not found after installation!"
+              }
+          } else {
+              Write-Output "Error: vswhere.exe not found! Visual Studio installation might have failed."
           }
+        shell: pwsh
 
       - name: Archive Build
         run: Compress-Archive -Path build/windows/x64/runner/Release/* -DestinationPath test_release.zip
