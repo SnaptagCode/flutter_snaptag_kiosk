@@ -49,6 +49,15 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
           },
         ),
         title: const Text('출력 내역'),
+        actions: [ //키오스크에서 실행시켜보고 사이즈 조절 필요시 SizedBox로
+          IconButton(
+            padding: EdgeInsets.only(left: 30.w),
+            icon: SvgPicture.asset(SnaptagSvg.home),
+            onPressed: () async {
+              PhotoCardUploadRouteData().go(context);
+            },
+          ),
+        ],
       ),
       body: ordersPage.when(
         data: (response) {
