@@ -21,52 +21,6 @@ jobs:
           flutter-version: '3.29.1' # Flutter 버전에 맞게 수정
           channel: stable
 
-      - name: Clean and Setup Windows Build
-        run: |
-          flutter clean
-          flutter config --enable-windows-desktop
-          flutter create --platforms=windows .
-          flutter pub get
-
-      - name: Create empty .env file if missing
-        run: |
-          if (-Not (Test-Path "assets/.env")) {
-            New-Item -Path assets/.env -ItemType File
-          }
-
-      - name: Upgrade Flutter Packages
-        run: flutter pub upgrade
-
-      - name: Run Build Runner
-        run: flutter pub run build_runner build --delete-conflicting-outputs
-
-      - name: Add CMake warning suppression flags
-        run: echo 'set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /WX-")' >> windows/CMakeLists.txt
-
-      - name: Disable "Treat Warnings As Errors" for vcxproj
-        run: |
-          if (Test-Path "windows/flutter/ephemeral/.plugin_symlinks/flutter_soloud/flutter_soloud_plugin.vcxproj") {
-            (Get-Content windows/flutter/ephemeral/.plugin_symlinks/flutter_soloud/flutter_soloud_plugin.vcxproj) `
-            -replace '<TreatWarningAsErrors>true</TreatWarningAsErrors>', '<TreatWarningAsErrors>false</TreatWarningAsErrors>' `
-            | Set-Content windows/flutter/ephemeral/.plugin_symlinks/flutter_soloud/flutter_soloud_plugin.vcxproj
-          }
-
-      - name: Build Windows Release
-        run: flutter build windows --release
-
-      - name: Verify Build Artifacts Before Archiving
-        run: |
-          if (-Not (Test-Path "build/windows/x64/runner/Release")) {
-            echo "Error: Release folder does not exist!"
-            exit 1
-          }
-
-      - name: Check Build Directory
-        run: Get-ChildItem -Path build/windows/x64/runner/ -Name
-
-      - name: List Build Directory
-        run: Get-ChildItem -Path build/windows/x64/runner -Recurse
-
       - name: Install Visual Studio Build Tools if Missing & Copy VC++ Redistributable
         run: |
           $vswherePath = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
@@ -87,7 +41,7 @@ jobs:
                   $vcRedistPath = "$vsInstallPath\VC\Redist\MSVC"
                   $latestRedistVersion = Get-ChildItem -Directory -Path $vcRedistPath | Sort-Object Name -Descending | Select-Object -First 1
                   if ($latestRedistVersion) {
-                      $latestRedistPath = Join-Path -Path $vcRedistPath -ChildPath "$($latestRedistVersion.Name)\x64\Microsoft.VC142.CRT"
+                      $latestRedistPath = Join-Path -Path $vcRedistPath -ChildPath "$($latestRedistVersion.Name)\x64\Microsoft.VC143.CRT"
                       if (Test-Path $latestRedistPath) {
                           Write-Output "Copying VC++ Redistributable DLLs from: $latestRedistPath"
                           Copy-Item -Path "$latestRedistPath\*" -Destination "build/windows/x64/runner/Release" -Force
