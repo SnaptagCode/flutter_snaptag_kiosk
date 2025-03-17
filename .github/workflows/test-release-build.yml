@@ -15,12 +15,6 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '3.29.1' # Flutter 버전에 맞게 수정
-          channel: stable
-
       - name: Install Visual Studio Build Tools if Missing & Copy VC++ Redistributable
         run: |
           $vswherePath = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
@@ -37,25 +31,40 @@ jobs:
           if (Test-Path $vswherePath) {
               $vsInstallPath = & $vswherePath -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
               if ($vsInstallPath) {
-                  Write-Output "Found Visual Studio installation at: $vsInstallPath"
+                  Write-Output "✅ Found Visual Studio installation at: $vsInstallPath"
                   $vcRedistPath = "$vsInstallPath\VC\Redist\MSVC"
+
+                  # 가장 최신 버전 폴더를 찾기
                   $latestRedistVersion = Get-ChildItem -Directory -Path $vcRedistPath | Sort-Object Name -Descending | Select-Object -First 1
                   if ($latestRedistVersion) {
-                      $latestRedistPath = Join-Path -Path $vcRedistPath -ChildPath "$($latestRedistVersion.Name)\x64\Microsoft.VC143.CRT"
-                      if (Test-Path $latestRedistPath) {
-                          Write-Output "Copying VC++ Redistributable DLLs from: $latestRedistPath"
-                          Copy-Item -Path "$latestRedistPath\*" -Destination "build/windows/x64/runner/Release" -Force
+                      $latestRedistPath = Join-Path -Path $vcRedistPath -ChildPath "$($latestRedistVersion.Name)\x64"
+
+                      # Microsoft.VCxxx.CRT 폴더 찾기
+                      $crtFolder = Get-ChildItem -Directory -Path $latestRedistPath | Where-Object { $_.Name -match "^Microsoft\.VC\d+\.CRT$" } | Select-Object -First 1
+
+                      if ($crtFolder) {
+                          $fullCrtPath = Join-Path -Path $latestRedistPath -ChildPath $crtFolder.Name
+                          Write-Output "📂 Found CRT folder: $fullCrtPath"
+
+                          # DLL 파일이 실제로 존재하는지 확인
+                          $dllFiles = Get-ChildItem -Path $fullCrtPath -Filter "*.dll"
+                          if ($dllFiles.Count -gt 0) {
+                              Write-Output "✅ Copying VC++ Redistributable DLLs from: $fullCrtPath"
+                              Copy-Item -Path "$fullCrtPath\*" -Destination "build/windows/x64/runner/Release" -Force
+                          } else {
+                              Write-Output "⚠️ Warning: No DLL files found in $fullCrtPath"
+                          }
                       } else {
-                          Write-Output "Warning: Could not find VC++ Redistributable DLLs in $latestRedistPath"
+                          Write-Output "⚠️ Warning: No 'Microsoft.VCxxx.CRT' folder found in $latestRedistPath"
                       }
                   } else {
-                      Write-Output "Warning: No Redistributable versions found in $vcRedistPath"
+                      Write-Output "⚠️ Warning: No Redistributable versions found in $vcRedistPath"
                   }
               } else {
-                  Write-Output "Error: Visual Studio installation not found after installation!"
+                  Write-Output "❌ Error: Visual Studio installation not found after installation!"
               }
           } else {
-              Write-Output "Error: vswhere.exe not found! Visual Studio installation might have failed."
+              Write-Output "❌ Error: vswhere.exe not found! Visual Studio installation might have failed."
           }
         shell: pwsh
 
