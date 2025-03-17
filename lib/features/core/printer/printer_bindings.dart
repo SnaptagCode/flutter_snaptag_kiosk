@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:ffi/ffi.dart';
+import 'package:flutter_snaptag_kiosk/features/core/printer/printer_status.dart';
 import 'package:flutter_snaptag_kiosk/features/core/printer/ribbon_status.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:image/image.dart' as img;
@@ -268,7 +269,7 @@ class PrinterBindings {
   }
 
   // getPrinterStatus 메서드 추가
-  PrinterStatus? getPrinterStatus(int machineId) {
+  (PrinterStatus?, int?) getPrinterStatus(int machineId) {
     final pChassisTemp = calloc<Int16>();
     final pPrintheadTemp = calloc<Int16>();
     final pHeaterTemp = calloc<Int16>();
@@ -279,9 +280,10 @@ class PrinterBindings {
     final pMainCode = calloc<Uint8>();
     final pSubCode = calloc<Uint8>();
     PrinterStatus? printerStatus;
+    int? result;
 
     try {
-      final result = _queryPrinterStatus(
+      result = _queryPrinterStatus(
         pChassisTemp,
         pPrintheadTemp,
         pHeaterTemp,
@@ -295,7 +297,7 @@ class PrinterBindings {
 
       if (result != 0) {
         logger.i('Query printer status failed with code: $result'); // 디버그용
-        return null; // null 반환으로 변경
+        return (null, result); // null 반환으로 변경
       }
 
       printerStatus = PrinterStatus(
@@ -305,14 +307,14 @@ class PrinterBindings {
         mainStatus: pMainStatus.value,
         errorStatus: pErrorStatus.value,
         warningStatus: pWarningStatus.value,
-        chassisTemperature: pChassisTemp.value,
-        printHeadTemperature: pPrintheadTemp.value,
-        heaterTemperature: pHeaterTemp.value,
+        chassisTemperature: pChassisTemp.value.toDouble() / 100,
+        printHeadTemperature: pPrintheadTemp.value.toDouble() / 100,
+        heaterTemperature: pHeaterTemp.value.toDouble() / 100,
         subStatus: pSubStatus.value,
       );
     } catch (e) {
       logger.i('Error in getPrinterStatus: $e'); // 디버그용
-      return null; // 예외 발생 시 null 반환
+      return (null, result); // 예외 발생 시 null 반환
     } finally {
       calloc.free(pChassisTemp);
       calloc.free(pPrintheadTemp);
@@ -325,7 +327,7 @@ class PrinterBindings {
       calloc.free(pSubCode);
     }
 
-    return printerStatus;
+    return (printerStatus, result);
   }
 
   // USB 초기화 메서드 추가

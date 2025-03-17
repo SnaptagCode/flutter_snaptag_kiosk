@@ -29,7 +29,8 @@ class PhotoCardUploadScreen extends ConsumerWidget {
         SizedBox(height: 12.h),
         Text(
           LocaleKeys.main_txt_01_03.tr(),
-          style: context.typography.kioskBody2B.copyWith(color: Color(int.parse(kiosk?.couponTextColor.replaceFirst('#', '0xff') ?? '0xffffff'))),
+          style: context.typography.kioskBody2B
+              .copyWith(color: Color(int.parse(kiosk?.couponTextColor.replaceFirst('#', '0xff') ?? '0xffffff'))),
         ),
         SizedBox(height: 30.h),
         Container(
@@ -58,8 +59,7 @@ class PhotoCardUploadScreen extends ConsumerWidget {
           ),
           onPressed: () async {
             await SoundManager().playSound();
-            PrintProcessRouteData().go(context);
-            // CodeVerificationRouteData().go(context);
+            CodeVerificationRouteData().go(context);
           },
         ),
       ],
