@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_snaptag_kiosk/features/core/printer/printer_iso.dart';
+import 'package:flutter_snaptag_kiosk/features/core/printer/printer_manager.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 
 class PrintFunctionTestWidget extends ConsumerWidget {
-  late final PrinterIso _printerIso;
+  late final PrinterManager _printerIso;
 
   PrintFunctionTestWidget({super.key});
 
@@ -18,7 +18,7 @@ class PrintFunctionTestWidget extends ConsumerWidget {
         children: [
           ElevatedButton(
             onPressed: () async {
-              _printerIso = PrinterIso();
+              _printerIso = PrinterManager();
 
               _printerIso.initializePrinter();
 
@@ -52,9 +52,7 @@ class PrintFunctionTestWidget extends ConsumerWidget {
           ),
           ElevatedButton(
             onPressed: () async {
-              final machinId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
-              logger.i("machindId: $machinId");
-              _printerIso.getPrinterLogData(machineId: machinId);
+              await ref.read(printerServiceProvider.notifier).startPrinterLogging();
             },
             child: Text('로깅'),
           ),
