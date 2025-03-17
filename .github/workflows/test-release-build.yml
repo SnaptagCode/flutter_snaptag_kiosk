@@ -30,6 +30,9 @@ jobs:
             flutter create .
           }
 
+      - name: Upgrade Flutter Packages
+        run: flutter pub upgrade
+
       - name: Install Dependencies
         run: flutter pub get
         
