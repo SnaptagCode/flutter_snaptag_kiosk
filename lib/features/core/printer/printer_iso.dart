@@ -13,8 +13,6 @@ class PrinterIso {
 
   Future<void> initializePrinter() async {
     try {
-      _bindings = PrinterBindings();
-
       // 1. 라이브러리 초기화 전에 이전 상태 정리
       _bindings.clearLibrary();
 
@@ -61,16 +59,6 @@ class PrinterIso {
 
       IsolateManager<PrintPath, void>()
           .runInIsolate(_printImageIsolate, PrintPath(frontPath: frontPath, backPath: rotatedRearPath));
-
-      // final receivePort = ReceivePort();
-      // await Isolate.spawn(_printImageIsolation, receivePort.sendPort);
-
-      // final sendPort = await receivePort.first as SendPort;
-      // final responsePort = ReceivePort();
-
-      // sendPort.send(PrintPath(frontPath: frontPath, backPath: rotatedRearPath));
-
-      // await responsePort.first;
     } catch (e, stack) {
       logger.i('Print error: $e\nStack: $stack');
       rethrow;
@@ -79,6 +67,9 @@ class PrinterIso {
 
   Future<void> _printImageIsolate(PrintPath printPath) async {
     try {
+      // 꼭 이 함수 안에서 객체를 초기화 해줘야 함.
+      _bindings = PrinterBindings();
+
       initializePrinter();
 
       printInit();
@@ -109,53 +100,6 @@ class PrinterIso {
       logger.i('_printImageIsolation error: $error\nStack: $stack');
     }
   }
-
-  // Future<void> _printImageIsolation(SendPort sendPort) async {
-  //   try {
-  //     final port = ReceivePort();
-  //     sendPort.send(port.sendPort);
-
-  //     port.listen((message) async {
-  //       if (message is PrintPath) {
-  //         initializePrinter();
-
-  //         printInit();
-
-  //         String? frontImageInfo;
-  //         String? behindImageInfo;
-
-  //         if (message.frontPath != null) {
-  //           frontImageInfo = await drawImage(path: message.frontPath!);
-  //         }
-
-  //         if (message.backPath != null) {
-  //           behindImageInfo = await drawImage(path: message.backPath!);
-  //         }
-
-  //         logger.i('5. Injecting card...');
-  //         _bindings.injectCard();
-
-  //         logger.i('6. Printing card...');
-  //         _bindings.printCard(
-  //           frontImageInfo: frontImageInfo,
-  //           backImageInfo: behindImageInfo,
-  //         );
-
-  //         logger.i('7. Ejecting card...');
-  //         _bindings.ejectCard();
-
-  //         sendPort.send(true);
-  //       }
-  //     }, onError: (error, stack) {
-  //       Exception("Error in printImageIsolation: $error\nStack: $stack");
-  //       logger.i('_printImageIsolation error: $error\nStack: $stack');
-  //     }, onDone: () {
-  //       logger.i('_printImageIsolation done');
-  //     });
-  //   } catch (e) {
-  //     rethrow;
-  //   }
-  // }
 
   void printInit() {
     try {
@@ -230,21 +174,22 @@ class PrinterIso {
   }
 
   // 프린터 상태 모니터링 메서드 추가
-
   String _commitCanvas() {
     final strPtr = calloc<ffi.Uint8>(200).cast<Utf8>();
     final lenPtr = calloc<ffi.Int32>()..value = 200;
+    String commitResult = "";
 
     try {
       final result = _bindings.commitCanvas(strPtr, lenPtr);
       if (result != 0) {
         throw Exception('Failed to commit canvas');
       }
-      return strPtr.toDartString();
+      commitResult = strPtr.toDartString();
     } finally {
       calloc.free(strPtr);
       calloc.free(lenPtr);
     }
+    return commitResult;
   }
 
   PrinterLog getPrinterLogData({required int machineId}) {

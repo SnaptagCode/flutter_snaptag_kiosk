@@ -52,12 +52,6 @@ class PrintFunctionTestWidget extends ConsumerWidget {
           ),
           ElevatedButton(
             onPressed: () async {
-              _printerIso.checkFeederStatus();
-            },
-            child: Text('카드 배출'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
               final machinId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
               logger.i("machindId: $machinId");
               _printerIso.getPrinterLogData(machineId: machinId);
