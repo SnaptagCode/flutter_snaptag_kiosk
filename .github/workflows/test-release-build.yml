@@ -86,12 +86,16 @@ jobs:
                   Write-Output "Found Visual Studio installation at: $vsInstallPath"
                   $vcRedistPath = "$vsInstallPath\VC\Redist\MSVC"
                   $latestRedistVersion = Get-ChildItem -Directory -Path $vcRedistPath | Sort-Object Name -Descending | Select-Object -First 1
-                  $latestRedistPath = "$vcRedistPath\$latestRedistVersion\x64\Microsoft.VC142.CRT"
-                  if (Test-Path $latestRedistPath) {
-                      Write-Output "Copying VC++ Redistributable DLLs from: $latestRedistPath"
-                      Copy-Item -Path "$latestRedistPath\*" -Destination "build/windows/x64/runner/Release" -Force
+                  if ($latestRedistVersion) {
+                      $latestRedistPath = Join-Path -Path $vcRedistPath -ChildPath "$($latestRedistVersion.Name)\x64\Microsoft.VC142.CRT"
+                      if (Test-Path $latestRedistPath) {
+                          Write-Output "Copying VC++ Redistributable DLLs from: $latestRedistPath"
+                          Copy-Item -Path "$latestRedistPath\*" -Destination "build/windows/x64/runner/Release" -Force
+                      } else {
+                          Write-Output "Warning: Could not find VC++ Redistributable DLLs in $latestRedistPath"
+                      }
                   } else {
-                      Write-Output "Warning: Could not find VC++ Redistributable DLLs in $latestRedistPath"
+                      Write-Output "Warning: No Redistributable versions found in $vcRedistPath"
                   }
               } else {
                   Write-Output "Error: Visual Studio installation not found after installation!"
