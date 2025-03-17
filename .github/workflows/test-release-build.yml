@@ -30,6 +30,12 @@ jobs:
             flutter create .
           }
 
+      - name: Create empty .env file if missing
+        run: |
+          if (-Not (Test-Path "assets/.env")) {
+            New-Item -Path assets/.env -ItemType File
+          }
+
       - name: Upgrade Flutter Packages
         run: flutter pub upgrade
 
@@ -49,6 +55,12 @@ jobs:
             -replace '<TreatWarningAsErrors>true</TreatWarningAsErrors>', '<TreatWarningAsErrors>false</TreatWarningAsErrors>' `
             | Set-Content windows/flutter/ephemeral/.plugin_symlinks/flutter_soloud/flutter_soloud_plugin.vcxproj
           }
+
+      - name: Ensure Windows project is clean
+        run: |
+          flutter clean
+          flutter create --platforms=windows .
+          flutter pub get
 
       - name: Build Windows Release
         run: flutter build windows --release
