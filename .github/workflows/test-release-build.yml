@@ -62,9 +62,6 @@ jobs:
           flutter create --platforms=windows .
           flutter pub get
 
-      - name: List Build Directory
-        run: Get-ChildItem -Path build/windows/runner -Recurse
-
       - name: Verify Build Artifacts Before Archiving
         run: |
           if (-Not (Test-Path "build/windows/runner/Release")) {
@@ -78,8 +75,11 @@ jobs:
       - name: Check Build Directory
         run: Get-ChildItem -Path build/windows/runner/ -Name
 
+      - name: List Build Directory
+        run: Get-ChildItem -Path build/windows/runner -Recurse
+
       - name: Archive Build
-        run: Compress-Archive -Path build\windows\runner\Release\* -DestinationPath test_release.zip
+        run: Compress-Archive -Path build/windows/x64/runner/Release/* -DestinationPath test_release.zip
 
       - name: Upload Release to GitHub
         uses: softprops/action-gh-release@v1
