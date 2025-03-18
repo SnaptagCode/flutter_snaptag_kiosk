@@ -10,6 +10,14 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:window_manager/window_manager.dart';
 
+class MyHttpOverrides extends HttpOverrides{
+  @override
+  HttpClient createHttpClient(SecurityContext? context){  // '?'를 추가해서 null safety 확보
+    return super.createHttpClient(context)
+      ..badCertificateCallback = (X509Certificate cert, String host, int port)=> true;
+  }
+}
+
 void main() async {
   if (kDebugMode) {
     F.appFlavor = Flavor.dev;
@@ -56,6 +64,7 @@ void main() async {
       slackCall.sendLogToSlack("[ZONE ERROR] $error\nStackTrace: $stackTrace");
     },
   );
+  HttpOverrides.global = MyHttpOverrides();
 }
 
 Future<void> windowManagerSetting() async {
