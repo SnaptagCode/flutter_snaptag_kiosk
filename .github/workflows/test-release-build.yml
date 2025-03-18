@@ -80,45 +80,6 @@ jobs:
           echo "Debug Build:"
           Get-ChildItem -Path build/windows/x64/runner/Debug -Name
 
-      - name: Install Visual Studio Build Tools if Missing & Copy VC++ Redistributable
-        run: |
-          $vswherePath = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
-
-          if (-Not (Test-Path $vswherePath)) {
-              Write-Output "Visual Studio is not installed! Installing Visual Studio Build Tools..."
-              $vsInstallerUrl = "https://aka.ms/vs/17/release/vs_BuildTools.exe"
-              $vsInstallerPath = "$env:TEMP\vs_BuildTools.exe"
-              Invoke-WebRequest -Uri $vsInstallerUrl -OutFile $vsInstallerPath
-              Start-Process -FilePath $vsInstallerPath -ArgumentList "--quiet --wait --norestart --nocache --installPath C:\BuildTools --add Microsoft.VisualStudio.Workload.VCTools" -NoNewWindow -Wait
-              Write-Output "Visual Studio Build Tools installation completed!"
-          }
-
-          if (Test-Path $vswherePath)) {
-              $vsInstallPath = & $vswherePath -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
-              if ($vsInstallPath) {
-                  Write-Output "Found Visual Studio installation at: $vsInstallPath"
-                  $vcRedistPath = "$vsInstallPath\VC\Redist\MSVC"
-                  $latestRedistVersion = Get-ChildItem -Directory -Path $vcRedistPath | Sort-Object Name -Descending | Select-Object -First 1
-                  if ($latestRedistVersion) {
-                      $latestRedistPath = Join-Path -Path $vcRedistPath -ChildPath "$($latestRedistVersion.Name)\x64\Microsoft.VC143.CRT"
-                      if (Test-Path $latestRedistPath) {
-                          Write-Output "Copying VC++ Redistributable DLLs from: $latestRedistPath"
-                          Copy-Item -Path "$latestRedistPath\*" -Destination "build/windows/x64/runner/Release" -Force
-                          Copy-Item -Path "$latestRedistPath\*" -Destination "build/windows/x64/runner/Debug" -Force
-                      } else {
-                          Write-Output "Warning: Could not find VC++ Redistributable DLLs in $latestRedistPath"
-                      }
-                  } else {
-                      Write-Output "Warning: No Redistributable versions found in $vcRedistPath"
-                  }
-              } else {
-                  Write-Output "Error: Visual Studio installation not found after installation!"
-              }
-          } else {
-              Write-Output "Error: vswhere.exe not found! Visual Studio installation might have failed."
-          }
-        shell: pwsh
-
       - name: Archive Release and Debug Build
         run: |
           Compress-Archive -Path build/windows/x64/runner/Release/* -DestinationPath test_release.zip
