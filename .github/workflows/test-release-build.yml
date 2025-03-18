@@ -28,12 +28,10 @@ jobs:
           flutter create --platforms=windows .
           flutter pub get
 
-      - name: Create .env file with default content if missing
+      - name: Create .env file with SLACK_WEBHOOK_URL
         run: |
           $envFilePath = "assets/.env"
-          if (-Not (Test-Path $envFilePath)) {
-              "a" | Set-Content -Path $envFilePath
-          }
+          "SLACK_WEBHOOK_URL=${{ secrets.SLACK_WEBHOOK_URL }}" | Set-Content -Path $envFilePath
 
       - name: Upgrade Flutter Packages
         run: flutter pub upgrade
@@ -69,6 +67,11 @@ jobs:
             exit 1
           }
 
+      - name: Copy .env file to Build Directories
+        run: |
+          Copy-Item -Path "assets/.env" -Destination "build/windows/x64/runner/Release" -Force
+          Copy-Item -Path "assets/.env" -Destination "build/windows/x64/runner/Debug" -Force
+
       - name: Check Build Directory
         run: |
           echo "Release Build:"
@@ -90,7 +93,7 @@ jobs:
               Write-Output "Visual Studio Build Tools installation completed!"
           }
 
-          if (Test-Path $vswherePath) {
+          if (Test-Path $vswherePath)) {
               $vsInstallPath = & $vswherePath -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
               if ($vsInstallPath) {
                   Write-Output "Found Visual Studio installation at: $vsInstallPath"
