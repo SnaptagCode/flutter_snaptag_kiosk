@@ -1,0 +1,98 @@
+name: Test Release and Debug Build (Windows)
+
+on:
+  push:
+    tags:
+      - 'test-v*' # test-v로 시작하는 태그에서 실행(실 버전에서는 v* 로)
+  workflow_dispatch: # 수동 실행도 가능하게 설정
+
+jobs:
+  build:
+    if: startsWith(github.ref, 'refs/tags/test-v')
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.29.1' # Flutter 버전에 맞게 수정
+          channel: stable
+
+      - name: Clean and Setup Windows Build
+        run: |
+          flutter clean
+          flutter config --enable-windows-desktop
+          flutter create --platforms=windows .
+          flutter pub get
+
+      - name: Create .env file with SLACK_WEBHOOK_URL
+        run: |
+          $envFilePath = "assets/.env"
+          "SLACK_WEBHOOK_URL=${{ secrets.SLACK_WEBHOOK_URL }}" | Set-Content -Path $envFilePath
+
+      - name: Upgrade Flutter Packages
+        run: flutter pub upgrade
+
+      - name: Run Build Runner
+        run: flutter pub run build_runner build --delete-conflicting-outputs
+
+      - name: Add CMake warning suppression flags
+        run: echo 'set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /WX-")' >> windows/CMakeLists.txt
+
+      - name: Disable "Treat Warnings As Errors" for vcxproj
+        run: |
+          if (Test-Path "windows/flutter/ephemeral/.plugin_symlinks/flutter_soloud/flutter_soloud_plugin.vcxproj") {
+            (Get-Content windows/flutter/ephemeral/.plugin_symlinks/flutter_soloud/flutter_soloud_plugin.vcxproj) `
+            -replace '<TreatWarningAsErrors>true</TreatWarningAsErrors>', '<TreatWarningAsErrors>false</TreatWarningAsErrors>' `
+            | Set-Content windows/flutter/ephemeral/.plugin_symlinks/flutter_soloud/flutter_soloud_plugin.vcxproj
+          }
+
+      - name: Build Windows Release
+        run: flutter build windows --release
+
+      - name: Build Windows Debug
+        run: flutter build windows --debug
+
+      - name: Verify Build Artifacts Before Archiving
+        run: |
+          if (-Not (Test-Path "build/windows/x64/runner/Release")) {
+            echo "Error: Release folder does not exist!"
+            exit 1
+          }
+          if (-Not (Test-Path "build/windows/x64/runner/Debug")) {
+            echo "Error: Debug folder does not exist!"
+            exit 1
+          }
+
+      - name: Copy .env file to Build Directories
+        run: |
+          Copy-Item -Path "assets/.env" -Destination "build/windows/x64/runner/Release" -Force
+          Copy-Item -Path "assets/.env" -Destination "build/windows/x64/runner/Debug" -Force
+
+      - name: Check Build Directory
+        run: |
+          echo "Release Build:"
+          Get-ChildItem -Path build/windows/x64/runner/Release -Name
+          
+          echo "Debug Build:"
+          Get-ChildItem -Path build/windows/x64/runner/Debug -Name
+
+      - name: Archive Release and Debug Build
+        run: |
+          Compress-Archive -Path build/windows/x64/runner/Release/* -DestinationPath test_release.zip
+          Compress-Archive -Path build/windows/x64/runner/Debug/* -DestinationPath test_debug.zip
+
+      - name: Upload Release and Debug to GitHub
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            test_release.zip
+            test_debug.zip
+          body: "Automated test release and debug build for Windows."
+          tag_name: ${{ github.ref_name }}
+          name: "Test Release & Debug - ${{ github.ref_name }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
