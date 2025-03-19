@@ -17,6 +17,7 @@
   "sub03_txt_03": "出力が完了するまでカードを抜かないでください！",
   "alert_title_print_complete": "出力完了",
   "alert_txt_print_complete": "フォトカードの出力が完了しました。\r\n下のフォトカード\r\nを受け取るところからカードを受け取ってください。\r\nありがとうございます。",
+  "alert_txt_print_complete_02": "3秒後に自動的にポップアップが終了します。",
   "alert_btn_print_complete": "確認",
   "alert_title_purchase_failure": "購入失敗",
   "alert_txt_purchase_failure": "購入が正常に完了しませんでした。\r\n再度お試しください。",

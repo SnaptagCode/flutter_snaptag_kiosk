@@ -17,7 +17,8 @@ sub03_txt_02	카드가 출력되기까지 약 1분 정도의 시간이 소요됩
 sub03_txt_03	출력이 완료될 때까지 카드를 뽑지 말아 주세요!	出力が完了するまでカードを抜かないでください！	Don't pick the card until the output is completed!	打印完成前请勿拔出卡片！
 alert_title_print_complete	출력 완료	出力完了	Print Completed	打印完成
 alert_txt_print_complete	포토카드 출력이 완료되었습니다.\r\n아래 포토카드 받는 곳에서 카드를 받아 가세요.\r\n감사합니다.	フォトカードの出力が完了しました。\r\n下のフォトカード\r\nを受け取るところからカードを受け取ってください。\r\nありがとうございます。	Your photo card has been printed!\r\nPlease check the output tray below.\r\nThank you!	您的照片卡已打印！\r\n请检查下面的输出托盘。\r\n谢谢！
-alert_btn_print_complete	확인	確認	OK	确定
+alert_txt_print_complete_02	3초 후 자동으로 팝업이 종료됩니다.	3秒後に自動的にポップアップが終了します。	The popup will be closed automatically after 3 seconds.	弹出窗口将在 3 秒后自动关闭。
+alert_btn_print_complete    확인	確認	OK	确定
 alert_title_purchase_failure	결제 실패	購入失敗	Payment Failed	支付失败
 alert_txt_purchase_failure	결제가 정상적으로 완료되지 않았습니다.\r\n다시 시도해 주세요.	購入が正常に完了しませんでした。\r\n再度お試しください。	The payment was not completed normally.\r\nPlease try again.	支付未正常完成。\r\n请再试一次。
 alert_btn_purchase_failure	돌아가기	戻る	Back	返回
