@@ -217,7 +217,8 @@ class DialogHelper {
     );
   }
 
-  static Future<void> showPrintCompleteDialog( //3초 후 자동으로 닫히고 QR 화면으로 이동
+  /*    2.2.1 이하 버전용
+  static Future<void> showPrintCompleteDialog( //2초 후 자동으로 닫히고 QR 화면으로 이동
     BuildContext context, {
     VoidCallback? onButtonPressed,
   }) async {
@@ -235,7 +236,116 @@ class DialogHelper {
       buttonText: LocaleKeys.alert_btn_print_complete.tr(),
       onButtonPressed: onButtonPressed,
     );
+  }*/
+
+  // 2.3.0 이후 개편
+  static Future<void> showPrintCompleteDialog(
+      BuildContext context, {
+        VoidCallback? onButtonPressed,
+      }) async {
+    int countdown = 3;
+
+    await showDialog(
+      context: context,
+      barrierDismissible: false, // 사용자가 임의로 닫지 못하도록 설정
+      builder: (BuildContext dialogContext) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+
+            void startCountdown() {
+              Future.delayed(const Duration(seconds: 1), () {
+                if (countdown > 1) {
+                  setState(() {
+                    countdown--;
+                  });
+                  startCountdown(); // 재귀적으로 호출하여 1초마다 감소
+                } else {
+                  if (Navigator.of(dialogContext).canPop()) {
+                    PhotoCardUploadRouteData().go(dialogContext);
+                    Navigator.of(dialogContext).pop();
+                  }
+                }
+              });
+            }
+
+            if (countdown == 3) startCountdown();
+
+            return AlertDialog(
+              backgroundColor: Colors.white,
+              insetPadding: EdgeInsets.symmetric(horizontal: 100.w),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20.r),
+              ),
+              title: Center(
+                child: Text(
+                  LocaleKeys.alert_title_print_complete.tr(),
+                  style: context.typography.kioskAlert1B.copyWith(
+                    color: Colors.black,
+                  ),
+                ),
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    LocaleKeys.alert_txt_print_complete.tr(),
+                    style: context.typography.kioskAlert2M.copyWith(
+                      color: Colors.black,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 10),
+                  Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Image.asset(
+                        'assets/images/alert_bufferring_bw.png', // ✅ 배경 이미지 경로
+                        width: 144.w, // 크기 조정
+                        height: 144.h,
+                        fit: BoxFit.cover,
+                      ),
+                      Text(
+                        '$countdown',
+                        style: const TextStyle(
+                          fontSize: 42, // 폰트 크기 키움
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black, // 글자 색상
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    LocaleKeys.alert_txt_print_complete_02.tr(),
+                    style: context.typography.kioskBody2B.copyWith(
+                    color: Color(0xFFADADAD),
+                  ),
+                  ),
+                ],
+              ),
+              actions: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.of(dialogContext).pop();
+                          onButtonPressed?.call();
+                        },
+                        style: context.dialogButtonStyle,
+                        child: Text(LocaleKeys.alert_btn_print_complete.tr()),
+                      ),
+                    ),
+                  ],
+                )
+              ],
+            );
+          },
+        );
+      },
+    );
   }
+
 
   static Future<void> showErrorDialog(BuildContext context) async {
     await _showOneButtonKioskDialog(

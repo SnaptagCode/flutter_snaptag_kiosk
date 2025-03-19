@@ -17,6 +17,7 @@
   "sub03_txt_03": "출력이 완료될 때까지 카드를 뽑지 말아 주세요!",
   "alert_title_print_complete": "출력 완료",
   "alert_txt_print_complete": "포토카드 출력이 완료되었습니다.\r\n아래 포토카드 받는 곳에서 카드를 받아 가세요.\r\n감사합니다.",
+  "alert_txt_print_complete_02": "3초 후 자동으로 팝업이 종료됩니다.",
   "alert_btn_print_complete": "확인",
   "alert_title_purchase_failure": "결제 실패",
   "alert_txt_purchase_failure": "결제가 정상적으로 완료되지 않았습니다.\r\n결제 수단을 확인하거나 홈으로 이동해 주세요.",

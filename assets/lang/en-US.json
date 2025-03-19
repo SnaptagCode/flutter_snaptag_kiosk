@@ -17,6 +17,7 @@
   "sub03_txt_03": "Don't pick the card until the output is completed!",
   "alert_title_print_complete": "Print Completed",
   "alert_txt_print_complete": "Your photo card has been printed!\r\nPlease check the output tray below.\r\nThank you!",
+  "alert_txt_print_complete_02": "The popup will be closed automatically after 3 seconds.",
   "alert_btn_print_complete": "OK",
   "alert_title_purchase_failure": "Payment Failed",
   "alert_txt_purchase_failure": "The payment was not completed normally.\r\nPlease try again.",
