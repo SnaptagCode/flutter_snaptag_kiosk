@@ -12,12 +12,10 @@ class PhotoCardPreviewScreen extends ConsumerStatefulWidget {
     super.key,
   });
   @override
-  ConsumerState<PhotoCardPreviewScreen> createState() =>
-      _PhotoCardPreviewScreenState();
+  ConsumerState<PhotoCardPreviewScreen> createState() => _PhotoCardPreviewScreenState();
 }
 
-class _PhotoCardPreviewScreenState
-    extends ConsumerState<PhotoCardPreviewScreen> {
+class _PhotoCardPreviewScreenState extends ConsumerState<PhotoCardPreviewScreen> {
   Future<void> _handlePaymentError(Object error, StackTrace stack) async {
     logger.e('Payment error occurred', error: error, stackTrace: stack);
     await DialogHelper.showPurchaseFailedDialog(
@@ -109,9 +107,7 @@ class _PhotoCardPreviewScreenState
                 style: context.paymentButtonStyle,
                 onPressed: () async {
                   await SoundManager().playSound();
-                  ref
-                      .read(photoCardPreviewScreenProviderProvider.notifier)
-                      .payment();
+                  ref.read(photoCardPreviewScreenProviderProvider.notifier).payment();
                 },
                 child: Text(LocaleKeys.sub02_btn_pay.tr()),
               ),
@@ -119,8 +115,9 @@ class _PhotoCardPreviewScreenState
           ),
           SizedBox(height: 30.h),
           Text(
-              LocaleKeys.sub03_txt_03.tr(),
-              style: context.typography.kioskBody2B.copyWith(color: Color(int.parse(kiosk?.couponTextColor.replaceFirst('#', '0xff') ?? '0xffffff'))),
+            LocaleKeys.sub03_txt_03.tr(),
+            style: context.typography.kioskBody2B
+                .copyWith(color: Color(int.parse(kiosk?.couponTextColor.replaceFirst('#', '0xff') ?? '0xffffff'))),
           ),
         ],
       ),

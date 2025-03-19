@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_snaptag_kiosk/features/presentation/providers/screens/printing_state.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 
@@ -68,7 +69,7 @@ class KioskShell extends ConsumerWidget {
                 ),
                 child: Stack(
                   children: [
-                    if (ref.watch(printProcessScreenProviderProvider).isLoading)
+                    if (ref.watch(printingStateProvider))
                       Image.asset(
                         SnaptagImages.printLoadingGIF,
                         fit: BoxFit.fill,
