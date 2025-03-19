@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_snaptag_kiosk/features/presentation/providers/screens/printing_state.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 
 class PrintProcessScreen extends ConsumerStatefulWidget {
@@ -35,6 +36,7 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
         context.loaderOverlay.hide();
       }
        */
+      ref.read(printingStateProvider.notifier).updatePrinting(false);
 
       if (!next.isLoading) {
         // 로딩이 아닐 때만 처리
@@ -92,7 +94,8 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
           Text(
             LocaleKeys.sub03_txt_03.tr(),
             textAlign: TextAlign.center,
-            style: context.typography.kioskBody2B.copyWith(color: Color(int.parse(kiosk?.couponTextColor.replaceFirst('#', '0xff') ?? '0xffffff'))),
+            style: context.typography.kioskBody2B
+                .copyWith(color: Color(int.parse(kiosk?.couponTextColor.replaceFirst('#', '0xff') ?? '0xffffff'))),
           ),
         ],
       ),
