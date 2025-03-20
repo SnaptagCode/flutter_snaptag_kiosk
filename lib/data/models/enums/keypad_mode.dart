@@ -1,0 +1,1 @@
+enum ModeType {event, admin}

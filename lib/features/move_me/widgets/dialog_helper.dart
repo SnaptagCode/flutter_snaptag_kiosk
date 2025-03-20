@@ -5,6 +5,7 @@ import 'package:flutter_snaptag_kiosk/core/utils/sound_manager.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_snaptag_kiosk/features/move_me/widgets/code_keypad.dart';
 
 ///
 /// [Figma](https://www.figma.com/design/8IDM2KJtqAYWm2IsmytU5W/%ED%82%A4%EC%98%A4%EC%8A%A4%ED%81%AC_%EB%94%94%EC%9E%90%EC%9D%B8_%EA%B3%B5%EC%9C%A0%EC%9A%A9?node-id=943-15366&m=dev)
@@ -13,6 +14,7 @@ import 'package:go_router/go_router.dart';
 /// - `title` : #000000
 /// - `message` : #000000
 ///
+
 class DialogHelper {
   static Future<bool> showRefundFailDialog(
     BuildContext context,
@@ -215,10 +217,18 @@ class DialogHelper {
     );
   }
 
-  static Future<void> showPrintCompleteDialog(
+  /*    2.2.1 이하 버전용
+  static Future<void> showPrintCompleteDialog( //2초 후 자동으로 닫히고 QR 화면으로 이동
     BuildContext context, {
     VoidCallback? onButtonPressed,
   }) async {
+    Future.delayed(const Duration(seconds: 2), () {
+
+      if (Navigator.of(context, rootNavigator: true).canPop()) {
+        PhotoCardUploadRouteData().go(context);
+        Navigator.of(context, rootNavigator: true).pop();
+      }
+    });
     await _showOneButtonKioskDialog(
       context,
       title: LocaleKeys.alert_title_print_complete.tr(),
@@ -226,7 +236,116 @@ class DialogHelper {
       buttonText: LocaleKeys.alert_btn_print_complete.tr(),
       onButtonPressed: onButtonPressed,
     );
+  }*/
+
+  // 2.3.0 이후 개편
+  static Future<void> showPrintCompleteDialog(
+      BuildContext context, {
+        VoidCallback? onButtonPressed,
+      }) async {
+    int countdown = 3;
+
+    await showDialog(
+      context: context,
+      barrierDismissible: false, // 사용자가 임의로 닫지 못하도록 설정
+      builder: (BuildContext dialogContext) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+
+            void startCountdown() {
+              Future.delayed(const Duration(seconds: 1), () {
+                if (countdown > 1) {
+                  setState(() {
+                    countdown--;
+                  });
+                  startCountdown(); // 재귀적으로 호출하여 1초마다 감소
+                } else {
+                  if (Navigator.of(dialogContext).canPop()) {
+                    PhotoCardUploadRouteData().go(dialogContext);
+                    Navigator.of(dialogContext).pop();
+                  }
+                }
+              });
+            }
+
+            if (countdown == 3) startCountdown();
+
+            return AlertDialog(
+              backgroundColor: Colors.white,
+              insetPadding: EdgeInsets.symmetric(horizontal: 100.w),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20.r),
+              ),
+              title: Center(
+                child: Text(
+                  LocaleKeys.alert_title_print_complete.tr(),
+                  style: context.typography.kioskAlert1B.copyWith(
+                    color: Colors.black,
+                  ),
+                ),
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    LocaleKeys.alert_txt_print_complete.tr(),
+                    style: context.typography.kioskAlert2M.copyWith(
+                      color: Colors.black,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 10),
+                  Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Image.asset(
+                        'assets/images/alert_bufferring_bw.png', // ✅ 배경 이미지 경로
+                        width: 144.w, // 크기 조정
+                        height: 144.h,
+                        fit: BoxFit.cover,
+                      ),
+                      Text(
+                        '$countdown',
+                        style: const TextStyle(
+                          fontSize: 42, // 폰트 크기 키움
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black, // 글자 색상
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    LocaleKeys.alert_txt_print_complete_02.tr(),
+                    style: context.typography.kioskBody2B.copyWith(
+                    color: Color(0xFFADADAD),
+                  ),
+                  ),
+                ],
+              ),
+              actions: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.of(dialogContext).pop();
+                          onButtonPressed?.call();
+                        },
+                        style: context.dialogButtonStyle,
+                        child: Text(LocaleKeys.alert_btn_print_complete.tr()),
+                      ),
+                    ),
+                  ],
+                )
+              ],
+            );
+          },
+        );
+      },
+    );
   }
+
 
   static Future<void> showErrorDialog(BuildContext context) async {
     await _showOneButtonKioskDialog(
@@ -258,4 +377,49 @@ class DialogHelper {
       onButtonPressed: onButtonPressed,
     );
   }
+
+  static Future<String?> showKeypadDialog(
+      BuildContext context, {
+        required ModeType mode,
+      }) async {
+    return await showDialog<String>(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Colors.white,
+          insetPadding: EdgeInsets.symmetric(horizontal: 100.w),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20.r),
+          ),
+          content: SizedBox(
+            width: 418.w,
+            height: 600.h,
+            child: AuthCodeKeypad(
+              mode: mode,
+              onCompleted: (code) {
+                print("입력된 코드: $code");
+                Navigator.pop(context, code);
+              },
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+/* Admin 패스워드 실패시 다이얼로그
+  static Future<void> showAdminFailDialog(
+      BuildContext context, {
+        VoidCallback? onButtonPressed,
+      }) async {
+    await _showOneButtonKioskDialog(
+      context,
+      title: '비밀번호 오류',
+      message: '비밀번호를 다시 입력해주세요',
+      buttonText: LocaleKeys.alert_btn_print_complete.tr(),
+      onButtonPressed: onButtonPressed,
+    );
+  }
+ */
 }

@@ -34,6 +34,7 @@ class LocalizationTextTestWidget extends StatelessWidget {
         _buildLocalizedCard(LocaleKeys.sub03_txt_02),
         _buildLocalizedCard(LocaleKeys.alert_title_print_complete),
         _buildLocalizedCard(LocaleKeys.alert_txt_print_complete),
+        _buildLocalizedCard(LocaleKeys.alert_txt_print_complete_02),
         _buildLocalizedCard(LocaleKeys.alert_btn_print_complete),
         _buildLocalizedCard(LocaleKeys.alert_title_purchase_failure),
         _buildLocalizedCard(LocaleKeys.alert_txt_purchase_failure),

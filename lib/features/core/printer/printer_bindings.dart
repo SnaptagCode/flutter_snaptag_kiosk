@@ -168,10 +168,10 @@ class PrinterBindings {
 
   // 인쇄 함수
   void printCard({
-    required String frontImageInfo,
+    required String? frontImageInfo,
     String? backImageInfo,
   }) {
-    final frontPointer = frontImageInfo.toNativeUtf8();
+    final frontPointer = frontImageInfo?.toNativeUtf8() ?? nullptr;
     final backPointer = backImageInfo?.toNativeUtf8() ?? nullptr;
     try {
       final result = _printDraw(frontPointer, backPointer);

@@ -16,8 +16,10 @@ abstract class LocaleKeys {
   static const sub02_btn_pay = 'sub02_btn_pay';
   static const sub03_txt_01 = 'sub03_txt_01';
   static const sub03_txt_02 = 'sub03_txt_02';
+  static const sub03_txt_03 = 'sub03_txt_03';
   static const alert_title_print_complete = 'alert_title_print_complete';
   static const alert_txt_print_complete = 'alert_txt_print_complete';
+  static const alert_txt_print_complete_02 = 'alert_txt_print_complete_02';
   static const alert_btn_print_complete = 'alert_btn_print_complete';
   static const alert_title_purchase_failure = 'alert_title_purchase_failure';
   static const alert_txt_purchase_failure = 'alert_txt_purchase_failure';

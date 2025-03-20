@@ -14,6 +14,7 @@
   "sub02_btn_pay": "立即支付",
   "sub03_txt_01": "照片卡正在打印中。请稍候。",
   "sub03_txt_02": "卡片打印大约需要1分钟。",
+  "sub03_txt_03": "打印完成前请勿拔出卡片！",
   "alert_title_print_complete": "打印完成",
   "alert_txt_print_complete": "您的照片卡已打印！\r\n请检查下面的输出托盘。\r\n谢谢！",
   "alert_btn_print_complete": "确定",
