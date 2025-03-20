@@ -47,13 +47,13 @@ class PrinterManager {
     required File? frontFile,
     required File? embeddedFile,
   }) async {
+    String? frontPath = frontFile?.path;
+    String? rotatedRearPath;
+
     try {
       if (frontFile == null && embeddedFile == null) {
         throw Exception('There is nothing to print');
       }
-
-      String? frontPath = frontFile?.path;
-      String? rotatedRearPath;
 
       if (embeddedFile != null) {
         rotatedRearPath = await rearImage(file: embeddedFile);
@@ -64,6 +64,14 @@ class PrinterManager {
     } catch (e, stack) {
       logger.i('Print error: $e\nStack: $stack');
       rethrow;
+    } finally {
+      if (rotatedRearPath != null) {
+        final rotatedFile = File(rotatedRearPath);
+        if (await rotatedFile.exists()) {
+          await rotatedFile.delete();
+          logger.i('✅ 임시 파일 삭제 완료: $rotatedRearPath');
+        }
+      }
     }
   }
 
@@ -145,7 +153,11 @@ class PrinterManager {
     // 임시 파일로 저장
     final temp = DateTime.now().millisecondsSinceEpoch.toString();
     final rotatedRearPath = '${temp}_rotated.png';
-    await File(rotatedRearPath).writeAsBytes(rotatedRearImage);
+    final newFile = await File(rotatedRearPath).writeAsBytes(rotatedRearImage);
+
+    // ✅ 강제로 파일 스트림 닫기 (Windows에서 파일 잠김 방지)
+    file.openRead().drain();
+    newFile.openRead().drain();
 
     return rotatedRearPath;
   }
