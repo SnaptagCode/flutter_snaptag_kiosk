@@ -231,11 +231,7 @@ class PrinterManager {
     // 임시 파일로 저장
     final temp = DateTime.now().millisecondsSinceEpoch.toString();
     final rotatedRearPath = '${temp}_rotated.png';
-    final newFile = await File(rotatedRearPath).writeAsBytes(rotatedRearImage);
-
-    // ✅ 강제로 파일 스트림 닫기 (Windows에서 파일 잠김 방지)
-    file.openRead().drain();
-    newFile.openRead().drain();
+    await File(rotatedRearPath).writeAsBytes(rotatedRearImage);
 
     return rotatedRearPath;
   }
@@ -294,6 +290,10 @@ class PrinterManager {
     return commitResult;
   }
 
+  bool existPrint() {
+    return true;
+  }
+
   Future<PrinterLog> backgroundPrinterLogTask(int machineId) async {
     final result = await IsolateManager<int, PrinterLog>().runInIsolate(getPrinterLogData, machineId);
     return result ?? PrinterLog();
@@ -313,16 +313,25 @@ class PrinterManager {
       final ribbonStatus = bindings.getRbnAndFilmRemaining();
       final isPrintingNow = bindings.checkCardPosition();
       final isFeederEmpty = !bindings.checkFeederStatus();
-      final errorMsg = printerStatus.$2 == null ? '' : bindings.getErrorInfo(printerStatus.$2 ?? 0);
+      // final errorMsg = printerStatus.$2 == null ? '' : bindings.getErrorInfo(printerStatus.$2 ?? 0);
       logger.i(
           'Printer status: $printerStatus, machineId: $machineId ribbon status: $ribbonStatus, isPrintingNow: $isPrintingNow, isFeederEmpty: $isFeederEmpty');
 
       return PrinterLog(
-          printerStatus: printerStatus.$1,
-          ribbonStatus: ribbonStatus,
+          kioskMachineId: machineId,
+          sdkMainCode: (printerStatus.$1?.mainCode ?? 0).toString(),
+          sdkSubCode: (printerStatus.$1?.mainCode ?? 0).toString(),
+          printerMainStatusCode: (printerStatus.$1?.mainStatus ?? 0).toString(),
+          printerErrorStatusCode: (printerStatus.$1?.errorStatus ?? 0).toString(),
+          printerWarningStatusCode: (printerStatus.$1?.warningStatus ?? 0).toString(),
+          chassisTemperature: printerStatus.$1?.chassisTemperature ?? 0,
+          printHeadTemperature: printerStatus.$1?.printHeadTemperature ?? 0,
+          heaterTemperature: printerStatus.$1?.heaterTemperature ?? 0,
+          rbnRemainingRatio: ribbonStatus?.rbnRemaining ?? 0,
+          filmRemainingRatio: ribbonStatus?.filmRemaining ?? 0,
           isPrintingNow: isPrintingNow,
           isFeederEmpty: isFeederEmpty,
-          errorMsg: errorMsg);
+          sdkErrorMessage: '');
     } catch (e) {
       logger.i('getPrinterLogData error: $e');
     }

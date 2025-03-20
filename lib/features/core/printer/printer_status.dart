@@ -12,9 +12,9 @@ class PrinterStatus with _$PrinterStatus {
     required int mainStatus,
     required int errorStatus,
     required int warningStatus,
-    required double chassisTemperature,
-    required double printHeadTemperature,
-    required double heaterTemperature,
+    required int chassisTemperature,
+    required int printHeadTemperature,
+    required int heaterTemperature,
     required int subStatus,
   }) = _PrinterStatus;
 

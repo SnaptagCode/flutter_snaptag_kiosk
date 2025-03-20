@@ -36,7 +36,7 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
         context.loaderOverlay.hide();
       }
        */
-      ref.read(printingStateProvider.notifier).updatePrinting(false);
+      ref.read(printingStateProvider.notifier).updatePrinting(next.isLoading);
 
       if (!next.isLoading) {
         // 로딩이 아닐 때만 처리

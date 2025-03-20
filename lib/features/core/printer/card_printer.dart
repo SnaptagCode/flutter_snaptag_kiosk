@@ -3,7 +3,9 @@ import 'dart:async';
 import 'dart:io';
 
 // Utf8 사용을 위한 임포트
+import 'package:flutter_snaptag_kiosk/core/utils/logger_service.dart';
 import 'package:flutter_snaptag_kiosk/data/datasources/cache/cache.dart';
+import 'package:flutter_snaptag_kiosk/data/repositories/kiosk_repository.dart';
 import 'package:flutter_snaptag_kiosk/features/core/printer/printer_manager.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -21,8 +23,13 @@ class PrinterService extends _$PrinterService {
 
   Future<void> startPrinterLogging() async {
     final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
-    _timer = Timer.periodic(Duration(seconds: 10), (timer) async {
-      final printerLogo = await _printerIso.backgroundPrinterLogTask(machineId);
+    _timer ??= Timer.periodic(Duration(seconds: 10), (timer) async {
+      if (_printerIso.existPrint()) {
+        final printerLogo = await _printerIso.backgroundPrinterLogTask(machineId);
+        logger.i('printerLogo: $printerLogo');
+
+        await ref.read(kioskRepositoryProvider).updatePrintLog(request: printerLogo);
+      }
     });
   }
 

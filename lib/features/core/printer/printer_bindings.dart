@@ -307,9 +307,9 @@ class PrinterBindings {
         mainStatus: pMainStatus.value,
         errorStatus: pErrorStatus.value,
         warningStatus: pWarningStatus.value,
-        chassisTemperature: pChassisTemp.value.toDouble() / 100,
-        printHeadTemperature: pPrintheadTemp.value.toDouble() / 100,
-        heaterTemperature: pHeaterTemp.value.toDouble() / 100,
+        chassisTemperature: pChassisTemp.value,
+        printHeadTemperature: pPrintheadTemp.value,
+        heaterTemperature: pHeaterTemp.value,
         subStatus: pSubStatus.value,
       );
     } catch (e) {
