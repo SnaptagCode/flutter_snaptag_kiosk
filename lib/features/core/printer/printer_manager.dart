@@ -2,12 +2,14 @@ import 'dart:async';
 import 'dart:ffi';
 import 'dart:io';
 import 'dart:ffi' as ffi; // ffi 임포트 확인
+import 'dart:typed_data';
 import 'package:ffi/ffi.dart'; // Utf8 사용을 위한 임포트
 import 'package:flutter_snaptag_kiosk/core/isolate/isolate_manager.dart';
 import 'package:flutter_snaptag_kiosk/features/core/printer/print_path.dart';
 import 'package:flutter_snaptag_kiosk/features/core/printer/printer_log.dart';
 import 'package:flutter_snaptag_kiosk/features/core/printer/ribbon_status.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
+import 'package:image/image.dart' as img;
 
 class PrinterManager {
   late PrinterBindings _bindings;
@@ -71,6 +73,89 @@ class PrinterManager {
           await rotatedFile.delete();
           logger.i('✅ 임시 파일 삭제 완료: $rotatedRearPath');
         }
+      }
+    }
+  }
+
+  Future<void> printImageTest({
+    required File? frontFile,
+    required File? embeddedFile,
+  }) async {
+    String? frontPath = frontFile?.path;
+    String? rotatedRearPath;
+
+    try {
+      if (frontFile == null && embeddedFile == null) {
+        throw Exception('There is nothing to print');
+      }
+
+      if (embeddedFile != null) {
+        rotatedRearPath = await rearImage(file: embeddedFile);
+      }
+      _printImageIsolate(PrintPath(frontPath: frontPath, backPath: rotatedRearPath));
+    } catch (e, stack) {
+      logger.i('Print error: $e\nStack: $stack');
+      rethrow;
+    }
+  }
+
+  Future<void> printImageNew({
+    required File? frontFile,
+    required String? backPhotoImageUrl,
+  }) async {
+    try {
+      _printImageIsolateNew(PrintParam(frontPath: frontFile?.path, backPhotoImageUrl: backPhotoImageUrl));
+    } catch (e) {
+      logger.i(e);
+    }
+  }
+
+  Future<void> _printImageIsolateNew(PrintParam printPath) async {
+    File? backPhotoFile;
+    try {
+      // 꼭 이 함수 안에서 객체를 초기화 해줘야 함.
+      _bindings = PrinterBindings();
+
+      initializePrinter();
+
+      printInit();
+
+      String? frontImageInfo;
+      String? behindImageInfo;
+      String? rotatedRearPath;
+
+      if (printPath.backPhotoImageUrl != null) {
+        backPhotoFile = await ImageHelper().convertImageUrlToFile(printPath.backPhotoImageUrl!);
+      }
+
+      if (backPhotoFile != null) {
+        rotatedRearPath = await rearImage(file: backPhotoFile);
+      }
+
+      if (printPath.frontPath != null) {
+        frontImageInfo = await drawImage(path: printPath.frontPath!);
+      }
+
+      if (rotatedRearPath != null) {
+        behindImageInfo = await drawImage(path: rotatedRearPath);
+      }
+
+      logger.i('5. Injecting card...');
+      _bindings.injectCard();
+
+      logger.i('6. Printing card...');
+      _bindings.printCard(
+        frontImageInfo: frontImageInfo,
+        backImageInfo: behindImageInfo,
+      );
+
+      logger.i('7. Ejecting card...');
+      _bindings.ejectCard();
+    } catch (error, stack) {
+      logger.i('_printImageIsolation error: $error\nStack: $stack');
+    } finally {
+      if (backPhotoFile != null && await backPhotoFile.exists()) {
+        await backPhotoFile.delete();
       }
     }
   }
@@ -149,7 +234,7 @@ class PrinterManager {
 
   Future<String> rearImage({required File file}) async {
     final rearImage = await file.readAsBytes();
-    final rotatedRearImage = _bindings.flipImage180(rearImage);
+    final rotatedRearImage = _flipImage180(rearImage);
     // 임시 파일로 저장
     final temp = DateTime.now().millisecondsSinceEpoch.toString();
     final rotatedRearPath = '${temp}_rotated.png';
@@ -160,6 +245,16 @@ class PrinterManager {
     newFile.openRead().drain();
 
     return rotatedRearPath;
+  }
+
+  // 이미지 회전 기능 추가
+  Uint8List _flipImage180(Uint8List imageBytes) {
+    final originalImage = img.decodeImage(imageBytes);
+    if (originalImage != null) {
+      final flippedImage = img.copyRotate(originalImage, angle: 180);
+      return Uint8List.fromList(img.encodePng(flippedImage));
+    }
+    return imageBytes;
   }
 
   Future<void> _prepareAndDrawImage(String imagePath, bool isFront) async {

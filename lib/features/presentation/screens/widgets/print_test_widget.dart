@@ -48,10 +48,10 @@ class ProcessedImage extends _$ProcessedImage {
       }
 
       try {
-        await ref.read(printerServiceProvider.notifier).printImage(
-              frontFile: state.frontFile!,
-              embeddedFile: null,
-            );
+        // await ref.read(printerServiceProvider.notifier).printImage(
+        //       frontFile: state.frontFile!,
+        //       embeddedFile: null,
+        //     );
       } finally {}
       return;
     }
@@ -64,10 +64,10 @@ class ProcessedImage extends _$ProcessedImage {
     await tempFile.writeAsBytes(state.backImage!);
 
     try {
-      await ref.read(printerServiceProvider.notifier).printImage(
-            frontFile: state.frontFile!,
-            embeddedFile: tempFile,
-          );
+      // await ref.read(printerServiceProvider.notifier).printImage(
+      //       frontFile: state.frontFile!,
+      //       embeddedFile: tempFile,
+      //     );
     } catch (e) {
       rethrow;
     } finally {

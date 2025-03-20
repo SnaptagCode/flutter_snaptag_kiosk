@@ -35,17 +35,17 @@ class PrintService extends _$PrintService {
     await _executePrintJob(
       printJobInfo.printedPhotoCardId,
       frontPhotoInfo.safeEmbedImage,
-      printJobInfo.backPhotoFile,
+      printJobInfo.backPhotoImageUrl,
     );
   }
 
-  Future<void> _executePrintJob(int printedPhotoCardId, File frontPhoto, File embedded) async {
+  Future<void> _executePrintJob(int printedPhotoCardId, File frontPhoto, String backPhotoImageUrl) async {
     try {
       // 프린트 상태 시작
       await _updatePrintStatus(printedPhotoCardId, PrintedStatus.started);
 
       // 실제 프린트 실행
-      await _executePrint(frontPhoto: frontPhoto, embedded: embedded);
+      await _executePrint(frontPhoto: frontPhoto, backPhotoImageUrl: backPhotoImageUrl);
 
       // 프린트 상태 완료
       await _updatePrintStatus(printedPhotoCardId, PrintedStatus.completed);
@@ -76,7 +76,7 @@ class PrintService extends _$PrintService {
   Future<
       ({
         int printedPhotoCardId,
-        File backPhotoFile,
+        String backPhotoImageUrl,
       })> _createPrintJobWithEmbeddingBackImage({
     required int frontPhotoCardId,
     required int backPhotoCardId,
@@ -91,9 +91,7 @@ class PrintService extends _$PrintService {
 
       final response = await ref.read(kioskRepositoryProvider).createPrintStatus(request: request);
 
-      final backPhotoFile = await ImageHelper().convertImageUrlToFile(response.formattedImageUrl);
-
-      return (printedPhotoCardId: response.printedPhotoCardId, backPhotoFile: backPhotoFile);
+      return (printedPhotoCardId: response.printedPhotoCardId, backPhotoImageUrl: response.formattedImageUrl);
     } catch (e) {
       rethrow;
     }
@@ -117,19 +115,15 @@ class PrintService extends _$PrintService {
 
   Future<void> _executePrint({
     required File frontPhoto,
-    required File embedded,
+    required String backPhotoImageUrl,
   }) async {
     try {
       await ref.read(printerServiceProvider.notifier).printImage(
             frontFile: frontPhoto,
-            embeddedFile: embedded,
+            backPhotoImageUrl: backPhotoImageUrl,
           );
     } catch (e) {
       rethrow;
-    } finally {
-      if (await embedded.exists()) {
-        await embedded.delete();
-      }
     }
   }
 }

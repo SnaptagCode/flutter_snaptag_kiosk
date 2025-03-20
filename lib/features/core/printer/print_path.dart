@@ -19,3 +19,10 @@ class PrintPath {
     );
   }
 }
+
+class PrintParam {
+  String? frontPath;
+  String? backPhotoImageUrl;
+
+  PrintParam({this.frontPath, this.backPhotoImageUrl});
+}
