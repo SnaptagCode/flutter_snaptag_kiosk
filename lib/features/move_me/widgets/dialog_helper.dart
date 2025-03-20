@@ -217,12 +217,12 @@ class DialogHelper {
     );
   }
 
-  /*    2.2.1 이하 버전용
-  static Future<void> showPrintCompleteDialog( //2초 후 자동으로 닫히고 QR 화면으로 이동
+  //    2.3.0 이하 버전용
+  static Future<void> showPrintCompleteDialog( //3초 후 자동으로 닫히고 QR 화면으로 이동
     BuildContext context, {
     VoidCallback? onButtonPressed,
   }) async {
-    Future.delayed(const Duration(seconds: 2), () {
+    Future.delayed(const Duration(seconds: 3), () {
 
       if (Navigator.of(context, rootNavigator: true).canPop()) {
         PhotoCardUploadRouteData().go(context);
@@ -236,9 +236,10 @@ class DialogHelper {
       buttonText: LocaleKeys.alert_btn_print_complete.tr(),
       onButtonPressed: onButtonPressed,
     );
-  }*/
+  }
 
-  // 2.3.0 이후 개편
+  // 2.3.0 카운트 버전
+  /*
   static Future<void> showPrintCompleteDialog(
       BuildContext context, {
         VoidCallback? onButtonPressed,
@@ -345,6 +346,8 @@ class DialogHelper {
       },
     );
   }
+  */
+
 
 
   static Future<void> showErrorDialog(BuildContext context) async {
