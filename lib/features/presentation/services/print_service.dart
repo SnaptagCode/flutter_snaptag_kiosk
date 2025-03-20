@@ -35,17 +35,18 @@ class PrintService extends _$PrintService {
     await _executePrintJob(
       printJobInfo.printedPhotoCardId,
       frontPhotoInfo.safeEmbedImage,
-      printJobInfo.backPhotoImageUrl,
+      printJobInfo.backPhotoFile,
     );
   }
 
-  Future<void> _executePrintJob(int printedPhotoCardId, File frontPhoto, String backPhotoImageUrl) async {
+  Future<void> _executePrintJob(int printedPhotoCardId, File frontPhoto, File backPhoto) async {
     try {
       // 프린트 상태 시작
       await _updatePrintStatus(printedPhotoCardId, PrintedStatus.started);
 
       // 실제 프린트 실행
-      await _executePrint(frontPhoto: frontPhoto, backPhotoImageUrl: backPhotoImageUrl);
+      // await _executePrint(frontPhoto: frontPhoto, backPhotoImageUrl: backPhotoImageUrl);
+      await _executePrint(frontPhoto: frontPhoto, backPhoto: backPhoto);
 
       // 프린트 상태 완료
       await _updatePrintStatus(printedPhotoCardId, PrintedStatus.completed);
@@ -73,10 +74,34 @@ class PrintService extends _$PrintService {
     if (printerState.hasError) throw Exception('Printer is not ready');
   }
 
+  // Future<
+  //     ({
+  //       int printedPhotoCardId,
+  //       String backPhotoImageUrl,
+  //     })> _createPrintJobWithEmbeddingBackImage({
+  //   required int frontPhotoCardId,
+  //   required int backPhotoCardId,
+  // }) async {
+  //   try {
+  //     final request = CreatePrintRequest(
+  //       kioskMachineId: ref.read(kioskInfoServiceProvider)!.kioskMachineId,
+  //       kioskEventId: ref.read(kioskInfoServiceProvider)!.kioskEventId,
+  //       frontPhotoCardId: frontPhotoCardId,
+  //       backPhotoCardId: backPhotoCardId,
+  //     );
+
+  //     final response = await ref.read(kioskRepositoryProvider).createPrintStatus(request: request);
+
+  //     return (printedPhotoCardId: response.printedPhotoCardId, backPhotoImageUrl: response.formattedImageUrl);
+  //   } catch (e) {
+  //     rethrow;
+  //   }
+  // }
+
   Future<
       ({
         int printedPhotoCardId,
-        String backPhotoImageUrl,
+        File backPhotoFile,
       })> _createPrintJobWithEmbeddingBackImage({
     required int frontPhotoCardId,
     required int backPhotoCardId,
@@ -91,7 +116,9 @@ class PrintService extends _$PrintService {
 
       final response = await ref.read(kioskRepositoryProvider).createPrintStatus(request: request);
 
-      return (printedPhotoCardId: response.printedPhotoCardId, backPhotoImageUrl: response.formattedImageUrl);
+      final backPhotoFile = await ImageHelper().convertImageUrlToFile(response.formattedImageUrl);
+
+      return (printedPhotoCardId: response.printedPhotoCardId, backPhotoFile: backPhotoFile);
     } catch (e) {
       rethrow;
     }
@@ -113,14 +140,28 @@ class PrintService extends _$PrintService {
     }
   }
 
+  // Future<void> _executePrint({
+  //   required File frontPhoto,
+  //   required String backPhotoImageUrl,
+  // }) async {
+  //   try {
+  //     await ref.read(printerServiceProvider.notifier).printImage(
+  //           frontFile: frontPhoto,
+  //           backPhotoImageUrl: backPhotoImageUrl,
+  //         );
+  //   } catch (e) {
+  //     rethrow;
+  //   }
+  // }
+
   Future<void> _executePrint({
     required File frontPhoto,
-    required String backPhotoImageUrl,
+    required File backPhoto,
   }) async {
     try {
       await ref.read(printerServiceProvider.notifier).printImage(
             frontFile: frontPhoto,
-            backPhotoImageUrl: backPhotoImageUrl,
+            backFile: backPhoto,
           );
     } catch (e) {
       rethrow;

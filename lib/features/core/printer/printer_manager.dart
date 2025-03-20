@@ -66,14 +66,6 @@ class PrinterManager {
     } catch (e, stack) {
       logger.i('Print error: $e\nStack: $stack');
       rethrow;
-    } finally {
-      if (rotatedRearPath != null) {
-        final rotatedFile = File(rotatedRearPath);
-        if (await rotatedFile.exists()) {
-          await rotatedFile.delete();
-          logger.i('✅ 임시 파일 삭제 완료: $rotatedRearPath');
-        }
-      }
     }
   }
 
@@ -178,6 +170,7 @@ class PrinterManager {
 
       if (printPath.backPath != null) {
         behindImageInfo = await drawImage(path: printPath.backPath!);
+        await File(printPath.backPath!).delete().catchError((_) {});
       }
 
       logger.i('5. Injecting card...');

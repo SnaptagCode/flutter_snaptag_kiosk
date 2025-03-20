@@ -31,14 +31,27 @@ class PrinterService extends _$PrinterService {
     _timer = null;
   }
 
+  // Future<void> printImage({
+  //   required File? frontFile,
+  //   required String? backPhotoImageUrl,
+  // }) async {
+  //   try {
+  //     state = const AsyncValue.loading();
+
+  //     _printerIso.printImageNew(frontFile: frontFile, backPhotoImageUrl: backPhotoImageUrl);
+  //   } catch (e) {
+  //     rethrow;
+  //   }
+  // }
+
   Future<void> printImage({
     required File? frontFile,
-    required String? backPhotoImageUrl,
+    required File? backFile,
   }) async {
     try {
       state = const AsyncValue.loading();
 
-      _printerIso.printImageNew(frontFile: frontFile, backPhotoImageUrl: backPhotoImageUrl);
+      _printerIso.printImage(frontFile: frontFile, embeddedFile: backFile);
     } catch (e) {
       rethrow;
     }
