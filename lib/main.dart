@@ -11,9 +11,6 @@ import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:window_manager/window_manager.dart';
 
 void main() async {
-  // 인증서 유효성 무시
-  HttpOverrides.global = MyHttpOverrides();
-
   if (kDebugMode) {
     F.appFlavor = Flavor.dev;
   } else {
@@ -76,17 +73,5 @@ Future<void> windowManagerSetting() async {
       await windowManager.show();
       await windowManager.focus();
     });
-  }
-}
-
-// 🚨 SSL 인증서 오류(HandshakeException) 해결을 위한 설정
-// ➤ 신뢰할 수 없는 인증서로 인해 발생하는 HandshakeException을 방지하기 위해 인증서 검증을 무시하는 작업
-// ➤ Windows IOT 버전에서 발생한 오류
-class MyHttpOverrides extends HttpOverrides {
-  @override
-  HttpClient createHttpClient(SecurityContext? context) {
-    // '?'를 추가해서 null safety 확보
-    return super.createHttpClient(context)
-      ..badCertificateCallback = (X509Certificate cert, String host, int port) => true;
   }
 }

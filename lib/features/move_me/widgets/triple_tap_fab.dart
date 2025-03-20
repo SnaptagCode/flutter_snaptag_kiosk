@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:intl/intl.dart';
-
 
 class TripleTapFloatingButton extends ConsumerWidget {
   const TripleTapFloatingButton({super.key});
@@ -11,10 +8,6 @@ class TripleTapFloatingButton extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final tripleTapNotifier = ref.read(tripleTapStateProvider.notifier);
-
-    String _generateCurrentTimePin() {
-      return DateFormat("MMddHH").format(DateTime.now()); // 예: 031110 (3월 11일 10시)
-    }
 
     return FloatingActionButton(
       heroTag: null,
@@ -28,20 +21,10 @@ class TripleTapFloatingButton extends ConsumerWidget {
           F.appFlavor == Flavor.dev ? context.kioskColors.buttonColor.withOpacity(0.3) : Colors.transparent,
       elevation: 0.0,
       onPressed: () {
-        tripleTapNotifier.registerTap(() async {
+        tripleTapNotifier.registerTap(() {
           tripleTapNotifier.reset(); // 상태 초기화
           // 3번 탭 후 화면 전환
-          String? enteredCode = await DialogHelper.showKeypadDialog(context, mode: ModeType.admin);
-
-          if (enteredCode != null) {
-            String correctPassword = _generateCurrentTimePin();
-
-            if (enteredCode == correctPassword) {
-              SetupMainRouteData().go(context);
-            } else {
-              //await showAdminFailDialog(context); //비밀번호 불일치 → 오류 모달 표시
-            }
-          }
+          SetupMainRouteData().go(context);
         });
       },
       child: F.appFlavor == Flavor.dev

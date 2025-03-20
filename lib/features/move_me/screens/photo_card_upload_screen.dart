@@ -11,8 +11,6 @@ class PhotoCardUploadScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final kiosk = ref.watch(kioskInfoServiceProvider);
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisAlignment: MainAxisAlignment.start,
@@ -29,7 +27,7 @@ class PhotoCardUploadScreen extends ConsumerWidget {
         SizedBox(height: 12.h),
         Text(
           LocaleKeys.main_txt_01_03.tr(),
-          style: context.typography.kioskBody2B.copyWith(color: Color(int.parse(kiosk?.couponTextColor.replaceFirst('#', '0xff') ?? '0xffffff'))),
+          style: context.typography.kioskBody2B,
         ),
         SizedBox(height: 30.h),
         Container(

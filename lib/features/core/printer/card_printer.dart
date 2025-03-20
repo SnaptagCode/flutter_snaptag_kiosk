@@ -51,14 +51,10 @@ class PrinterService extends _$PrinterService {
   }
 
   Future<void> printImage({
-    required File? frontFile,
-    required File? embeddedFile,
+    required File frontFile,
+    required File embeddedFile,
   }) async {
     try {
-      if (frontFile == null && embeddedFile == null) {
-        throw Exception('There is nothing to print');
-      }
-
       state = const AsyncValue.loading();
       // 피더 상태 체크 추가
       logger.i('Checking feeder status...');
@@ -77,44 +73,39 @@ class PrinterService extends _$PrinterService {
       }
 
       logger.i('2. Preparing front canvas...');
-      StringBuffer? frontBuffer;
+      final frontBuffer = StringBuffer();
 
-      if (frontFile != null) {
-        frontBuffer = StringBuffer();
-        try {
-          await _prepareAndDrawImage(frontBuffer, frontFile.path, true);
-        } catch (e, stack) {
-          logger.i('Error in front canvas preparation: $e\nStack: $stack');
-          throw Exception('Failed to prepare front canvas: $e');
-        }
+      try {
+        await _prepareAndDrawImage(frontBuffer, frontFile.path, true);
+      } catch (e, stack) {
+        logger.i('Error in front canvas preparation: $e\nStack: $stack');
+        throw Exception('Failed to prepare front canvas: $e');
       }
 
       StringBuffer? rearBuffer;
 
-      if (embeddedFile != null) {
-        logger.i('3. Loading and rotating rear image...');
-        final rearImage = await embeddedFile.readAsBytes();
-        final rotatedRearImage = _bindings.flipImage180(rearImage);
-        // 임시 파일로 저장
-        final temp = DateTime.now().millisecondsSinceEpoch.toString();
-        final rotatedRearPath = '${temp}_rotated.png';
-        await File(rotatedRearPath).writeAsBytes(rotatedRearImage);
+      logger.i('3. Loading and rotating rear image...');
+      final rearImage = await embeddedFile.readAsBytes();
+      final rotatedRearImage = _bindings.flipImage180(rearImage);
+      // 임시 파일로 저장
+      final temp = DateTime.now().millisecondsSinceEpoch.toString();
+      final rotatedRearPath = '${temp}_rotated.png';
+      await File(rotatedRearPath).writeAsBytes(rotatedRearImage);
+
+      try {
+        logger.i('4. Preparing rear canvas...');
+        rearBuffer = StringBuffer();
 
         try {
-          logger.i('4. Preparing rear canvas...');
-          rearBuffer = StringBuffer();
-
-          try {
-            await _prepareAndDrawImage(rearBuffer, rotatedRearPath, false);
-          } catch (e, stack) {
-            logger.i('Error in rear canvas preparation: $e\nStack: $stack');
-            throw Exception('Failed to prepare rear canvas: $e');
-          }
-        } finally {
-          await File(rotatedRearPath).delete().catchError((_) {
-            logger.i('Failed to delete rotated rear image');
-          });
+          await _prepareAndDrawImage(rearBuffer, rotatedRearPath, false);
+        } catch (e, stack) {
+          logger.i('Error in rear canvas preparation: $e\nStack: $stack');
+          throw Exception('Failed to prepare rear canvas: $e');
         }
+      } finally {
+        await File(rotatedRearPath).delete().catchError((_) {
+          logger.i('Failed to delete rotated rear image');
+        });
       }
 
       logger.i('5. Injecting card...');
@@ -122,8 +113,8 @@ class PrinterService extends _$PrinterService {
 
       logger.i('6. Printing card...');
       _bindings.printCard(
-        frontImageInfo: frontBuffer?.toString(),
-        backImageInfo: rearBuffer?.toString(),
+        frontImageInfo: frontBuffer.toString(),
+        backImageInfo: rearBuffer.toString(),
       );
 
       logger.i('7. Ejecting card...');
