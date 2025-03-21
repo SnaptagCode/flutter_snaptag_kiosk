@@ -67,6 +67,11 @@ jobs:
             exit 1
           }
 
+      - name: Copy assets folder to Build Directories
+        run: |
+          Copy-Item -Path "assets" -Destination "build/windows/x64/runner/Release" -Recurse -Force
+          Copy-Item -Path "assets" -Destination "build/windows/x64/runner/Debug" -Recurse -Force
+
       - name: Copy .env file to Build Directories
         run: |
           Copy-Item -Path "assets/.env" -Destination "build/windows/x64/runner/Release" -Force
