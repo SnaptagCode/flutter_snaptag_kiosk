@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_snaptag_kiosk/features/move_me/widgets/file_io_button.dart';
 import 'package:flutter_snaptag_kiosk/features/move_me/widgets/pager_print_type_toggle.dart';
+import 'package:flutter_snaptag_kiosk/features/move_me/widgets/print_function_test_widget.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_svg/svg.dart';
 
@@ -31,6 +33,10 @@ class _UnitTestScreenState extends ConsumerState<UnitTestScreen> {
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Text('프린트 함수 테스트', style: Theme.of(context).textTheme.headlineSmall),
+            PrintFunctionTestWidget(),
+            Text('파일 입출력', style: Theme.of(context).textTheme.headlineSmall),
+            FileIoButton(),
             Text('양면 / 단면 설정', style: Theme.of(context).textTheme.headlineSmall),
             PagerPrintTypeToggle(),
             Text('프론트 이미지', style: Theme.of(context).textTheme.headlineSmall),

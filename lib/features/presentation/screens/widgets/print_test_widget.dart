@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_snaptag_kiosk/core/constants/image_paths.dart';
 import 'package:flutter_snaptag_kiosk/features/core/printer/card_printer.dart';
 import 'package:flutter_snaptag_kiosk/features/move_me/providers/front_photo_list.dart';
 import 'package:flutter_snaptag_kiosk/features/move_me/providers/page_print_provider.dart';
@@ -49,7 +50,7 @@ class ProcessedImage extends _$ProcessedImage {
       try {
         await ref.read(printerServiceProvider.notifier).printImage(
               frontFile: state.frontFile!,
-              embeddedFile: null,
+              backFile: null,
             );
       } finally {}
       return;
@@ -65,7 +66,7 @@ class ProcessedImage extends _$ProcessedImage {
     try {
       await ref.read(printerServiceProvider.notifier).printImage(
             frontFile: state.frontFile!,
-            embeddedFile: tempFile,
+            backFile: tempFile,
           );
     } catch (e) {
       rethrow;

@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:dio/dio.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:retrofit/retrofit.dart';
@@ -57,6 +55,11 @@ abstract class KioskApiClient {
   @PATCH('/v1/print/{printedPhotoCardId}')
   Future<UpdatePrintResponse> updatePrint({
     @Path('printedPhotoCardId') required int printedPhotoCardId,
+    @Body() required Map<String, dynamic> body,
+  });
+
+  @POST('/v1/machine/log')
+  Future<void> updatePrintLog({
     @Body() required Map<String, dynamic> body,
   });
 }

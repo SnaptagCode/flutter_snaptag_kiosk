@@ -1,5 +1,6 @@
 import 'package:flutter_snaptag_kiosk/data/datasources/remote/remote.dart';
 import 'package:flutter_snaptag_kiosk/data/models/models.dart';
+import 'package:flutter_snaptag_kiosk/features/core/printer/printer_log.dart';
 import 'package:flutter_snaptag_kiosk/flavors.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -106,6 +107,18 @@ class _KioskRepository {
     try {
       return await _apiClient.updatePrint(
         printedPhotoCardId: printedPhotoCardId,
+        body: request.toJson(),
+      );
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> updatePrintLog({
+    required PrinterLog request,
+  }) async {
+    try {
+      await _apiClient.updatePrintLog(
         body: request.toJson(),
       );
     } catch (e) {

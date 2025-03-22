@@ -3,6 +3,8 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:ffi/ffi.dart';
+import 'package:flutter_snaptag_kiosk/features/core/printer/printer_status.dart';
+import 'package:flutter_snaptag_kiosk/features/core/printer/ribbon_status.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:image/image.dart' as img;
 
@@ -35,6 +37,7 @@ class PrinterBindings {
   late final R600SetTextIsStrong _setTextIsStrong;
   late final R600DrawImage _drawImage;
   late final R600IsFeederNoEmpty _isFeederNoEmpty;
+  late final R600GetRbnAndFilmRemaining _getRbnAndFilmRemaining;
 
   PrinterBindings() {
     // DLL 로드
@@ -64,6 +67,8 @@ class PrinterBindings {
     _setFont = _dll.lookupFunction<R600SetFontNative, R600SetFont>('R600SetFont');
     _setTextIsStrong = _dll.lookupFunction<R600SetTextIsStrongNative, R600SetTextIsStrong>('R600SetTextIsStrong');
     _isFeederNoEmpty = _dll.lookupFunction<R600IsFeederNoEmptyNative, R600IsFeederNoEmpty>('R600IsFeederNoEmpty');
+    _getRbnAndFilmRemaining =
+        _dll.lookupFunction<R600GetRbnAndFilmRemainingNative, R600GetRbnAndFilmRemaining>('R600GetRbnAndFilmRemaining');
   }
 
   int initLibrary() {
@@ -74,29 +79,39 @@ class PrinterBindings {
     final outputStr = calloc<Uint8>(500).cast<Utf8>();
     final len = calloc<Int32>();
     len.value = 500;
+    var error = "";
 
     try {
       final result = _getErrorInfo(errorCode, outputStr, len);
       if (result != 0) return 'Failed to get error info';
-      return outputStr.toDartString();
+
+      error = outputStr.toDartString();
+
+      logger.i('Error info: $error');
     } finally {
       calloc.free(outputStr);
       calloc.free(len);
     }
+
+    return error;
   }
 
   // 카드 위치 확인 함수
   bool checkCardPosition() {
-    final flag = calloc<Uint8>();
+    final flag = calloc<Uint8>(); // 0 없음 , 1 있음
+    var flagValue = false;
     try {
-      final result = _isPrtHaveCard(flag);
+      final result = _isPrtHaveCard(flag); // 0 성공, 1 실패
       if (result != 0) {
         throw Exception('Failed to check card position');
       }
-      return flag.value != 0;
+      flagValue = flag.value != 0;
+    } catch (e) {
+      rethrow;
     } finally {
       calloc.free(flag);
     }
+    return flagValue;
   }
 
   // 캔버스 준비 함수
@@ -194,6 +209,33 @@ class PrinterBindings {
     }
   }
 
+  // 리본과 필름 잔량 확인 함수
+  RibbonStatus? getRbnAndFilmRemaining() {
+    final rbnRemaining = calloc<Short>();
+    final filmRemaining = calloc<Short>();
+    RibbonStatus? ribbonStatus;
+
+    try {
+      final result = _getRbnAndFilmRemaining(rbnRemaining, filmRemaining);
+      if (result != 0) {
+        throw Exception('Failed to get ribbon and film remaining');
+      }
+      logger.i('Ribbon remaining: ${rbnRemaining.value}');
+      logger.i('Film remaining: ${filmRemaining.value}');
+      ribbonStatus = RibbonStatus(
+        rbnRemaining: rbnRemaining.value,
+        filmRemaining: filmRemaining.value,
+      );
+    } catch (e) {
+      rethrow;
+    } finally {
+      calloc.free(rbnRemaining);
+      calloc.free(filmRemaining);
+    }
+
+    return ribbonStatus;
+  }
+
   void setCanvasOrientation(bool isPortrait) {
     final result = _setCanvasPortrait(isPortrait ? 1 : 0);
     if (result != 0) {
@@ -227,7 +269,7 @@ class PrinterBindings {
   }
 
   // getPrinterStatus 메서드 추가
-  PrinterStatus? getPrinterStatus() {
+  (PrinterStatus?, int?) getPrinterStatus(int machineId) {
     final pChassisTemp = calloc<Int16>();
     final pPrintheadTemp = calloc<Int16>();
     final pHeaterTemp = calloc<Int16>();
@@ -237,9 +279,11 @@ class PrinterBindings {
     final pWarningStatus = calloc<Uint32>();
     final pMainCode = calloc<Uint8>();
     final pSubCode = calloc<Uint8>();
+    PrinterStatus? printerStatus;
+    int? result;
 
     try {
-      final result = _queryPrinterStatus(
+      result = _queryPrinterStatus(
         pChassisTemp,
         pPrintheadTemp,
         pHeaterTemp,
@@ -253,10 +297,11 @@ class PrinterBindings {
 
       if (result != 0) {
         logger.i('Query printer status failed with code: $result'); // 디버그용
-        return null; // null 반환으로 변경
+        return (null, result); // null 반환으로 변경
       }
 
-      return PrinterStatus(
+      printerStatus = PrinterStatus(
+        machineId: machineId,
         mainCode: pMainCode.value,
         subCode: pSubCode.value,
         mainStatus: pMainStatus.value,
@@ -269,7 +314,7 @@ class PrinterBindings {
       );
     } catch (e) {
       logger.i('Error in getPrinterStatus: $e'); // 디버그용
-      return null; // 예외 발생 시 null 반환
+      return (null, result); // 예외 발생 시 null 반환
     } finally {
       calloc.free(pChassisTemp);
       calloc.free(pPrintheadTemp);
@@ -281,6 +326,8 @@ class PrinterBindings {
       calloc.free(pMainCode);
       calloc.free(pSubCode);
     }
+
+    return (printerStatus, result);
   }
 
   // USB 초기화 메서드 추가
@@ -370,19 +417,33 @@ class PrinterBindings {
     }
   }
 
+  Uint8List enumUsbPrinter() {
+    final enumListPtr = calloc<Uint8>(500);
+    final listLenPtr = calloc<Uint32>()..value = 500;
+    final numPtr = calloc<Int32>()..value = 10;
+
+    int result = _enumUsbPrt(enumListPtr.cast(), listLenPtr, numPtr);
+    if (result != 0) {
+      logger.i('Failed to enumerate printer: $result');
+    }
+    return enumListPtr.asTypedList(500);
+  }
+
   bool ensurePrinterReady() {
+    bool flagValue = false;
     try {
       // 카드 존재 여부 확인
       final flag = calloc<Uint8>();
       try {
         int result = _isPrtHaveCard(flag);
+        flagValue = flag.value != 0;
         if (result != 0) {
           logger.i('Failed to check card position');
           return false;
         }
 
         // 카드가 있다면 배출
-        if (flag.value != 0) {
+        if (flagValue) {
           logger.i('Card is in the printer, ejecting...');
           result = _cardEject(0); // 왼쪽으로 배출
           if (result != 0) {
@@ -390,7 +451,6 @@ class PrinterBindings {
             return false;
           }
         }
-        return true;
       } finally {
         calloc.free(flag);
       }
@@ -398,6 +458,7 @@ class PrinterBindings {
       logger.i('Error in ensurePrinterReady: $e');
       return false;
     }
+    return true;
   }
 
   void clearLibrary() {
@@ -453,16 +514,18 @@ class PrinterBindings {
   }
 
   bool checkFeederStatus() {
-    final feederStatusPtr = calloc<Int32>();
+    final feederStatusPtr = calloc<Int32>(); // 0 : 비어있음, 1: 존재
+    bool feederStatus = false;
     try {
       final result = _isFeederNoEmpty(feederStatusPtr);
+      feederStatus = feederStatusPtr.value != 0;
       if (result != 0) {
         final error = getErrorInfo(result);
         throw Exception('Failed to check feeder status: $error');
       }
-      return feederStatusPtr.value != 0;
     } finally {
       calloc.free(feederStatusPtr);
     }
+    return feederStatus;
   }
 }

@@ -39,13 +39,14 @@ class PrintService extends _$PrintService {
     );
   }
 
-  Future<void> _executePrintJob(int printedPhotoCardId, File frontPhoto, File embedded) async {
+  Future<void> _executePrintJob(int printedPhotoCardId, File frontPhoto, File backPhoto) async {
     try {
       // 프린트 상태 시작
       await _updatePrintStatus(printedPhotoCardId, PrintedStatus.started);
 
       // 실제 프린트 실행
-      await _executePrint(frontPhoto: frontPhoto, embedded: embedded);
+      // await _executePrint(frontPhoto: frontPhoto, backPhotoImageUrl: backPhotoImageUrl);
+      await _executePrint(frontPhoto: frontPhoto, backPhoto: backPhoto);
 
       // 프린트 상태 완료
       await _updatePrintStatus(printedPhotoCardId, PrintedStatus.completed);
@@ -117,19 +118,15 @@ class PrintService extends _$PrintService {
 
   Future<void> _executePrint({
     required File frontPhoto,
-    required File embedded,
+    required File backPhoto,
   }) async {
     try {
       await ref.read(printerServiceProvider.notifier).printImage(
             frontFile: frontPhoto,
-            embeddedFile: embedded,
+            backFile: backPhoto,
           );
     } catch (e) {
       rethrow;
-    } finally {
-      if (await embedded.exists()) {
-        await embedded.delete();
-      }
     }
   }
 }
