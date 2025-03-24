@@ -5,13 +5,27 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 
-class App extends ConsumerWidget {
+class App extends ConsumerStatefulWidget {
   const App({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<App> createState() => AppState();
+}
+
+class AppState extends ConsumerState<App> {
+  @override
+  void initState() {
+    super.initState();
+
+    // ❗️ 앱이 실행됐을 때 한 번 실행.
+    // ref.read(printerServiceProvider.notifier).printLogo();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final router = ref.watch(routerProvider);
     final theme = ref.watch(themeNotifierProvider);
+
     return theme.when(
       data: (themeData) => MaterialApp.router(
         debugShowCheckedModeBanner: false,

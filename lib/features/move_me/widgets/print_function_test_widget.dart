@@ -52,7 +52,7 @@ class PrintFunctionTestWidget extends ConsumerWidget {
           ),
           ElevatedButton(
             onPressed: () async {
-              await ref.read(printerServiceProvider.notifier).startPrinterLogging();
+              // await ref.read(printerServiceProvider.notifier).startPrinterLogging();
             },
             child: Text('로깅'),
           ),

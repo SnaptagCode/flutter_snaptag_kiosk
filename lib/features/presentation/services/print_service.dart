@@ -19,24 +19,29 @@ class PrintService extends _$PrintService {
   }
 
   Future<void> _handlePrintProcess() async {
-    // 1. 사전 검증
-    _validatePrintRequirements();
+    try {
+      // 1. 사전 검증
+      _validatePrintRequirements();
 
-    // 2. 프론트 이미지 준비
-    final frontPhotoInfo = await _prepareFrontPhoto();
+      // 2. 프론트 이미지 준비
+      final frontPhotoInfo = await _prepareFrontPhoto();
 
-    // 3. 프린트 작업 생성 및 백 이미지 준비
-    final printJobInfo = await _createPrintJobWithEmbeddingBackImage(
-      frontPhotoCardId: frontPhotoInfo.id,
-      backPhotoCardId: ref.read(verifyPhotoCardProvider).value?.backPhotoCardId ?? 0,
-    );
+      // 3. 프린트 작업 생성 및 백 이미지 준비
+      final printJobInfo = await _createPrintJobWithEmbeddingBackImage(
+        frontPhotoCardId: frontPhotoInfo.id,
+        backPhotoCardId: ref.read(verifyPhotoCardProvider).value?.backPhotoCardId ?? 0,
+      );
 
-    // 4. 프린트 진행 및 상태 업데이트
-    await _executePrintJob(
-      printJobInfo.printedPhotoCardId,
-      frontPhotoInfo.safeEmbedImage,
-      printJobInfo.backPhotoFile,
-    );
+      // 4. 프린트 진행 및 상태 업데이트
+      await _executePrintJob(
+        printJobInfo.printedPhotoCardId,
+        frontPhotoInfo.safeEmbedImage,
+        printJobInfo.backPhotoFile,
+      );
+    } catch (e) {
+      logger.i(e);
+      rethrow;
+    }
   }
 
   Future<void> _executePrintJob(int printedPhotoCardId, File frontPhoto, File backPhoto) async {

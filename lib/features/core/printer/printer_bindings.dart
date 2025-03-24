@@ -410,6 +410,8 @@ class PrinterBindings {
 
       logger.i('Printer connected successfully'); // 디버그 로그 추가
       return true;
+    } catch (e) {
+      rethrow;
     } finally {
       calloc.free(enumListPtr);
       calloc.free(listLenPtr);

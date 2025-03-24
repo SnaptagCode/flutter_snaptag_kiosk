@@ -13,7 +13,7 @@ class GradientContainer extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: 1080.w,
-      height: 360.h,
+      height: 400.h,
       decoration: BoxDecoration(border: Border.all(color: Colors.transparent, width: 0.w)),
       child: Stack(
         children: [

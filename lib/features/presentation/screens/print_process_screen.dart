@@ -61,8 +61,10 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
           data: (_) async {
             await DialogHelper.showPrintCompleteDialog(
               context,
-              onButtonPressed: () {
+              finishedPrinting: () {
                 ref.read(printingStateProvider.notifier).updatePrinting(false);
+              },
+              onButtonPressed: () {
                 PhotoCardUploadRouteData().go(context);
               },
             );
@@ -83,7 +85,15 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
             style: context.typography.kioskBody1B,
           ),
           SizedBox(height: 30.h),
-          SizedBox(height: 400.h),
+          GradientContainer(
+            content: Padding(
+              padding: EdgeInsets.all(8.r),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10.r),
+                child: SizedBox(height: 400.h),
+              ),
+            ),
+          ),
           SizedBox(height: 30.h),
           Text(
             LocaleKeys.sub03_txt_02.tr(),

@@ -13,11 +13,10 @@ import 'package:image/image.dart' as img;
 
 class PrinterManager {
   late PrinterBindings _bindings;
-  Timer? _timer;
 
   Future<void> initializePrinter() async {
     try {
-      // 1. 라이브러리 초기화 전에 이전 상태 정리
+      //
       _bindings.clearLibrary();
 
       // 2. 프린터 연결
@@ -58,7 +57,7 @@ class PrinterManager {
       }
 
       if (embeddedFile != null) {
-        rotatedRearPath = await rearImage(file: embeddedFile);
+        rotatedRearPath = await _rearImage(file: embeddedFile);
       }
 
       await IsolateManager<PrintPath, void>()
@@ -69,92 +68,9 @@ class PrinterManager {
     }
   }
 
-  Future<void> printImageTest({
-    required File? frontFile,
-    required File? embeddedFile,
-  }) async {
-    String? frontPath = frontFile?.path;
-    String? rotatedRearPath;
-
-    try {
-      if (frontFile == null && embeddedFile == null) {
-        throw Exception('There is nothing to print');
-      }
-
-      if (embeddedFile != null) {
-        rotatedRearPath = await rearImage(file: embeddedFile);
-      }
-      _printImageIsolate(PrintPath(frontPath: frontPath, backPath: rotatedRearPath));
-    } catch (e, stack) {
-      logger.i('Print error: $e\nStack: $stack');
-      rethrow;
-    }
-  }
-
-  Future<void> printImageNew({
-    required File? frontFile,
-    required String? backPhotoImageUrl,
-  }) async {
-    try {
-      _printImageIsolateNew(PrintParam(frontPath: frontFile?.path, backPhotoImageUrl: backPhotoImageUrl));
-    } catch (e) {
-      logger.i(e);
-    }
-  }
-
-  Future<void> _printImageIsolateNew(PrintParam printPath) async {
-    File? backPhotoFile;
-    try {
-      // 꼭 이 함수 안에서 객체를 초기화 해줘야 함.
-      _bindings = PrinterBindings();
-
-      initializePrinter();
-
-      printInit();
-
-      String? frontImageInfo;
-      String? behindImageInfo;
-      String? rotatedRearPath;
-
-      if (printPath.backPhotoImageUrl != null) {
-        backPhotoFile = await ImageHelper().convertImageUrlToFile(printPath.backPhotoImageUrl!);
-      }
-
-      if (backPhotoFile != null) {
-        rotatedRearPath = await rearImage(file: backPhotoFile);
-      }
-
-      if (printPath.frontPath != null) {
-        frontImageInfo = await drawImage(path: printPath.frontPath!);
-      }
-
-      if (rotatedRearPath != null) {
-        behindImageInfo = await drawImage(path: rotatedRearPath);
-      }
-
-      logger.i('5. Injecting card...');
-      _bindings.injectCard();
-
-      logger.i('6. Printing card...');
-      _bindings.printCard(
-        frontImageInfo: frontImageInfo,
-        backImageInfo: behindImageInfo,
-      );
-
-      logger.i('7. Ejecting card...');
-      _bindings.ejectCard();
-    } catch (error, stack) {
-      logger.i('_printImageIsolation error: $error\nStack: $stack');
-    } finally {
-      if (backPhotoFile != null && await backPhotoFile.exists()) {
-        await backPhotoFile.delete();
-      }
-    }
-  }
-
   Future<void> _printImageIsolate(PrintPath printPath) async {
     try {
-      // 꼭 이 함수 안에서 객체를 초기화 해줘야 함.
+      // ❗️ DynamicLibrary 를 Isolate 안에서 생성해야 함.
       _bindings = PrinterBindings();
 
       initializePrinter();
@@ -170,6 +86,7 @@ class PrinterManager {
 
       if (printPath.backPath != null) {
         behindImageInfo = await drawImage(path: printPath.backPath!);
+        // ❗️ 프로세스 충돌 발생, 파일을 삭제해야 됨.
         await File(printPath.backPath!).delete().catchError((_) {});
       }
 
@@ -186,6 +103,7 @@ class PrinterManager {
       _bindings.ejectCard();
     } catch (error, stack) {
       logger.i('_printImageIsolation error: $error\nStack: $stack');
+      rethrow;
     }
   }
 
@@ -225,7 +143,7 @@ class PrinterManager {
     }
   }
 
-  Future<String> rearImage({required File file}) async {
+  Future<String> _rearImage({required File file}) async {
     final rearImage = await file.readAsBytes();
     final rotatedRearImage = _flipImage180(rearImage);
     // 임시 파일로 저장
@@ -290,32 +208,23 @@ class PrinterManager {
     return commitResult;
   }
 
-  bool existPrint() {
-    return true;
-  }
-
   Future<PrinterLog> backgroundPrinterLogTask(int machineId) async {
     final result = await IsolateManager<int, PrinterLog>().runInIsolate(getPrinterLogData, machineId);
     return result ?? PrinterLog();
   }
 
-  PrinterLog getPrinterLogData(int machineId) {
-    final bindings = PrinterBindings();
-
-    // 1. 초기화
-    bindings.clearLibrary();
-
-    // 2. 프린터 연결
-    bindings.connectPrinter();
-
+  Future<PrinterLog> getPrinterLogData(int machineId) async {
     try {
-      final printerStatus = bindings.getPrinterStatus(machineId);
-      final ribbonStatus = bindings.getRbnAndFilmRemaining();
-      final isPrintingNow = bindings.checkCardPosition();
-      final isFeederEmpty = !bindings.checkFeederStatus();
+      // ❗️ DynamicLibrary 를 Isolate 안에서 생성해야 함.
+      //    - 프린팅하는 것과 별도로 실행되야 함.
+      // TODO : 에러 처리 필요
+
+      final printerStatus = _bindings.getPrinterStatus(machineId);
+      final ribbonStatus = _bindings.getRbnAndFilmRemaining();
+      // final isPrintingNow = _bindings.checkCardPosition();
+      // final isFeederEmpty = !_bindings.checkFeederStatus();
       // final errorMsg = printerStatus.$2 == null ? '' : bindings.getErrorInfo(printerStatus.$2 ?? 0);
-      logger.i(
-          'Printer status: $printerStatus, machineId: $machineId ribbon status: $ribbonStatus, isPrintingNow: $isPrintingNow, isFeederEmpty: $isFeederEmpty');
+      logger.i('Printer status: $printerStatus, machineId: $machineId ribbon status: $ribbonStatus, ');
 
       return PrinterLog(
           kioskMachineId: machineId,
@@ -329,13 +238,12 @@ class PrinterManager {
           heaterTemperature: printerStatus.$1?.heaterTemperature ?? 0,
           rbnRemainingRatio: ribbonStatus?.rbnRemaining ?? 0,
           filmRemainingRatio: ribbonStatus?.filmRemaining ?? 0,
-          isPrintingNow: isPrintingNow,
-          isFeederEmpty: isFeederEmpty,
+          isPrintingNow: true,
+          isFeederEmpty: false,
           sdkErrorMessage: '');
     } catch (e) {
-      logger.i('getPrinterLogData error: $e');
+      rethrow;
     }
-    return PrinterLog();
   }
 
   PrinterStatus? getPrinterStatus(int machineId) {

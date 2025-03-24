@@ -3,18 +3,18 @@ import 'dart:async';
 import 'dart:io';
 
 // Utf8 사용을 위한 임포트
-import 'package:flutter_snaptag_kiosk/core/utils/logger_service.dart';
-import 'package:flutter_snaptag_kiosk/data/datasources/cache/cache.dart';
-import 'package:flutter_snaptag_kiosk/data/repositories/kiosk_repository.dart';
 import 'package:flutter_snaptag_kiosk/features/core/printer/printer_manager.dart';
+import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'card_printer.g.dart';
 
 @Riverpod(keepAlive: true)
 class PrinterService extends _$PrinterService {
-  final PrinterManager _printerIso = PrinterManager();
+  final PrinterManager _printerManager = PrinterManager();
   Timer? _timer;
+  bool isPrinting = false;
+  bool isLogging = false;
 
   @override
   FutureOr<void> build() async {
@@ -22,12 +22,11 @@ class PrinterService extends _$PrinterService {
   }
 
   Future<void> startPrinterLogging() async {
-    final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
     _timer ??= Timer.periodic(Duration(seconds: 10), (timer) async {
-      if (_printerIso.existPrint()) {
-        final printerLogo = await _printerIso.backgroundPrinterLogTask(machineId);
-        logger.i('printerLogo: $printerLogo');
-        await ref.read(kioskRepositoryProvider).updatePrintLog(request: printerLogo);
+      try {
+        await printLogo();
+      } catch (e) {
+        logger.i(e);
       }
     });
   }
@@ -37,6 +36,22 @@ class PrinterService extends _$PrinterService {
     _timer = null;
   }
 
+  Future<void> printLogo() async {
+    try {
+      final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
+      final printerLogo = await _printerManager.getPrinterLogData(machineId);
+      SlackLogService().sendLogToSlack('printerState: $printerLogo');
+      if (machineId != 0) {
+        await ref.read(kioskRepositoryProvider).updatePrintLog(request: printerLogo);
+      }
+    } catch (e) {
+      SlackLogService().sendLogToSlack('printerError: $e');
+      rethrow;
+    } finally {
+      // isLogging = false;
+    }
+  }
+
   Future<void> printImage({
     required File? frontFile,
     required File? backFile,
@@ -44,9 +59,13 @@ class PrinterService extends _$PrinterService {
     try {
       state = const AsyncValue.loading();
 
-      await _printerIso.printImage(frontFile: frontFile, embeddedFile: backFile);
+      await _printerManager.printImage(frontFile: frontFile, embeddedFile: backFile);
     } catch (e) {
+      SlackLogService().sendLogToSlack('printerError: $e');
+      // TODO : 프린트 중 발생한 에러를 여기서 확인. -> 로깅
       rethrow;
+    } finally {
+      // isPrinting = false;
     }
   }
 }
