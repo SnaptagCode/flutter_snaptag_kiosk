@@ -291,6 +291,7 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
                 ),
               ),
               onPressed: () async {
+                context.loaderOverlay.show();
                 final result1 = await DialogHelper.showSetupDialog(
                   context,
                   title: '환불을 진행합니다.',
@@ -305,7 +306,6 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
                   confirmButtonText: '환불 진행',
                 );
                 if (result2) {
-                  context.loaderOverlay.show();
                   await ref.read(setupRefundProcessProvider.notifier).startRefund(order);
                 }
               },
@@ -329,6 +329,7 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
                 ),
               ),
               onPressed: () async {
+                context.loaderOverlay.show();
                 await SoundManager().playSound();
                 final result1 = await DialogHelper.showSetupDialog(
                   context,
