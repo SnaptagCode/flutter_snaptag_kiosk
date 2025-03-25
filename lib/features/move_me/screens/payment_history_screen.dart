@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_snaptag_kiosk/core/utils/sound_manager.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:loader_overlay/loader_overlay.dart';
 
 class PaymentHistoryScreen extends ConsumerStatefulWidget {
   const PaymentHistoryScreen({super.key});
@@ -17,6 +18,11 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
   @override
   Widget build(BuildContext context) {
     ref.listen(setupRefundProcessProvider, (prev, next) {
+
+      if (context.loaderOverlay.visible) {
+        context.loaderOverlay.hide();
+      }
+
       next.whenOrNull(
         error: (error, stack) async {
           await DialogHelper.showRefundFailDialog(context);
@@ -299,6 +305,7 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
                   confirmButtonText: '환불 진행',
                 );
                 if (result2) {
+                  context.loaderOverlay.show();
                   await ref.read(setupRefundProcessProvider.notifier).startRefund(order);
                 }
               },
@@ -323,8 +330,6 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
               ),
               onPressed: () async {
                 await SoundManager().playSound();
-
-                ;
                 final result1 = await DialogHelper.showSetupDialog(
                   context,
                   title: '환불을 진행합니다.',
