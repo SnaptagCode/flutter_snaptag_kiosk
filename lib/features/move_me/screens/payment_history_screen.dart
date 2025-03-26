@@ -19,15 +19,13 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
   Widget build(BuildContext context) {
     ref.listen(setupRefundProcessProvider, (prev, next) {
 
-      if (context.loaderOverlay.visible) {
-        context.loaderOverlay.hide();
-      }
-
       next.whenOrNull(
         error: (error, stack) async {
+          context.loaderOverlay.hide();
           await DialogHelper.showRefundFailDialog(context);
         },
         data: (response) async {
+          context.loaderOverlay.hide();
           if (response != null && response.code == 1) {
             await DialogHelper.showRefundSuccessDialog(context);
           } else if (response != null) {
@@ -38,7 +36,19 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
     });
     final ordersPage = ref.watch(ordersPageProvider());
 
-    return Scaffold(
+    return LoaderOverlay(
+    overlayWidgetBuilder: (dynamic progress){
+      return Center(
+        child: SizedBox(
+          width: 350.h,
+          height: 350.h,
+          child: CircularProgressIndicator(
+            strokeWidth: 15.h,
+          ),
+        ),
+      );
+    },
+    child: Scaffold(
       backgroundColor: Color(0xFFF2F2F2),
       appBar: AppBar(
         leading: IconButton(
@@ -174,7 +184,7 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
           onRetry: () => ref.refresh(ordersPageProvider()),
         ),
       ),
-    );
+    ),);
   }
 
   List<DataColumn> get columns {
@@ -297,6 +307,7 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
                   title: '환불을 진행합니다.',
                 );
                 if (!result1) {
+                  context.loaderOverlay.hide();
                   return;
                 }
                 final result2 = await DialogHelper.showSetupDialog(
@@ -307,6 +318,10 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
                 );
                 if (result2) {
                   await ref.read(setupRefundProcessProvider.notifier).startRefund(order);
+                  context.loaderOverlay.hide();
+                }
+                else {
+                  context.loaderOverlay.hide();
                 }
               },
             );
@@ -336,6 +351,7 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
                   title: '환불을 진행합니다.',
                 );
                 if (!result1) {
+                  context.loaderOverlay.hide();
                   return;
                 }
                 final result2 = await DialogHelper.showSetupDialog(
@@ -346,6 +362,10 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
                 );
                 if (result2) {
                   await ref.read(setupRefundProcessProvider.notifier).startRefund(order);
+                  context.loaderOverlay.hide();
+                }
+                else {
+                  context.loaderOverlay.hide();
                 }
               },
             );
