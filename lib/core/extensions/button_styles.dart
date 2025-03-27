@@ -11,7 +11,7 @@ extension ButtonStyles on BuildContext {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
         elevation: 10,
         shadowColor: Colors.black.withOpacity(0.4),
-        textStyle: typography.kioskAlertBtnB,
+        textStyle: typography.kioskAlertBtnB.copyWith(fontFamily: 'Cafe24Ssurround2')
       );
   ButtonStyle get setupDialogConfirmButtonStyle => OutlinedButton.styleFrom(
         fixedSize: Size(double.infinity, 94.h),
@@ -21,7 +21,7 @@ extension ButtonStyles on BuildContext {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
         elevation: 10,
         shadowColor: Colors.black.withOpacity(0.4),
-        textStyle: typography.kioskAlertBtnB,
+        textStyle: typography.kioskAlertBtnB.copyWith(fontFamily: 'Cafe24Ssurround2')
       );
 
   ///
@@ -37,7 +37,7 @@ extension ButtonStyles on BuildContext {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
         elevation: 10,
         shadowColor: Colors.black.withOpacity(0.4),
-        textStyle: typography.kioskBtn1B,
+        textStyle: typography.kioskBtn1B.copyWith(fontFamily: 'Cafe24Ssurround2')
       );
 
   ///
@@ -53,7 +53,7 @@ extension ButtonStyles on BuildContext {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
         elevation: 10,
         shadowColor: Colors.black.withOpacity(0.4),
-        textStyle: typography.kioskAlertBtnB,
+        textStyle: typography.kioskAlertBtnB.copyWith(fontFamily: 'Cafe24Ssurround2')
       );
 
   ///
@@ -69,7 +69,8 @@ extension ButtonStyles on BuildContext {
       padding: EdgeInsets.symmetric(vertical: 6.h, horizontal: 8.w),
       elevation: 10,
       shadowColor: Colors.black.withOpacity(0.4),
-      textStyle: typography.kioskBtn1B);
+      textStyle: typography.kioskBtn1B.copyWith(fontFamily: 'Cafe24Ssurround2')
+  );
 
   ///
   /// [Figma](https://www.figma.com/design/8IDM2KJtqAYWm2IsmytU5W/%ED%82%A4%EC%98%A4%EC%8A%A4%ED%81%AC_%EB%94%94%EC%9E%90%EC%9D%B8_%EA%B3%B5%EC%9C%A0%EC%9A%A9?node-id=931-13722&m=dev)
@@ -87,7 +88,9 @@ extension ButtonStyles on BuildContext {
             width: 1.w,
             color: kioskColors.buttonColor,
           )),
-      textStyle: typography.kioksNum1SB);
+      //textStyle: typography.kioksNum1SB
+    textStyle: typography.kioksNum1SB.copyWith(fontFamily: 'Cafe24Ssurround2')
+  );
 
   ///
   /// [Figma](https://www.figma.com/design/8IDM2KJtqAYWm2IsmytU5W/%ED%82%A4%EC%98%A4%EC%8A%A4%ED%81%AC_%EB%94%94%EC%9E%90%EC%9D%B8_%EA%B3%B5%EC%9C%A0%EC%9A%A9?node-id=931-13744&m=dev)
@@ -100,5 +103,6 @@ extension ButtonStyles on BuildContext {
       backgroundColor: kioskColors.buttonColor,
       foregroundColor: kioskColors.buttonTextColor,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
-      textStyle: typography.kioskNum2B);
+      textStyle: typography.kioskNum2B.copyWith(fontFamily: 'Cafe24Ssurround2')
+  );
 }

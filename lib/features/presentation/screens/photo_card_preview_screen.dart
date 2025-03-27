@@ -120,7 +120,9 @@ class _PhotoCardPreviewScreenState
           SizedBox(height: 30.h),
           Text(
               LocaleKeys.sub03_txt_03.tr(),
-              style: context.typography.kioskBody2B.copyWith(color: Color(int.parse(kiosk?.couponTextColor.replaceFirst('#', '0xff') ?? '0xffffff'))),
+              style: context.typography.kioskBody2B.copyWith(color: Color(int.parse(kiosk?.couponTextColor.replaceFirst('#', '0xff') ?? '0xffffff')),
+                fontFamily: 'Pretendard',
+              ),
           ),
         ],
       ),

@@ -36,7 +36,8 @@ class LanguageSwitcher extends ConsumerWidget {
         locale: const Locale('ja', 'JP'),
         name: '日本語',
         flag: SnaptagSvg.flagJp,
-        fontFamily: 'PrentendardJP',
+        //fontFamily: 'PrentendardJP',
+        fontFamily: 'Cafe24Ssurround2',
       ),
     ];
 
@@ -133,7 +134,8 @@ class LocaleOption {
     required this.locale,
     required this.name,
     required this.flag,
-    this.fontFamily = 'Pretendard',
+    //this.fontFamily = 'Pretendard',
+    this.fontFamily = 'Cafe24Ssurround2',
   });
 
   final Locale locale;

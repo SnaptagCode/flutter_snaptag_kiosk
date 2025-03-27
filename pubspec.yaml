@@ -43,6 +43,7 @@ dependencies:
   flutter_soloud: ^2.1.7
   flutter_dotenv: ^5.2.1
   pretty_dio_logger: ^1.4.0
+  pretty_animated_buttons: ^0.0.2
 
 dev_dependencies:
   flutter_test:
@@ -71,6 +72,26 @@ flutter:
     - assets/sounds/
 
   fonts:
+    - family: Cafe24Ssurround2
+      fonts:
+        - asset: assets/fonts/Cafe24Ssurround-v2.0.ttf
+          weight: 100
+        - asset: assets/fonts/Cafe24Ssurround-v2.0.ttf
+          weight: 200
+        - asset: assets/fonts/Cafe24Ssurround-v2.0.ttf
+          weight: 300
+        - asset: assets/fonts/Cafe24Ssurround-v2.0.ttf
+          weight: 400
+        - asset: assets/fonts/Cafe24Ssurround-v2.0.ttf
+          weight: 500
+        - asset: assets/fonts/Cafe24Ssurround-v2.0.ttf
+          weight: 600
+        - asset: assets/fonts/Cafe24Ssurround-v2.0.ttf
+          weight: 700
+        - asset: assets/fonts/Cafe24Ssurround-v2.0.ttf
+          weight: 800
+        - asset: assets/fonts/Cafe24Ssurround-v2.0.ttf
+          weight: 900
     - family: PretendardJP
       fonts:
         - asset: assets/fonts/PretendardJP-Thin.ttf

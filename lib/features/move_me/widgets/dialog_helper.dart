@@ -40,6 +40,7 @@ class DialogHelper {
               Text(
                 '환불이 실패했습니다.',
                 style: context.typography.kioskAlert1B.copyWith(
+                  fontFamily: 'Pretendard',
                   color: Colors.black,
                 ),
               ),
@@ -74,6 +75,7 @@ class DialogHelper {
               Text(
                 '환불이 완료되었습니다.',
                 style: context.typography.kioskAlert1B.copyWith(
+                  fontFamily: 'Pretendard',
                   color: Colors.black,
                 ),
               ),
@@ -104,6 +106,7 @@ class DialogHelper {
             child: Text(
               title,
               style: context.typography.kioskAlert1B.copyWith(
+                fontFamily: 'Pretendard',
                 color: Colors.black,
               ),
             ),
@@ -173,6 +176,7 @@ class DialogHelper {
             message,
             style: context.typography.kioskAlert2M.copyWith(
               color: Colors.black,
+              fontFamily: 'Pretendard',
             ),
             textAlign: TextAlign.center,
           ),
