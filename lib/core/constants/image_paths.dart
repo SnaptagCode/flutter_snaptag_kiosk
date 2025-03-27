@@ -11,6 +11,8 @@ class SnaptagImages {
 
   static const String printLoading = 'assets/images/print_loading.png';
 
+  static const String printLoadingGIF = 'assets/images/print_loading.gif';
+
   static const String setupBackground = 'assets/images/setup_background.png';
 
   static const String loading = 'assets/images/loading.gif';

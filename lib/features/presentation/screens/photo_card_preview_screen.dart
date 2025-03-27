@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_snaptag_kiosk/core/utils/sound_manager.dart';
+import 'package:flutter_snaptag_kiosk/features/presentation/providers/screens/printing_state.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 
@@ -12,12 +13,10 @@ class PhotoCardPreviewScreen extends ConsumerStatefulWidget {
     super.key,
   });
   @override
-  ConsumerState<PhotoCardPreviewScreen> createState() =>
-      _PhotoCardPreviewScreenState();
+  ConsumerState<PhotoCardPreviewScreen> createState() => _PhotoCardPreviewScreenState();
 }
 
-class _PhotoCardPreviewScreenState
-    extends ConsumerState<PhotoCardPreviewScreen> {
+class _PhotoCardPreviewScreenState extends ConsumerState<PhotoCardPreviewScreen> {
   Future<void> _handlePaymentError(Object error, StackTrace stack) async {
     logger.e('Payment error occurred', error: error, stackTrace: stack);
     await DialogHelper.showPurchaseFailedDialog(
@@ -55,6 +54,7 @@ class _PhotoCardPreviewScreenState
             final order = ref.watch(updateOrderInfoProvider)?.status;
             if (order == OrderStatus.completed) {
               PrintProcessRouteData().go(context);
+              ref.read(printingStateProvider.notifier).updatePrinting(true);
             } else {
               await DialogHelper.showPurchaseFailedDialog(
                 context,
@@ -109,9 +109,7 @@ class _PhotoCardPreviewScreenState
                 style: context.paymentButtonStyle,
                 onPressed: () async {
                   await SoundManager().playSound();
-                  ref
-                      .read(photoCardPreviewScreenProviderProvider.notifier)
-                      .payment();
+                  ref.read(photoCardPreviewScreenProviderProvider.notifier).payment();
                 },
                 child: Text(LocaleKeys.sub02_btn_pay.tr()),
               ),
@@ -119,8 +117,9 @@ class _PhotoCardPreviewScreenState
           ),
           SizedBox(height: 30.h),
           Text(
-              LocaleKeys.sub03_txt_03.tr(),
-              style: context.typography.kioskBody2B.copyWith(color: Color(int.parse(kiosk?.couponTextColor.replaceFirst('#', '0xff') ?? '0xffffff'))),
+            LocaleKeys.sub03_txt_03.tr(),
+            style: context.typography.kioskBody2B
+                .copyWith(color: Color(int.parse(kiosk?.couponTextColor.replaceFirst('#', '0xff') ?? '0xffffff'))),
           ),
         ],
       ),

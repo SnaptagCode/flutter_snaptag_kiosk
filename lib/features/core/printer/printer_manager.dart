@@ -14,7 +14,6 @@ class PrinterManager {
   late PrinterBindings _bindings;
   late Isolate _printIsolate;
   late SendPort _sendPort;
-  late ReceivePort _printReceivePort;
   bool isFirst = false;
 
   PrinterManager._();
@@ -31,14 +30,19 @@ class PrinterManager {
   }
 
   Future<void> _initPrintIsolate() async {
-    _printReceivePort = ReceivePort();
+    try {
+      logger.i('_initPrintIsolate');
+      final printReceivePort = ReceivePort();
 
-    _printIsolate = await Isolate.spawn(_printEntry, _printReceivePort.sendPort);
+      _printIsolate = await Isolate.spawn(_printEntry, printReceivePort.sendPort);
 
-    _sendPort = await _printReceivePort.first;
+      _sendPort = await printReceivePort.first;
+    } catch (e) {
+      logger.i(e);
+    }
   }
 
-  Future<void> _printEntry(SendPort sendPort) async {
+  void _printEntry(SendPort sendPort) async {
     try {
       final isolateReceivePort = ReceivePort();
       sendPort.send(isolateReceivePort.sendPort);
@@ -49,7 +53,7 @@ class PrinterManager {
       bindings.initLibrary();
 
       // 2. 프린터 연결
-      final connected = _bindings.connectPrinter();
+      final connected = bindings.connectPrinter();
       if (!connected) {
         throw Exception('Failed to connect printer');
       }
@@ -57,18 +61,18 @@ class PrinterManager {
 
       // 3. 리본 설정
       // 레거시 코드와 동일하게 setRibbonOpt 호출
-      _bindings.setRibbonOpt(1, 0, "2", 2);
-      _bindings.setRibbonOpt(1, 1, "255", 4);
+      bindings.setRibbonOpt(1, 0, "2", 2);
+      bindings.setRibbonOpt(1, 1, "255", 4);
 
       // 4. 프린터 준비 상태 확인
-      final ready = _bindings.ensurePrinterReady();
+      final ready = bindings.ensurePrinterReady();
       if (!ready) {
         throw Exception('Failed to ensure printer ready');
       }
 
       // 피더 상태 체크 추가
       logger.i('Checking feeder status...');
-      final hasCard = _bindings.checkFeederStatus();
+      final hasCard = bindings.checkFeederStatus();
       if (!hasCard) {
         throw Exception('Card feeder is empty');
       }
@@ -76,16 +80,18 @@ class PrinterManager {
       // compute(, 'message');
 
       logger.i('1. Checking card position...');
-      final hasCardInPrinter = _bindings.checkCardPosition();
+      final hasCardInPrinter = bindings.checkCardPosition();
       if (hasCardInPrinter) {
         logger.i('Card found, ejecting...');
-        _bindings.ejectCard();
+        bindings.ejectCard();
       }
 
       isolateReceivePort.listen((message) async {
         if (message is Map<String, dynamic>) {
           final printPath = message['data'] as PrintPath;
           final replyPort = message['port'] as SendPort;
+
+          logger.i('printPath: front ${printPath.frontPath} back ${printPath.backPath} replyPort: $replyPort');
 
           try {
             // 프린트 작업
@@ -94,11 +100,11 @@ class PrinterManager {
             String? behindImageInfo;
 
             if (printPath.frontPath != null) {
-              frontImageInfo = await drawImage(path: printPath.frontPath!);
+              frontImageInfo = await drawImage(path: printPath.frontPath!, bindings: bindings);
             }
 
             if (printPath.backPath != null) {
-              behindImageInfo = await drawImage(path: printPath.backPath!);
+              behindImageInfo = await drawImage(path: printPath.backPath!, bindings: bindings);
               // ❗️ 프로세스 충돌 발생, 파일을 삭제해야 됨.
               await File(printPath.backPath!).delete().catchError((_) {
                 logger.i('Failed to delete rotated rear image');
@@ -106,19 +112,20 @@ class PrinterManager {
             }
 
             logger.i('5. Injecting card...');
-            _bindings.injectCard();
+            bindings.injectCard();
 
             logger.i('6. Printing card...');
-            _bindings.printCard(
+            bindings.printCard(
               frontImageInfo: frontImageInfo,
               backImageInfo: behindImageInfo,
             );
 
             logger.i('7. Ejecting card...');
-            _bindings.ejectCard();
+            bindings.ejectCard();
 
             replyPort.send({'status': 'success'});
           } catch (e) {
+            logger.i('isolateReceivePort: $e');
             replyPort.send({'status': 'error'});
           }
         }
@@ -150,6 +157,7 @@ class PrinterManager {
 
       final response = await responsePort.first as Map<String, dynamic>;
 
+      logger.i('response: $response');
       if (response['status'] == 'success') {
         logger.i('프린트 완료');
       } else {
@@ -311,7 +319,6 @@ class PrinterManager {
       _printImageIsolate(PrintPath(frontPath: frontPath, backPath: null));
     } catch (e, stack) {
       logger.i('Print error: $e\nStack: $stack');
-      rethrow;
     }
   }
 
@@ -346,11 +353,11 @@ class PrinterManager {
       String? behindImageInfo;
 
       if (printPath.frontPath != null) {
-        frontImageInfo = await drawImage(path: printPath.frontPath!);
+        frontImageInfo = await drawImage(path: printPath.frontPath!, bindings: _bindings);
       }
 
       if (printPath.backPath != null) {
-        behindImageInfo = await drawImage(path: printPath.backPath!);
+        behindImageInfo = await drawImage(path: printPath.backPath!, bindings: _bindings);
         // ❗️ 프로세스 충돌 발생, 파일을 삭제해야 됨.
         await File(printPath.backPath!).delete().catchError((_) {
           logger.i('Failed to delete rotated rear image');
@@ -395,13 +402,13 @@ class PrinterManager {
     return imageBytes;
   }
 
-  Future<String> drawImage({required String path}) async {
+  Future<String> drawImage({required String path, required PrinterBindings bindings}) async {
     StringBuffer buffer = StringBuffer();
     try {
-      await _prepareAndDrawImageTest(path, true);
+      await _prepareAndDrawImageTest(path, true, bindings);
 
       logger.i('Committing canvas...');
-      buffer.write(_commitCanvas());
+      buffer.write(_commitCanvas(bindings));
 
       return buffer.toString();
     } catch (e, stack) {
@@ -433,15 +440,15 @@ class PrinterManager {
       height: 0,
       noAbsoluteBlack: true,
     );
-    buffer.write(_commitCanvas());
+    // buffer.write(_commitCanvas());
   }
 
-  Future<void> _prepareAndDrawImageTest(String imagePath, bool isFront) async {
-    _bindings.setCanvasOrientation(true);
-    _bindings.prepareCanvas(isColor: true);
+  Future<void> _prepareAndDrawImageTest(String imagePath, bool isFront, PrinterBindings bindings) async {
+    bindings.setCanvasOrientation(true);
+    bindings.prepareCanvas(isColor: true);
 
     logger.i('Drawing image...');
-    _bindings.drawImage(
+    bindings.drawImage(
       imagePath: imagePath,
       x: -1,
       y: -1,
@@ -451,7 +458,7 @@ class PrinterManager {
     );
     logger.i('Drawing empty text...');
     // 제거 시 이미지 출력이 안됨
-    _bindings.drawText(
+    bindings.drawText(
       text: '',
       x: 0,
       y: 0,
@@ -461,12 +468,12 @@ class PrinterManager {
     );
   }
 
-  String _commitCanvas() {
+  String _commitCanvas(PrinterBindings bindings) {
     final strPtr = calloc<ffi.Uint8>(200).cast<Utf8>();
     final lenPtr = calloc<ffi.Int32>()..value = 200;
 
     try {
-      final result = _bindings.commitCanvas(strPtr, lenPtr);
+      final result = bindings.commitCanvas(strPtr, lenPtr);
       if (result != 0) {
         throw Exception('Failed to commit canvas');
       }

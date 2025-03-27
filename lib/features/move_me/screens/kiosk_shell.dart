@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_snaptag_kiosk/features/presentation/providers/screens/printing_state.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 
@@ -66,25 +67,34 @@ class KioskShell extends ConsumerWidget {
                           fit: BoxFit.cover,
                         ),
                 ),
-                child: Column(
+                child: Stack(
                   children: [
-                    // 앱바 영역
-                    SizedBox(
-                      height: 70.h,
-                      child: Row(
-                        children: [
-                          const Spacer(),
-                          KioskNavigatorButton(),
-                          SizedBox(width: 30.w),
-                        ],
+                    if (ref.watch(printingStateProvider))
+                      Image.asset(
+                        SnaptagImages.printLoadingGIF,
+                        fit: BoxFit.fill,
                       ),
-                    ),
-                    SizedBox(
-                      height: 230.h,
-                    ),
-                    // 실제 콘텐츠
-                    Expanded(
-                      child: child,
+                    Column(
+                      children: [
+                        // 앱바 영역
+                        SizedBox(
+                          height: 70.h,
+                          child: Row(
+                            children: [
+                              const Spacer(),
+                              KioskNavigatorButton(),
+                              SizedBox(width: 30.w),
+                            ],
+                          ),
+                        ),
+                        SizedBox(
+                          height: 230.h,
+                        ),
+                        // 실제 콘텐츠
+                        Expanded(
+                          child: child,
+                        ),
+                      ],
                     ),
                   ],
                 ),
