@@ -51,13 +51,20 @@ class PrinterManager {
       _printStatusCheck(bindings);
 
       isolateReceivePort.listen((message) async {
-        if (message is Map<String, dynamic>) {
-          final printPath = message['data'] as PrintPath;
-          final replyPort = message['port'] as SendPort;
+        try {
+          if (message is Map<String, dynamic>) {
+            final printPath = message['data'] as PrintPath;
+            final replyPort = message['port'] as SendPort;
+            final shouldPrintLog = message['shouldPrintLog'] as bool;
 
-          logger.i('printPath: front ${printPath.frontPath} back ${printPath.backPath} replyPort: $replyPort');
+            logger.i('shouldPrintLog: $shouldPrintLog printPath: $printPath');
 
-          try {
+            if (shouldPrintLog) {
+              final printerLog = getPrinterLogData(bindings);
+              replyPort.send({'printStatus': printerLog});
+              return;
+            }
+
             String? frontImageInfo;
             String? behindImageInfo;
 
@@ -88,10 +95,9 @@ class PrinterManager {
             bindings.ejectCard();
 
             replyPort.send({'printStatus': printerLog});
-          } catch (e) {
-            logger.i('isolateReceivePort: $e');
-            replyPort.send({'status': 'error'});
           }
+        } catch (e) {
+          logger.i('isolateReceivePort: $e');
         }
       });
     } catch (e) {
@@ -117,7 +123,11 @@ class PrinterManager {
 
       final responsePort = ReceivePort();
 
-      _sendPort.send({'data': PrintPath(frontPath: frontPath, backPath: null), 'port': responsePort.sendPort});
+      _sendPort.send({
+        'shouldPrintLog': false,
+        'data': PrintPath(frontPath: frontPath, backPath: null),
+        'port': responsePort.sendPort
+      });
 
       try {
         final response = await responsePort.first as Map<String, dynamic>;
@@ -180,6 +190,22 @@ class PrinterManager {
     } catch (e, stack) {
       logger.i('Print error: $e\nStack: $stack');
       rethrow;
+    }
+  }
+
+  Future<PrinterLog?> startLog() async {
+    try {
+      final responsePort = ReceivePort();
+
+      _sendPort.send(
+          {'shouldPrintLog': true, 'data': PrintPath(frontPath: null, backPath: null), 'port': responsePort.sendPort});
+
+      final response = await responsePort.first as Map<String, dynamic>;
+
+      return response['printStatus'] as PrinterLog;
+    } catch (e, stack) {
+      logger.i('startLog error: $e\nStack: $stack');
+      return null;
     }
   }
 

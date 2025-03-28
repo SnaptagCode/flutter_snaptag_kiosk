@@ -1,3 +1,4 @@
+import 'package:flutter_snaptag_kiosk/features/core/printer/printer_manager.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -27,6 +28,17 @@ class KioskInfoService extends _$KioskInfoService {
       state = response;
 
       ref.read(frontPhotoListProvider.notifier).fetch();
+
+      final printerManager = await PrinterManager.getInstance();
+      final printerLog = await printerManager.startLog();
+
+      if (printerLog != null) {
+        final log = printerLog.copyWith(kioskMachineId: machineId);
+        if (machineId != 0) {
+          await ref.read(kioskRepositoryProvider).updatePrintLog(request: log);
+          SlackLogService().sendLogToSlack('PrintState : $log');
+        }
+      }
 
       return response;
     } catch (e) {

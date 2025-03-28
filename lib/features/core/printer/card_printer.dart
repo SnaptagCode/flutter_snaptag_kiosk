@@ -27,11 +27,10 @@ class PrinterService extends _$PrinterService {
 
       if (printerLog != null) {
         final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
+        final log = printerLog.copyWith(kioskMachineId: machineId);
         if (machineId != 0) {
-          await ref
-              .read(kioskRepositoryProvider)
-              .updatePrintLog(request: printerLog.copyWith(kioskMachineId: machineId));
-          SlackLogService().sendLogToSlack('PrintState : $printerLog');
+          await ref.read(kioskRepositoryProvider).updatePrintLog(request: log);
+          SlackLogService().sendLogToSlack('PrintState : $log');
         }
       }
     } catch (e) {
