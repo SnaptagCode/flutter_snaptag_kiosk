@@ -122,7 +122,7 @@ class PrintService extends _$PrintService {
     try {
       await ref.read(printerServiceProvider.notifier).printImage(
             frontFile: frontPhoto,
-            embeddedFile: embedded,
+            backFile: embedded,
           );
     } catch (e) {
       rethrow;

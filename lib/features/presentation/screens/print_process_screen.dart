@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_snaptag_kiosk/features/presentation/providers/screens/printing_state.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 
 class PrintProcessScreen extends ConsumerStatefulWidget {
@@ -60,6 +61,9 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
           data: (_) async {
             await DialogHelper.showPrintCompleteDialog(
               context,
+              finishedPrinting: () {
+                ref.read(printingStateProvider.notifier).updatePrinting(false);
+              },
               onButtonPressed: () {
                 PhotoCardUploadRouteData().go(context);
               },
@@ -86,10 +90,7 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
               padding: EdgeInsets.all(8.r),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(10.r),
-                child: Image.asset(
-                  SnaptagImages.printLoading,
-                  fit: BoxFit.fill,
-                ),
+                child: SizedBox(height: 400.h),
               ),
             ),
           ),
@@ -103,7 +104,8 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
           Text(
             LocaleKeys.sub03_txt_03.tr(),
             textAlign: TextAlign.center,
-            style: context.typography.kioskBody2B.copyWith(color: Color(int.parse(kiosk?.couponTextColor.replaceFirst('#', '0xff') ?? '0xffffff'))),
+            style: context.typography.kioskBody2B
+                .copyWith(color: Color(int.parse(kiosk?.couponTextColor.replaceFirst('#', '0xff') ?? '0xffffff'))),
           ),
         ],
       ),
