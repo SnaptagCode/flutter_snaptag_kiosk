@@ -53,6 +53,7 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
             await DialogHelper.showPrintErrorDialog(
               context,
               onButtonPressed: () {
+                ref.read(printingStateProvider.notifier).updatePrinting(false);
                 PhotoCardUploadRouteData().go(context);
               },
             );

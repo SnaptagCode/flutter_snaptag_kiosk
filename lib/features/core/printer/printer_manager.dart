@@ -6,6 +6,7 @@ import 'dart:isolate';
 import 'dart:typed_data';
 import 'package:ffi/ffi.dart'; // Utf8 사용을 위한 임포트
 import 'package:flutter_snaptag_kiosk/features/core/printer/print_path.dart';
+import 'package:flutter_snaptag_kiosk/features/core/printer/printer_log.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:image/image.dart' as img;
 
@@ -81,10 +82,12 @@ class PrinterManager {
               backImageInfo: behindImageInfo,
             );
 
+            final printerLog = getPrinterLogData(bindings);
+
             logger.i('7. Ejecting card...');
             bindings.ejectCard();
 
-            replyPort.send({'status': 'success'});
+            replyPort.send({'printStatus': printerLog});
           } catch (e) {
             logger.i('isolateReceivePort: $e');
             replyPort.send({'status': 'error'});
@@ -96,7 +99,7 @@ class PrinterManager {
     }
   }
 
-  Future<void> startPrint({
+  Future<PrinterLog?> startPrint({
     required File? frontFile,
     required File? embeddedFile,
   }) async {
@@ -116,16 +119,17 @@ class PrinterManager {
 
       _sendPort.send({'data': PrintPath(frontPath: frontPath, backPath: null), 'port': responsePort.sendPort});
 
-      final response = await responsePort.first as Map<String, dynamic>;
-
-      logger.i('response: $response');
-      if (response['status'] == 'success') {
-        logger.i('프린트 완료');
-      } else {
-        logger.i('프린트 실패');
+      try {
+        final response = await responsePort.first as Map<String, dynamic>;
+        return response['printStatus'] as PrinterLog;
+      } catch (e) {
+        logger.i('error: $e');
       }
+
+      return null;
     } catch (e, stack) {
       logger.i('error: $e stack: $stack');
+      rethrow;
     }
   }
 
@@ -179,8 +183,37 @@ class PrinterManager {
     }
   }
 
+  PrinterLog getPrinterLogData(PrinterBindings bindings) {
+    try {
+      final printerStatus = bindings.getPrinterStatus(0);
+      final ribbonStatus = bindings.getRbnAndFilmRemaining();
+      final isPrintingNow = bindings.checkCardPosition();
+      final isFeederEmpty = !bindings.checkFeederStatus();
+      // final errorMsg = printerStatus.$2 == null ? '' : bindings.getErrorInfo(printerStatus.$2 ?? 0);
+      logger.i(
+          'Printer status: $printerStatus, ribbon status: $ribbonStatus, isPrintingNow: $isPrintingNow isFeederEmpty: $isFeederEmpty');
+
+      return PrinterLog(
+          sdkMainCode: (printerStatus?.mainCode ?? 0).toString(),
+          sdkSubCode: (printerStatus?.mainCode ?? 0).toString(),
+          printerMainStatusCode: (printerStatus?.mainStatus ?? 0).toString(),
+          printerErrorStatusCode: (printerStatus?.errorStatus ?? 0).toString(),
+          printerWarningStatusCode: (printerStatus?.warningStatus ?? 0).toString(),
+          chassisTemperature: printerStatus?.chassisTemperature ?? 0,
+          printerHeadTemperature: printerStatus?.printHeadTemperature ?? 0,
+          heaterTemperature: printerStatus?.heaterTemperature ?? 0,
+          rbnRemainingRatio: ribbonStatus?.rbnRemaining ?? 0,
+          filmRemainingRatio: ribbonStatus?.filmRemaining ?? 0,
+          isPrintingNow: isPrintingNow,
+          isFeederEmpty: isFeederEmpty,
+          sdkErrorMessage: '');
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   void printStatus(PrinterBindings bindings) {
-    final status = bindings.getPrinterStatus();
+    final status = bindings.getPrinterStatus(0);
     if (status != null) {
       logger.i(
           'status mainCode ${status.mainCode} mainStatus ${status.mainStatus} errorStatus ${status.errorStatus} subCode ${status.subCode} wariningStatus ${status.warningStatus}');
