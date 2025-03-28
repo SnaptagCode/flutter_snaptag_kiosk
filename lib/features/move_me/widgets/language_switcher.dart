@@ -37,7 +37,7 @@ class LanguageSwitcher extends ConsumerWidget {
         name: '日本語',
         flag: SnaptagSvg.flagJp,
         //fontFamily: 'PrentendardJP',
-        fontFamily: 'Cafe24Ssurround2',
+        fontFamily: 'MPLUSRounded',
       ),
     ];
 
