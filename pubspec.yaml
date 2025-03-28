@@ -72,6 +72,26 @@ flutter:
     - assets/sounds/
 
   fonts:
+    - family: MPLUSRounded
+      fonts:
+        - asset: assets/fonts/MPLUSRounded1c-Bold.ttf
+        - weight: 100
+        - asset: assets/fonts/MPLUSRounded1c-Bold.ttf
+        - weight: 200
+        - asset: assets/fonts/MPLUSRounded1c-Bold.ttf
+        - weight: 300
+        - asset: assets/fonts/MPLUSRounded1c-Bold.ttf
+        - weight: 400
+        - asset: assets/fonts/MPLUSRounded1c-Bold.ttf
+        - weight: 500
+        - asset: assets/fonts/MPLUSRounded1c-Bold.ttf
+        - weight: 600
+        - asset: assets/fonts/MPLUSRounded1c-Bold.ttf
+        - weight: 700
+        - asset: assets/fonts/MPLUSRounded1c-Bold.ttf
+        - weight: 800
+        - asset: assets/fonts/MPLUSRounded1c-Bold.ttf
+        - weight: 900
     - family: Cafe24Ssurround2
       fonts:
         - asset: assets/fonts/Cafe24Ssurround-v2.0.ttf
