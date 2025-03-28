@@ -134,8 +134,7 @@ class PrinterBindings {
       final result = _drawImage(x, y, width, height, pathPointer.cast(), noAbsoluteBlack ? 1 : 0);
       logger.i('DrawImage result: $result'); // 결과 코드 확인
       if (result != 0) {
-        final error = getErrorInfo(result);
-        throw Exception('Failed to draw image: $error (code: $result)');
+        throw Exception('Failed to draw image: $result');
       }
     } finally {
       calloc.free(pathPointer);
@@ -166,7 +165,7 @@ class PrinterBindings {
   void injectCard() {
     final result = _cardInject(0); // 0: 기본 위치
     if (result != 0) {
-      throw Exception('Failed to inject card');
+      throw Exception('Failed to inject card : $result');
     }
   }
 
@@ -207,7 +206,7 @@ class PrinterBindings {
     try {
       final result = _printDraw(frontPointer, backPointer);
       if (result != 0) {
-        throw Exception('Failed to print card');
+        throw Exception('Failed to print card : $result');
       }
     } finally {
       calloc.free(frontPointer);
@@ -221,7 +220,7 @@ class PrinterBindings {
   void ejectCard() {
     final result = _cardEject(0); // 0: 왼쪽으로 배출
     if (result != 0) {
-      throw Exception('Failed to eject card');
+      throw Exception('Failed to eject card $result');
     }
   }
 
@@ -258,7 +257,7 @@ class PrinterBindings {
   }
 
   // getPrinterStatus 메서드 추가
-  PrinterStatus? getPrinterStatus(int machineId) {
+  PrinterStatus? getPrinterStatus() {
     final pChassisTemp = calloc<Int16>();
     final pPrintheadTemp = calloc<Int16>();
     final pHeaterTemp = calloc<Int16>();

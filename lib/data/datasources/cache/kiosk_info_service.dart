@@ -29,6 +29,17 @@ class KioskInfoService extends _$KioskInfoService {
 
       ref.read(frontPhotoListProvider.notifier).fetch();
 
+      await printerStartLog(machineId);
+
+      return response;
+    } catch (e) {
+      ref.invalidateSelf();
+      rethrow;
+    }
+  }
+
+  Future<void> printerStartLog(int machineId) async {
+    try {
       final printerManager = await PrinterManager.getInstance();
       final printerLog = await printerManager.startLog();
 
@@ -39,11 +50,10 @@ class KioskInfoService extends _$KioskInfoService {
           SlackLogService().sendLogToSlack('PrintState : $log');
         }
       }
-
-      return response;
     } catch (e) {
-      ref.invalidateSelf();
-      rethrow;
+      // TODO : 프린트 초기화 작업 중 오류 발생.
+      logger.i(e);
+      SlackLogService().sendLogToSlack('printerStartLog : $e');
     }
   }
 

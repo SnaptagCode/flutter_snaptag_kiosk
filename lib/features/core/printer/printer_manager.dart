@@ -5,6 +5,7 @@ import 'dart:ffi' as ffi; // ffi 임포트 확인
 import 'dart:isolate';
 import 'dart:typed_data';
 import 'package:ffi/ffi.dart'; // Utf8 사용을 위한 임포트
+import 'package:flutter_snaptag_kiosk/features/core/printer/print_message.dart';
 import 'package:flutter_snaptag_kiosk/features/core/printer/print_path.dart';
 import 'package:flutter_snaptag_kiosk/features/core/printer/printer_log.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
@@ -17,14 +18,22 @@ class PrinterManager {
   PrinterManager._();
 
   static Future<PrinterManager> getInstance() async {
-    if (_instance != null) return _instance!;
-    _instance = PrinterManager._();
-    await _instance!._init();
-    return _instance!;
+    try {
+      if (_instance != null) return _instance!;
+      _instance = PrinterManager._();
+      await _instance!._init();
+      return _instance!;
+    } catch (e) {
+      rethrow;
+    }
   }
 
   Future<void> _init() async {
-    await _initPrintIsolate();
+    try {
+      await _initPrintIsolate();
+    } catch (e) {
+      rethrow;
+    }
   }
 
   Future<void> _initPrintIsolate() async {
@@ -36,6 +45,7 @@ class PrinterManager {
       _sendPort = await printReceivePort.first;
     } catch (e) {
       logger.i(e);
+      rethrow;
     }
   }
 
@@ -46,16 +56,19 @@ class PrinterManager {
 
       final PrinterBindings bindings = PrinterBindings();
 
+      // 프린트 초기화 작업
       _initializePrinter(bindings);
 
+      // 프린트 상태 체크
       _printStatusCheck(bindings);
 
       isolateReceivePort.listen((message) async {
+        SendPort? replyPort;
         try {
-          if (message is Map<String, dynamic>) {
-            final printPath = message['data'] as PrintPath;
-            final replyPort = message['port'] as SendPort;
-            final shouldPrintLog = message['shouldPrintLog'] as bool;
+          if (message is PrintMessage) {
+            final printPath = message.printPath;
+            replyPort = message.sendPort;
+            final shouldPrintLog = message.shouldPrintLog;
 
             logger.i('shouldPrintLog: $shouldPrintLog printPath: $printPath');
 
@@ -73,7 +86,7 @@ class PrinterManager {
             }
 
             if (printPath.backPath != null) {
-              behindImageInfo = await drawImage(path: printPath.backPath!, bindings: bindings);
+              behindImageInfo = await drawImage(path: printPath.backPath!, bindings: bindings, isFront: false);
               // ❗️ 프로세스 충돌 발생, 파일을 삭제해야 됨.
               await File(printPath.backPath!).delete().catchError((_) {
                 logger.i('Failed to delete rotated rear image');
@@ -94,14 +107,15 @@ class PrinterManager {
             logger.i('7. Ejecting card...');
             bindings.ejectCard();
 
-            replyPort.send({'printStatus': printerLog});
+            replyPort.send({'printStatus': printerLog, 'error': ''});
           }
         } catch (e) {
           logger.i('isolateReceivePort: $e');
+          replyPort?.send({'printStatus': PrinterLog(), 'error': e.toString()});
         }
       });
     } catch (e) {
-      logger.i(e);
+      rethrow;
     }
   }
 
@@ -123,17 +137,21 @@ class PrinterManager {
 
       final responsePort = ReceivePort();
 
-      _sendPort.send({
-        'shouldPrintLog': false,
-        'data': PrintPath(frontPath: frontPath, backPath: null),
-        'port': responsePort.sendPort
-      });
+      _sendPort.send(
+        PrintMessage(
+          printPath: PrintPath(frontPath: frontPath, backPath: rotatedRearPath),
+          sendPort: responsePort.sendPort,
+        ),
+      );
 
-      try {
-        final response = await responsePort.first as Map<String, dynamic>;
-        return response['printStatus'] as PrinterLog;
-      } catch (e) {
-        logger.i('error: $e');
+      final response = await responsePort.first as Map<String, dynamic>;
+      final printStatus = response['printStatus'] as PrinterLog?;
+      final errorMsg = response['error'] as String;
+
+      if (errorMsg.isEmpty) {
+        return printStatus;
+      } else {
+        Exception(errorMsg);
       }
 
       return null;
@@ -198,7 +216,11 @@ class PrinterManager {
       final responsePort = ReceivePort();
 
       _sendPort.send(
-          {'shouldPrintLog': true, 'data': PrintPath(frontPath: null, backPath: null), 'port': responsePort.sendPort});
+        PrintMessage(
+            shouldPrintLog: true,
+            printPath: PrintPath(frontPath: null, backPath: null),
+            sendPort: responsePort.sendPort),
+      );
 
       final response = await responsePort.first as Map<String, dynamic>;
 
@@ -209,9 +231,9 @@ class PrinterManager {
     }
   }
 
-  PrinterLog getPrinterLogData(PrinterBindings bindings) {
+  PrinterLog? getPrinterLogData(PrinterBindings bindings) {
     try {
-      final printerStatus = bindings.getPrinterStatus(0);
+      final printerStatus = bindings.getPrinterStatus();
       final ribbonStatus = bindings.getRbnAndFilmRemaining();
       final isPrintingNow = bindings.checkCardPosition();
       final isFeederEmpty = !bindings.checkFeederStatus();
@@ -234,12 +256,13 @@ class PrinterManager {
           isFeederEmpty: isFeederEmpty,
           sdkErrorMessage: '');
     } catch (e) {
-      rethrow;
+      logger.i(e);
+      return null;
     }
   }
 
   void printStatus(PrinterBindings bindings) {
-    final status = bindings.getPrinterStatus(0);
+    final status = bindings.getPrinterStatus();
     if (status != null) {
       logger.i(
           'status mainCode ${status.mainCode} mainStatus ${status.mainStatus} errorStatus ${status.errorStatus} subCode ${status.subCode} wariningStatus ${status.warningStatus}');
@@ -269,10 +292,10 @@ class PrinterManager {
     return imageBytes;
   }
 
-  Future<String> drawImage({required String path, required PrinterBindings bindings}) async {
+  Future<String> drawImage({required String path, required PrinterBindings bindings, bool isFront = true}) async {
     StringBuffer buffer = StringBuffer();
     try {
-      await _prepareAndDrawImageTest(path, true, bindings);
+      await _prepareAndDrawImage(path, true, bindings);
 
       logger.i('Committing canvas...');
       buffer.write(_commitCanvas(bindings));
@@ -280,11 +303,11 @@ class PrinterManager {
       return buffer.toString();
     } catch (e, stack) {
       logger.i('Error in front canvas preparation: $e\nStack: $stack');
-      throw Exception('Failed to prepare front canvas: $e');
+      throw Exception('Failed to prepare ${isFront ? 'Front' : 'Back'} canvas: $e');
     }
   }
 
-  Future<void> _prepareAndDrawImageTest(String imagePath, bool isFront, PrinterBindings bindings) async {
+  Future<void> _prepareAndDrawImage(String imagePath, bool isFront, PrinterBindings bindings) async {
     bindings.setCanvasOrientation(true);
     bindings.prepareCanvas(isColor: true);
 
