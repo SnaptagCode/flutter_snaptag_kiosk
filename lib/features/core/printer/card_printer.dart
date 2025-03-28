@@ -21,12 +21,8 @@ class PrinterService extends _$PrinterService {
       final printerManager = await PrinterManager.getInstance();
 
       await printerManager.startPrint(frontFile: frontFile, embeddedFile: backFile);
-
-      // await _printerManager.printImageTest(frontFile: frontFile, embeddedFile: backFile);
     } catch (e) {
       rethrow;
-    } finally {
-      // isPrinting = false;
     }
   }
 }

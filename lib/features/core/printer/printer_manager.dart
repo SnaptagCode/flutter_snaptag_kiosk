@@ -11,10 +11,7 @@ import 'package:image/image.dart' as img;
 
 class PrinterManager {
   static PrinterManager? _instance;
-  late PrinterBindings _bindings;
-  late Isolate _printIsolate;
   late SendPort _sendPort;
-  bool isFirst = false;
 
   PrinterManager._();
 
@@ -31,10 +28,9 @@ class PrinterManager {
 
   Future<void> _initPrintIsolate() async {
     try {
-      logger.i('_initPrintIsolate');
       final printReceivePort = ReceivePort();
 
-      _printIsolate = await Isolate.spawn(_printEntry, printReceivePort.sendPort);
+      await Isolate.spawn(_printEntry, printReceivePort.sendPort);
 
       _sendPort = await printReceivePort.first;
     } catch (e) {
@@ -49,42 +45,9 @@ class PrinterManager {
 
       final PrinterBindings bindings = PrinterBindings();
 
-      // 1. 라이브러리 초기화
-      bindings.initLibrary();
+      _initializePrinter(bindings);
 
-      // 2. 프린터 연결
-      final connected = bindings.connectPrinter();
-      if (!connected) {
-        throw Exception('Failed to connect printer');
-      }
-      logger.i('Printer connected successfully');
-
-      // 3. 리본 설정
-      // 레거시 코드와 동일하게 setRibbonOpt 호출
-      bindings.setRibbonOpt(1, 0, "2", 2);
-      bindings.setRibbonOpt(1, 1, "255", 4);
-
-      // 4. 프린터 준비 상태 확인
-      final ready = bindings.ensurePrinterReady();
-      if (!ready) {
-        throw Exception('Failed to ensure printer ready');
-      }
-
-      // 피더 상태 체크 추가
-      logger.i('Checking feeder status...');
-      final hasCard = bindings.checkFeederStatus();
-      if (!hasCard) {
-        throw Exception('Card feeder is empty');
-      }
-
-      // compute(, 'message');
-
-      logger.i('1. Checking card position...');
-      final hasCardInPrinter = bindings.checkCardPosition();
-      if (hasCardInPrinter) {
-        logger.i('Card found, ejecting...');
-        bindings.ejectCard();
-      }
+      _printStatusCheck(bindings);
 
       isolateReceivePort.listen((message) async {
         if (message is Map<String, dynamic>) {
@@ -94,8 +57,6 @@ class PrinterManager {
           logger.i('printPath: front ${printPath.frontPath} back ${printPath.backPath} replyPort: $replyPort');
 
           try {
-            // 프린트 작업
-
             String? frontImageInfo;
             String? behindImageInfo;
 
@@ -168,14 +129,12 @@ class PrinterManager {
     }
   }
 
-  Future<void> _initializePrinter() async {
+  Future<void> _initializePrinter(PrinterBindings bindings) async {
     try {
-      _bindings.initLibrary();
-
-      printStatus();
+      bindings.initLibrary();
 
       // 2. 프린터 연결
-      final connected = _bindings.connectPrinter();
+      final connected = bindings.connectPrinter();
       if (!connected) {
         throw Exception('Failed to connect printer');
       }
@@ -183,11 +142,11 @@ class PrinterManager {
 
       // 3. 리본 설정
       // 레거시 코드와 동일하게 setRibbonOpt 호출
-      _bindings.setRibbonOpt(1, 0, "2", 2);
-      _bindings.setRibbonOpt(1, 1, "255", 4);
+      bindings.setRibbonOpt(1, 0, "2", 2);
+      bindings.setRibbonOpt(1, 1, "255", 4);
 
       // 4. 프린터 준비 상태 확인
-      final ready = _bindings.ensurePrinterReady();
+      final ready = bindings.ensurePrinterReady();
       if (!ready) {
         throw Exception('Failed to ensure printer ready');
       }
@@ -199,185 +158,34 @@ class PrinterManager {
     }
   }
 
-  void printStatus() {
-    final status = _bindings.getPrinterStatus();
+  void _printStatusCheck(PrinterBindings bindings) {
+    try {
+      // 피더 상태 체크 추가
+      logger.i('Checking feeder status...');
+      final hasCard = bindings.checkFeederStatus();
+      if (!hasCard) {
+        throw Exception('Card feeder is empty');
+      }
+
+      logger.i('1. Checking card position...');
+      final hasCardInPrinter = bindings.checkCardPosition();
+      if (hasCardInPrinter) {
+        logger.i('Card found, ejecting...');
+        bindings.ejectCard();
+      }
+    } catch (e, stack) {
+      logger.i('Print error: $e\nStack: $stack');
+      rethrow;
+    }
+  }
+
+  void printStatus(PrinterBindings bindings) {
+    final status = bindings.getPrinterStatus();
     if (status != null) {
       logger.i(
           'status mainCode ${status.mainCode} mainStatus ${status.mainStatus} errorStatus ${status.errorStatus} subCode ${status.subCode} wariningStatus ${status.warningStatus}');
     } else {
       logger.i('status null');
-    }
-  }
-
-  Future<void> printImage({
-    required File? frontFile,
-    required File? embeddedFile,
-  }) async {
-    try {
-      if (frontFile == null && embeddedFile == null) {
-        throw Exception('There is nothing to print');
-      }
-
-      _bindings = PrinterBindings();
-      _initializePrinter();
-
-      // 피더 상태 체크 추가
-      logger.i('Checking feeder status...');
-      final hasCard = _bindings.checkFeederStatus();
-      if (!hasCard) {
-        throw Exception('Card feeder is empty');
-      }
-
-      // compute(, 'message');
-
-      logger.i('1. Checking card position...');
-      final hasCardInPrinter = _bindings.checkCardPosition();
-      if (hasCardInPrinter) {
-        logger.i('Card found, ejecting...');
-        _bindings.ejectCard();
-      }
-
-      logger.i('2. Preparing front canvas...');
-      StringBuffer? frontBuffer;
-
-      if (frontFile != null) {
-        frontBuffer = StringBuffer();
-        try {
-          await _prepareAndDrawImage(frontBuffer, frontFile.path, true);
-        } catch (e, stack) {
-          logger.i('Error in front canvas preparation: $e\nStack: $stack');
-          throw Exception('Failed to prepare front canvas: $e');
-        }
-      }
-
-      StringBuffer? rearBuffer;
-
-      if (embeddedFile != null) {
-        logger.i('3. Loading and rotating rear image...');
-        final rearImage = await embeddedFile.readAsBytes();
-        final rotatedRearImage = _bindings.flipImage180(rearImage);
-        // 임시 파일로 저장
-        final temp = DateTime.now().millisecondsSinceEpoch.toString();
-        final rotatedRearPath = '${temp}_rotated.png';
-        await File(rotatedRearPath).writeAsBytes(rotatedRearImage);
-
-        try {
-          logger.i('4. Preparing rear canvas...');
-          rearBuffer = StringBuffer();
-
-          try {
-            await _prepareAndDrawImage(rearBuffer, rotatedRearPath, false);
-          } catch (e, stack) {
-            logger.i('Error in rear canvas preparation: $e\nStack: $stack');
-            throw Exception('Failed to prepare rear canvas: $e');
-          }
-        } finally {
-          await File(rotatedRearPath).delete().catchError((_) {
-            logger.i('Failed to delete rotated rear image');
-          });
-        }
-      }
-
-      logger.i('5. Injecting card...');
-      _bindings.injectCard();
-
-      logger.i('6. Printing card...');
-      _bindings.printCard(
-        frontImageInfo: frontBuffer?.toString(),
-        backImageInfo: rearBuffer?.toString(),
-      );
-
-      logger.i('7. Ejecting card...');
-      _bindings.ejectCard();
-
-      _bindings.clearLibrary();
-    } catch (e, stack) {
-      logger.i('Print error: $e\nStack: $stack');
-      rethrow;
-    }
-  }
-
-  Future<void> printImageTest({
-    required File? frontFile,
-    required File? embeddedFile,
-  }) async {
-    String? frontPath = frontFile?.path;
-    String? rotatedRearPath;
-
-    try {
-      if (frontFile == null && embeddedFile == null) {
-        throw Exception('There is nothing to print');
-      }
-
-      if (embeddedFile != null) {
-        rotatedRearPath = await _rearImage(file: embeddedFile);
-      }
-
-      // await IsolateManager<PrintPath, void>()
-      //     .runInIsolate(_printImageIsolate, PrintPath(frontPath: frontPath, backPath: rotatedRearPath));
-
-      _printImageIsolate(PrintPath(frontPath: frontPath, backPath: null));
-    } catch (e, stack) {
-      logger.i('Print error: $e\nStack: $stack');
-    }
-  }
-
-  Future<void> _printImageIsolate(PrintPath printPath) async {
-    try {
-      // ❗️ DynamicLibrary 를 Isolate 안에서 생성해야 함.
-      _bindings = PrinterBindings();
-
-      _bindings.clearLibrary();
-
-      // 2. 프린터 연결
-      final connected = _bindings.connectPrinter();
-      if (!connected) {
-        throw Exception('Failed to connect printer');
-      }
-      logger.i('Printer connected successfully');
-
-      // 3. 리본 설정
-      // 레거시 코드와 동일하게 setRibbonOpt 호출
-      _bindings.setRibbonOpt(1, 0, "2", 2);
-      _bindings.setRibbonOpt(1, 1, "255", 4);
-
-      // 4. 프린터 준비 상태 확인
-      final ready = _bindings.ensurePrinterReady();
-      if (!ready) {
-        throw Exception('Failed to ensure printer ready');
-      }
-
-      logger.i('Printer initialization completed');
-
-      String? frontImageInfo;
-      String? behindImageInfo;
-
-      if (printPath.frontPath != null) {
-        frontImageInfo = await drawImage(path: printPath.frontPath!, bindings: _bindings);
-      }
-
-      if (printPath.backPath != null) {
-        behindImageInfo = await drawImage(path: printPath.backPath!, bindings: _bindings);
-        // ❗️ 프로세스 충돌 발생, 파일을 삭제해야 됨.
-        await File(printPath.backPath!).delete().catchError((_) {
-          logger.i('Failed to delete rotated rear image');
-        });
-      }
-
-      logger.i('5. Injecting card...');
-      _bindings.injectCard();
-
-      logger.i('6. Printing card...');
-      _bindings.printCard(
-        frontImageInfo: frontImageInfo,
-        backImageInfo: behindImageInfo,
-      );
-
-      logger.i('7. Ejecting card...');
-      _bindings.ejectCard();
-    } catch (error, stack) {
-      logger.i('_printImageIsolation error: $error\nStack: $stack');
-      rethrow;
     }
   }
 
@@ -415,32 +223,6 @@ class PrinterManager {
       logger.i('Error in front canvas preparation: $e\nStack: $stack');
       throw Exception('Failed to prepare front canvas: $e');
     }
-  }
-
-  Future<void> _prepareAndDrawImage(StringBuffer buffer, String imagePath, bool isFront) async {
-    _bindings.setCanvasOrientation(true);
-    _bindings.prepareCanvas(isColor: true);
-
-    logger.i('Drawing image...');
-    _bindings.drawImage(
-      imagePath: imagePath,
-      x: -1,
-      y: -1,
-      width: 56.0,
-      height: 88.0,
-      noAbsoluteBlack: true,
-    );
-    logger.i('Drawing empty text...');
-    // 제거 시 이미지 출력이 안됨
-    _bindings.drawText(
-      text: '',
-      x: 0,
-      y: 0,
-      width: 0,
-      height: 0,
-      noAbsoluteBlack: true,
-    );
-    // buffer.write(_commitCanvas());
   }
 
   Future<void> _prepareAndDrawImageTest(String imagePath, bool isFront, PrinterBindings bindings) async {
