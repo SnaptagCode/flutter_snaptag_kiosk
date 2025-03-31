@@ -59,8 +59,6 @@ class PhotoCardUploadScreen extends ConsumerWidget {
           ),
           onPressed: () async {
             await SoundManager().playSound();
-
-            await ref.read(printerServiceProvider.notifier).printImage(frontFile: null, backFile: null);
             CodeVerificationRouteData().go(context);
           },
         ),
