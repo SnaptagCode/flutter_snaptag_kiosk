@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_snaptag_kiosk/features/move_me/providers/currentFontFamilyProvider.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -16,7 +17,8 @@ class ThemeNotifier extends _$ThemeNotifier {
       colorScheme = _handleColorSelect(Colors.deepPurple);
     }
     return ThemeData(
-      fontFamily: fontFamily,
+      fontFamily: ref.watch(currentFontFamilyProvider),
+      //fontFamily: fontFamily,
       colorScheme: colorScheme,
       appBarTheme: AppBarTheme(
         centerTitle: true,

@@ -11,7 +11,7 @@ extension ButtonStyles on BuildContext {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
         elevation: 10,
         shadowColor: Colors.black.withOpacity(0.4),
-        textStyle: typography.kioskAlertBtnB.copyWith(fontFamily: 'Cafe24Ssurround2')
+        textStyle: typography.kioskAlertBtnB
       );
   ButtonStyle get setupDialogConfirmButtonStyle => OutlinedButton.styleFrom(
         fixedSize: Size(double.infinity, 94.h),
@@ -21,7 +21,7 @@ extension ButtonStyles on BuildContext {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
         elevation: 10,
         shadowColor: Colors.black.withOpacity(0.4),
-        textStyle: typography.kioskAlertBtnB.copyWith(fontFamily: 'Cafe24Ssurround2')
+        textStyle: typography.kioskAlertBtnB
       );
 
   ///
@@ -37,7 +37,8 @@ extension ButtonStyles on BuildContext {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
         elevation: 10,
         shadowColor: Colors.black.withOpacity(0.4),
-        textStyle: typography.kioskBtn1B.copyWith(fontFamily: 'Cafe24Ssurround2')
+        //textStyle: typography.kioskBtn1B.copyWith(fontFamily: 'Cafe24Ssurround2')
+        textStyle: typography.kioskBtn1B
       );
 
   ///
@@ -53,7 +54,8 @@ extension ButtonStyles on BuildContext {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
         elevation: 10,
         shadowColor: Colors.black.withOpacity(0.4),
-        textStyle: typography.kioskAlertBtnB.copyWith(fontFamily: 'Cafe24Ssurround2')
+        //textStyle: typography.kioskAlertBtnB.copyWith(fontFamily: 'Cafe24Ssurround2')
+        textStyle: typography.kioskAlertBtnB
       );
 
   ///
@@ -69,7 +71,8 @@ extension ButtonStyles on BuildContext {
       padding: EdgeInsets.symmetric(vertical: 6.h, horizontal: 8.w),
       elevation: 10,
       shadowColor: Colors.black.withOpacity(0.4),
-      textStyle: typography.kioskBtn1B.copyWith(fontFamily: 'Cafe24Ssurround2')
+      //textStyle: typography.kioskBtn1B.copyWith(fontFamily: 'Cafe24Ssurround2')
+      textStyle: typography.kioskBtn1B
   );
 
   ///
@@ -79,7 +82,8 @@ extension ButtonStyles on BuildContext {
   ///
   ButtonStyle get keypadNumberStyle => ElevatedButton.styleFrom(
       fixedSize: Size(130.w, 90.h),
-      padding: EdgeInsets.all(10.r),
+      //padding: EdgeInsets.all(10.r),
+      padding: EdgeInsets.fromLTRB(10.r, 21.r, 10.r, 10.r),
       backgroundColor: kioskColors.keypadButtonColor,
       foregroundColor: Colors.white,
       shape: RoundedRectangleBorder(
@@ -89,7 +93,8 @@ extension ButtonStyles on BuildContext {
             color: kioskColors.buttonColor,
           )),
       //textStyle: typography.kioksNum1SB
-    textStyle: typography.kioksNum1SB.copyWith(fontFamily: 'Cafe24Ssurround2')
+    //textStyle: typography.kioksNum1SB.copyWith(fontFamily: 'Cafe24Ssurround2')
+      textStyle: typography.kioksNum1SB
   );
 
   ///
@@ -103,6 +108,7 @@ extension ButtonStyles on BuildContext {
       backgroundColor: kioskColors.buttonColor,
       foregroundColor: kioskColors.buttonTextColor,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
-      textStyle: typography.kioskNum2B.copyWith(fontFamily: 'Cafe24Ssurround2')
+      //textStyle: typography.kioskNum2B.copyWith(fontFamily: 'Cafe24Ssurround2')
+      textStyle: typography.kioskNum2B
   );
 }

@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_snaptag_kiosk/core/constants/image_paths.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:flutter_snaptag_kiosk/features/move_me/providers/currentFontFamilyProvider.dart';
+
 
 class LanguageSwitcher extends ConsumerWidget {
   const LanguageSwitcher({
@@ -36,7 +38,7 @@ class LanguageSwitcher extends ConsumerWidget {
         locale: const Locale('ja', 'JP'),
         name: '日本語',
         flag: SnaptagSvg.flagJp,
-        //fontFamily: 'PrentendardJP',
+        //fontFamily: 'PretendardJP',
         fontFamily: 'MPLUSRounded',
       ),
     ];
@@ -53,6 +55,9 @@ class LanguageSwitcher extends ConsumerWidget {
       position: PopupMenuPosition.under,
       onSelected: (Locale locale) {
         EasyLocalization.of(context)!.setLocale(locale);
+
+        final selected = localeOptions.firstWhere((e) => e.locale == locale);
+        ref.read(currentFontFamilyProvider.notifier).state = selected.fontFamily;
       },
       color: Colors.white,
       itemBuilder: (BuildContext context) => <PopupMenuItem<Locale>>[
