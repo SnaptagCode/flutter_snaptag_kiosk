@@ -42,16 +42,16 @@ class PrintService extends _$PrintService {
   Future<void> _executePrintJob(int printedPhotoCardId, File frontPhoto, File embedded) async {
     try {
       // 프린트 상태 시작
-      await _updatePrintStatus(printedPhotoCardId, PrintedStatus.started);
+      //await _updatePrintStatus(printedPhotoCardId, PrintedStatus.started);
 
       // 실제 프린트 실행
       await _executePrint(frontPhoto: frontPhoto, embedded: embedded);
 
       // 프린트 상태 완료
-      await _updatePrintStatus(printedPhotoCardId, PrintedStatus.completed);
+      //await _updatePrintStatus(printedPhotoCardId, PrintedStatus.completed);
     } catch (e, stack) {
       logger.e('PrintService._executePrintJob failure', error: e, stackTrace: stack);
-      await _updatePrintStatus(printedPhotoCardId, PrintedStatus.failed);
+      //await _updatePrintStatus(printedPhotoCardId, PrintedStatus.failed);
       rethrow;
     }
   }
@@ -65,11 +65,11 @@ class PrintService extends _$PrintService {
 
   void _validatePrintRequirements() {
     final backPhotoCardResponseInfo = ref.watch(verifyPhotoCardProvider).value;
-    final approvalInfo = ref.read(paymentResponseStateProvider);
+    //final approvalInfo = ref.read(paymentResponseStateProvider);
     final printerState = ref.read(printerServiceProvider);
 
     if (backPhotoCardResponseInfo == null) throw Exception('No back photo card response info available');
-    if (approvalInfo == null) throw Exception('No payment approval info available');
+    //if (approvalInfo == null) throw Exception('No payment approval info available');
     if (printerState.hasError) throw Exception('Printer is not ready');
   }
 
