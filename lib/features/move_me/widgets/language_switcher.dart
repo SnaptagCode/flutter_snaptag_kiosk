@@ -28,11 +28,13 @@ class LanguageSwitcher extends ConsumerWidget {
         locale: const Locale('ko', 'KR'),
         name: '한국어',
         flag: SnaptagSvg.flagKr,
+        fontFamily: 'Cafe24Ssurround2',
       ),
       LocaleOption(
         locale: const Locale('en', 'US'),
         name: 'English',
         flag: SnaptagSvg.flagUs,
+        fontFamily: 'Cafe24Ssurround2',
       ),
       LocaleOption(
         locale: const Locale('ja', 'JP'),

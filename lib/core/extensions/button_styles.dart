@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_snaptag_kiosk/core/extensions/extensions.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 extension ButtonStyles on BuildContext {
   ButtonStyle get setupDialogCancelButtonStyle => OutlinedButton.styleFrom(
@@ -11,7 +12,9 @@ extension ButtonStyles on BuildContext {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
         elevation: 10,
         shadowColor: Colors.black.withOpacity(0.4),
-        textStyle: typography.kioskAlertBtnB
+        textStyle: locale.languageCode == 'ja'?
+        typography.kioskAlertBtnB.copyWith(fontFamily: 'MPLUSRounded'):
+        typography.kioskAlertBtnB.copyWith(fontFamily: 'Cafe24Ssurround2'),
       );
   ButtonStyle get setupDialogConfirmButtonStyle => OutlinedButton.styleFrom(
         fixedSize: Size(double.infinity, 94.h),
@@ -21,7 +24,10 @@ extension ButtonStyles on BuildContext {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
         elevation: 10,
         shadowColor: Colors.black.withOpacity(0.4),
-        textStyle: typography.kioskAlertBtnB
+        //textStyle: typography.kioskAlertBtnB
+    textStyle: locale.languageCode == 'ja'?
+    typography.kioskAlertBtnB.copyWith(fontFamily: 'MPLUSRounded'):
+    typography.kioskAlertBtnB.copyWith(fontFamily: 'Cafe24Ssurround2'),
       );
 
   ///
@@ -38,7 +44,10 @@ extension ButtonStyles on BuildContext {
         elevation: 10,
         shadowColor: Colors.black.withOpacity(0.4),
         //textStyle: typography.kioskBtn1B.copyWith(fontFamily: 'Cafe24Ssurround2')
-        textStyle: typography.kioskBtn1B
+        //textStyle: typography.kioskBtn1B
+    textStyle: locale.languageCode == 'ja'?
+    typography.kioskAlertBtnB.copyWith(fontFamily: 'MPLUSRounded'):
+    typography.kioskAlertBtnB.copyWith(fontFamily: 'Cafe24Ssurround2'),
       );
 
   ///
@@ -55,7 +64,10 @@ extension ButtonStyles on BuildContext {
         elevation: 10,
         shadowColor: Colors.black.withOpacity(0.4),
         //textStyle: typography.kioskAlertBtnB.copyWith(fontFamily: 'Cafe24Ssurround2')
-        textStyle: typography.kioskAlertBtnB
+        //textStyle: typography.kioskAlertBtnB
+    textStyle: locale.languageCode == 'ja'?
+    typography.kioskAlertBtnB.copyWith(fontFamily: 'MPLUSRounded'):
+    typography.kioskAlertBtnB.copyWith(fontFamily: 'Cafe24Ssurround2'),
       );
 
   ///
@@ -72,7 +84,10 @@ extension ButtonStyles on BuildContext {
       elevation: 10,
       shadowColor: Colors.black.withOpacity(0.4),
       //textStyle: typography.kioskBtn1B.copyWith(fontFamily: 'Cafe24Ssurround2')
-      textStyle: typography.kioskBtn1B
+      //textStyle: typography.kioskBtn1B
+    textStyle: locale.languageCode == 'ja'?
+    typography.kioskAlertBtnB.copyWith(fontFamily: 'MPLUSRounded'):
+    typography.kioskAlertBtnB.copyWith(fontFamily: 'Cafe24Ssurround2'),
   );
 
   ///
@@ -94,7 +109,10 @@ extension ButtonStyles on BuildContext {
           )),
       //textStyle: typography.kioksNum1SB
     //textStyle: typography.kioksNum1SB.copyWith(fontFamily: 'Cafe24Ssurround2')
-      textStyle: typography.kioksNum1SB
+      //textStyle: typography.kioksNum1SB
+    textStyle: locale.languageCode == 'ja'?
+    typography.kioskAlertBtnB.copyWith(fontFamily: 'MPLUSRounded'):
+    typography.kioskAlertBtnB.copyWith(fontFamily: 'Cafe24Ssurround2'),
   );
 
   ///
@@ -109,6 +127,9 @@ extension ButtonStyles on BuildContext {
       foregroundColor: kioskColors.buttonTextColor,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
       //textStyle: typography.kioskNum2B.copyWith(fontFamily: 'Cafe24Ssurround2')
-      textStyle: typography.kioskNum2B
+      //textStyle: typography.kioskNum2B
+    textStyle: locale.languageCode == 'ja'?
+    typography.kioskAlertBtnB.copyWith(fontFamily: 'MPLUSRounded'):
+    typography.kioskAlertBtnB.copyWith(fontFamily: 'Cafe24Ssurround2'),
   );
 }
