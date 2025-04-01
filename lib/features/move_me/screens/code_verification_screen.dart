@@ -43,7 +43,11 @@ class CodeVerificationScreen extends ConsumerWidget {
       },
     );
 
-    return Column(
+    return DefaultTextStyle(
+        style: TextStyle(
+        fontFamily: context.locale.languageCode == 'ja'?
+        'MPLUSRounded' : 'Cafe24Ssurround2',
+    ),child:Column(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -74,7 +78,7 @@ class CodeVerificationScreen extends ConsumerWidget {
           ),
         ),
       ],
-    );
+    ),);
   }
 }
 

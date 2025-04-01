@@ -36,6 +36,7 @@ extension ButtonStyles on BuildContext {
   /// - `foregroundColor` : kioskColors.buttonTextColor
   ///
   ButtonStyle get mainLargeButtonStyle => ElevatedButton.styleFrom(
+        padding: EdgeInsets.fromLTRB(0.r, 24.r, 0.r, 0.r),
         fixedSize: Size(double.infinity, 82.h),
         minimumSize: Size(520.w, 78.h),
         backgroundColor: kioskColors.buttonColor,
@@ -98,7 +99,8 @@ extension ButtonStyles on BuildContext {
   ButtonStyle get keypadNumberStyle => ElevatedButton.styleFrom(
       fixedSize: Size(130.w, 90.h),
       //padding: EdgeInsets.all(10.r),
-      padding: EdgeInsets.fromLTRB(10.r, 21.r, 10.r, 10.r),
+      //padding: EdgeInsets.fromLTRB(10.r, 21.r, 10.r, 10.r),
+      padding: EdgeInsets.fromLTRB(10.r, 18.r, 10.r, 2.r),
       backgroundColor: kioskColors.keypadButtonColor,
       foregroundColor: Colors.white,
       shape: RoundedRectangleBorder(
@@ -111,8 +113,8 @@ extension ButtonStyles on BuildContext {
     //textStyle: typography.kioksNum1SB.copyWith(fontFamily: 'Cafe24Ssurround2')
       //textStyle: typography.kioksNum1SB
     textStyle: locale.languageCode == 'ja'?
-    typography.kioskAlertBtnB.copyWith(fontFamily: 'MPLUSRounded'):
-    typography.kioskAlertBtnB.copyWith(fontFamily: 'Cafe24Ssurround2'),
+    typography.kioksNum1SB.copyWith(fontFamily: 'MPLUSRounded'):
+    typography.kioksNum1SB.copyWith(fontFamily: 'Cafe24Ssurround2'),
   );
 
   ///
@@ -129,7 +131,7 @@ extension ButtonStyles on BuildContext {
       //textStyle: typography.kioskNum2B.copyWith(fontFamily: 'Cafe24Ssurround2')
       //textStyle: typography.kioskNum2B
     textStyle: locale.languageCode == 'ja'?
-    typography.kioskAlertBtnB.copyWith(fontFamily: 'MPLUSRounded'):
-    typography.kioskAlertBtnB.copyWith(fontFamily: 'Cafe24Ssurround2'),
+    typography.kioksNum1SB.copyWith(fontFamily: 'MPLUSRounded'):
+    typography.kioksNum1SB.copyWith(fontFamily: 'Cafe24Ssurround2'),
   );
 }

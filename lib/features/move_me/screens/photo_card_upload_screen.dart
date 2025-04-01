@@ -5,7 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_snaptag_kiosk/core/utils/sound_manager.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:qr_flutter/qr_flutter.dart';
-
+import 'package:flutter_snaptag_kiosk/core/theme/language_font_theme_wrapper.dart';
 class PhotoCardUploadScreen extends ConsumerWidget {
   const PhotoCardUploadScreen({super.key});
 
@@ -13,7 +13,14 @@ class PhotoCardUploadScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final kiosk = ref.watch(kioskInfoServiceProvider);
 
-    return Column(
+    return DefaultTextStyle(
+        style: TextStyle(
+        fontFamily: context.locale.languageCode == 'ja'?
+        'MPLUSRounded' : 'Cafe24Ssurround2',
+    ),
+      child:Column(
+      //FontThemed(child: Column(
+
       crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
@@ -55,6 +62,9 @@ class PhotoCardUploadScreen extends ConsumerWidget {
           style: context.mainLargeButtonStyle,
           child: Text(
             LocaleKeys.main_btn_txt.tr(),
+            /*style: context.locale.languageCode == 'ja'?
+            TextStyle(fontFamily: 'Cafe24Ssurround2') :
+            TextStyle(fontFamily: 'MPLUSRounded'),*/
           ),
           onPressed: () async {
             await SoundManager().playSound();
@@ -64,6 +74,7 @@ class PhotoCardUploadScreen extends ConsumerWidget {
           },
         ),
       ],
-    );
+    //),
+    ),);
   }
 }
