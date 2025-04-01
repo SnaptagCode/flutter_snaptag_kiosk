@@ -58,8 +58,9 @@ class KioskTypography extends ThemeExtension<KioskTypography> {
           letterSpacing: 0,
           height: 1.0,
         ),
-        kioskNum2B: TextStyle(
-          fontSize: 42.sp,
+        kioskNum2B: TextStyle( //키패드의 완료버튼
+          //fontSize: 42.sp,
+          fontSize: 38.sp,
           fontWeight: FontWeight.w700,
           color: Colors.black,
           letterSpacing: -0.42,

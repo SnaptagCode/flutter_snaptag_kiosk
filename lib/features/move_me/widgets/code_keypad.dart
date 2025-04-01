@@ -166,7 +166,7 @@ class _NumericPad extends StatelessWidget {
   Widget _buildGridItem(BuildContext context, int index) {
     if (index == 9) {
       return ElevatedButton(
-        style: context.keypadNumberStyle,
+        style: context.keypadBackStyle,
         onPressed: () async {
           await SoundManager().playSound();
           onDeletePressed();

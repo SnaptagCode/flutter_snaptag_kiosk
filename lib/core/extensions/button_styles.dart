@@ -36,7 +36,8 @@ extension ButtonStyles on BuildContext {
   /// - `foregroundColor` : kioskColors.buttonTextColor
   ///
   ButtonStyle get mainLargeButtonStyle => ElevatedButton.styleFrom(
-        padding: EdgeInsets.fromLTRB(0.r, 24.r, 0.r, 0.r),
+        //padding: EdgeInsets.fromLTRB(0.r, 2.r, 0.r, 0.r),
+        padding: EdgeInsets.only(top: 3.9.h),
         fixedSize: Size(double.infinity, 82.h),
         minimumSize: Size(520.w, 78.h),
         backgroundColor: kioskColors.buttonColor,
@@ -117,6 +118,31 @@ extension ButtonStyles on BuildContext {
     typography.kioksNum1SB.copyWith(fontFamily: 'Cafe24Ssurround2'),
   );
 
+  ButtonStyle get keypadBackStyle => ElevatedButton.styleFrom(
+    fixedSize: Size(130.w, 90.h),
+    padding: EdgeInsets.all(10.r),
+    //padding: EdgeInsets.fromLTRB(10.r, 21.r, 10.r, 10.r),
+    //padding: EdgeInsets.fromLTRB(10.r, 3.r, 10.r, 10.r),
+    //padding: EdgeInsets.fromLTRB(10.w, 0.h, 10.w, 15.h), 위로 올려라
+    //padding: EdgeInsets.fromLTRB(10.w, 0.h, 10.w, 24.h), //아주살짝 올려라
+    //padding: EdgeInsets.fromLTRB(10.w, 0.h, 10.w, 28.h), //아주살짝 올려라
+    //padding: EdgeInsets.fromLTRB(10.w, 0.h, 10.w, 32.h),
+    backgroundColor: kioskColors.keypadButtonColor,
+    foregroundColor: Colors.white,
+    shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10.r),
+        side: BorderSide(
+          width: 1.w,
+          color: kioskColors.buttonColor,
+        )),
+    //textStyle: typography.kioksNum1SB
+    //textStyle: typography.kioksNum1SB.copyWith(fontFamily: 'Cafe24Ssurround2')
+    //textStyle: typography.kioksNum1SB
+    textStyle: locale.languageCode == 'ja'?
+    typography.kioksNum1SB.copyWith(fontFamily: 'MPLUSRounded'):
+    typography.kioksNum1SB.copyWith(fontFamily: 'Cafe24Ssurround2'),
+  );
+
   ///
   /// [Figma](https://www.figma.com/design/8IDM2KJtqAYWm2IsmytU5W/%ED%82%A4%EC%98%A4%EC%8A%A4%ED%81%AC_%EB%94%94%EC%9E%90%EC%9D%B8_%EA%B3%B5%EC%9C%A0%EC%9A%A9?node-id=931-13744&m=dev)
   /// - `backgroundColor` : kioskColors.buttonColor
@@ -124,14 +150,18 @@ extension ButtonStyles on BuildContext {
   ///
   ButtonStyle get keypadCompleteStyle => ElevatedButton.styleFrom(
       fixedSize: Size(130.w, 90.h),
-      padding: EdgeInsets.only(left: 6.w, right: 6.w, top: 24.h, bottom: 24.h),
+      //padding: EdgeInsets.only(left: 6.w, right: 6.w, top: 24.h, bottom: 24.h),
+      //padding: EdgeInsets.fromLTRB(10.r, 16.r, 10.r, 2.r),
+    // 아래로 내려라
+    //padding: EdgeInsets.fromLTRB(10.w, 15.h, 10.w, 2.h), //아주살짝 올리기
+    padding: EdgeInsets.fromLTRB(10.w, 14.h, 10.w, 3.h),
       backgroundColor: kioskColors.buttonColor,
       foregroundColor: kioskColors.buttonTextColor,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
       //textStyle: typography.kioskNum2B.copyWith(fontFamily: 'Cafe24Ssurround2')
       //textStyle: typography.kioskNum2B
     textStyle: locale.languageCode == 'ja'?
-    typography.kioksNum1SB.copyWith(fontFamily: 'MPLUSRounded'):
-    typography.kioksNum1SB.copyWith(fontFamily: 'Cafe24Ssurround2'),
+    typography.kioskNum2B.copyWith(fontFamily: 'MPLUSRounded'):
+    typography.kioskNum2B.copyWith(fontFamily: 'Cafe24Ssurround2'),
   );
 }

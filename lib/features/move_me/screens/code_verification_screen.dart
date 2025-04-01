@@ -160,9 +160,12 @@ class _NumericPad extends ConsumerWidget {
         child: SizedBox(
           width: 60.w,
           height: 60.h,
-          child: Image.asset(
-            SnaptagImages.arrowBack,
-          ),
+          child: Padding(
+            padding: EdgeInsets.only(bottom: 8), //위치 조정
+            child: Image.asset(
+              SnaptagImages.arrowBack,
+            ),
+          )
         ),
       );
     }

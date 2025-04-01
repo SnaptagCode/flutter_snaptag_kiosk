@@ -17,7 +17,7 @@ class ThemeNotifier extends _$ThemeNotifier {
       colorScheme = _handleColorSelect(Colors.deepPurple);
     }
     return ThemeData(
-      fontFamily: ref.watch(currentFontFamilyProvider),
+      //fontFamily: ref.watch(currentFontFamilyProvider), //전체에 적용시 (앱 전체 리빌딩)
       //fontFamily: fontFamily,
       colorScheme: colorScheme,
       appBarTheme: AppBarTheme(
