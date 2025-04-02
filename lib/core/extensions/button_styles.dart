@@ -37,7 +37,7 @@ extension ButtonStyles on BuildContext {
   ///
   ButtonStyle get mainLargeButtonStyle => ElevatedButton.styleFrom(
         //padding: EdgeInsets.fromLTRB(0.r, 2.r, 0.r, 0.r),
-        padding: EdgeInsets.only(top: 3.9.h),
+        padding: EdgeInsets.only(top: 4.5.h),
         fixedSize: Size(double.infinity, 82.h),
         minimumSize: Size(520.w, 78.h),
         backgroundColor: kioskColors.buttonColor,
@@ -80,7 +80,8 @@ extension ButtonStyles on BuildContext {
       backgroundColor: kioskColors.buttonColor,
       foregroundColor: kioskColors.buttonTextColor,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
-      padding: EdgeInsets.symmetric(vertical: 6.h, horizontal: 8.w),
+      padding: EdgeInsets.fromLTRB(8.w, 9.h, 8.w, 6.h),
+      //padding: EdgeInsets.symmetric(vertical: 6.h, horizontal: 8.w),
       elevation: 10,
       shadowColor: Colors.black.withOpacity(0.4),
       //textStyle: typography.kioskBtn1B.copyWith(fontFamily: 'Cafe24Ssurround2')
