@@ -102,10 +102,10 @@ class PrinterManager {
               backImageInfo: behindImageInfo,
             );
 
-            final printerLog = getPrinterLogData(bindings);
-
             logger.i('7. Ejecting card...');
             bindings.ejectCard();
+
+            final printerLog = getPrinterLogData(bindings);
 
             replyPort.send({'printStatus': printerLog, 'error': ''});
           }
