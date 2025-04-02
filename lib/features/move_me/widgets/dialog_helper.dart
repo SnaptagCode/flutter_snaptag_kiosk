@@ -22,7 +22,12 @@ class DialogHelper {
     return await showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
+        return DefaultTextStyle(
+            style: TextStyle(
+            fontFamily: context.locale.languageCode == 'ja'?
+            'MPLUSRounded' : 'Cafe24Ssurround2',
+        ),
+          child: AlertDialog(
           backgroundColor: Colors.white,
           insetPadding: EdgeInsets.symmetric(horizontal: 100.w),
           shape: RoundedRectangleBorder(
@@ -46,7 +51,7 @@ class DialogHelper {
               ),
             ],
           ),
-        );
+        ),);
       },
     );
   }
@@ -57,7 +62,12 @@ class DialogHelper {
     return await showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
+        return DefaultTextStyle(
+            style: TextStyle(
+            fontFamily: context.locale.languageCode == 'ja'?
+            'MPLUSRounded' : 'Cafe24Ssurround2',
+        ),
+        child:AlertDialog(
           backgroundColor: Colors.white,
           insetPadding: EdgeInsets.symmetric(horizontal: 100.w),
           shape: RoundedRectangleBorder(
@@ -81,7 +91,7 @@ class DialogHelper {
               ),
             ],
           ),
-        );
+        ),);
       },
     );
   }
@@ -96,7 +106,12 @@ class DialogHelper {
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
-        return AlertDialog(
+        return DefaultTextStyle(
+            style: TextStyle(
+            fontFamily: context.locale.languageCode == 'ja'?
+            'MPLUSRounded' : 'Cafe24Ssurround2',
+        ),
+        child: AlertDialog(
           backgroundColor: Colors.white,
           insetPadding: EdgeInsets.symmetric(horizontal: 100.w),
           shape: RoundedRectangleBorder(
@@ -142,7 +157,7 @@ class DialogHelper {
               ],
             )
           ],
-        );
+        ),);
       },
     );
   }
@@ -158,7 +173,12 @@ class DialogHelper {
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
-        return AlertDialog(
+        return DefaultTextStyle(
+            style: TextStyle(
+            fontFamily: context.locale.languageCode == 'ja'?
+            'MPLUSRounded' : 'Cafe24Ssurround2',
+        ),
+        child: AlertDialog(
           backgroundColor: Colors.white,
           insetPadding: EdgeInsets.symmetric(horizontal: 100.w),
           shape: RoundedRectangleBorder(
@@ -200,7 +220,7 @@ class DialogHelper {
               ],
             )
           ],
-        );
+        ),);
       },
     );
     return true;
@@ -222,13 +242,17 @@ class DialogHelper {
   }
 
   //    2.3.0 이하 버전용
-  static Future<void> showPrintCompleteDialog( //5초 후 자동으로 닫히고 QR 화면으로 이동
+  static Future<void> showPrintCompleteDialog(
+    //5초 후 자동으로 닫히고 QR 화면으로 이동
     BuildContext context, {
+    VoidCallback? finishedPrinting,
     VoidCallback? onButtonPressed,
   }) async {
     Future.delayed(const Duration(seconds: 5), () {
-
       if (Navigator.of(context, rootNavigator: true).canPop()) {
+        if (finishedPrinting != null) {
+          finishedPrinting();
+        }
         PhotoCardUploadRouteData().go(context);
         Navigator.of(context, rootNavigator: true).pop();
       }
@@ -238,7 +262,14 @@ class DialogHelper {
       title: LocaleKeys.alert_title_print_complete.tr(),
       message: LocaleKeys.alert_txt_print_complete.tr(),
       buttonText: LocaleKeys.alert_btn_print_complete.tr(),
-      onButtonPressed: onButtonPressed,
+      onButtonPressed: () {
+        if (onButtonPressed != null) {
+          if (finishedPrinting != null) {
+            finishedPrinting();
+          }
+          onButtonPressed();
+        }
+      },
     );
   }
 
@@ -352,8 +383,6 @@ class DialogHelper {
   }
   */
 
-
-
   static Future<void> showErrorDialog(BuildContext context) async {
     await _showOneButtonKioskDialog(
       context,
@@ -386,14 +415,19 @@ class DialogHelper {
   }
 
   static Future<String?> showKeypadDialog(
-      BuildContext context, {
-        required ModeType mode,
-      }) async {
+    BuildContext context, {
+    required ModeType mode,
+  }) async {
     return await showDialog<String>(
       context: context,
       barrierDismissible: true,
       builder: (BuildContext context) {
-        return AlertDialog(
+        return DefaultTextStyle(
+            style: TextStyle(
+            fontFamily: context.locale.languageCode == 'ja'?
+            'MPLUSRounded' : 'Cafe24Ssurround2',
+        ),
+        child: AlertDialog(
           backgroundColor: Colors.white,
           insetPadding: EdgeInsets.symmetric(horizontal: 100.w),
           shape: RoundedRectangleBorder(
@@ -410,7 +444,7 @@ class DialogHelper {
               },
             ),
           ),
-        );
+        ),);
       },
     );
   }

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:ffi/ffi.dart';
+import 'package:flutter_snaptag_kiosk/features/core/printer/ribbon_status.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:image/image.dart' as img;
 
@@ -35,6 +36,7 @@ class PrinterBindings {
   late final R600SetTextIsStrong _setTextIsStrong;
   late final R600DrawImage _drawImage;
   late final R600IsFeederNoEmpty _isFeederNoEmpty;
+  late final R600GetRbnAndFilmRemaining _getRbnAndFilmRemaining;
 
   PrinterBindings() {
     // DLL 로드
@@ -64,6 +66,8 @@ class PrinterBindings {
     _setFont = _dll.lookupFunction<R600SetFontNative, R600SetFont>('R600SetFont');
     _setTextIsStrong = _dll.lookupFunction<R600SetTextIsStrongNative, R600SetTextIsStrong>('R600SetTextIsStrong');
     _isFeederNoEmpty = _dll.lookupFunction<R600IsFeederNoEmptyNative, R600IsFeederNoEmpty>('R600IsFeederNoEmpty');
+    _getRbnAndFilmRemaining =
+        _dll.lookupFunction<R600GetRbnAndFilmRemainingNative, R600GetRbnAndFilmRemaining>('R600GetRbnAndFilmRemaining');
   }
 
   int initLibrary() {
@@ -130,8 +134,7 @@ class PrinterBindings {
       final result = _drawImage(x, y, width, height, pathPointer.cast(), noAbsoluteBlack ? 1 : 0);
       logger.i('DrawImage result: $result'); // 결과 코드 확인
       if (result != 0) {
-        final error = getErrorInfo(result);
-        throw Exception('Failed to draw image: $error (code: $result)');
+        throw Exception('Failed to draw image: $result');
       }
     } finally {
       calloc.free(pathPointer);
@@ -162,8 +165,35 @@ class PrinterBindings {
   void injectCard() {
     final result = _cardInject(0); // 0: 기본 위치
     if (result != 0) {
-      throw Exception('Failed to inject card');
+      throw Exception('Failed to inject card : $result');
     }
+  }
+
+  // 리본과 필름 잔량 확인 함수
+  RibbonStatus? getRbnAndFilmRemaining() {
+    final rbnRemaining = calloc<Short>();
+    final filmRemaining = calloc<Short>();
+    RibbonStatus? ribbonStatus;
+
+    try {
+      final result = _getRbnAndFilmRemaining(rbnRemaining, filmRemaining);
+      if (result != 0) {
+        throw Exception('Failed to get ribbon and film remaining');
+      }
+      logger.i('Ribbon remaining: ${rbnRemaining.value}');
+      logger.i('Film remaining: ${filmRemaining.value}');
+      ribbonStatus = RibbonStatus(
+        rbnRemaining: rbnRemaining.value,
+        filmRemaining: filmRemaining.value,
+      );
+    } catch (e) {
+      rethrow;
+    } finally {
+      calloc.free(rbnRemaining);
+      calloc.free(filmRemaining);
+    }
+
+    return ribbonStatus;
   }
 
   // 인쇄 함수
@@ -176,7 +206,7 @@ class PrinterBindings {
     try {
       final result = _printDraw(frontPointer, backPointer);
       if (result != 0) {
-        throw Exception('Failed to print card');
+        throw Exception('Failed to print card : $result');
       }
     } finally {
       calloc.free(frontPointer);
@@ -190,7 +220,7 @@ class PrinterBindings {
   void ejectCard() {
     final result = _cardEject(0); // 0: 왼쪽으로 배출
     if (result != 0) {
-      throw Exception('Failed to eject card');
+      throw Exception('Failed to eject card $result');
     }
   }
 
@@ -237,9 +267,11 @@ class PrinterBindings {
     final pWarningStatus = calloc<Uint32>();
     final pMainCode = calloc<Uint8>();
     final pSubCode = calloc<Uint8>();
+    PrinterStatus? printerStatus;
+    int? result;
 
     try {
-      final result = _queryPrinterStatus(
+      result = _queryPrinterStatus(
         pChassisTemp,
         pPrintheadTemp,
         pHeaterTemp,
@@ -256,7 +288,8 @@ class PrinterBindings {
         return null; // null 반환으로 변경
       }
 
-      return PrinterStatus(
+      printerStatus = PrinterStatus(
+        machineId: 0,
         mainCode: pMainCode.value,
         subCode: pSubCode.value,
         mainStatus: pMainStatus.value,
@@ -281,6 +314,8 @@ class PrinterBindings {
       calloc.free(pMainCode);
       calloc.free(pSubCode);
     }
+
+    return printerStatus;
   }
 
   // USB 초기화 메서드 추가
@@ -336,9 +371,6 @@ class PrinterBindings {
     final numPtr = calloc<Int32>()..value = 10;
 
     try {
-      // 먼저 이전 상태를 정리
-      _libInit();
-
       logger.i('Enumerating USB printer...'); // 디버그 로그 추가
       // USB 프린터만 사용
       int result = _enumUsbPrt(enumListPtr.cast(), listLenPtr, numPtr);

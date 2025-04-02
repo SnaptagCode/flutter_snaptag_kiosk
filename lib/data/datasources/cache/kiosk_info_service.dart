@@ -1,3 +1,4 @@
+import 'package:flutter_snaptag_kiosk/features/core/printer/printer_manager.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -28,10 +29,31 @@ class KioskInfoService extends _$KioskInfoService {
 
       ref.read(frontPhotoListProvider.notifier).fetch();
 
+      await printerStartLog(machineId);
+
       return response;
     } catch (e) {
       ref.invalidateSelf();
       rethrow;
+    }
+  }
+
+  Future<void> printerStartLog(int machineId) async {
+    try {
+      final printerManager = await PrinterManager.getInstance();
+      final printerLog = await printerManager.startLog();
+
+      if (printerLog != null) {
+        final log = printerLog.copyWith(kioskMachineId: machineId);
+        if (machineId != 0) {
+          await ref.read(kioskRepositoryProvider).updatePrintLog(request: log);
+          SlackLogService().sendLogToSlack('PrintState : $log');
+        }
+      }
+    } catch (e) {
+      // TODO : 프린트 초기화 작업 중 오류 발생.
+      logger.i(e);
+      SlackLogService().sendLogToSlack('printerStartLog : $e');
     }
   }
 

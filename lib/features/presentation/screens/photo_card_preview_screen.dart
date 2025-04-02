@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_snaptag_kiosk/core/utils/sound_manager.dart';
+import 'package:flutter_snaptag_kiosk/features/presentation/providers/screens/printing_state.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 
@@ -55,6 +56,7 @@ class _PhotoCardPreviewScreenState
             final order = ref.watch(updateOrderInfoProvider)?.status;
             if (order == OrderStatus.completed) {
               PrintProcessRouteData().go(context);
+              ref.read(printingStateProvider.notifier).updatePrinting(true);
             } else {
               await DialogHelper.showPurchaseFailedDialog(
                 context,
@@ -120,9 +122,7 @@ class _PhotoCardPreviewScreenState
           SizedBox(height: 30.h),
           Text(
               LocaleKeys.sub03_txt_03.tr(),
-              style: context.typography.kioskBody2B.copyWith(color: Color(int.parse(kiosk?.couponTextColor.replaceFirst('#', '0xff') ?? '0xffffff')),
-                //fontFamily: 'Pretendard',
-              ),
+              style: context.typography.kioskBody2B.copyWith(color: Color(int.parse(kiosk?.couponTextColor.replaceFirst('#', '0xff') ?? '0xffffff'))),
           ),
         ],
       ),
