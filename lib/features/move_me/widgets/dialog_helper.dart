@@ -189,6 +189,8 @@ class DialogHelper {
               title,
               style: context.typography.kioskAlert1B.copyWith(
                 color: Colors.black,
+                fontFamily: context.locale.languageCode == 'ja'?
+                    'MPLUSRounded' : 'Cafe24Ssurround2',
               ),
             ),
           ),

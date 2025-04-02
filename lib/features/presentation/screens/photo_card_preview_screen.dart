@@ -66,7 +66,12 @@ class _PhotoCardPreviewScreenState
     );
     final kiosk = ref.watch(kioskInfoServiceProvider);
 
-    return Center(
+    return DefaultTextStyle(
+        style: TextStyle(
+        fontFamily: context.locale.languageCode == 'ja'?
+        'MPLUSRounded' : 'Cafe24Ssurround2',
+    ),
+    child: Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -126,6 +131,6 @@ class _PhotoCardPreviewScreenState
           ),
         ],
       ),
-    );
+    ),);
   }
 }
