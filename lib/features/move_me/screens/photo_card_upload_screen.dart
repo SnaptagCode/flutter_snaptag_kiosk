@@ -5,7 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_snaptag_kiosk/core/utils/sound_manager.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:qr_flutter/qr_flutter.dart';
-import 'package:flutter_snaptag_kiosk/core/theme/language_font_theme_wrapper.dart';
+
 class PhotoCardUploadScreen extends ConsumerWidget {
   const PhotoCardUploadScreen({super.key});
 
