@@ -43,11 +43,11 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
             logger.e('Print process error', error: error, stackTrace: stack);
 
             // 에러 발생 시 환불 처리
-            try {
+            /*try {
               await ref.read(paymentServiceProvider.notifier).refund();
             } catch (refundError) {
               logger.e('Refund failed', error: refundError);
-            }
+            }*/
 
             await DialogHelper.showPrintErrorDialog(
               context,

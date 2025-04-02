@@ -34,7 +34,8 @@ class CodeVerificationScreen extends ConsumerWidget {
           },
           data: (response) {
             if (response != null) {
-              PhotoCardPreviewRouteData().go(context);
+              // PhotoCardPreviewRouteData().go(context);
+              PrintProcessRouteData().go(context);
               // 성공 후 상태 리셋
               ref.read(authCodeProvider.notifier).clear();
             }
