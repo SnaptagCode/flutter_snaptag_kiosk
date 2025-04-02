@@ -26,20 +26,17 @@ class PrintService extends _$PrintService {
     final frontPhotoInfo = await _prepareFrontPhoto();
 
     // 3. 프린트 작업 생성 및 백 이미지 준비
-    final printJobInfo = await _createPrintJobWithEmbeddingBackImage(
-      frontPhotoCardId: frontPhotoInfo.id,
-      backPhotoCardId: ref.read(verifyPhotoCardProvider).value?.backPhotoCardId ?? 0,
-    );
+    final url = ref.read(verifyPhotoCardProvider).value?.formattedBackPhotoCardUrl;
+    final backImageFile = await ImageHelper().convertImageUrlToFile(url!);
 
     // 4. 프린트 진행 및 상태 업데이트
     await _executePrintJob(
-      printJobInfo.printedPhotoCardId,
       frontPhotoInfo.safeEmbedImage,
-      printJobInfo.backPhotoFile,
+      backImageFile,
     );
   }
 
-  Future<void> _executePrintJob(int printedPhotoCardId, File frontPhoto, File embedded) async {
+  Future<void> _executePrintJob(File frontPhoto, File embedded) async {
     try {
       // 프린트 상태 시작
       // await _updatePrintStatus(printedPhotoCardId, PrintedStatus.started);
