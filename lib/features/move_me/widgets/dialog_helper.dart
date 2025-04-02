@@ -22,7 +22,12 @@ class DialogHelper {
     return await showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
+        return DefaultTextStyle(
+            style: TextStyle(
+            fontFamily: context.locale.languageCode == 'ja'?
+            'MPLUSRounded' : 'Cafe24Ssurround2',
+        ),
+        child: AlertDialog(
           backgroundColor: Colors.white,
           insetPadding: EdgeInsets.symmetric(horizontal: 100.w),
           shape: RoundedRectangleBorder(
@@ -46,7 +51,7 @@ class DialogHelper {
               ),
             ],
           ),
-        );
+        ),);
       },
     );
   }
@@ -57,7 +62,12 @@ class DialogHelper {
     return await showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
+        return DefaultTextStyle(
+            style: TextStyle(
+            fontFamily: context.locale.languageCode == 'ja'?
+            'MPLUSRounded' : 'Cafe24Ssurround2',
+        ),
+        child: AlertDialog(
           backgroundColor: Colors.white,
           insetPadding: EdgeInsets.symmetric(horizontal: 100.w),
           shape: RoundedRectangleBorder(
@@ -81,7 +91,7 @@ class DialogHelper {
               ),
             ],
           ),
-        );
+        ),);
       },
     );
   }
@@ -96,7 +106,12 @@ class DialogHelper {
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
-        return AlertDialog(
+        return DefaultTextStyle(
+            style: TextStyle(
+            fontFamily: context.locale.languageCode == 'ja'?
+            'MPLUSRounded' : 'Cafe24Ssurround2',
+        ),
+        child: AlertDialog(
           backgroundColor: Colors.white,
           insetPadding: EdgeInsets.symmetric(horizontal: 100.w),
           shape: RoundedRectangleBorder(
@@ -142,7 +157,7 @@ class DialogHelper {
               ],
             )
           ],
-        );
+        ),);
       },
     );
   }
@@ -158,7 +173,12 @@ class DialogHelper {
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
-        return AlertDialog(
+        return DefaultTextStyle(
+            style: TextStyle(
+            fontFamily: context.locale.languageCode == 'ja'?
+            'MPLUSRounded' : 'Cafe24Ssurround2',
+        ),
+        child: AlertDialog(
           backgroundColor: Colors.white,
           insetPadding: EdgeInsets.symmetric(horizontal: 100.w),
           shape: RoundedRectangleBorder(
@@ -200,7 +220,7 @@ class DialogHelper {
               ],
             )
           ],
-        );
+        ),);
       },
     );
     return true;
@@ -393,7 +413,12 @@ class DialogHelper {
       context: context,
       barrierDismissible: true,
       builder: (BuildContext context) {
-        return AlertDialog(
+        return DefaultTextStyle(
+            style: TextStyle(
+            fontFamily: context.locale.languageCode == 'ja'?
+            'MPLUSRounded' : 'Cafe24Ssurround2',
+        ),
+        child: AlertDialog(
           backgroundColor: Colors.white,
           insetPadding: EdgeInsets.symmetric(horizontal: 100.w),
           shape: RoundedRectangleBorder(
@@ -410,7 +435,7 @@ class DialogHelper {
               },
             ),
           ),
-        );
+        ),);
       },
     );
   }
