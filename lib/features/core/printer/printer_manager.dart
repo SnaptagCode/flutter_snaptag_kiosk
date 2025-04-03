@@ -165,9 +165,6 @@ class PrinterManager {
     try {
       bindings.initLibrary();
 
-      // 1. 라이브러리 초기화 전에 이전 상태 정리
-      bindings.clearLibrary();
-
       // 2. 프린터 연결
       final connected = bindings.connectPrinter();
       if (!connected) {
