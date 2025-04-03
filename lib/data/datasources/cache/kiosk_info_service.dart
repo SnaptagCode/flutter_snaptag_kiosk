@@ -28,6 +28,8 @@ class KioskInfoService extends _$KioskInfoService {
 
       ref.read(frontPhotoListProvider.notifier).fetch();
 
+      ref.read(printerServiceProvider.notifier).startPrintLog();
+
       return response;
     } catch (e) {
       ref.invalidateSelf();
