@@ -59,9 +59,6 @@ class PrinterManager {
       // 프린트 초기화 작업
       _initializePrinter(bindings);
 
-      // 프린트 상태 체크
-      _printStatusCheck(bindings);
-
       isolateReceivePort.listen((message) async {
         SendPort? replyPort;
         try {
@@ -77,6 +74,9 @@ class PrinterManager {
               replyPort.send({'printStatus': printerLog});
               return;
             }
+
+            // 프린트 상태 체크
+            _printStatusCheck(bindings);
 
             String? frontImageInfo;
             String? behindImageInfo;
@@ -164,6 +164,9 @@ class PrinterManager {
   Future<void> _initializePrinter(PrinterBindings bindings) async {
     try {
       bindings.initLibrary();
+
+      // 1. 라이브러리 초기화 전에 이전 상태 정리
+      bindings.clearLibrary();
 
       // 2. 프린터 연결
       final connected = bindings.connectPrinter();
