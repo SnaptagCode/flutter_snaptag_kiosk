@@ -12,7 +12,13 @@ class SetupMainScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Scaffold(
+    return Theme(
+        data: Theme.of(context).copyWith(
+      textTheme: Theme.of(context).textTheme.apply(
+        fontFamily: 'Pretendard',
+      ),
+    ),
+     child: Scaffold(
       backgroundColor: Color(0xFFF2F2F2),
       appBar: AppBar(
         centerTitle: false,
@@ -141,7 +147,7 @@ class SetupMainScreen extends ConsumerWidget {
           ],
         ),
       ),
-    );
+    ),);
   }
 }
 

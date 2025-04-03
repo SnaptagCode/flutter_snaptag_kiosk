@@ -70,7 +70,11 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
     });
     final kiosk = ref.watch(kioskInfoServiceProvider);
 
-    return Center(
+    return DefaultTextStyle(
+        style: TextStyle(
+        fontFamily: context.locale.languageCode == 'ja'?
+        'MPLUSRounded' : 'Cafe24Ssurround2',
+    ), child: Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -103,10 +107,12 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
           Text(
             LocaleKeys.sub03_txt_03.tr(),
             textAlign: TextAlign.center,
-            style: context.typography.kioskBody2B.copyWith(color: Color(int.parse(kiosk?.couponTextColor.replaceFirst('#', '0xff') ?? '0xffffff'))),
+            style: context.typography.kioskBody2B.copyWith(color: Color(int.parse(kiosk?.couponTextColor.replaceFirst('#', '0xff') ?? '0xffffff')),
+              //fontFamily: 'Pretendard',
+            ),
           ),
         ],
       ),
-    );
+    ),);
   }
 }
