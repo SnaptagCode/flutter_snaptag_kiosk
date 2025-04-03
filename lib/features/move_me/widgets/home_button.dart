@@ -15,7 +15,11 @@ class HomeButton extends ConsumerWidget {
     final currentPath = GoRouterState.of(context).matchedLocation;
     final isPrinting = currentPath == PrintProcessRouteData().location;
 
-    return InkWell(
+    return DefaultTextStyle(
+        style: TextStyle(
+        fontFamily: 'Cafe24Ssurround2',
+    ),
+      child: InkWell(
       onTap: isPrinting
           ? null
           : () {
@@ -53,6 +57,6 @@ class HomeButton extends ConsumerWidget {
           ),
         ),
       ),
-    );
+      ),);
   }
 }
