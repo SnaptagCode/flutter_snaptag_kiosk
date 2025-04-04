@@ -59,4 +59,9 @@ abstract class KioskApiClient {
     @Path('printedPhotoCardId') required int printedPhotoCardId,
     @Body() required Map<String, dynamic> body,
   });
+
+  @POST('/v1/machine/log')
+  Future<void> updatePrintLog({
+    @Body() required Map<String, dynamic> body,
+  });
 }
