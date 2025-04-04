@@ -25,7 +25,22 @@ class _PhotoCardPreviewScreenState
     );
     return;
   }
+  final Stopwatch _stopwatch = Stopwatch();
 
+  @override
+  void initState() {
+    super.initState();
+    _stopwatch.start();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _stopwatch.stop();
+      debugPrint('📸 PhotoCardPreviewScreen 렌더링 완료까지 ${_stopwatch.elapsedMilliseconds}ms');
+    });
+  }
   @override
   Widget build(BuildContext context) {
     ref.listen<AsyncValue<void>>(

@@ -14,6 +14,11 @@ class KioskShell extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final stopwatch = Stopwatch()..start();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      stopwatch.stop();
+      debugPrint('⏱ KioskShell 렌더링 완료까지 ${stopwatch.elapsedMilliseconds}ms');
+    });
     final hasNetworkError = ref.watch(backgroundImageProvider);
     final settings = ref.read(kioskInfoServiceProvider);
     return Scaffold(

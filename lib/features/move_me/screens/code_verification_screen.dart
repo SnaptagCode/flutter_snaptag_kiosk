@@ -6,11 +6,33 @@ import 'package:flutter_snaptag_kiosk/core/utils/sound_manager.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 
-class CodeVerificationScreen extends ConsumerWidget {
+class CodeVerificationScreen extends ConsumerStatefulWidget {
   const CodeVerificationScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<CodeVerificationScreen> createState() => _CodeVerificationScreenState();
+}
+
+class _CodeVerificationScreenState extends ConsumerState<CodeVerificationScreen> {
+  final Stopwatch _stopwatch = Stopwatch();
+
+  @override
+  void initState() {
+    super.initState();
+    _stopwatch.start();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _stopwatch.stop();
+      debugPrint('⏱ CodeVerificationScreen first frame rendered in ${_stopwatch.elapsedMilliseconds}ms');
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     ref.listen<AsyncValue<BackPhotoCardResponse?>>(
       verifyPhotoCardProvider,
       (previous, next) {

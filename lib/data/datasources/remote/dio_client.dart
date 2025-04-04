@@ -2,6 +2,8 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
+import 'dart:convert';
+import 'package:flutter/foundation.dart';
 
 final dioProvider = Provider.family<Dio, String>((ref, baseUrl) {
   final dio = Dio()
@@ -25,6 +27,9 @@ final dioProvider = Provider.family<Dio, String>((ref, baseUrl) {
     // Request가 보내기 전에 실행됩니다.
     // 예를 들어, 헤더를 설정하거나 요청을 변환할 수 있습니다.
     onRequest: (RequestOptions options, RequestInterceptorHandler handler) {
+      options.extra['startTime'] = DateTime.now();
+      final requestSize = _getSizeInBytes(options.data);
+      options.extra['requestSize'] = requestSize;
       return handler.next(options);
     },
     // Response를 받은 후에 실행됩니다.
@@ -37,6 +42,11 @@ final dioProvider = Provider.family<Dio, String>((ref, baseUrl) {
           message: response.data!['message'], // 표시할 메시지
           error: response.data!['code'], // 사용자 정의 오류 메시지
         );
+        final start = response.requestOptions.extra['startTime'] as DateTime?;
+        final duration = DateTime.now().difference(start!);
+        debugPrint('요청~응답까지 ${duration.inMilliseconds}ms');
+        //final responseSize = _getSizeInBytes(options.data);
+        //options.extra['reponseSize'] = responseSize;
         // interceptor onError로 전달
         return handler.reject(newError, true);
       }
@@ -59,3 +69,13 @@ final dioProvider = Provider.family<Dio, String>((ref, baseUrl) {
 
   return dio;
 });
+
+int _getSizeInBytes(dynamic data) {
+  try {
+    if (data == null) return 0;
+    final jsonStr = data is String ? data : data.toString();
+    return utf8.encode(jsonStr).length;
+  } catch (_) {
+    return 0;
+  }
+}

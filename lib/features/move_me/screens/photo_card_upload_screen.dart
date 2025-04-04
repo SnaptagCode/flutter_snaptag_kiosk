@@ -11,7 +11,13 @@ class PhotoCardUploadScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final stopwatch = Stopwatch()..start();
     final kiosk = ref.watch(kioskInfoServiceProvider);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      stopwatch.stop();
+      debugPrint('⏱ PhotoCardUploadScreen 렌더링 완료까지 ${stopwatch.elapsedMilliseconds}ms 소요됨');
+    });
 
     return DefaultTextStyle(
         style: TextStyle(
