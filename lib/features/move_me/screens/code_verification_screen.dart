@@ -43,7 +43,11 @@ class CodeVerificationScreen extends ConsumerWidget {
       },
     );
 
-    return Column(
+    return DefaultTextStyle(
+        style: TextStyle(
+        fontFamily: context.locale.languageCode == 'ja'?
+        'MPLUSRounded' : 'Cafe24Ssurround2',
+    ),child:Column(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -74,7 +78,7 @@ class CodeVerificationScreen extends ConsumerWidget {
           ),
         ),
       ],
-    );
+    ),);
   }
 }
 
@@ -84,7 +88,12 @@ class _InputDisplay extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final keypadState = ref.watch(authCodeProvider);
-    return Container(
+    return DefaultTextStyle(
+        style: TextStyle(
+        fontFamily: context.locale.languageCode == 'ja'?
+        'MPLUSRounded' : 'Cafe24Ssurround2',
+    ),
+    child: Container(
       width: 478.w,
       height: 86.h,
       decoration: context.keypadDisplayDecoration,
@@ -119,14 +128,18 @@ class _InputDisplay extends ConsumerWidget {
           ),
         ],
       ),
-    );
+    ),);
   }
 }
 
 class _NumericPad extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Column(
+    return DefaultTextStyle(
+        style: TextStyle(
+        fontFamily: context.locale.languageCode == 'ja'?
+        'MPLUSRounded' : 'Cafe24Ssurround2',
+    ), child: Column(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
         for (int row = 0; row < 4; row++) ...[
@@ -142,7 +155,7 @@ class _NumericPad extends ConsumerWidget {
           if (row < 3) SizedBox(height: 10.h), // 로우 사이 간격 추가
         ],
       ],
-    );
+    ),);
   }
 
   Widget _buildGridItem(BuildContext context, WidgetRef ref, int index) {
@@ -156,9 +169,12 @@ class _NumericPad extends ConsumerWidget {
         child: SizedBox(
           width: 60.w,
           height: 60.h,
-          child: Image.asset(
+          child: Padding(
+            padding: EdgeInsets.only(bottom: 8),
+            child: Image.asset(
             SnaptagImages.arrowBack,
           ),
+        ),
         ),
       );
     }

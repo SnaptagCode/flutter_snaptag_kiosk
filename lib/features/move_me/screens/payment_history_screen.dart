@@ -36,7 +36,13 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
     });
     final ordersPage = ref.watch(ordersPageProvider());
 
-    return LoaderOverlay(
+    return Theme(
+        data: Theme.of(context).copyWith(
+      textTheme: Theme.of(context).textTheme.apply(
+        fontFamily: 'Pretendard',
+      ),
+    ),
+     child: LoaderOverlay(
     overlayWidgetBuilder: (dynamic progress){
       return Center(
         child: SizedBox(
@@ -184,7 +190,7 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
           onRetry: () => ref.refresh(ordersPageProvider()),
         ),
       ),
-    ),);
+    ),),);
   }
 
   List<DataColumn> get columns {

@@ -22,7 +22,12 @@ class DialogHelper {
     return await showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
+        return DefaultTextStyle(
+            style: TextStyle(
+            fontFamily: context.locale.languageCode == 'ja'?
+            'MPLUSRounded' : 'Cafe24Ssurround2',
+        ),
+        child: AlertDialog(
           backgroundColor: Colors.white,
           insetPadding: EdgeInsets.symmetric(horizontal: 100.w),
           shape: RoundedRectangleBorder(
@@ -40,12 +45,13 @@ class DialogHelper {
               Text(
                 '환불이 실패했습니다.',
                 style: context.typography.kioskAlert1B.copyWith(
+                  fontFamily: 'Pretendard',
                   color: Colors.black,
                 ),
               ),
             ],
           ),
-        );
+        ),);
       },
     );
   }
@@ -56,7 +62,12 @@ class DialogHelper {
     return await showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
+        return DefaultTextStyle(
+            style: TextStyle(
+            fontFamily: context.locale.languageCode == 'ja'?
+            'MPLUSRounded' : 'Cafe24Ssurround2',
+        ),
+        child: AlertDialog(
           backgroundColor: Colors.white,
           insetPadding: EdgeInsets.symmetric(horizontal: 100.w),
           shape: RoundedRectangleBorder(
@@ -74,12 +85,13 @@ class DialogHelper {
               Text(
                 '환불이 완료되었습니다.',
                 style: context.typography.kioskAlert1B.copyWith(
+                  fontFamily: 'Pretendard',
                   color: Colors.black,
                 ),
               ),
             ],
           ),
-        );
+        ),);
       },
     );
   }
@@ -94,7 +106,12 @@ class DialogHelper {
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
-        return AlertDialog(
+        return DefaultTextStyle(
+            style: TextStyle(
+            fontFamily: context.locale.languageCode == 'ja'?
+            'MPLUSRounded' : 'Cafe24Ssurround2',
+        ),
+        child: AlertDialog(
           backgroundColor: Colors.white,
           insetPadding: EdgeInsets.symmetric(horizontal: 100.w),
           shape: RoundedRectangleBorder(
@@ -104,6 +121,7 @@ class DialogHelper {
             child: Text(
               title,
               style: context.typography.kioskAlert1B.copyWith(
+                fontFamily: 'Pretendard',
                 color: Colors.black,
               ),
             ),
@@ -139,7 +157,7 @@ class DialogHelper {
               ],
             )
           ],
-        );
+        ),);
       },
     );
   }
@@ -155,7 +173,12 @@ class DialogHelper {
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
-        return AlertDialog(
+        return DefaultTextStyle(
+            style: TextStyle(
+            fontFamily: context.locale.languageCode == 'ja'?
+            'MPLUSRounded' : 'Cafe24Ssurround2',
+        ),
+        child: AlertDialog(
           backgroundColor: Colors.white,
           insetPadding: EdgeInsets.symmetric(horizontal: 100.w),
           shape: RoundedRectangleBorder(
@@ -166,6 +189,8 @@ class DialogHelper {
               title,
               style: context.typography.kioskAlert1B.copyWith(
                 color: Colors.black,
+                fontFamily: context.locale.languageCode == 'ja'?
+                    'MPLUSRounded' : 'Cafe24Ssurround2',
               ),
             ),
           ),
@@ -173,6 +198,7 @@ class DialogHelper {
             message,
             style: context.typography.kioskAlert2M.copyWith(
               color: Colors.black,
+              fontFamily: 'Pretendard',
             ),
             textAlign: TextAlign.center,
           ),
@@ -196,7 +222,7 @@ class DialogHelper {
               ],
             )
           ],
-        );
+        ),);
       },
     );
     return true;
@@ -398,7 +424,12 @@ class DialogHelper {
       context: context,
       barrierDismissible: true,
       builder: (BuildContext context) {
-        return AlertDialog(
+        return DefaultTextStyle(
+            style: TextStyle(
+            fontFamily: context.locale.languageCode == 'ja'?
+            'MPLUSRounded' : 'Cafe24Ssurround2',
+        ),
+        child: AlertDialog(
           backgroundColor: Colors.white,
           insetPadding: EdgeInsets.symmetric(horizontal: 100.w),
           shape: RoundedRectangleBorder(
@@ -415,7 +446,7 @@ class DialogHelper {
               },
             ),
           ),
-        );
+        ),);
       },
     );
   }

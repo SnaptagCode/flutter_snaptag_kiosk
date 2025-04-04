@@ -59,7 +59,8 @@ class KioskTypography extends ThemeExtension<KioskTypography> {
           height: 1.0,
         ),
         kioskNum2B: TextStyle(
-          fontSize: 42.sp,
+          //fontSize: 42.sp,
+          fontSize: 38.sp,
           fontWeight: FontWeight.w700,
           color: Colors.black,
           letterSpacing: -0.42,

@@ -13,7 +13,14 @@ class PhotoCardUploadScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final kiosk = ref.watch(kioskInfoServiceProvider);
 
-    return Column(
+    return DefaultTextStyle(
+        style: TextStyle(
+        fontFamily: context.locale.languageCode == 'ja'?
+        'MPLUSRounded' : 'Cafe24Ssurround2',
+    ),
+      child:Column(
+      //FontThemed(child: Column(
+
       crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
@@ -56,6 +63,9 @@ class PhotoCardUploadScreen extends ConsumerWidget {
           style: context.mainLargeButtonStyle,
           child: Text(
             LocaleKeys.main_btn_txt.tr(),
+            /*style: context.locale.languageCode == 'ja'?
+            TextStyle(fontFamily: 'Cafe24Ssurround2') :
+            TextStyle(fontFamily: 'MPLUSRounded'),*/
           ),
           onPressed: () async {
             await SoundManager().playSound();
@@ -63,6 +73,7 @@ class PhotoCardUploadScreen extends ConsumerWidget {
           },
         ),
       ],
-    );
+    //),
+    ),);
   }
 }
