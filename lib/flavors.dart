@@ -31,24 +31,40 @@ class F {
   }
 
   static String get kioskBaseUrl {
-    switch (F.appFlavor) {
+    /*switch (F.appFlavor) {
       case Flavor.dev:
         return 'https://kiosk-dev-server.snaptag.co.kr';
       case Flavor.prod:
         return 'https://kiosk-server.snaptag.co.kr';
       default:
         return 'https://kiosk-server.snaptag.co.kr';
+    }*/
+    switch (appFlavor) {
+      case Flavor.dev:
+        return 'https://dev.admin.labcode.kr';
+      case Flavor.prod:
+        return 'https://admin.labcode.kr';
+      default:
+        return 'https://admin.labcode.kr';
     }
   }
 
   static String get qrCodePrefix {
-    switch (appFlavor) {
+/*    switch (appFlavor) {
       case Flavor.dev:
         return 'https://dev-photocard-kiosk-qr.snaptag.co.kr';
       case Flavor.prod:
         return 'https://photocard-kiosk-qr.snaptag.co.kr';
       default:
         return 'https://photocard-kiosk-qr.snaptag.co.kr';
+    }*/
+    switch (F.appFlavor) {
+      case Flavor.dev:
+        return 'https://dev-worldit-kiosk-qr.snaptag.co.kr';
+      case Flavor.prod:
+        return 'https://worldit-kiosk-qr.snaptag.co.kr';
+      default:
+        return 'https://worldit-kiosk-qr.snaptag.co.kr';
     }
   }
 }
