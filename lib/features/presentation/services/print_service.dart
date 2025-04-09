@@ -26,6 +26,10 @@ class PrintService extends _$PrintService {
     final frontPhotoInfo = await _prepareFrontPhoto();
 
     // 3. 프린트 작업 생성 및 백 이미지 준비
+    /*final printJobInfo = await _createPrintJobWithEmbeddingBackImage(
+      frontPhotoCardId: frontPhotoInfo.id,
+      backPhotoCardId: ref.read(verifyPhotoCardProvider).value?.backPhotoCardId ?? 0,
+    );*/
     //final url = ref.read(verifyPhotoCardProvider).value?.formattedBackPhotoCardUrl;
     //final backImageFile = await ImageHelper().convertImageUrlToFile(url!);
 
@@ -42,16 +46,16 @@ class PrintService extends _$PrintService {
   Future<void> _executePrintJob(File frontPhoto, File embedded) async {
     try {
       // 프린트 상태 시작
-      // await _updatePrintStatus(printedPhotoCardId, PrintedStatus.started);
+      //  await _updatePrintStatus(printedPhotoCardId, PrintedStatus.started);
 
       // 실제 프린트 실행
       await _executePrint(frontPhoto: frontPhoto, embedded: embedded);
 
       // 프린트 상태 완료
-      // await _updatePrintStatus(printedPhotoCardId, PrintedStatus.completed);
+      //  await _updatePrintStatus(printedPhotoCardId, PrintedStatus.completed);
     } catch (e, stack) {
       logger.e('PrintService._executePrintJob failure', error: e, stackTrace: stack);
-      // await _updatePrintStatus(printedPhotoCardId, PrintedStatus.failed);
+       // await _updatePrintStatus(printedPhotoCardId, PrintedStatus.failed);
       rethrow;
     }
   }

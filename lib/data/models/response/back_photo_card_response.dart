@@ -13,6 +13,8 @@ class BackPhotoCardResponse with _$BackPhotoCardResponse {
     required String photoAuthNumber,
     int? embeddingProductId,
     required String formattedBackPhotoCardUrl,
+    required String status,
+    required int seq
   }) = _BackPhotoCardResponse;
 
   factory BackPhotoCardResponse.fromJson(Map<String, dynamic> json) => _$BackPhotoCardResponseFromJson(json);

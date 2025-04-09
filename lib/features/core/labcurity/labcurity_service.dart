@@ -5,6 +5,7 @@ import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_snaptag_kiosk/core/constants/directory_paths.dart';
 import 'package:flutter_snaptag_kiosk/domain/entities/entities.dart';
+import 'package:flutter_snaptag_kiosk/features/features.dart';
 import 'package:intl/intl.dart';
 import 'package:path/path.dart' as path;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -16,18 +17,20 @@ part 'labcurity_service.g.dart';
 @riverpod
 LabcurityService labcurityService(Ref ref) {
   final library = ref.watch(labcurityLibraryProvider);
-  return LabcurityService(library);
+  return LabcurityService(library, ref);
 }
 
 class LabcurityService {
   final LabcurityLibrary _library;
+  final Ref ref;
 
-  LabcurityService(this._library);
+  LabcurityService(this._library, this.ref);
 
   Future<File> embedImage(Uint8List imageBytes, [LabcurityImageConfig? config]) async {
-    config ??= const LabcurityImageConfig();
+    final foxtrotCode = ref.read(verifyPhotoCardProvider).value?.seq;
 
     final extension = _getImageExtension(imageBytes);
+    config ??= const LabcurityImageConfig();
     if (extension == 'unknown') {
       throw UnsupportedError('Unsupported image format');
     }
@@ -45,7 +48,8 @@ class LabcurityService {
     final inputFilePath = path.join(inputDirPath, '$formattedDateTime.$extension');
     final labcurityPath = FilePaths.labcurityKey.buildPath;
     final settingPath = FilePaths.labcuritySetting.buildPath;
-    final foxtrotCode = await updateFoxtrotCode(FilePaths.labcurityCode.buildPath);
+    // 로컬 json 파일로 foxtrotCode 생성시 아래 함수 사용
+    //final foxtrotCode = await updateFoxtrotCode(FilePaths.labcurityCode.buildPath);
 
     // Seed5
     try {
@@ -57,7 +61,7 @@ class LabcurityService {
         outputFilePath,
         config.size,
         config.strength,
-        foxtrotCode,
+        foxtrotCode?? 0,
         settingPath
       );
 
