@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:typed_data';
+import 'dart:convert';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_snaptag_kiosk/core/constants/directory_paths.dart';
@@ -43,8 +44,36 @@ class LabcurityService {
     final outputFilePath = path.join(outputDirPath, '$formattedDateTime.$extension');
     final inputFilePath = path.join(inputDirPath, '$formattedDateTime.$extension');
     final labcurityPath = FilePaths.labcurityKey.buildPath;
+    final settingPath = FilePaths.labcuritySetting.buildPath;
+    final foxtrotCode = await updateFoxtrotCode(FilePaths.labcurityCode.buildPath);
 
+    // Seed5
     try {
+      await File(inputFilePath).writeAsBytes(imageBytes);
+
+      final result = _library.getLabCodeImageW(
+        labcurityPath,
+        inputFilePath,
+        outputFilePath,
+        config.size,
+        config.strength,
+        foxtrotCode,
+        settingPath
+      );
+
+      if (result == 0) {
+        final outputFile = File(outputFilePath);
+        if (await outputFile.exists()) {
+          return outputFile;
+        }
+      }
+      throw Exception('Failed to process image. Error code: $result');
+    } finally {
+      await _cleanupFiles(inputFilePath);
+    }
+
+    // Seed 6
+    /*try {
       await File(inputFilePath).writeAsBytes(imageBytes);
 
       final result = _library.getLabCodeImageFullW(
@@ -70,7 +99,7 @@ class LabcurityService {
       throw Exception('Failed to process image. Error code: $result');
     } finally {
       await _cleanupFiles(inputFilePath);
-    }
+    }*/
   }
 
   Future<void> _ensureDirectoryExists(String dirPath) async {
@@ -101,4 +130,33 @@ class LabcurityService {
     }
     return 'unknown';
   }
+  Future<int> updateFoxtrotCode(String dirPath) async {
+    //final dir = await getApplicationDocumentsDirectory();
+
+    final file = File(dirPath);
+
+    Map<String, dynamic> data;
+
+    if (await file.exists()) {
+      // 파일이 존재하면 읽고 파싱
+      final content = await file.readAsString();
+      data = jsonDecode(content);
+
+      // 기존 값 있으면 +1
+      final currentValue = data['foxtrotCode'] ?? 0;
+      final changeValue = currentValue + 1;
+      data['foxtrotCode'] = changeValue;
+      await file.writeAsString(jsonEncode(data), flush: true);
+      print('foxtrotCode updated: ${data['foxtrotCode']}');
+      return changeValue;
+    } else {
+      // 파일이 없으면 새로 만들고 5로 시작
+      data = {'foxtrotCode': 5};
+      await file.writeAsString(jsonEncode(data), flush: true);
+      print('foxtrotCode updated: ${data['foxtrotCode']}');
+      return 5;
+    }
+  }
 }
+
+

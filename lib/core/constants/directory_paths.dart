@@ -43,6 +43,8 @@ enum DirectoryPaths {
 enum FilePaths {
   labcurityKey('labcurity_key.txt', directory: DirectoryPaths.labcurity),
   labcurityDLL('LabCode_x64.dll', directory: DirectoryPaths.labcurity),
+  labcuritySetting('setting_file.txt', directory: DirectoryPaths.labcurity),
+  labcurityCode('foxtrot_code.json', directory: DirectoryPaths.labcurity),
   printerDLL('libDSRetransfer600App.dll', directory: DirectoryPaths.luca);
 
   const FilePaths(this.name, {required this.directory});

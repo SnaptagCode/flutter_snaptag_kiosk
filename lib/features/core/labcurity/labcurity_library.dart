@@ -14,6 +14,54 @@ LabcurityLibrary labcurityLibrary(Ref ref) {
   return LabcurityLibrary();
 }
 
+// Seed 5
+class LabcurityLibrary {
+  late final DynamicLibrary _dll;
+  late final GetLabCodeImageWDart _getLabCodeImageW;
+
+  LabcurityLibrary() {
+    final dllSource = FilePaths.labcurityDLL.buildPath;
+    _dll = DynamicLibrary.open(dllSource);
+
+    _getLabCodeImageW =
+        _dll.lookupFunction<GetLabCodeImageWNative, GetLabCodeImageWDart>('getLabCodeImageW');
+  }
+
+  int getLabCodeImageW(
+      String keyPath,
+      String inputPath,
+      String writePath,
+      int size,
+      int strength,
+      int foxtrotCode,
+      String settingPath,
+      ) {
+    final keyPathPtr = keyPath.toNativeUtf16();
+    final inputPathPtr = inputPath.toNativeUtf16();
+    final writePathPtr = writePath.toNativeUtf16();
+    final settingPathPtr = settingPath.toNativeUtf16();
+
+    try {
+      return _getLabCodeImageW(
+        keyPathPtr,
+        inputPathPtr,
+        writePathPtr,
+        size,
+        strength,
+        foxtrotCode,
+        settingPathPtr
+      );
+    } finally {
+      malloc.free(keyPathPtr);
+      malloc.free(inputPathPtr);
+      malloc.free(writePathPtr);
+      malloc.free(settingPathPtr);
+    }
+  }
+}
+
+// Seed 6
+/*
 class LabcurityLibrary {
   late final DynamicLibrary _dll;
   late final GetLabCodeImageFullWDart _getLabCodeImageFullW;
@@ -64,3 +112,4 @@ class LabcurityLibrary {
     }
   }
 }
+*/

@@ -26,13 +26,16 @@ class PrintService extends _$PrintService {
     final frontPhotoInfo = await _prepareFrontPhoto();
 
     // 3. 프린트 작업 생성 및 백 이미지 준비
-    final url = ref.read(verifyPhotoCardProvider).value?.formattedBackPhotoCardUrl;
-    final backImageFile = await ImageHelper().convertImageUrlToFile(url!);
+    //final url = ref.read(verifyPhotoCardProvider).value?.formattedBackPhotoCardUrl;
+    //final backImageFile = await ImageHelper().convertImageUrlToFile(url!);
+
+    final embeddedBackImage = await _prepareBackImage();
 
     // 4. 프린트 진행 및 상태 업데이트
     await _executePrintJob(
       frontPhotoInfo.safeEmbedImage,
-      backImageFile,
+        embeddedBackImage
+      //backImageFile,
     );
   }
 
@@ -58,6 +61,30 @@ class PrintService extends _$PrintService {
     final randomPhoto = await frontPhotoList.getRandomPhoto();
 
     return randomPhoto;
+  }
+
+  Future<File> _prepareBackImage() async {
+    final backPhoto = ref.watch(verifyPhotoCardProvider).value;
+    if (backPhoto == null) {
+      throw Exception('No back photo available');
+    }
+
+    try {
+      final response = await ImageHelper().getImageBytes(backPhoto.formattedBackPhotoCardUrl);
+
+      final File processedImage = await ref.read(labcurityServiceProvider).embedImage(
+        response.data,
+        LabcurityImageConfig(
+          size: 3,
+          strength: 16,
+          //foxtrotCode: config?.productCode ?? 1,
+        ),
+      );
+
+      return processedImage;
+    } catch (e) {
+      rethrow;
+    }
   }
 
   void _validatePrintRequirements() {
