@@ -132,7 +132,8 @@ class PrinterService extends _$PrinterService {
       logger.i('7. Ejecting card...');
       _bindings.ejectCard();
 
-      startPrintLog();
+      // ❗️ 주석 처리된 부분은 나중에 필요할 때 활성화
+      // startPrintLog();
     } catch (e, stack) {
       logger.i('Print error: $e\nStack: $stack');
       rethrow;
