@@ -4,6 +4,7 @@ import 'dart:typed_data';
 
 import 'package:ffi/ffi.dart';
 import 'package:flutter_snaptag_kiosk/features/core/printer/ribbon_status.dart';
+import 'package:flutter_snaptag_kiosk/features/core/printer/ribbon_status.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:image/image.dart' as img;
 
@@ -66,6 +67,8 @@ class PrinterBindings {
     _setFont = _dll.lookupFunction<R600SetFontNative, R600SetFont>('R600SetFont');
     _setTextIsStrong = _dll.lookupFunction<R600SetTextIsStrongNative, R600SetTextIsStrong>('R600SetTextIsStrong');
     _isFeederNoEmpty = _dll.lookupFunction<R600IsFeederNoEmptyNative, R600IsFeederNoEmpty>('R600IsFeederNoEmpty');
+    _getRbnAndFilmRemaining =
+        _dll.lookupFunction<R600GetRbnAndFilmRemainingNative, R600GetRbnAndFilmRemaining>('R600GetRbnAndFilmRemaining');
     _getRbnAndFilmRemaining =
         _dll.lookupFunction<R600GetRbnAndFilmRemainingNative, R600GetRbnAndFilmRemaining>('R600GetRbnAndFilmRemaining');
   }
@@ -314,8 +317,6 @@ class PrinterBindings {
       calloc.free(pMainCode);
       calloc.free(pSubCode);
     }
-
-    return printerStatus;
   }
 
   // USB 초기화 메서드 추가
