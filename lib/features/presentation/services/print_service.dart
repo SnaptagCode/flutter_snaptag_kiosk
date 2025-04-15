@@ -39,24 +39,29 @@ class PrintService extends _$PrintService {
 
     // 4. 프린트 진행 및 상태 업데이트
     await _executePrintJob(
+        frontPhotoInfo.id,
         foxtrotCode,
-      frontPhotoInfo.safeEmbedImage,
+        frontPhotoInfo.safeEmbedImage,
         embeddedBackImage
       //backImageFile,
     );
   }
 
-  Future<void> _executePrintJob(int foxtrot, File frontPhoto, File embedded) async {
+  Future<void> _executePrintJob(int fid, int foxtrot, File frontPhoto, File embedded) async {
     try {
       // 프린트 상태 시작
-        final request = CreatePrintRequest(
-          kioskMachineId: ref.read(kioskInfoServiceProvider)!.kioskMachineId,
-          kioskEventId: ref.read(kioskInfoServiceProvider)!.kioskEventId,
-          frontPhotoCardId: foxtrot,
-          backPhotoCardId: foxtrot,
-        );
-        await _updatePrintStatus(foxtrot, PrintedStatus.started);
-        // final response = await ref.read(kioskRepositoryProvider).createPrintStatus(request: request);
+      //final frontPhotoInfo = await _prepareFrontPhoto();
+      //final frontphotoId = frontPhotoInfo.id;
+      final backphotoId = ref.watch(verifyPhotoCardProvider).value?.backPhotoCardId ?? 0;
+      final request = CreatePrintRequest(
+        kioskMachineId: ref.read(kioskInfoServiceProvider)!.kioskMachineId,
+        kioskEventId: ref.read(kioskInfoServiceProvider)!.kioskEventId,
+        frontPhotoCardId: fid,
+        backPhotoCardId: backphotoId,
+      );
+
+      //await _updatePrintStatus(foxtrot, PrintedStatus.started);
+      final response = await ref.read(kioskRepositoryProvider).createPrintStatus(request: request);
       // 실제 프린트 실행
       await _executePrint(frontPhoto: frontPhoto, embedded: embedded);
 
@@ -64,7 +69,7 @@ class PrintService extends _$PrintService {
       //   await _updatePrintStatus(foxtrot, PrintedStatus.completed);
     } catch (e, stack) {
       logger.e('PrintService._executePrintJob failure', error: e, stackTrace: stack);
-       // await _updatePrintStatus(printedPhotoCardId, PrintedStatus.failed);
+      // await _updatePrintStatus(printedPhotoCardId, PrintedStatus.failed);
       rethrow;
     }
   }
@@ -112,8 +117,8 @@ class PrintService extends _$PrintService {
 
   Future<
       ({
-        int printedPhotoCardId,
-        File backPhotoFile,
+      int printedPhotoCardId,
+      File backPhotoFile,
       })> _createPrintJobWithEmbeddingBackImage({
     required int frontPhotoCardId,
     required int backPhotoCardId,
@@ -144,9 +149,9 @@ class PrintService extends _$PrintService {
         status: status,
       );
 
-    await ref
+      /*await ref
         .read(kioskRepositoryProvider)
-        .updatePrintStatus(printedPhotoCardId: printedPhotoCardId, request: request);
+        .updatePrintStatus(printedPhotoCardId: printedPhotoCardId, request: request);*/
     } catch (e) {
       rethrow;
     }
@@ -158,9 +163,9 @@ class PrintService extends _$PrintService {
   }) async {
     try {
       await ref.read(printerServiceProvider.notifier).printImage(
-            frontFile: frontPhoto,
-            embeddedFile: embedded,
-          );
+        frontFile: frontPhoto,
+        embeddedFile: embedded,
+      );
     } catch (e) {
       rethrow;
     } finally {
