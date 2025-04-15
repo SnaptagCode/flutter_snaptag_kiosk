@@ -81,7 +81,7 @@ class SetupMainScreen extends ConsumerWidget {
                     },
                   ),
                 ),
-                SizedBox(
+                /*SizedBox(
                   width: 260.w,
                   height: 342.h,
                   child: SetupMainCard(
@@ -93,7 +93,7 @@ class SetupMainScreen extends ConsumerWidget {
                       PaymentHistoryRouteData().go(context);
                     },
                   ),
-                ),
+                ),*/
                 SizedBox(
                   width: 260.w,
                   height: 342.h,
