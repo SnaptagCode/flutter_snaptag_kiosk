@@ -60,13 +60,13 @@ class PrintService extends _$PrintService {
         backPhotoCardId: backphotoId,
       );
 
-      //await _updatePrintStatus(foxtrot, PrintedStatus.started);
       final response = await ref.read(kioskRepositoryProvider).createPrintStatus(request: request);
+      await _updatePrintStatus(response.printedPhotoCardId, PrintedStatus.started);
       // 실제 프린트 실행
       await _executePrint(frontPhoto: frontPhoto, embedded: embedded);
 
       // 프린트 상태 완료
-      //   await _updatePrintStatus(foxtrot, PrintedStatus.completed);
+         await _updatePrintStatus(response.printedPhotoCardId, PrintedStatus.completed);
     } catch (e, stack) {
       logger.e('PrintService._executePrintJob failure', error: e, stackTrace: stack);
       // await _updatePrintStatus(printedPhotoCardId, PrintedStatus.failed);
@@ -149,9 +149,9 @@ class PrintService extends _$PrintService {
         status: status,
       );
 
-      /*await ref
+      await ref
         .read(kioskRepositoryProvider)
-        .updatePrintStatus(printedPhotoCardId: printedPhotoCardId, request: request);*/
+        .updatePrintStatus(printedPhotoCardId: printedPhotoCardId, request: request);
     } catch (e) {
       rethrow;
     }
