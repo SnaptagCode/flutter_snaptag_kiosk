@@ -41,7 +41,7 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
         await next.when(
           error: (error, stack) async {
             logger.e('Print process error', error: error, stackTrace: stack);
-
+            SlackLogService().sendErrorLogToSlack('Print process error\nError: $error');
             // 에러 발생 시 환불 처리
             try {
               await ref.read(paymentServiceProvider.notifier).refund();
