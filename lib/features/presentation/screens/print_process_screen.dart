@@ -46,6 +46,7 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
             try {
               await ref.read(paymentServiceProvider.notifier).refund();
             } catch (refundError) {
+              SlackLogService().sendErrorLogToSlack('Refund failed \nError: $refundError');
               logger.e('Refund failed', error: refundError);
             }
 
