@@ -28,6 +28,9 @@ class KioskInfoService extends _$KioskInfoService {
 
       ref.read(frontPhotoListProvider.notifier).fetch();
 
+      // ❗️ 주석 처리된 부분은 나중에 필요할 때 활성화
+      // ref.read(printerServiceProvider.notifier).startPrintLog();
+
       return response;
     } catch (e) {
       ref.invalidateSelf();

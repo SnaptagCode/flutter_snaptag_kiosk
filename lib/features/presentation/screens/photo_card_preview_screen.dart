@@ -66,7 +66,12 @@ class _PhotoCardPreviewScreenState
     );
     final kiosk = ref.watch(kioskInfoServiceProvider);
 
-    return Center(
+    return DefaultTextStyle(
+        style: TextStyle(
+        fontFamily: context.locale.languageCode == 'ja'?
+        'MPLUSRounded' : 'Cafe24Ssurround2',
+    ),
+    child: Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -120,10 +125,12 @@ class _PhotoCardPreviewScreenState
           SizedBox(height: 30.h),
           Text(
               LocaleKeys.sub03_txt_03.tr(),
-              style: context.typography.kioskBody2B.copyWith(color: Color(int.parse(kiosk?.couponTextColor.replaceFirst('#', '0xff') ?? '0xffffff'))),
+              style: context.typography.kioskBody2B.copyWith(color: Color(int.parse(kiosk?.couponTextColor.replaceFirst('#', '0xff') ?? '0xffffff')),
+                //fontFamily: 'Pretendard',
+              ),
           ),
         ],
       ),
-    );
+    ),);
   }
 }

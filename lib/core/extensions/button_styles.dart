@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_snaptag_kiosk/core/extensions/extensions.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 extension ButtonStyles on BuildContext {
   ButtonStyle get setupDialogCancelButtonStyle => OutlinedButton.styleFrom(
@@ -11,7 +12,9 @@ extension ButtonStyles on BuildContext {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
         elevation: 10,
         shadowColor: Colors.black.withOpacity(0.4),
-        textStyle: typography.kioskAlertBtnB,
+        textStyle: locale.languageCode == 'ja'?
+        typography.kioskAlertBtnB.copyWith(fontFamily: 'MPLUSRounded'):
+        typography.kioskAlertBtnB.copyWith(fontFamily: 'Cafe24Ssurround2'),
       );
   ButtonStyle get setupDialogConfirmButtonStyle => OutlinedButton.styleFrom(
         fixedSize: Size(double.infinity, 94.h),
@@ -21,7 +24,10 @@ extension ButtonStyles on BuildContext {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
         elevation: 10,
         shadowColor: Colors.black.withOpacity(0.4),
-        textStyle: typography.kioskAlertBtnB,
+        //textStyle: typography.kioskAlertBtnB
+    textStyle: locale.languageCode == 'ja'?
+    typography.kioskAlertBtnB.copyWith(fontFamily: 'MPLUSRounded'):
+    typography.kioskAlertBtnB.copyWith(fontFamily: 'Cafe24Ssurround2'),
       );
 
   ///
@@ -30,6 +36,8 @@ extension ButtonStyles on BuildContext {
   /// - `foregroundColor` : kioskColors.buttonTextColor
   ///
   ButtonStyle get mainLargeButtonStyle => ElevatedButton.styleFrom(
+        //padding: EdgeInsets.fromLTRB(0.r, 24.r, 0.r, 0.r),
+        padding: EdgeInsets.only(top: 4.5.h),
         fixedSize: Size(double.infinity, 82.h),
         minimumSize: Size(520.w, 78.h),
         backgroundColor: kioskColors.buttonColor,
@@ -37,7 +45,11 @@ extension ButtonStyles on BuildContext {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
         elevation: 10,
         shadowColor: Colors.black.withOpacity(0.4),
-        textStyle: typography.kioskBtn1B,
+        //textStyle: typography.kioskBtn1B.copyWith(fontFamily: 'Cafe24Ssurround2')
+        //textStyle: typography.kioskBtn1B
+    textStyle: locale.languageCode == 'ja'?
+    typography.kioskAlertBtnB.copyWith(fontFamily: 'MPLUSRounded'):
+    typography.kioskAlertBtnB.copyWith(fontFamily: 'Cafe24Ssurround2'),
       );
 
   ///
@@ -53,7 +65,11 @@ extension ButtonStyles on BuildContext {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
         elevation: 10,
         shadowColor: Colors.black.withOpacity(0.4),
-        textStyle: typography.kioskAlertBtnB,
+        //textStyle: typography.kioskAlertBtnB.copyWith(fontFamily: 'Cafe24Ssurround2')
+        //textStyle: typography.kioskAlertBtnB
+    textStyle: locale.languageCode == 'ja'?
+    typography.kioskAlertBtnB.copyWith(fontFamily: 'MPLUSRounded'):
+    typography.kioskAlertBtnB.copyWith(fontFamily: 'Cafe24Ssurround2'),
       );
 
   ///
@@ -66,10 +82,16 @@ extension ButtonStyles on BuildContext {
       backgroundColor: kioskColors.buttonColor,
       foregroundColor: kioskColors.buttonTextColor,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
-      padding: EdgeInsets.symmetric(vertical: 6.h, horizontal: 8.w),
+      //padding: EdgeInsets.symmetric(vertical: 6.h, horizontal: 8.w),
+      padding: EdgeInsets.fromLTRB(8.w, 9.h, 8.w, 6.h),
       elevation: 10,
       shadowColor: Colors.black.withOpacity(0.4),
-      textStyle: typography.kioskBtn1B);
+      //textStyle: typography.kioskBtn1B.copyWith(fontFamily: 'Cafe24Ssurround2')
+      //textStyle: typography.kioskBtn1B
+    textStyle: locale.languageCode == 'ja'?
+    typography.kioskAlertBtnB.copyWith(fontFamily: 'MPLUSRounded'):
+    typography.kioskAlertBtnB.copyWith(fontFamily: 'Cafe24Ssurround2'),
+  );
 
   ///
   /// [Figma](https://www.figma.com/design/8IDM2KJtqAYWm2IsmytU5W/%ED%82%A4%EC%98%A4%EC%8A%A4%ED%81%AC_%EB%94%94%EC%9E%90%EC%9D%B8_%EA%B3%B5%EC%9C%A0%EC%9A%A9?node-id=931-13722&m=dev)
@@ -78,7 +100,9 @@ extension ButtonStyles on BuildContext {
   ///
   ButtonStyle get keypadNumberStyle => ElevatedButton.styleFrom(
       fixedSize: Size(130.w, 90.h),
-      padding: EdgeInsets.all(10.r),
+      //padding: EdgeInsets.all(10.r),
+      //padding: EdgeInsets.fromLTRB(10.r, 21.r, 10.r, 10.r),
+      padding: EdgeInsets.fromLTRB(10.r, 18.r, 10.r, 2.r),
       backgroundColor: kioskColors.keypadButtonColor,
       foregroundColor: Colors.white,
       shape: RoundedRectangleBorder(
@@ -87,8 +111,32 @@ extension ButtonStyles on BuildContext {
             width: 1.w,
             color: kioskColors.buttonColor,
           )),
-      textStyle: typography.kioksNum1SB);
+      //textStyle: typography.kioksNum1SB
+    //textStyle: typography.kioksNum1SB.copyWith(fontFamily: 'Cafe24Ssurround2')
+      //textStyle: typography.kioksNum1SB
+    textStyle: locale.languageCode == 'ja'?
+    typography.kioksNum1SB.copyWith(fontFamily: 'MPLUSRounded'):
+    typography.kioksNum1SB.copyWith(fontFamily: 'Cafe24Ssurround2'),
+  );
 
+  ButtonStyle get keypadBackStyle => ElevatedButton.styleFrom(
+    fixedSize: Size(130.w, 90.h),
+    padding: EdgeInsets.all(10.r),
+    backgroundColor: kioskColors.keypadButtonColor,
+    foregroundColor: Colors.white,
+    shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10.r),
+        side: BorderSide(
+          width: 1.w,
+          color: kioskColors.buttonColor,
+        )),
+    //textStyle: typography.kioksNum1SB
+    //textStyle: typography.kioksNum1SB.copyWith(fontFamily: 'Cafe24Ssurround2')
+    //textStyle: typography.kioksNum1SB
+    textStyle: locale.languageCode == 'ja'?
+    typography.kioksNum1SB.copyWith(fontFamily: 'MPLUSRounded'):
+    typography.kioksNum1SB.copyWith(fontFamily: 'Cafe24Ssurround2'),
+  );
   ///
   /// [Figma](https://www.figma.com/design/8IDM2KJtqAYWm2IsmytU5W/%ED%82%A4%EC%98%A4%EC%8A%A4%ED%81%AC_%EB%94%94%EC%9E%90%EC%9D%B8_%EA%B3%B5%EC%9C%A0%EC%9A%A9?node-id=931-13744&m=dev)
   /// - `backgroundColor` : kioskColors.buttonColor
@@ -96,9 +144,15 @@ extension ButtonStyles on BuildContext {
   ///
   ButtonStyle get keypadCompleteStyle => ElevatedButton.styleFrom(
       fixedSize: Size(130.w, 90.h),
-      padding: EdgeInsets.only(left: 6.w, right: 6.w, top: 24.h, bottom: 24.h),
+      //padding: EdgeInsets.only(left: 6.w, right: 6.w, top: 24.h, bottom: 24.h),
+      padding: EdgeInsets.fromLTRB(10.w,14.w, 10.h, 3.h),
       backgroundColor: kioskColors.buttonColor,
       foregroundColor: kioskColors.buttonTextColor,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
-      textStyle: typography.kioskNum2B);
+      //textStyle: typography.kioskNum2B.copyWith(fontFamily: 'Cafe24Ssurround2')
+      //textStyle: typography.kioskNum2B
+    textStyle: locale.languageCode == 'ja'?
+    typography.kioskNum2B.copyWith(fontFamily: 'MPLUSRounded'):
+    typography.kioskNum2B.copyWith(fontFamily: 'Cafe24Ssurround2'),
+  );
 }

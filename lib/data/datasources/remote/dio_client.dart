@@ -9,10 +9,17 @@ final dioProvider = Provider.family<Dio, String>((ref, baseUrl) {
     ..options.connectTimeout = const Duration(seconds: 30)
     ..options.receiveTimeout = const Duration(seconds: 30);
   dio.interceptors.add(
-    DioLogger(
-      sendHook: SlackLogService().sendLogToSlack,
-      request: false,
-    ),
+      DioLogger(
+        sendHook: (log) {
+          if (log.contains('DioError')) {
+            SlackLogService().sendErrorLogToSlack(log);
+            SlackLogService().sendLogToSlack(log);
+          } else {
+            SlackLogService().sendLogToSlack(log);
+          }
+        },
+        request: false,
+      )
   );
   dio.interceptors.add(
     PrettyDioLogger(
