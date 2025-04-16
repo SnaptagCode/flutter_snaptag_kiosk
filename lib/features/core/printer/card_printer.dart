@@ -45,9 +45,9 @@ class PrinterService extends _$PrinterService {
       if (!ready) {
         throw Exception('Failed to ensure printer ready');
       }
-
       logger.i('Printer initialization completed');
     } catch (e) {
+      SlackLogService().sendErrorLogToSlack('Printer initialization error: $e');
       logger.i('Printer initialization error: $e');
       rethrow;
     }
