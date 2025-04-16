@@ -104,13 +104,13 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
             style: context.typography.kioskBody2B,
           ),
           SizedBox(height: 12.h),
-          Text(
+          /*Text(
             LocaleKeys.sub03_txt_03.tr(),
             textAlign: TextAlign.center,
             style: context.typography.kioskBody2B.copyWith(color: Color(int.parse(kiosk?.couponTextColor.replaceFirst('#', '0xff') ?? '0xffffff')),
               //fontFamily: 'Pretendard',
             ),
-          ),
+          ),*/
         ],
       ),
     ),);
