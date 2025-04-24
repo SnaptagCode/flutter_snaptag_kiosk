@@ -3,6 +3,8 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:ffi/ffi.dart';
+
+import 'package:flutter_snaptag_kiosk/features/core/printer/ribbon_status.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:image/image.dart' as img;
 
@@ -35,6 +37,7 @@ class PrinterBindings {
   late final R600SetTextIsStrong _setTextIsStrong;
   late final R600DrawImage _drawImage;
   late final R600IsFeederNoEmpty _isFeederNoEmpty;
+  late final R600GetRbnAndFilmRemaining _getRbnAndFilmRemaining;
 
   PrinterBindings() {
     // DLL 로드
@@ -64,6 +67,8 @@ class PrinterBindings {
     _setFont = _dll.lookupFunction<R600SetFontNative, R600SetFont>('R600SetFont');
     _setTextIsStrong = _dll.lookupFunction<R600SetTextIsStrongNative, R600SetTextIsStrong>('R600SetTextIsStrong');
     _isFeederNoEmpty = _dll.lookupFunction<R600IsFeederNoEmptyNative, R600IsFeederNoEmpty>('R600IsFeederNoEmpty');
+    _getRbnAndFilmRemaining =
+        _dll.lookupFunction<R600GetRbnAndFilmRemainingNative, R600GetRbnAndFilmRemaining>('R600GetRbnAndFilmRemaining');
   }
 
   int initLibrary() {
@@ -237,9 +242,12 @@ class PrinterBindings {
     final pWarningStatus = calloc<Uint32>();
     final pMainCode = calloc<Uint8>();
     final pSubCode = calloc<Uint8>();
+    PrinterStatus? printerStatus;
+    int? result;
 
     try {
-      final result = _queryPrinterStatus(
+      //final result = _queryPrinterStatus(
+      result = _queryPrinterStatus(
         pChassisTemp,
         pPrintheadTemp,
         pHeaterTemp,
@@ -256,7 +264,9 @@ class PrinterBindings {
         return null; // null 반환으로 변경
       }
 
-      return PrinterStatus(
+      //return PrinterStatus(
+      printerStatus = PrinterStatus(
+        machineId: 0,
         mainCode: pMainCode.value,
         subCode: pSubCode.value,
         mainStatus: pMainStatus.value,
@@ -281,6 +291,36 @@ class PrinterBindings {
       calloc.free(pMainCode);
       calloc.free(pSubCode);
     }
+
+
+    return printerStatus;
+  }
+
+  // 리본과 필름 잔량 확인 함수
+  RibbonStatus? getRbnAndFilmRemaining() {
+    final rbnRemaining = calloc<Short>();
+    final filmRemaining = calloc<Short>();
+    RibbonStatus? ribbonStatus;
+
+    try {
+      final result = _getRbnAndFilmRemaining(rbnRemaining, filmRemaining);
+      if (result != 0) {
+        throw Exception('Failed to get ribbon and film remaining');
+      }
+      logger.i('Ribbon remaining: ${rbnRemaining.value}');
+      logger.i('Film remaining: ${filmRemaining.value}');
+      ribbonStatus = RibbonStatus(
+        rbnRemaining: rbnRemaining.value,
+        filmRemaining: filmRemaining.value,
+      );
+    } catch (e) {
+      rethrow;
+    } finally {
+      calloc.free(rbnRemaining);
+      calloc.free(filmRemaining);
+    }
+
+    return ribbonStatus;
   }
 
   // USB 초기화 메서드 추가

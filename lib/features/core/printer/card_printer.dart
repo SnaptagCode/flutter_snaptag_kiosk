@@ -4,6 +4,11 @@ import 'dart:io';
 import 'package:ffi/ffi.dart'; // Utf8 사용을 위한 임포트
 import 'package:flutter/foundation.dart';
 import 'package:flutter_snaptag_kiosk/core/utils/logger_service.dart';
+
+import 'package:flutter_snaptag_kiosk/data/datasources/cache/kiosk_info_service.dart';
+import 'package:flutter_snaptag_kiosk/data/datasources/remote/slack_log_service.dart';
+import 'package:flutter_snaptag_kiosk/data/repositories/kiosk_repository.dart';
+import 'package:flutter_snaptag_kiosk/features/core/printer/printer_log.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'printer_bindings.dart';
@@ -128,9 +133,26 @@ class PrinterService extends _$PrinterService {
 
       logger.i('7. Ejecting card...');
       _bindings.ejectCard();
+      startPrintLog();
     } catch (e, stack) {
       logger.i('Print error: $e\nStack: $stack');
       rethrow;
+    }
+  }
+
+  Future<void> startPrintLog() async {
+    final printerLog = getPrinterLogData(_bindings);
+    if (printerLog != null) {
+      final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
+      final log = printerLog.copyWith(kioskMachineId: machineId);
+      if (machineId != 0) {
+        await ref.read(kioskRepositoryProvider).updatePrintLog(request: log);
+        SlackLogService().sendLogToSlack('MachineID: $machineId, PrintState : $log');
+        /*final currentTemp = log.printerHeadTemperature;
+        if (currentTemp < 207){
+          SlackLogService().sendErrorLogToSlack('MachineID: $machineId, PrintTemperature: $currentTemp');
+        }*/
+      }
     }
   }
 
@@ -189,6 +211,35 @@ class PrinterService extends _$PrinterService {
     } finally {
       calloc.free(strPtr);
       calloc.free(lenPtr);
+    }
+  }
+  PrinterLog? getPrinterLogData(PrinterBindings bindings) {
+    try {
+      final printerStatus = bindings.getPrinterStatus();
+      final ribbonStatus = bindings.getRbnAndFilmRemaining();
+      final isPrintingNow = bindings.checkCardPosition();
+      final isFeederEmpty = !bindings.checkFeederStatus();
+      // final errorMsg = printerStatus.$2 == null ? '' : bindings.getErrorInfo(printerStatus.$2 ?? 0);
+      logger.i(
+          'Printer status: $printerStatus, ribbon status: $ribbonStatus, isPrintingNow: $isPrintingNow isFeederEmpty: $isFeederEmpty');
+
+      return PrinterLog(
+          sdkMainCode: (printerStatus?.mainCode ?? 0).toString(),
+          sdkSubCode: (printerStatus?.mainCode ?? 0).toString(),
+          printerMainStatusCode: (printerStatus?.mainStatus ?? 0).toString(),
+          printerErrorStatusCode: (printerStatus?.errorStatus ?? 0).toString(),
+          printerWarningStatusCode: (printerStatus?.warningStatus ?? 0).toString(),
+          chassisTemperature: printerStatus?.chassisTemperature ?? 0,
+          printerHeadTemperature: printerStatus?.printHeadTemperature ?? 0,
+          heaterTemperature: printerStatus?.heaterTemperature ?? 0,
+          rbnRemainingRatio: ribbonStatus?.rbnRemaining ?? 0,
+          filmRemainingRatio: ribbonStatus?.filmRemaining ?? 0,
+          isPrintingNow: isPrintingNow,
+          isFeederEmpty: isFeederEmpty,
+          sdkErrorMessage: '');
+    } catch (e) {
+      logger.i(e);
+      return null;
     }
   }
 }

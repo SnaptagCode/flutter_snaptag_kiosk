@@ -10,6 +10,19 @@ class PaymentResponseState extends _$PaymentResponseState {
 
   void update(PaymentResponse response) {
     SlackLogService().sendLogToSlack('PaymentResponseState.update: $response');
+    try {
+      if (response.res != '0000') {
+        final orderResponse = ref.read(createOrderInfoProvider);
+        if (orderResponse == null) {
+          throw Exception('No order response available');
+        }
+
+        SlackLogService().sendErrorLogToSlack('OrderResponse : $orderResponse \n PaymentResponse: $response');
+      }
+      SlackLogService().sendLogToSlack('PaymentResponse: $response');
+    } catch (e) {
+      SlackLogService().sendLogToSlack('PaymentResponseState Exception: $e');
+    }
     state = response;
   }
 
