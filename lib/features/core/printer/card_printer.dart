@@ -133,7 +133,7 @@ class PrinterService extends _$PrinterService {
       _bindings.ejectCard();
 
       // ❗️ 주석 처리된 부분은 나중에 필요할 때 활성화
-      // startPrintLog();
+      startPrintLog();
     } catch (e, stack) {
       logger.i('Print error: $e\nStack: $stack');
       rethrow;
@@ -147,7 +147,7 @@ class PrinterService extends _$PrinterService {
       final log = printerLog.copyWith(kioskMachineId: machineId);
       if (machineId != 0) {
         await ref.read(kioskRepositoryProvider).updatePrintLog(request: log);
-        SlackLogService().sendLogToSlack('PrintState : $log');
+        SlackLogService().sendLogToSlack('Machine ID: $machineId , PrintState : $log');
       }
     }
   }
