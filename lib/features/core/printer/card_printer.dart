@@ -58,8 +58,8 @@ class PrinterService extends _$PrinterService {
     required File? embeddedFile,
   }) async {
     try {
-      if (frontFile == null && embeddedFile == null) {
-        throw Exception('There is nothing to print');
+      if (embeddedFile == null) {
+        throw Exception('There is nothing to print (no embeddedFile)');
       }
 
       state = const AsyncValue.loading();
@@ -124,16 +124,22 @@ class PrinterService extends _$PrinterService {
       _bindings.injectCard();
 
       logger.i('6. Printing card...');
+
+      // 기존 프론트, 백 이미지 순서 프린트 로직 (현재는 단면 인쇄 고려 순서 변경)
+      // _bindings.printCard(
+      //   frontImageInfo: frontBuffer?.toString(),
+      //   backImageInfo: rearBuffer?.toString(),
+      // );
       _bindings.printCard(
-        frontImageInfo: frontBuffer?.toString(),
-        backImageInfo: rearBuffer?.toString(),
+        frontImageInfo: rearBuffer?.toString(),
+        backImageInfo: frontBuffer?.toString(),
       );
 
       logger.i('7. Ejecting card...');
       _bindings.ejectCard();
 
       // ❗️ 주석 처리된 부분은 나중에 필요할 때 활성화
-      // startPrintLog();
+       startPrintLog();
     } catch (e, stack) {
       logger.i('Print error: $e\nStack: $stack');
       rethrow;

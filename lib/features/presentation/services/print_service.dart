@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:flutter_snaptag_kiosk/features/move_me/providers/page_print_provider.dart';
 part 'print_service.g.dart';
 
 @riverpod
@@ -45,7 +46,14 @@ class PrintService extends _$PrintService {
       await _updatePrintStatus(printedPhotoCardId, PrintedStatus.started);
 
       // 실제 프린트 실행
-      await _executePrint(frontPhoto: frontPhoto, embedded: embedded);
+      //await _executePrint(frontPhoto: frontPhoto, embedded: embedded);
+      final isSingleSidedMode = ref.watch(pagePrintProvider) == PagePrintType.single;
+      if (isSingleSidedMode) {
+        final tempFront = null;
+        await _executePrint(frontPhoto: tempFront, embedded: embedded);
+      } else {
+        await _executePrint(frontPhoto: frontPhoto, embedded: embedded);
+      }
 
       // 프린트 상태 완료
       await _updatePrintStatus(printedPhotoCardId, PrintedStatus.completed);
