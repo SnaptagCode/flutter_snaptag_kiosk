@@ -10,6 +10,7 @@ class PagePrint extends _$PagePrint {
   void switchType() {
     state = state == PagePrintType.double ? PagePrintType.single : PagePrintType.double;
   }
+  void set(PagePrintType type) => state = type;
 }
 
 enum PagePrintType {

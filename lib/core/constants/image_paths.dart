@@ -52,4 +52,9 @@ class SnaptagSvg {
   static const String refresh = 'assets/icons/refresh.svg';
 
   static const String arrowBack = 'assets/icons/arrow_back.svg';
+
+  static const String printDoubleActive = 'assets/icons/print/printMode_double_active.svg';
+  static const String printDoubleInactive = 'assets/icons/print/printMode_double_inactive.svg';
+  static const String printSingleActive = 'assets/icons/print/printMode_single_active.svg';
+  static const String printSingleInactive = 'assets/icons/print/printMode_single_inactive.svg';
 }

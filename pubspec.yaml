@@ -65,6 +65,7 @@ flutter:
   assets:
     - assets/.env
     - assets/icons/
+    - assets/icons/print/
     - assets/images/
     - assets/labcurity/
     - assets/lang/
