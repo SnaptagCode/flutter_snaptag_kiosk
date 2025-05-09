@@ -66,6 +66,57 @@ class SetupMainScreen extends ConsumerWidget {
               ),
             ),
             SizedBox(height: 50.h),
+            Center(
+                child: Text(
+                  '*인쇄 모드를 선택 후 미리보기를 해주세요.',
+                  style: context.typography.kioskBody1B.copyWith(color: Colors.red),
+                ),
+              ),
+            SizedBox(height: 20.h),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SizedBox(
+                  width: 400.w,
+                  height: 120.h,
+                  child: SetupSubCard(
+                    label: '양면 인쇄',
+                    mode: PagePrintType.double,
+                    currentModeSelector: (ref) => ref.watch(pagePrintProvider),
+                    activeAssetName: SnaptagSvg.printDoubleActive,
+                    inactiveAssetName: SnaptagSvg.printDoubleInactive,
+                    onTap: () async {
+                      await SoundManager().playSound();
+                      ref.read(pagePrintProvider.notifier).set(PagePrintType.double);
+                    },
+                  ),
+                ),
+                SizedBox(
+                  width: 400.w,
+                  height: 120.h,
+                  child: SetupSubCard(
+                    label: '단면 인쇄',
+                    mode: PagePrintType.single,
+                    currentModeSelector: (ref) => ref.watch(pagePrintProvider),
+                    activeAssetName: SnaptagSvg.printSingleActive,
+                    inactiveAssetName: SnaptagSvg.printSingleInactive,
+                    onTap: () async {
+                      await SoundManager().playSound();
+                      ref.read(pagePrintProvider.notifier).set(PagePrintType.single);
+                    },
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(
+              height: 80.h,
+              width: 820.w,
+              child: Divider(
+                thickness: 2,
+                height: 0,
+              ),
+            ),
             Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
@@ -77,9 +128,12 @@ class SetupMainScreen extends ConsumerWidget {
                     label: '이벤트\n미리보기',
                     assetName: SnaptagSvg.eventPreview,
                     onTap: () async {
+                      if (ref.read(pagePrintProvider) != PagePrintType.none) {
                       await SoundManager().playSound();
-
                       KioskInfoRouteData().go(context);
+                      } else {
+                        print('이벤트를 선택해주세요');
+                      }
                     },
                   ),
                 ),
@@ -146,51 +200,30 @@ class SetupMainScreen extends ConsumerWidget {
                   ),
                 ],
               ),
-            Center(
-              child: Text(
-                '인쇄 모드',
-                style: context.typography.kioksNum1SB,
-              ),
-            ),
-            Center(
-              child: Text(
-                '*인쇄 모드를 선택 후 미리보기를 해주세요.',
-                style: context.typography.kioskBody1B.copyWith(color: Colors.red),
-              ),
-            ),
             Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 SizedBox(
-                  width: 400.w,
-                  height: 120.h,
-                  child: SetupSubCard(
-                    label: '양면 인쇄',
-                    mode: PagePrintType.double,
-                    currentModeSelector: (ref) => ref.watch(pagePrintProvider),
-                    activeAssetName: SnaptagSvg.printDoubleActive,
-                    inactiveAssetName: SnaptagSvg.printDoubleInactive,
+                  width: 260.w,
+                  height: 342.h,
+                  child: SetupMainCard(
+                    label: '서비스 점검',
+                    assetName: SnaptagSvg.maintenance,
                     onTap: () async {
                       await SoundManager().playSound();
-                      ref.read(pagePrintProvider.notifier).set(PagePrintType.double);
+
+                      MaintenanceRouteData().go(context);
                     },
                   ),
                 ),
                 SizedBox(
-                  width: 400.w,
-                  height: 120.h,
-                  child: SetupSubCard(
-                    label: '단면 인쇄',
-                    mode: PagePrintType.single,
-                    currentModeSelector: (ref) => ref.watch(pagePrintProvider),
-                    activeAssetName: SnaptagSvg.printSingleActive,
-                    inactiveAssetName: SnaptagSvg.printSingleInactive,
-                    onTap: () async {
-                      await SoundManager().playSound();
-                      ref.read(pagePrintProvider.notifier).set(PagePrintType.single);
-                    },
-                  ),
+                  width: 260.w,
+                  height: 342.h,
+                ),
+                SizedBox(
+                  width: 260.w,
+                  height: 342.h,
                 ),
               ],
             ),

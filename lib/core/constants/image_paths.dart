@@ -14,6 +14,9 @@ class SnaptagImages {
   static const String setupBackground = 'assets/images/setup_background.png';
 
   static const String loading = 'assets/images/loading.gif';
+
+  static const String maintenance = 'assets/images/maintenance.png';
+
 }
 
 class SnaptagSounds {
@@ -42,6 +45,8 @@ class SnaptagSvg {
   static const String off = 'assets/icons/off.svg';
 
   static const String payment = 'assets/icons/payment.svg';
+
+  static const String maintenance = 'assets/icons/maintenance.svg';
 
   static const String snaptagLogo = 'assets/icons/snaptag_logo.svg';
 
