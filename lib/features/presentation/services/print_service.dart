@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:flutter_snaptag_kiosk/features/move_me/providers/page_print_provider.dart';
 part 'print_service.g.dart';
 
 @riverpod

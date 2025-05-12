@@ -6,8 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_snaptag_kiosk/features/core/printer/card_printer.dart';
 import 'package:flutter_snaptag_kiosk/features/move_me/providers/front_photo_list.dart';
-import 'package:flutter_snaptag_kiosk/features/move_me/providers/page_print_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:flutter_snaptag_kiosk/lib.dart';
 
 part 'print_test_widget.g.dart';
 

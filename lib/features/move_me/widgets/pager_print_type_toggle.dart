@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_snaptag_kiosk/features/move_me/providers/page_print_provider.dart';
+import 'package:flutter_snaptag_kiosk/lib.dart';
 
 class PagerPrintTypeToggle extends ConsumerWidget {
   const PagerPrintTypeToggle({super.key});

@@ -62,4 +62,7 @@ class SnaptagSvg {
   static const String printDoubleInactive = 'assets/icons/print/printMode_double_inactive.svg';
   static const String printSingleActive = 'assets/icons/print/printMode_single_active.svg';
   static const String printSingleInactive = 'assets/icons/print/printMode_single_inactive.svg';
+
+  static const String printDouble = 'assets/icons/print/print_double.svg';
+  static const String printSingle = 'assets/icons/print/print_single.svg';
 }

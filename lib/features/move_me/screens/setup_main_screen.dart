@@ -6,8 +6,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_snaptag_kiosk/core/utils/sound_manager.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:flutter_snaptag_kiosk/features/move_me/providers/page_print_provider.dart';
-
 
 class SetupMainScreen extends ConsumerWidget {
   const SetupMainScreen({super.key});
@@ -78,7 +76,7 @@ class SetupMainScreen extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 SizedBox(
-                  width: 400.w,
+                  width: 390.w,
                   height: 120.h,
                   child: SetupSubCard(
                     label: '양면 인쇄',
@@ -93,7 +91,7 @@ class SetupMainScreen extends ConsumerWidget {
                   ),
                 ),
                 SizedBox(
-                  width: 400.w,
+                  width: 390.w,
                   height: 120.h,
                   child: SetupSubCard(
                     label: '단면 인쇄',
@@ -111,9 +109,9 @@ class SetupMainScreen extends ConsumerWidget {
             ),
             SizedBox(
               height: 80.h,
-              width: 820.w,
+              width: 760.w, //780
               child: Divider(
-                thickness: 2,
+                thickness: 1.h,
                 height: 0,
               ),
             ),
@@ -332,12 +330,13 @@ class SetupSubCard<T> extends ConsumerWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
+              SizedBox(width: 72.5.w), //60
                 SvgPicture.asset(
                   isActive? activeAssetName : inactiveAssetName,
-                  width: 100.w,
-                  height: 100.w,
+                  width: 80.w,
+                  height: 80.w,
                 ),
-              SizedBox(width: 50.w),
+              SizedBox(width: 23.w),
               Align(
                 alignment: Alignment.centerRight,
                 child: Text(
