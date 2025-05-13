@@ -27,4 +27,7 @@ abstract class LocaleKeys {
   static const alert_title_print_failure = 'alert_title_print_failure';
   static const alert_txt_print_failure = 'alert_txt_print_failure';
   static const alert_btn_print_failure = 'alert_btn_print_failure';
+  static const alert_title_card_refill = 'alert_title_card_refill';
+  static const alert_txt_card_refill = 'alert_txt_card_refill';
+  static const alert_btn_card_refill = 'alert_btn_card_refill';
 }

@@ -123,7 +123,7 @@ class PrintService extends _$PrintService {
   }
 
   Future<void> _executePrint({
-    required File frontPhoto,
+    File? frontPhoto,
     required File embedded,
   }) async {
     try {

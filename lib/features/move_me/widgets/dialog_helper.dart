@@ -407,6 +407,19 @@ class DialogHelper {
     );
   }
 
+  static Future<bool> showPrintCardRefillDialog(
+      BuildContext context, {
+        VoidCallback? onButtonPressed,
+      }) async {
+    return await _showOneButtonKioskDialog(
+      context,
+      title: LocaleKeys.alert_title_card_refill.tr(),
+      message: LocaleKeys.alert_txt_card_refill.tr(),
+      buttonText: LocaleKeys.alert_btn_card_refill.tr(),
+      onButtonPressed: onButtonPressed,
+    );
+  }
+
   static Future<String?> showKeypadDialog(
       BuildContext context, {
         required ModeType mode,

@@ -14,7 +14,7 @@ class FloatingPrinterStatusBadge extends ConsumerWidget {
     return Align(
         alignment: Alignment.topLeft,
         child: Padding(
-          padding: const EdgeInsets.all(20.0),
+          padding: const EdgeInsets.all(0),
           child: Container(
             //padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             child: SvgPicture.asset(
