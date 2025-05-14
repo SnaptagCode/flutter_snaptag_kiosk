@@ -64,7 +64,7 @@ class SetupMainScreen extends ConsumerWidget {
               ),
             ),
             SizedBox(height: 50.h),
-            Center(
+            /*Center(
                 child: Text(
                   '*인쇄 모드를 선택 후 미리보기를 해주세요.',
                   style: context.typography.kioskBody1B.copyWith(color: Colors.red),
@@ -114,7 +114,7 @@ class SetupMainScreen extends ConsumerWidget {
                 thickness: 1.h,
                 height: 0,
               ),
-            ),
+            ),*/
             Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,

@@ -99,11 +99,11 @@ class KioskShell extends ConsumerWidget {
       floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
       floatingActionButton: TripleTapFloatingButton(),
     ),
-        const Positioned(
+        /*const Positioned(
           top: 20,
           left: 20,
           child: FloatingPrinterStatusBadge(),
-        ),
+        ),*/
       ],
     );
   }
