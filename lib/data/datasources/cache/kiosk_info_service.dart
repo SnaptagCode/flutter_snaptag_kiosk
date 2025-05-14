@@ -29,6 +29,7 @@ class KioskInfoService extends _$KioskInfoService {
 
       ref.read(frontPhotoListProvider.notifier).fetch();
 
+      await SlackLogService().sendLogToSlack('printerStartLog_0'); //deleteP
       await printerStartLog(machineId);
 
       return response;
@@ -40,20 +41,29 @@ class KioskInfoService extends _$KioskInfoService {
 
   Future<void> printerStartLog(int machineId) async {
     try {
+      await SlackLogService().sendLogToSlack('printerStartLog_1'); //deleteP
+
       final printerManager = await PrinterManager.getInstance();
       final printerLog = await printerManager.startLog();
+      await SlackLogService().sendLogToSlack('printerStartLog_2'); //deleteP
 
       if (printerLog != null) {
+        await SlackLogService().sendLogToSlack('printerStartLog_3'); //deleteP
+
         final log = printerLog.copyWith(kioskMachineId: machineId);
         if (machineId != 0) {
+          await SlackLogService().sendLogToSlack('printerStartLog_4'); //deleteP
+
           await ref.read(kioskRepositoryProvider).updatePrintLog(request: log);
-          SlackLogService().sendLogToSlack('PrintState : $log');
+          await SlackLogService().sendLogToSlack('PrintState : $log');
         }
+        await SlackLogService().sendLogToSlack('printerStartLog_5'); //deleteP
+
       }
     } catch (e) {
       // TODO : 프린트 초기화 작업 중 오류 발생.
+      await SlackLogService().sendLogToSlack('printerStartLog : $e'); //deleteP
       logger.i(e);
-      SlackLogService().sendLogToSlack('printerStartLog : $e');
     }
   }
 

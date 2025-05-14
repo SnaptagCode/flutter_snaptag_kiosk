@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:isolate';
 
 import 'package:flutter_snaptag_kiosk/core/utils/logger_service.dart';
+import 'package:flutter_snaptag_kiosk/lib.dart'; //deleteP
+
 
 class IsolateManager<T, R> {
   Future<R?> runInIsolate(
@@ -10,6 +12,7 @@ class IsolateManager<T, R> {
   ) async {
     try {
       logger.i("✅ IsolateManager start");
+      SlackLogService().sendLogToSlack('IsolateManager start'); //deleteP
       final receivePort = ReceivePort(); // 🎯 메인 Isolate가 응답을 받을 포트 생성
       final isolate = await Isolate.spawn(
         _isolateEntry<T, R>,
@@ -21,6 +24,7 @@ class IsolateManager<T, R> {
       receivePort.close();
       isolate.kill(priority: Isolate.immediate); // 🎯 Isolate 종료
 
+      await SlackLogService().sendLogToSlack('IsolateManager finished result: $result'); //deleteP
       logger.i("✅ IsolateManager finished result: $result");
 
       return result;

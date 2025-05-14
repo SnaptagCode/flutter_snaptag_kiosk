@@ -22,7 +22,7 @@ class PrinterService extends _$PrinterService {
       state = const AsyncValue.loading();
 
       final printerManager = await PrinterManager.getInstance();
-
+      await SlackLogService().sendLogToSlack('CardPrinter code execute'); //deleteP
       final printerLog = await printerManager.startPrint(frontFile: frontFile, embeddedFile: backFile);
 
       if (printerLog != null) {
@@ -30,11 +30,11 @@ class PrinterService extends _$PrinterService {
         final log = printerLog.copyWith(kioskMachineId: machineId);
         if (machineId != 0) {
           await ref.read(kioskRepositoryProvider).updatePrintLog(request: log);
-          SlackLogService().sendLogToSlack('PrintState : $log');
+          await SlackLogService().sendLogToSlack('PrintState : $log');
         }
       }
     } catch (e) {
-      SlackLogService().sendLogToSlack('printerError: $e');
+      await SlackLogService().sendLogToSlack('printerError: $e');
       rethrow;
     }
   }

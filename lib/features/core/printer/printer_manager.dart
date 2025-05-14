@@ -30,26 +30,39 @@ class PrinterManager {
 
   Future<void> _init() async {
     try {
+      await SlackLogService().sendLogToSlack('startManager_init'); //deleteP
+
       await _initPrintIsolate();
     } catch (e) {
+      await SlackLogService().sendLogToSlack('_initPrintIsolate error : $e'); //deleteP
       rethrow;
     }
   }
 
   Future<void> _initPrintIsolate() async {
     try {
-      final printReceivePort = ReceivePort();
 
-      await Isolate.spawn(_printEntry, printReceivePort.sendPort);
+      final printReceivePort = ReceivePort();
+      await SlackLogService().sendLogToSlack('_initPrintIsolate'); //deleteP
+
+      try{
+        await Isolate.spawn(_printEntry, printReceivePort.sendPort);
+      } catch (e) {
+        await SlackLogService().sendLogToSlack('Isolate.spawn :  $e'); //deleteP
+        rethrow;
+      }
 
       _sendPort = await printReceivePort.first;
+      await SlackLogService().sendLogToSlack('_initPrintIsolate_sendPort'); //deleteP
+
     } catch (e) {
       logger.i(e);
+      await SlackLogService().sendLogToSlack('_initPrintIsolate_ :  $e'); //deleteP
       rethrow;
     }
   }
 
-  void _printEntry(SendPort sendPort) async {
+  static void _printEntry(SendPort sendPort) async {
     try {
       final isolateReceivePort = ReceivePort();
       sendPort.send(isolateReceivePort.sendPort);
@@ -68,6 +81,7 @@ class PrinterManager {
             final shouldPrintLog = message.shouldPrintLog;
 
             logger.i('shouldPrintLog: $shouldPrintLog printPath: $printPath');
+            await SlackLogService().sendLogToSlack('shouldPrintLog: $shouldPrintLog printPath: $printPath'); //deleteP
 
             if (shouldPrintLog) {
               final printerLog = getPrinterLogData(bindings);
@@ -111,10 +125,12 @@ class PrinterManager {
           }
         } catch (e) {
           logger.i('isolateReceivePort: $e');
+          await SlackLogService().sendLogToSlack('isolateReceivePort: $e'); //deleteP
           replyPort?.send({'printStatus': PrinterLog(), 'error': e.toString()});
         }
       });
     } catch (e) {
+      await SlackLogService().sendLogToSlack('isolateReceivePort.listen err: $e'); //deleteP
       rethrow;
     }
   }
@@ -128,6 +144,7 @@ class PrinterManager {
 
     try {
       if (frontFile == null && embeddedFile == null) {
+        await SlackLogService().sendLogToSlack('There is nothing to print'); //deleteP
         throw Exception('There is nothing to print');
       }
 
@@ -161,9 +178,11 @@ class PrinterManager {
     }
   }
 
-  Future<void> _initializePrinter(PrinterBindings bindings) async {
+  static Future<void> _initializePrinter(PrinterBindings bindings) async {
     try {
       bindings.initLibrary();
+
+      bindings.clearLibrary(); //deleteP?
 
       // 2. 프린터 연결
       final connected = bindings.connectPrinter();
@@ -190,7 +209,7 @@ class PrinterManager {
     }
   }
 
-  void _printStatusCheck(PrinterBindings bindings) {
+  static void _printStatusCheck(PrinterBindings bindings) {
     try {
       // 피더 상태 체크 추가
       logger.i('Checking feeder status...');
@@ -214,6 +233,7 @@ class PrinterManager {
   Future<PrinterLog?> startLog() async {
     try {
       final responsePort = ReceivePort();
+      await SlackLogService().sendLogToSlack('startManager_1'); //deleteP
 
       _sendPort.send(
         PrintMessage(
@@ -221,8 +241,10 @@ class PrinterManager {
             printPath: PrintPath(frontPath: null, backPath: null),
             sendPort: responsePort.sendPort),
       );
+      await SlackLogService().sendLogToSlack('startManager_1-after _sendPort.send'); //deleteP
 
       final response = await responsePort.first as Map<String, dynamic>;
+      await SlackLogService().sendLogToSlack('startManager_1-after _sendPort.send'); //deleteP
 
       return response['printStatus'] as PrinterLog;
     } catch (e, stack) {
@@ -231,7 +253,7 @@ class PrinterManager {
     }
   }
 
-  PrinterLog? getPrinterLogData(PrinterBindings bindings) {
+  static PrinterLog? getPrinterLogData(PrinterBindings bindings) {
     try {
       final printerStatus = bindings.getPrinterStatus();
       final ribbonStatus = bindings.getRbnAndFilmRemaining();
@@ -292,7 +314,7 @@ class PrinterManager {
     return imageBytes;
   }
 
-  Future<String> drawImage({required String path, required PrinterBindings bindings, bool isFront = true}) async {
+  static Future<String> drawImage({required String path, required PrinterBindings bindings, bool isFront = true}) async {
     StringBuffer buffer = StringBuffer();
     try {
       await _prepareAndDrawImage(path, true, bindings);
@@ -307,7 +329,7 @@ class PrinterManager {
     }
   }
 
-  Future<void> _prepareAndDrawImage(String imagePath, bool isFront, PrinterBindings bindings) async {
+  static Future<void> _prepareAndDrawImage(String imagePath, bool isFront, PrinterBindings bindings) async {
     bindings.setCanvasOrientation(true);
     bindings.prepareCanvas(isColor: true);
 
@@ -332,7 +354,7 @@ class PrinterManager {
     );
   }
 
-  String _commitCanvas(PrinterBindings bindings) {
+  static String _commitCanvas(PrinterBindings bindings) {
     final strPtr = calloc<ffi.Uint8>(200).cast<Utf8>();
     final lenPtr = calloc<ffi.Int32>()..value = 200;
 
