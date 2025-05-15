@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_snaptag_kiosk/features/move_me/screens/global_shell.dart';
+import 'package:flutter_snaptag_kiosk/features/move_me/screens/maintenance_screen.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:go_router/go_router.dart';
 
@@ -18,6 +19,7 @@ final GlobalKey<NavigatorState> globalNavigatorKey = GlobalKey<NavigatorState>(d
         TypedGoRoute<PaymentHistoryRouteData>(path: 'payment-history'),
         TypedGoRoute<UnitTestRouteData>(path: 'unit-test'),
         TypedGoRoute<KioskComponentsRouteData>(path: 'kiosk-components'),
+        TypedGoRoute<MaintenanceRouteData>(path: 'maintenance'),
       ],
     ),
     TypedGoRoute<KioskRouteData>(
@@ -162,3 +164,15 @@ class PrintProcessRouteData extends GoRouteData {
     );
   }
 }
+
+class MaintenanceRouteData extends GoRouteData {
+  const MaintenanceRouteData();
+
+  @override
+  Page<void> buildPage(BuildContext context, GoRouterState state) {
+    return NoTransitionPage(
+      child: const MaintenanceScreen(),
+    );
+  }
+}
+

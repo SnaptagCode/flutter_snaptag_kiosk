@@ -49,7 +49,6 @@ class PrinterService extends _$PrinterService {
     } catch (e) {
       final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
       SlackLogService().sendErrorLogToSlack('Machine ID: $machineId, Printer initialization error: $e');
-      logger.i('Printer initialization error: $e');
       rethrow;
     }
   }
@@ -117,6 +116,7 @@ class PrinterService extends _$PrinterService {
         } finally {
           await File(rotatedRearPath).delete().catchError((_) {
             logger.i('Failed to delete rotated rear image');
+            throw Exception('Failed to delete rotated rear image');
           });
         }
       }

@@ -43,20 +43,30 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
             logger.e('Print process error', error: error, stackTrace: stack);
             final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
             SlackLogService().sendErrorLogToSlack('Machine ID: $machineId, Print process error\nError: $error');
+            SlackLogService().sendErrorLogToSlack('Print process error\nError: $error');
+            final errorMessage = error.toString();
             // 에러 발생 시 환불 처리
             try {
               await ref.read(paymentServiceProvider.notifier).refund();
             } catch (refundError) {
-              SlackLogService().sendErrorLogToSlack('Machine ID: $machineId, Refund failed \nError: $refundError');
+              SlackLogService().sendErrorLogToSlack('Refund failed \nError: $refundError');
               logger.e('Refund failed', error: refundError);
             }
-
-            await DialogHelper.showPrintErrorDialog(
-              context,
-              onButtonPressed: () {
-                PhotoCardUploadRouteData().go(context);
-              },
-            );
+            if (errorMessage.contains('Card feeder is empty')) {
+              await DialogHelper.showPrintCardRefillDialog(
+                context,
+                onButtonPressed: () {
+                  PhotoCardUploadRouteData().go(context);
+                },
+              );
+            } else {
+              await DialogHelper.showPrintErrorDialog(
+                context,
+                onButtonPressed: () {
+                  PhotoCardUploadRouteData().go(context);
+                },
+              );
+            }
           },
           loading: () => null,
           data: (_) async {
