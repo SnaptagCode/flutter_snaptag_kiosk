@@ -45,7 +45,14 @@ class PrintService extends _$PrintService {
       await _updatePrintStatus(printedPhotoCardId, PrintedStatus.started);
 
       // 실제 프린트 실행
-      await _executePrint(frontPhoto: frontPhoto, embedded: embedded);
+      //await _executePrint(frontPhoto: frontPhoto, embedded: embedded);
+      final isSingleSidedMode = ref.watch(pagePrintProvider) == PagePrintType.single;
+      if (isSingleSidedMode) {
+        final tempFront = null;
+        await _executePrint(frontPhoto: tempFront, embedded: embedded);
+      } else {
+        await _executePrint(frontPhoto: frontPhoto, embedded: embedded);
+      }
 
       // 프린트 상태 완료
       await _updatePrintStatus(printedPhotoCardId, PrintedStatus.completed);
@@ -116,7 +123,7 @@ class PrintService extends _$PrintService {
   }
 
   Future<void> _executePrint({
-    required File frontPhoto,
+    File? frontPhoto,
     required File embedded,
   }) async {
     try {

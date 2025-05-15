@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:loader_overlay/loader_overlay.dart';
+import 'package:flutter_snaptag_kiosk/features/move_me/widgets/printer_status_badge.dart';
 
 class KioskShell extends ConsumerWidget {
   final Widget child;
@@ -16,7 +17,9 @@ class KioskShell extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final hasNetworkError = ref.watch(backgroundImageProvider);
     final settings = ref.read(kioskInfoServiceProvider);
-    return Scaffold(
+    return Stack(
+        children: [
+        Scaffold(
       body: Column(
         children: [
           SizedBox(
@@ -95,6 +98,13 @@ class KioskShell extends ConsumerWidget {
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
       floatingActionButton: TripleTapFloatingButton(),
+    ),
+        /*const Positioned(
+          top: 20,
+          left: 20,
+          child: FloatingPrinterStatusBadge(),
+        ),*/
+      ],
     );
   }
 }
