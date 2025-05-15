@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:loader_overlay/loader_overlay.dart';
-import 'package:flutter_snaptag_kiosk/features/move_me/widgets/printer_status_badge.dart';
 
 class KioskShell extends ConsumerWidget {
   final Widget child;

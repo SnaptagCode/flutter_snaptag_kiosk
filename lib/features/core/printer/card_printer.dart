@@ -116,6 +116,7 @@ class PrinterService extends _$PrinterService {
         } finally {
           await File(rotatedRearPath).delete().catchError((_) {
             logger.i('Failed to delete rotated rear image');
+            throw Exception('Failed to delete rotated rear image');
           });
         }
       }
