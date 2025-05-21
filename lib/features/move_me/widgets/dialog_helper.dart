@@ -228,6 +228,82 @@ class DialogHelper {
     return true;
   }
 
+  static Future<bool> showSetupTwoDialog(
+      BuildContext context, {
+        required String title,
+        required String contentText,
+        String cancelButtonText = '취소',
+        String confirmButtonText = '확인',
+      }) async {
+    return await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return DefaultTextStyle(
+          style: TextStyle(
+            fontFamily: context.locale.languageCode == 'ja'
+                ? 'MPLUSRounded'
+                : 'Cafe24Ssurround2',
+          ),
+          child: AlertDialog(
+            backgroundColor: Colors.white,
+            insetPadding: EdgeInsets.symmetric(horizontal: 100.h),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20.r),
+            ),
+            title: Center(
+              child: Text(
+                title,
+                textAlign: TextAlign.center,
+                style: context.typography.kioskAlert1B.copyWith(
+                  fontFamily: 'Pretendard',
+                  color: Colors.black,
+                ),
+              ),
+            ),
+            content: Text(
+              contentText,
+              textAlign: TextAlign.center,
+              style: context.typography.kioskAlert2M.copyWith(
+                fontFamily: 'Pretendard',
+                color: Color(0xFF414448),
+              ),
+            ),
+            actions: [
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () async {
+                        await SoundManager().playSound();
+                        Navigator.of(context).pop(false);
+                      },
+                      style: context.setupDialogCancelButtonStyle,
+                      child: Text(cancelButtonText),
+                    ),
+                  ),
+                  SizedBox(width: 12.w),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        await SoundManager().playSound();
+                        Navigator.of(context).pop(true);
+                      },
+                      style: context.setupDialogConfirmButtonStyle,
+                      child: Text(confirmButtonText),
+                    ),
+                  ),
+                ],
+              )
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+
+
   //showCustomDialog
   static Future<void> showCustomDialog(BuildContext context,
       {required String title,

@@ -45,6 +45,8 @@ dependencies:
   pretty_dio_logger: ^1.4.0
   pretty_animated_buttons: ^0.0.2
 
+  package_info_plus: ^8.3.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -71,6 +73,7 @@ flutter:
     - assets/lang/
     - assets/luca/
     - assets/sounds/
+    - assets/.env.version
 
   fonts:
     - family: MPLUSRounded

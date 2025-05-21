@@ -6,12 +6,21 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_snaptag_kiosk/core/utils/sound_manager.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter_snaptag_kiosk/core/providers/version_notifier.dart';
+import 'package:flutter_snaptag_kiosk/core/utils/launcher_service.dart';
 
 class SetupMainScreen extends ConsumerWidget {
   const SetupMainScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+
+    final versionState = ref.read(versionStateProvider);
+
+    final currentVersion = versionState.currentVersion;
+    final latestVersion = versionState.latestVersion;
+    final isUpdateAvailable = currentVersion != latestVersion;
+
     return Theme(
         data: Theme.of(context).copyWith(
       textTheme: Theme.of(context).textTheme.apply(
@@ -162,6 +171,8 @@ class SetupMainScreen extends ConsumerWidget {
                         title: '이벤트를 실행합니다.',
                       );
                       if (result) {
+                        final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
+                        SlackLogService().sendLogToSlack('machineId:$machineId, currentVersion:$currentVersion, latestVersion:$latestVersion');
                         PhotoCardUploadRouteData().go(context);
                       }
                     },
@@ -218,12 +229,50 @@ class SetupMainScreen extends ConsumerWidget {
                 SizedBox(
                   width: 260.w,
                   height: 342.h,
+                  child: SetupUpdateCard(
+                    title: '현재 버전',
+                    version: currentVersion,
+                    //version: "2.4.5",
+                    buttonName: '업데이트',
+                    isActive: isUpdateAvailable,
+                    onUpdatePressed: () async {
+                      final result = await DialogHelper.showSetupTwoDialog(
+                        context,
+                        title: '업데이트 하시겠습니까?',
+                        contentText:'업데이트 시 앱이 재시작 됩니다.',
+                      );
+                      if (result) {
+                          try {
+                            final launcherPath = await LauncherPathUtil.getLauncherPath();
+                            await ForceUpdateWriter.writeForceUpdateTrue();
+                            print("Process.start");
+                            await Process.start(launcherPath, ['f'], runInShell: true,
+                              mode: ProcessStartMode.detached,);
+                            print("Process.start(launcherPath, ['f'])");
+                            exit(0);
+                          } catch (e) {
+                            print("런처 실행 실패: $e");
+                        }
+                      } else {
+
+                      }
+                    },
+                  ),
                 ),
                 SizedBox(
                   width: 260.w,
                   height: 342.h,
                 ),
               ],
+            ),
+            SizedBox(
+              height: 40.h,
+            ),
+            SizedBox(
+                width: 820.w, //780
+                height: 88.h,
+                child: isUpdateAvailable?
+                  UpdateNoticeBanner(latestVersion: versionState.latestVersion) : SizedBox()
             ),
           ],
         ),
@@ -344,6 +393,131 @@ class SetupSubCard<T> extends ConsumerWidget {
                   textAlign: TextAlign.center,
                   style: isActive? context.typography.kioskInput2B.copyWith(color: Colors.white) : context.typography.kioskInput2B.copyWith(color: Colors.black),
                 ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class SetupUpdateCard extends StatelessWidget {
+  final String title;
+  final String version;
+  final String buttonName;
+  final bool isActive;
+  final VoidCallback? onUpdatePressed;
+
+  const SetupUpdateCard({
+    super.key,
+    required this.title,
+    required this.version,
+    required this.buttonName,
+    required this.isActive,
+    this.onUpdatePressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.all(8.w),
+      child: Container(
+        width: 260.w,
+        height: 342.h,
+        padding: EdgeInsets.only(top: 63.h),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border.all(
+            color: Color(0xFFE6E8EB),
+          ),
+          borderRadius: const BorderRadius.all(Radius.circular(12)),
+        ),
+        child: Column(
+          children: [
+            SizedBox(height: 40.w),
+            Text(
+              title,
+              style: context.typography.kioskBody2B.copyWith(
+                color: Color(0xFF999999),
+              ),
+            ),
+            SizedBox(height: 12.w),
+            Text(
+              version,
+              style: context.typography.kioskNum2B
+            ),
+            const Spacer(),
+            SizedBox(
+              width: 216.w,
+              height: 46.h,
+              child: ElevatedButton(
+                onPressed: isActive ? onUpdatePressed : null,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: isActive ? Color(0xFF316FFF) : Color(0xFFD5D5D5),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                child: Text(
+                    '$buttonName',
+                    style: context.typography.kioskBody2B.copyWith(
+                      color: Colors.white,
+                    ),
+                ),
+              ),
+            ),
+            SizedBox(height: 24.w),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class UpdateNoticeBanner extends StatelessWidget {
+  final String latestVersion;
+
+  const UpdateNoticeBanner({
+    super.key,
+    required this.latestVersion,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 25.w),
+      child: Container(
+        width: double.infinity,
+        padding: EdgeInsets.symmetric(vertical: 16.h, horizontal: 24.w),
+        decoration: BoxDecoration(
+          color: const Color(0xFF444444),
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black26,
+              blurRadius: 4,
+              offset: Offset(0, 2),
+            ),
+          ],
+        ),
+        child: RichText(
+          textAlign: TextAlign.center,
+          text: TextSpan(
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Colors.white,
+              fontSize: 20.sp,
+            ),
+            children: [
+              const TextSpan(text: '최신 버전 '),
+              TextSpan(
+                text: '$latestVersion',
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              TextSpan(
+                  text: '이 출시되었습니다.\n원활한 이용을 위해 업데이트를 진행해주세요',
+                  style: TextStyle(color: Color.fromARGB(204, 255, 255, 255)),
               ),
             ],
           ),
