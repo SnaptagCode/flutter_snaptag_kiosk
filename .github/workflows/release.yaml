@@ -24,7 +24,6 @@ jobs:
       - name: Clean and Setup Windows Build
         run: |
           flutter clean
-          Remove-Item -Recurse -Force .dart_tool, build
           flutter config --enable-windows-desktop
           flutter create --platforms=windows .
           flutter pub get
@@ -40,7 +39,7 @@ jobs:
         run: flutter pub upgrade
 
       - name: Run Build Runner
-        run: flutter pub run build_runner build --delete-conflicting-outputs
+        run: dart run build_runner build --delete-conflicting-outputs
 
       - name: Add CMake warning suppression flags
         run: echo 'set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /WX-")' >> windows/CMakeLists.txt
