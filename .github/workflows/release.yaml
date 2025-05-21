@@ -24,7 +24,7 @@ jobs:
       - name: Clean and Setup Windows Build
         run: |
           flutter clean
-          rm -rf .dart_tool build
+          Remove-Item -Recurse -Force .dart_tool, build
           flutter config --enable-windows-desktop
           flutter create --platforms=windows .
           flutter pub get
