@@ -18,12 +18,13 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.29.1' # Flutter 버전에 맞게 수정
+          flutter-version: '3.29.2' # Flutter 버전에 맞게 수정
           channel: stable
 
       - name: Clean and Setup Windows Build
         run: |
           flutter clean
+          rm -rf .dart_tool build
           flutter config --enable-windows-desktop
           flutter create --platforms=windows .
           flutter pub get
