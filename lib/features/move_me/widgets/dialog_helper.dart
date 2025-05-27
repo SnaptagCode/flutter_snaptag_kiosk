@@ -470,6 +470,15 @@ class DialogHelper {
     );
   }
 
+  static Future<void> showPaymentCardFailedDialog(BuildContext context) async {
+    await _showOneButtonKioskDialog(
+      context,
+      title: LocaleKeys.alert_title_paymentcard_failure.tr(),
+      message: LocaleKeys.alert_txt_paymentcard_failure.tr(),
+      buttonText: LocaleKeys.alert_btn_paymentcard_failure.tr(),
+    );
+  }
+
   static Future<bool> showPrintErrorDialog(
     BuildContext context, {
     VoidCallback? onButtonPressed,

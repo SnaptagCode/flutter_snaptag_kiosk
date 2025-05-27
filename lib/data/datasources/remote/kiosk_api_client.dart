@@ -31,6 +31,11 @@ abstract class KioskApiClient {
     @Query('photoAuthNumber') required String photoAuthNumber,
   });
 
+  @POST('/v1/kiosk-event/update-back-photo-status')
+  Future<BackPhotoStatusResponse> updateBackPhotoStatus({
+    @Body() required Map<String, dynamic> body,
+  });
+
   @GET('/v1/order/list')
   Future<OrderListResponse> getOrders({
     @Query('pageSize') required int pageSize,

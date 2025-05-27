@@ -231,8 +231,8 @@ class SetupMainScreen extends ConsumerWidget {
                   height: 342.h,
                   child: SetupUpdateCard(
                     title: '현재 버전',
-                    version: currentVersion,
-                    //version: "2.4.5",
+                    //version: currentVersion,
+                    version: "v2.4.6h",
                     buttonName: '업데이트',
                     isActive: isUpdateAvailable,
                     onUpdatePressed: () async {

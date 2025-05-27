@@ -5,8 +5,8 @@ class VersionState {
   final String? error;
 
   VersionState({
-    required this.currentVersion,
-    required this.latestVersion,
+    this.currentVersion = "v2.4.6h",
+    this.latestVersion = "v2.4.6h",
     this.isLoading = false,
     this.error,
   });
