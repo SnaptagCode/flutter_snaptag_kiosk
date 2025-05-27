@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as p;
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class VersionRepository {
   final String githubRepo = "SnaptagCode/flutter_snaptag_kiosk";
@@ -32,7 +31,7 @@ class VersionRepository {
   Future<String> getCurrentVersion() async {
     final envFile = File('assets/.env.version');
     final version = await envFile.readAsString();
-    return version ?? '확인중';
+    return version ?? 'v2.4.6h';
   }
 
   Future<String> getLatestVersionFromGitHub() async {

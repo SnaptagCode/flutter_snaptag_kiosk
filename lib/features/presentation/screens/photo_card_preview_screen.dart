@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_snaptag_kiosk/core/utils/sound_manager.dart';
+import 'package:flutter_snaptag_kiosk/features/move_me/providers/payment_failure_provider.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 
@@ -114,9 +115,17 @@ class _PhotoCardPreviewScreenState
                 style: context.paymentButtonStyle,
                 onPressed: () async {
                   await SoundManager().playSound();
-                  ref
+                  await ref
                       .read(photoCardPreviewScreenProviderProvider.notifier)
                       .payment();
+                  final isPaymentFailed = ref.read(paymentFailureProvider);
+                  if (isPaymentFailed) {
+                    ref.read(paymentFailureProvider.notifier).reset();
+                    DialogHelper.showPaymentCardFailedDialog(
+                      context,
+                    );
+                    PhotoCardUploadRouteData().go(context);
+                  }
                 },
                 child: Text(LocaleKeys.sub02_btn_pay.tr()),
               ),

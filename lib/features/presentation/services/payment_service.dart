@@ -1,5 +1,7 @@
+import 'package:flutter_snaptag_kiosk/data/models/request/update_back_photo_request.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:flutter_snaptag_kiosk/features/move_me/providers/payment_failure_provider.dart';
 
 part 'payment_service.g.dart';
 
@@ -31,7 +33,18 @@ class PaymentService extends _$PaymentService {
             totalAmount: price,
           );
 
-      ref.read(paymentResponseStateProvider.notifier).update(paymentResponse);
+      if (paymentResponse.approvalNo == null || paymentResponse.approvalNo == '') {
+        final machineId = ref.read(kioskInfoServiceProvider)!.kioskMachineId;
+        SlackLogService().sendErrorLogToSlack('machineId: $machineId, Null approvalNo Card');
+        final BackPhotoStatusResponse response = await ref.read(kioskRepositoryProvider).updateBackPhotoStatus(UpdateBackPhotoRequest(
+          photoAuthNumber : backPhoto.photoAuthNumber,
+          status : "STARTED",
+        ));
+        print("update status response : $response");
+        ref.read(paymentFailureProvider.notifier).triggerFailure();
+      } else {
+        ref.read(paymentResponseStateProvider.notifier).update(paymentResponse);
+      }
     } catch (e) {
       logger.e('Payment process failed', error: e);
       rethrow;
