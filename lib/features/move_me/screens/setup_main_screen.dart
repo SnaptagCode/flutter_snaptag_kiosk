@@ -232,7 +232,7 @@ class SetupMainScreen extends ConsumerWidget {
                   child: SetupUpdateCard(
                     title: '현재 버전',
                     //version: currentVersion,
-                    version: "v2.4.6",
+                    version: "v2.4.6h",
                     buttonName: '업데이트',
                     isActive: isUpdateAvailable,
                     onUpdatePressed: () async {
