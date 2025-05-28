@@ -15,7 +15,7 @@ class SetupMainScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
 
-    final versionState = ref.read(versionStateProvider);
+    final versionState = ref.watch(versionStateProvider);
 
     final currentVersion = versionState.currentVersion;
     final latestVersion = versionState.latestVersion;
@@ -232,7 +232,7 @@ class SetupMainScreen extends ConsumerWidget {
                   child: SetupUpdateCard(
                     title: '현재 버전',
                     //version: currentVersion,
-                    version: "v2.4.6h",
+                    version: "v2.4.7",
                     buttonName: '업데이트',
                     isActive: isUpdateAvailable,
                     onUpdatePressed: () async {
