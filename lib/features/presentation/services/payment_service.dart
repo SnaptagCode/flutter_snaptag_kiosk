@@ -32,8 +32,9 @@ class PaymentService extends _$PaymentService {
       final paymentResponse = await ref.read(paymentRepositoryProvider).approve(
             totalAmount: price,
           );
-
-      if (paymentResponse.approvalNo == null || paymentResponse.approvalNo == '') {
+      ref.read(paymentResponseStateProvider.notifier).update(paymentResponse);
+      final approvalNo = paymentResponse.approvalNo ?? '';
+      if (approvalNo.trim().isEmpty && paymentResponse.res == '0000') {
         final machineId = ref.read(kioskInfoServiceProvider)!.kioskMachineId;
         SlackLogService().sendErrorLogToSlack('machineId: $machineId, Null approvalNo Card');
         final BackPhotoStatusResponse response = await ref.read(kioskRepositoryProvider).updateBackPhotoStatus(UpdateBackPhotoRequest(
@@ -42,15 +43,20 @@ class PaymentService extends _$PaymentService {
         ));
         print("update status response : $response");
         ref.read(paymentFailureProvider.notifier).triggerFailure();
+        final failResponse = await _updateFailOrder();
+        ref.read(updateOrderInfoProvider.notifier).update(failResponse);
       } else {
-        ref.read(paymentResponseStateProvider.notifier).update(paymentResponse);
+        final response = await _updateOrder();
+        ref.read(updateOrderInfoProvider.notifier).update(response);
       }
     } catch (e) {
+      final response = await _updateOrder();
+      ref.read(updateOrderInfoProvider.notifier).update(response);
       logger.e('Payment process failed', error: e);
       rethrow;
     } finally {
-      final response = await _updateOrder();
-      ref.read(updateOrderInfoProvider.notifier).update(response);
+      // final response = await _updateOrder();
+      // ref.read(updateOrderInfoProvider.notifier).update(response);
     }
   }
 
@@ -60,6 +66,11 @@ class PaymentService extends _$PaymentService {
       if (approvalInfo == null) {
         throw Exception('No payment approval info available');
       }
+      final approvalNo = approvalInfo.approvalNo ?? '';
+      if (approvalNo.trim().isEmpty) {
+        throw Exception('No approval number available');
+      }
+
       final price = ref.read(kioskInfoServiceProvider)!.photoCardPrice;
       final paymentResponse = await ref.read(paymentRepositoryProvider).cancel(
             totalAmount: price,
@@ -112,6 +123,35 @@ class PaymentService extends _$PaymentService {
         approvalNumber: approval?.approvalNo ?? '-',
         purchaseAuthNumber: approval?.approvalNo ?? '-',
         authSeqNumber: approval?.approvalNo ?? '-',
+        detail: approval?.KSNET ?? '{}',
+      );
+
+      return await ref.read(kioskRepositoryProvider).updateOrderStatus(orderId.toInt(), request);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<UpdateOrderResponse> _updateFailOrder() async {
+    try {
+      final settings = ref.read(kioskInfoServiceProvider);
+      final backPhoto = ref.watch(verifyPhotoCardProvider).value;
+      final approval = ref.watch(paymentResponseStateProvider);
+      final orderId = ref.watch(createOrderInfoProvider)?.orderId;
+      if (orderId == null) {
+        throw Exception('No order id available');
+      }
+      logger.i(
+          'respCode: ${approval?.respCode} \trespCode: ${approval?.respCode} \nORDER STATUS: ${approval?.orderState}');
+      final request = UpdateOrderRequest(
+        kioskEventId: settings!.kioskEventId,
+        kioskMachineId: settings.kioskMachineId,
+        photoAuthNumber: backPhoto?.photoAuthNumber ?? '-',
+        amount: settings.photoCardPrice,
+        status: OrderStatus.failed,
+        approvalNumber: '-',
+        purchaseAuthNumber: '-',
+        authSeqNumber: '-',
         detail: approval?.KSNET ?? '{}',
       );
 

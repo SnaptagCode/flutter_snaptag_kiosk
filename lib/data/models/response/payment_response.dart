@@ -42,7 +42,7 @@ extension PaymentResponseExtension on PaymentResponse {
     Map<String, dynamic> data = {"KSNET": ksnet};
     return jsonEncode(data);
   }
-
+  bool get isApprovalNoEmpty => approvalNo == null || approvalNo!.trim().isEmpty;
   ///
   /// 0: 실패
   ///
@@ -61,6 +61,11 @@ extension PaymentResponseExtension on PaymentResponse {
         // RES가 정상이면 RESPCODE 확인
         switch (respCode) {
           case '0000':
+            if (isApprovalNoEmpty) {
+              return 0;
+            } else {
+              return 1;
+            }
             return 1;
           case '7001':
           case '7002':
