@@ -19,7 +19,8 @@ class SetupMainScreen extends ConsumerWidget {
 
     final currentVersion = versionState.currentVersion;
     final latestVersion = versionState.latestVersion;
-    final isUpdateAvailable = currentVersion != latestVersion;
+    //final isUpdateAvailable = currentVersion != latestVersion;
+    final isUpdateAvailable = false;
 
     return Theme(
         data: Theme.of(context).copyWith(
