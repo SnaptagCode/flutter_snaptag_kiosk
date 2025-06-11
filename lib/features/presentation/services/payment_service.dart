@@ -34,8 +34,8 @@ class PaymentService extends _$PaymentService {
           );
       ref.read(paymentResponseStateProvider.notifier).update(paymentResponse);
       final approvalNo = paymentResponse.approvalNo ?? '';
+      final machineId = ref.read(kioskInfoServiceProvider)!.kioskMachineId;
       if (approvalNo.trim().isEmpty && paymentResponse.res == '0000') {
-        final machineId = ref.read(kioskInfoServiceProvider)!.kioskMachineId;
         SlackLogService().sendErrorLogToSlack('machineId: $machineId, Null approvalNo Card');
         final BackPhotoStatusResponse response = await ref.read(kioskRepositoryProvider).updateBackPhotoStatus(UpdateBackPhotoRequest(
           photoAuthNumber : backPhoto.photoAuthNumber,
@@ -48,6 +48,9 @@ class PaymentService extends _$PaymentService {
       } else {
         final response = await _updateOrder();
         ref.read(updateOrderInfoProvider.notifier).update(response);
+        if (paymentResponse.res == '0000') {
+          ref.read(cardCountProvider.notifier).decrease();
+        }
       }
     } catch (e) {
       final response = await _updateOrder();
@@ -91,6 +94,7 @@ class PaymentService extends _$PaymentService {
   Future<CreateOrderResponse> _createOrder() async {
     final settings = ref.read(kioskInfoServiceProvider);
     final backPhoto = ref.watch(verifyPhotoCardProvider).value;
+    final isSingleSided = ref.read(pagePrintProvider) == PagePrintType.single;
 
     final request = CreateOrderRequest(
       kioskEventId: settings!.kioskEventId,
@@ -98,6 +102,7 @@ class PaymentService extends _$PaymentService {
       photoAuthNumber: backPhoto?.photoAuthNumber ?? '',
       amount: settings.photoCardPrice,
       paymentType: PaymentType.card,
+      isSingleSided: isSingleSided,
     );
 
     return await ref.read(kioskRepositoryProvider).createOrderStatus(request);

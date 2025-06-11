@@ -123,7 +123,7 @@ class SetupMainScreen extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 SizedBox(
-                  width: 260.w,
+                  width: 240.w,
                   height: 80.h,
                   child: Align(
                     alignment: Alignment.center,
@@ -155,13 +155,12 @@ class SetupMainScreen extends ConsumerWidget {
 
                         if (value == null || value.isEmpty) return; // 값이 없으면 종료
                         int cardNumber = int.parse(value);
+                        final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
                         ref.read(cardCountProvider.notifier).update(cardNumber);
                         if(cardNumber <= 0) {
                           ref.read(pagePrintProvider.notifier).set(PagePrintType.double);
-                          SlackLogService().sendLogToSlack('change pagePrintType double');
                         } else {
                           ref.read(pagePrintProvider.notifier).set(PagePrintType.single);
-                          SlackLogService().sendLogToSlack('change pagePrintType single');
                         }
                       } else {
                         print('click when pagePringType not single');
@@ -170,7 +169,7 @@ class SetupMainScreen extends ConsumerWidget {
                     child: Align(
                       alignment: Alignment.center,
                       child: Text(
-                        cardCountState.toString(),
+                        (cardCountState).toString(),
                         textAlign: TextAlign.center,
                         style: ref.watch(pagePrintProvider) != PagePrintType.single? context.typography.kioskBody2B.copyWith(color: Color(0xFFECEDEF)) : context.typography.kioskBody2B.copyWith(color: Colors.black),
                       ),
@@ -200,6 +199,9 @@ class SetupMainScreen extends ConsumerWidget {
                     onTap: () async {
                       if (ref.read(pagePrintProvider) != PagePrintType.none) {
                       await SoundManager().playSound();
+                      if (cardCountState < 1) {
+                        ref.read(pagePrintProvider.notifier).set(PagePrintType.double);
+                      }
                       KioskInfoRouteData().go(context);
                       } else {
                         print('이벤트를 선택해주세요');
@@ -236,6 +238,13 @@ class SetupMainScreen extends ConsumerWidget {
                       if (result) {
                         final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
                         SlackLogService().sendLogToSlack('machineId:$machineId, currentVersion:$currentVersion, latestVersion:$latestVersion');
+                        if(cardCountState < 1) {
+                          ref.read(pagePrintProvider.notifier).set(PagePrintType.double);
+                          SlackLogService().sendLogToSlack('machineId: $machineId, singleCard: $cardCountState, set pagePrintType double');
+                        } else {
+                          ref.read(pagePrintProvider.notifier).set(PagePrintType.single);
+                          SlackLogService().sendLogToSlack('machineId: $machineId, singleCard: $cardCountState, set pagePrintType single');
+                        }
                         PhotoCardUploadRouteData().go(context);
                       }
                     },

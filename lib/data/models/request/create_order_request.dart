@@ -15,6 +15,7 @@ class CreateOrderRequest with _$CreateOrderRequest {
     String? tradeNumber,
     String? uniqueNumber,
     required PaymentType paymentType,
+    bool? isSingleSided,
   }) = _CreateOrderRequest;
 
   factory CreateOrderRequest.fromJson(Map<String, dynamic> json) => _$CreateOrderRequestFromJson(json);
