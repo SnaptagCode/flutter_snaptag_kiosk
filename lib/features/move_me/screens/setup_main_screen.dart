@@ -19,8 +19,8 @@ class SetupMainScreen extends ConsumerWidget {
     final cardCountState = ref.watch(cardCountProvider);
     final currentVersion = versionState.currentVersion;
     final latestVersion = versionState.latestVersion;
-    //final isUpdateAvailable = currentVersion != latestVersion;
-    final isUpdateAvailable = false;
+    final isUpdateAvailable = currentVersion != latestVersion;
+    //final isUpdateAvailable = false;
 
     return Theme(
         data: Theme.of(context).copyWith(
@@ -304,7 +304,7 @@ class SetupMainScreen extends ConsumerWidget {
                   child: SetupUpdateCard(
                     title: '현재 버전',
                     //version: currentVersion,
-                    version: "v2.4.7",
+                    version: "v2.4.8",
                     buttonName: '업데이트',
                     isActive: isUpdateAvailable,
                     onUpdatePressed: () async {
