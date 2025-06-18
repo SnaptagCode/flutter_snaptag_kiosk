@@ -12,8 +12,8 @@ class VersionRepository {
   late final String launcherPath;
 
   VersionRepository() {
-    home = Platform.environment['USERPROFILE'] ??
-        (throw Exception("홈 디렉토리를 가져올 수 없습니다."));
+    home =
+        Platform.environment['HOME'] ?? Platform.environment['USERPROFILE'] ?? (throw Exception("홈 디렉토리를 가져올 수 없습니다."));
 
     snaptagDir = Directory(p.join(home, 'Snaptag'));
     if (!snaptagDir.existsSync()) {

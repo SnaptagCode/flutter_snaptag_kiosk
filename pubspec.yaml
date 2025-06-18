@@ -55,7 +55,7 @@ dev_dependencies:
   # Code Generation
   build_runner: ^2.4.14
   riverpod_generator: ^2.3.9
-  go_router_builder: ^2.7.1
+  go_router_builder: ^3.0.0
   freezed: ^2.5.7
   json_serializable: ^6.9.0
   retrofit_generator: ^9.1.5
