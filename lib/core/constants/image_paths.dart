@@ -17,6 +17,14 @@ class SnaptagImages {
 
   static const String maintenance = 'assets/images/maintenance.png';
 
+  static const String advertisingImage1 = 'assets/images/advertising_image1.jpg';
+
+  static const String advertisingImage2 = 'assets/images/advertising_image2.jpg';
+
+  static const String advertisingImage3 = 'assets/images/advertising_image3.jpg';
+
+  static const String advertisingImage4 = 'assets/images/advertising_image4.jpg';
+
 }
 
 class SnaptagSounds {

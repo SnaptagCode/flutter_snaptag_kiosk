@@ -14,6 +14,14 @@ class PrintProcessScreen extends ConsumerStatefulWidget {
 class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
   @override
   Widget build(BuildContext context) {
+    final randomAdImage = ([
+      SnaptagImages.advertisingImage1,
+      SnaptagImages.advertisingImage2,
+      SnaptagImages.advertisingImage3,
+      SnaptagImages.advertisingImage4,
+    ]..shuffle()).first;
+
+
     /**
          final printProcess = ref.watch(printProcessScreenProviderProvider);
     if (printProcess.isLoading) {
@@ -125,7 +133,7 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(10.r),
                 child: Image.asset(
-                  SnaptagImages.printLoading,
+                  randomAdImage,// SnaptagImages.printLoading,
                   fit: BoxFit.fill,
                 ),
               ),
