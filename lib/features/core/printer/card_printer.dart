@@ -18,6 +18,9 @@ part 'card_printer.g.dart';
 class PrinterService extends _$PrinterService {
   late final PrinterBindings _bindings;
 
+  bool _hasConnected = false;
+  bool get hasConnected => _hasConnected;
+
   @override
   FutureOr<void> build() async {
     _bindings = PrinterBindings();
@@ -29,13 +32,34 @@ class PrinterService extends _$PrinterService {
       // 1. 라이브러리 초기화 전에 이전 상태 정리
       _bindings.clearLibrary();
 
-      // 2. 프린터 연결
+      isConnected();
+
+      logger.i('Printer initialization completed');
+    } catch (e) {
+      final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
+      SlackLogService().sendErrorLogToSlack('Machine ID: $machineId, Printer initialization error: $e');
+      rethrow;
+    }
+  }
+
+  bool isConnected() {
+    try {
       final connected = _bindings.connectPrinter();
       if (!connected) {
         throw Exception('Failed to connect printer');
       }
-      logger.i('Printer connected successfully');
 
+      settingPrinter();
+
+      return connected;
+    } catch (e) {
+      logger.e('Error checking printer connection: $e');
+      return false;
+    }
+  }
+
+  void settingPrinter() {
+    try {
       // 3. 리본 설정
       // 레거시 코드와 동일하게 setRibbonOpt 호출
       _bindings.setRibbonOpt(1, 0, "2", 2);
@@ -46,11 +70,8 @@ class PrinterService extends _$PrinterService {
       if (!ready) {
         throw Exception('Failed to ensure printer ready');
       }
-      logger.i('Printer initialization completed');
     } catch (e) {
-      final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
-      SlackLogService().sendErrorLogToSlack('Machine ID: $machineId, Printer initialization error: $e');
-      rethrow;
+      logger.e('Error settingPrinter: $e');
     }
   }
 
@@ -127,7 +148,7 @@ class PrinterService extends _$PrinterService {
 
       logger.i('6. Printing card...');
 
-      if (isSingleMode){
+      if (isSingleMode) {
         _bindings.printCard(
           frontImageInfo: rearBuffer?.toString(),
           backImageInfo: null,

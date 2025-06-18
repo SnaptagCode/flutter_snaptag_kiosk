@@ -14,7 +14,6 @@ class SetupMainScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-
     final versionState = ref.watch(versionStateProvider);
     final cardCountState = ref.watch(cardCountProvider);
     final currentVersion = versionState.currentVersion;
@@ -23,236 +22,173 @@ class SetupMainScreen extends ConsumerWidget {
     //final isUpdateAvailable = false;
 
     return Theme(
-        data: Theme.of(context).copyWith(
-      textTheme: Theme.of(context).textTheme.apply(
-        fontFamily: 'Pretendard',
-      ),
-    ),
-     child: Scaffold(
-      backgroundColor: Color(0xFFF2F2F2),
-      appBar: AppBar(
-        centerTitle: false,
-        title: SvgPicture.asset(
-          SnaptagSvg.snaptagLogo,
-          width: 160.w,
-        ),
-        actions: [
-          InkWell(
-            onTap: () async {
-              final result = await DialogHelper.showSetupDialog(
-                context,
-                title: '프로그램을 종료합니다.',
-              );
-              if (result) {
-                // 종료
-                exit(0);
-              }
-            },
-            child: SvgPicture.asset(
-              SnaptagSvg.off,
-              width: 44.w,
+      data: Theme.of(context).copyWith(
+        textTheme: Theme.of(context).textTheme.apply(
+              fontFamily: 'Pretendard',
             ),
-          ),
-          SizedBox(width: 30.w),
-        ],
       ),
-      body: Container(
-        decoration: BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage(SnaptagImages.setupBackground),
-            fit: BoxFit.fill,
+      child: Scaffold(
+        backgroundColor: Color(0xFFF2F2F2),
+        appBar: AppBar(
+          centerTitle: false,
+          title: SvgPicture.asset(
+            SnaptagSvg.snaptagLogo,
+            width: 160.w,
           ),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Center(
-              child: Text(
-                '관리자 모드',
-                style: context.typography.kioksNum1SB,
+          actions: [
+            InkWell(
+              onTap: () async {
+                final result = await DialogHelper.showSetupDialog(
+                  context,
+                  title: '프로그램을 종료합니다.',
+                );
+                if (result) {
+                  // 종료
+                  exit(0);
+                }
+              },
+              child: SvgPicture.asset(
+                SnaptagSvg.off,
+                width: 44.w,
               ),
             ),
-            SizedBox(height: 50.h),
-            Center(
+            SizedBox(width: 30.w),
+          ],
+        ),
+        body: Container(
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage(SnaptagImages.setupBackground),
+              fit: BoxFit.fill,
+            ),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Center(
+                child: Text(
+                  '관리자 모드',
+                  style: context.typography.kioksNum1SB,
+                ),
+              ),
+              SizedBox(height: 50.h),
+              Center(
                 child: Text(
                   '*인쇄 모드를 선택 후 미리보기를 해주세요.',
                   style: context.typography.kioskBody1B.copyWith(color: Colors.red),
                 ),
               ),
-            SizedBox(height: 20.h),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                SizedBox(
-                  width: 390.w,
-                  height: 120.h,
-                  child: SetupSubCard(
-                    label: '양면 인쇄',
-                    mode: PagePrintType.double,
-                    currentModeSelector: (ref) => ref.watch(pagePrintProvider),
-                    activeAssetName: SnaptagSvg.printDoubleActive,
-                    inactiveAssetName: SnaptagSvg.printDoubleInactive,
-                    onTap: () async {
-                      await SoundManager().playSound();
-                      ref.read(pagePrintProvider.notifier).set(PagePrintType.double);
-                    },
-                  ),
-                ),
-                SizedBox(
-                  width: 390.w,
-                  height: 120.h,
-                  child: SetupSubCard(
-                    label: '단면 인쇄',
-                    mode: PagePrintType.single,
-                    currentModeSelector: (ref) => ref.watch(pagePrintProvider),
-                    activeAssetName: SnaptagSvg.printSingleActive,
-                    inactiveAssetName: SnaptagSvg.printSingleInactive,
-                    onTap: () async {
-                      await SoundManager().playSound();
-                      ref.read(pagePrintProvider.notifier).set(PagePrintType.single);
-                    },
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 10,),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                SizedBox(
-                  width: 240.w,
-                  height: 80.h,
-                  child: Align(
-                    alignment: Alignment.center,
-                    child: Text(
-                      '단면 카드 수량',
-                      textAlign: TextAlign.center,
-                      style: context.typography.kioskBody1B,
+              SizedBox(height: 20.h),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SizedBox(
+                    width: 390.w,
+                    height: 120.h,
+                    child: SetupSubCard(
+                      label: '양면 인쇄',
+                      mode: PagePrintType.double,
+                      currentModeSelector: (ref) => ref.watch(pagePrintProvider),
+                      activeAssetName: SnaptagSvg.printDoubleActive,
+                      inactiveAssetName: SnaptagSvg.printDoubleInactive,
+                      onTap: () async {
+                        await SoundManager().playSound();
+                        ref.read(pagePrintProvider.notifier).set(PagePrintType.double);
+                      },
                     ),
                   ),
-                ),
-                //SizedBox(width: 40.w),
-                Container(
-                  width: 520.w,
-                  height: 80.h,
-                  //padding: EdgeInsets.only(top: 50.w),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    border: Border.all(
-                      color: ref.watch(pagePrintProvider) == PagePrintType.single? Colors.black : Color(0xFFECEDEF),
+                  SizedBox(
+                    width: 390.w,
+                    height: 120.h,
+                    child: SetupSubCard(
+                      label: '단면 인쇄',
+                      mode: PagePrintType.single,
+                      currentModeSelector: (ref) => ref.watch(pagePrintProvider),
+                      activeAssetName: SnaptagSvg.printSingleActive,
+                      inactiveAssetName: SnaptagSvg.printSingleInactive,
+                      onTap: () async {
+                        await SoundManager().playSound();
+                        ref.read(pagePrintProvider.notifier).set(PagePrintType.single);
+                      },
                     ),
-                    borderRadius: const BorderRadius.all(Radius.circular(12)),
                   ),
-                  child: InkWell(
-                    borderRadius: const BorderRadius.all(Radius.circular(12)),
-                    onTap: () async {
-                      final isActive = ref.read(pagePrintProvider) == PagePrintType.single;
-                      if (isActive) {
-                        String? value = await DialogHelper.showKeypadDialog(context, mode: ModeType.card);
-
-                        if (value == null || value.isEmpty) return; // 값이 없으면 종료
-                        int cardNumber = int.parse(value);
-                        final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
-                        ref.read(cardCountProvider.notifier).update(cardNumber);
-                        if(cardNumber <= 0) {
-                          ref.read(pagePrintProvider.notifier).set(PagePrintType.double);
-                        } else {
-                          ref.read(pagePrintProvider.notifier).set(PagePrintType.single);
-                        }
-                      } else {
-                        print('click when pagePringType not single');
-                      }
-                    },
+                ],
+              ),
+              SizedBox(
+                height: 10,
+              ),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SizedBox(
+                    width: 240.w,
+                    height: 80.h,
                     child: Align(
                       alignment: Alignment.center,
                       child: Text(
-                        (cardCountState).toString(),
+                        '단면 카드 수량',
                         textAlign: TextAlign.center,
-                        style: ref.watch(pagePrintProvider) != PagePrintType.single? context.typography.kioskBody2B.copyWith(color: Color(0xFFECEDEF)) : context.typography.kioskBody2B.copyWith(color: Colors.black),
+                        style: context.typography.kioskBody1B,
                       ),
                     ),
                   ),
-                ),
-              ],
-            ),
-            SizedBox(
-              height: 80.h,
-              width: 760.w, //780
-              child: Divider(
-                thickness: 1.h,
-                height: 0,
-              ),
-            ),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                SizedBox(
-                  width: 260.w,
-                  height: 342.h,
-                  child: SetupMainCard(
-                    label: '이벤트\n미리보기',
-                    assetName: SnaptagSvg.eventPreview,
-                    onTap: () async {
-                      if (ref.read(pagePrintProvider) != PagePrintType.none) {
-                      await SoundManager().playSound();
-                      if (cardCountState < 1) {
-                        ref.read(pagePrintProvider.notifier).set(PagePrintType.double);
-                      }
-                      KioskInfoRouteData().go(context);
-                      } else {
-                        print('이벤트를 선택해주세요');
-                      }
-                    },
-                  ),
-                ),
-                SizedBox(
-                  width: 260.w,
-                  height: 342.h,
-                  child: SetupMainCard(
-                    label: '출력 내역',
-                    assetName: SnaptagSvg.payment,
-                    onTap: () async {
-                      await SoundManager().playSound();
+                  //SizedBox(width: 40.w),
+                  Container(
+                    width: 520.w,
+                    height: 80.h,
+                    //padding: EdgeInsets.only(top: 50.w),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      border: Border.all(
+                        color: ref.watch(pagePrintProvider) == PagePrintType.single ? Colors.black : Color(0xFFECEDEF),
+                      ),
+                      borderRadius: const BorderRadius.all(Radius.circular(12)),
+                    ),
+                    child: InkWell(
+                      borderRadius: const BorderRadius.all(Radius.circular(12)),
+                      onTap: () async {
+                        final isActive = ref.read(pagePrintProvider) == PagePrintType.single;
+                        if (isActive) {
+                          String? value = await DialogHelper.showKeypadDialog(context, mode: ModeType.card);
 
-                      PaymentHistoryRouteData().go(context);
-                    },
-                  ),
-                ),
-                SizedBox(
-                  width: 260.w,
-                  height: 342.h,
-                  child: SetupMainCard(
-                    label: '이벤트\n실행',
-                    assetName: SnaptagSvg.eventRun,
-                    onTap: () async {
-                      await SoundManager().playSound();
-
-                      final result = await DialogHelper.showSetupDialog(
-                        context,
-                        title: '이벤트를 실행합니다.',
-                      );
-                      if (result) {
-                        final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
-                        SlackLogService().sendLogToSlack('machineId:$machineId, currentVersion:$currentVersion, latestVersion:$latestVersion');
-                        if(cardCountState < 1) {
-                          ref.read(pagePrintProvider.notifier).set(PagePrintType.double);
-                          SlackLogService().sendLogToSlack('machineId: $machineId, singleCard: $cardCountState, set pagePrintType double');
+                          if (value == null || value.isEmpty) return; // 값이 없으면 종료
+                          int cardNumber = int.parse(value);
+                          final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
+                          ref.read(cardCountProvider.notifier).update(cardNumber);
+                          if (cardNumber <= 0) {
+                            ref.read(pagePrintProvider.notifier).set(PagePrintType.double);
+                          } else {
+                            ref.read(pagePrintProvider.notifier).set(PagePrintType.single);
+                          }
                         } else {
-                          ref.read(pagePrintProvider.notifier).set(PagePrintType.single);
-                          SlackLogService().sendLogToSlack('machineId: $machineId, singleCard: $cardCountState, set pagePrintType single');
+                          print('click when pagePringType not single');
                         }
-                        PhotoCardUploadRouteData().go(context);
-                      }
-                    },
+                      },
+                      child: Align(
+                        alignment: Alignment.center,
+                        child: Text(
+                          (cardCountState).toString(),
+                          textAlign: TextAlign.center,
+                          style: ref.watch(pagePrintProvider) != PagePrintType.single
+                              ? context.typography.kioskBody2B.copyWith(color: Color(0xFFECEDEF))
+                              : context.typography.kioskBody2B.copyWith(color: Colors.black),
+                        ),
+                      ),
+                    ),
                   ),
+                ],
+              ),
+              SizedBox(
+                height: 80.h,
+                width: 760.w, //780
+                child: Divider(
+                  thickness: 1.h,
+                  height: 0,
                 ),
-              ],
-            ),
-            if (F.appFlavor == Flavor.dev)
+              ),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -261,95 +197,178 @@ class SetupMainScreen extends ConsumerWidget {
                     width: 260.w,
                     height: 342.h,
                     child: SetupMainCard(
-                        label: 'Unit Test',
-                        onTap: () async {
+                      label: '이벤트\n미리보기',
+                      assetName: SnaptagSvg.eventPreview,
+                      onTap: () async {
+                        if (ref.read(pagePrintProvider) != PagePrintType.none) {
                           await SoundManager().playSound();
-
-                          UnitTestRouteData().go(context);
-                        }),
+                          if (cardCountState < 1) {
+                            ref.read(pagePrintProvider.notifier).set(PagePrintType.double);
+                          }
+                          KioskInfoRouteData().go(context);
+                        } else {
+                          print('이벤트를 선택해주세요');
+                        }
+                      },
+                    ),
                   ),
                   SizedBox(
                     width: 260.w,
                     height: 342.h,
                     child: SetupMainCard(
-                        label: 'Kiosk\nComponents',
-                        onTap: () async {
-                          await SoundManager().playSound();
+                      label: '출력 내역',
+                      assetName: SnaptagSvg.payment,
+                      onTap: () async {
+                        await SoundManager().playSound();
 
-                          KioskComponentsRouteData().go(context);
-                        }),
+                        PaymentHistoryRouteData().go(context);
+                      },
+                    ),
+                  ),
+                  SizedBox(
+                    width: 260.w,
+                    height: 342.h,
+                    child: SetupMainCard(
+                      label: '이벤트\n실행',
+                      assetName: SnaptagSvg.eventRun,
+                      onTap: () async {
+                        await SoundManager().playSound();
+
+                        final connected = ref.read(printerServiceProvider.notifier).isConnected();
+
+                        if (!connected) {
+                          final result = await DialogHelper.showSetupDialog(
+                            context,
+                            title: '프린터 연결 안됨',
+                          );
+
+                          return;
+                        }
+
+                        final result = await DialogHelper.showSetupDialog(
+                          context,
+                          title: '이벤트를 실행합니다.',
+                        );
+                        if (result) {
+                          final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
+                          SlackLogService().sendLogToSlack(
+                              'machineId:$machineId, currentVersion:$currentVersion, latestVersion:$latestVersion');
+                          if (cardCountState < 1) {
+                            ref.read(pagePrintProvider.notifier).set(PagePrintType.double);
+                            SlackLogService().sendLogToSlack(
+                                'machineId: $machineId, singleCard: $cardCountState, set pagePrintType double');
+                          } else {
+                            ref.read(pagePrintProvider.notifier).set(PagePrintType.single);
+                            SlackLogService().sendLogToSlack(
+                                'machineId: $machineId, singleCard: $cardCountState, set pagePrintType single');
+                          }
+                          PhotoCardUploadRouteData().go(context);
+                        }
+                      },
+                    ),
                   ),
                 ],
               ),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                SizedBox(
-                  width: 260.w,
-                  height: 342.h,
-                  child: SetupMainCard(
-                    label: '서비스 점검',
-                    assetName: SnaptagSvg.maintenance,
-                    onTap: () async {
-                      await SoundManager().playSound();
+              if (F.appFlavor == Flavor.dev)
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                      width: 260.w,
+                      height: 342.h,
+                      child: SetupMainCard(
+                          label: 'Unit Test',
+                          onTap: () async {
+                            await SoundManager().playSound();
 
-                      MaintenanceRouteData().go(context);
-                    },
-                  ),
+                            UnitTestRouteData().go(context);
+                          }),
+                    ),
+                    SizedBox(
+                      width: 260.w,
+                      height: 342.h,
+                      child: SetupMainCard(
+                          label: 'Kiosk\nComponents',
+                          onTap: () async {
+                            await SoundManager().playSound();
+
+                            KioskComponentsRouteData().go(context);
+                          }),
+                    ),
+                  ],
                 ),
-                SizedBox(
-                  width: 260.w,
-                  height: 342.h,
-                  child: SetupUpdateCard(
-                    title: '현재 버전',
-                    //version: currentVersion,
-                    version: "v2.4.8",
-                    buttonName: '업데이트',
-                    isActive: isUpdateAvailable,
-                    onUpdatePressed: () async {
-                      final result = await DialogHelper.showSetupTwoDialog(
-                        context,
-                        title: '업데이트 하시겠습니까?',
-                        contentText:'업데이트 시 앱이 재시작 됩니다.',
-                      );
-                      if (result) {
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SizedBox(
+                    width: 260.w,
+                    height: 342.h,
+                    child: SetupMainCard(
+                      label: '서비스 점검',
+                      assetName: SnaptagSvg.maintenance,
+                      onTap: () async {
+                        await SoundManager().playSound();
+
+                        MaintenanceRouteData().go(context);
+                      },
+                    ),
+                  ),
+                  SizedBox(
+                    width: 260.w,
+                    height: 342.h,
+                    child: SetupUpdateCard(
+                      title: '현재 버전',
+                      //version: currentVersion,
+                      version: "v2.4.8",
+                      buttonName: '업데이트',
+                      isActive: isUpdateAvailable,
+                      onUpdatePressed: () async {
+                        final result = await DialogHelper.showSetupTwoDialog(
+                          context,
+                          title: '업데이트 하시겠습니까?',
+                          contentText: '업데이트 시 앱이 재시작 됩니다.',
+                        );
+                        if (result) {
                           try {
                             final launcherPath = await LauncherPathUtil.getLauncherPath();
                             await ForceUpdateWriter.writeForceUpdateTrue();
                             print("Process.start");
-                            await Process.start(launcherPath, ['f'], runInShell: true,
-                              mode: ProcessStartMode.detached,);
+                            await Process.start(
+                              launcherPath,
+                              ['f'],
+                              runInShell: true,
+                              mode: ProcessStartMode.detached,
+                            );
                             print("Process.start(launcherPath, ['f'])");
                             exit(0);
                           } catch (e) {
                             print("런처 실행 실패: $e");
-                        }
-                      } else {
-
-                      }
-                    },
+                          }
+                        } else {}
+                      },
+                    ),
                   ),
-                ),
-                SizedBox(
-                  width: 260.w,
-                  height: 342.h,
-                ),
-              ],
-            ),
-            SizedBox(
-              height: 40.h,
-            ),
-            SizedBox(
-                width: 820.w, //780
-                height: 88.h,
-                child: isUpdateAvailable?
-                  UpdateNoticeBanner(latestVersion: versionState.latestVersion) : SizedBox()
-            ),
-          ],
+                  SizedBox(
+                    width: 260.w,
+                    height: 342.h,
+                  ),
+                ],
+              ),
+              SizedBox(
+                height: 40.h,
+              ),
+              SizedBox(
+                  width: 820.w, //780
+                  height: 88.h,
+                  child:
+                      isUpdateAvailable ? UpdateNoticeBanner(latestVersion: versionState.latestVersion) : SizedBox()),
+            ],
+          ),
         ),
       ),
-    ),);
+    );
   }
 }
 
@@ -439,7 +458,7 @@ class SetupSubCard<T> extends ConsumerWidget {
         height: 120.h,
         //padding: EdgeInsets.only(top: 50.w),
         decoration: BoxDecoration(
-          color: isActive? Colors.black : Colors.white,
+          color: isActive ? Colors.black : Colors.white,
           border: Border.all(
             color: Color(0xFFE6E8EB),
           ),
@@ -452,18 +471,20 @@ class SetupSubCard<T> extends ConsumerWidget {
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               SizedBox(width: 72.5.w), //60
-                SvgPicture.asset(
-                  isActive? activeAssetName : inactiveAssetName,
-                  width: 80.w,
-                  height: 80.w,
-                ),
+              SvgPicture.asset(
+                isActive ? activeAssetName : inactiveAssetName,
+                width: 80.w,
+                height: 80.w,
+              ),
               SizedBox(width: 23.w),
               Align(
                 alignment: Alignment.centerRight,
                 child: Text(
                   label,
                   textAlign: TextAlign.center,
-                  style: isActive? context.typography.kioskInput2B.copyWith(color: Colors.white) : context.typography.kioskInput2B.copyWith(color: Colors.black),
+                  style: isActive
+                      ? context.typography.kioskInput2B.copyWith(color: Colors.white)
+                      : context.typography.kioskInput2B.copyWith(color: Colors.black),
                 ),
               ),
             ],
@@ -515,10 +536,7 @@ class SetupUpdateCard extends StatelessWidget {
               ),
             ),
             SizedBox(height: 12.w),
-            Text(
-              version,
-              style: context.typography.kioskNum2B
-            ),
+            Text(version, style: context.typography.kioskNum2B),
             const Spacer(),
             SizedBox(
               width: 216.w,
@@ -533,10 +551,10 @@ class SetupUpdateCard extends StatelessWidget {
                   ),
                 ),
                 child: Text(
-                    '$buttonName',
-                    style: context.typography.kioskBody2B.copyWith(
-                      color: Colors.white,
-                    ),
+                  '$buttonName',
+                  style: context.typography.kioskBody2B.copyWith(
+                    color: Colors.white,
+                  ),
                 ),
               ),
             ),
@@ -578,9 +596,9 @@ class UpdateNoticeBanner extends StatelessWidget {
           textAlign: TextAlign.center,
           text: TextSpan(
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Colors.white,
-              fontSize: 20.sp,
-            ),
+                  color: Colors.white,
+                  fontSize: 20.sp,
+                ),
             children: [
               const TextSpan(text: '최신 버전 '),
               TextSpan(
@@ -588,8 +606,8 @@ class UpdateNoticeBanner extends StatelessWidget {
                 style: const TextStyle(fontWeight: FontWeight.bold),
               ),
               TextSpan(
-                  text: '이 출시되었습니다.\n원활한 이용을 위해 업데이트를 진행해주세요',
-                  style: TextStyle(color: Color.fromARGB(204, 255, 255, 255)),
+                text: '이 출시되었습니다.\n원활한 이용을 위해 업데이트를 진행해주세요',
+                style: TextStyle(color: Color.fromARGB(204, 255, 255, 255)),
               ),
             ],
           ),
