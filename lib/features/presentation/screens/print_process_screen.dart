@@ -176,7 +176,7 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
   /// .env.version 파일에서 버전 문자열을 동기적으로 읽어옵니다.
   String? getAppVersionSync() {
     try {
-      final file = File('.env.version');
+      final file = File('assets/.env.version');
       if (!file.existsSync()) {
         print('❌ .env.version 파일이 존재하지 않습니다.');
         return null;

@@ -245,8 +245,7 @@ class SetupMainScreen extends ConsumerWidget {
                           ref.read(pagePrintProvider.notifier).set(PagePrintType.single);
                           SlackLogService().sendLogToSlack('machineId: $machineId, singleCard: $cardCountState, set pagePrintType single');
                         }
-                        // PhotoCardUploadRouteData().go(context);
-                        PrintProcessRouteData().go(context);
+                        PhotoCardUploadRouteData().go(context);
                       }
                     },
                   ),

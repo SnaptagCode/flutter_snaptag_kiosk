@@ -20,7 +20,6 @@ class F {
   }
 
   static String get adminBaseUrl {
-      return 'https://kiosk-admin-dev-server.snaptag.co.kr';
     switch (F.appFlavor) {
       
       case Flavor.dev:
@@ -33,7 +32,6 @@ class F {
   }
 
   static String get kioskBaseUrl {
-    return 'https://kiosk-dev-server.snaptag.co.kr';
     switch (F.appFlavor) {
       case Flavor.dev:
         return 'https://kiosk-dev-server.snaptag.co.kr';
@@ -45,7 +43,6 @@ class F {
   }
 
   static String get qrCodePrefix {
-    return 'https://dev-photocard-kiosk-qr.snaptag.co.kr';
     switch (appFlavor) {
       case Flavor.dev:
         return 'https://dev-photocard-kiosk-qr.snaptag.co.kr';
