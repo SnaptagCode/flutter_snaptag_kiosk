@@ -45,17 +45,20 @@ class PrinterService extends _$PrinterService {
     }
   }
 
-  bool isConnected() {
+  Future<bool> isConnected() async {
     try {
       final connected = _bindings.connectPrinter();
+      _hasConnected = connected;
       if (!connected) {
         SlackLogService().sendErrorLogToSlack('Failed to connect printer');
         throw Exception('Failed to connect printer');
       }
 
-      startPrintLog();
+      final printerLog = await startPrintLog();
 
-      return connected;
+      final isReady = printerLog?.printerMainStatusCode == "1004";
+
+      return connected && isReady;
     } catch (e) {
       logger.e('Error checking printer connection: $e');
       return false;
@@ -178,7 +181,7 @@ class PrinterService extends _$PrinterService {
     }
   }
 
-  Future<void> startPrintLog() async {
+  Future<PrinterLog?> startPrintLog() async {
     final printerLog = getPrinterLogData(_bindings);
     if (printerLog != null) {
       final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
@@ -187,7 +190,10 @@ class PrinterService extends _$PrinterService {
         await ref.read(kioskRepositoryProvider).updatePrintLog(request: log);
         SlackLogService().sendLogToSlack('Machine ID: $machineId , PrintState : $log');
       }
+      return printerLog;
     }
+
+    return null;
   }
 
   Future<void> _prepareAndDrawImage(StringBuffer buffer, String imagePath, bool isFront) async {
