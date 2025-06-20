@@ -18,7 +18,6 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
   @override
   Widget build(BuildContext context) {
     final randomAdImage = getRandomAdImagePath();
-
     /**
          final printProcess = ref.watch(printProcessScreenProviderProvider);
     if (printProcess.isLoading) {
@@ -174,46 +173,62 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
     );
   }
 
-  /// 플랫폼별로 실행 파일 기준 adImages 디렉토리를 반환합니다.R
+  /// .env.version 파일에서 버전 문자열을 동기적으로 읽어옵니다.
+  String? getAppVersionSync() {
+    try {
+      final file = File('.env.version');
+      if (!file.existsSync()) {
+        print('❌ .env.version 파일이 존재하지 않습니다.');
+        return null;
+      }
+      return file.readAsStringSync().trim();
+    } catch (e) {
+      print('❌ .env.version 파일 읽기 오류: $e');
+      return null;
+    }
+  }
 
-String? getRandomAdImagePath() {
-  try {
-    // 실행 파일 위치 추출
-    final execPath = Platform.resolvedExecutable;
-    final execDir = File(execPath).parent;
+  /// 사용자 홈 디렉토리를 동기적으로 반환합니다.
+  String? getUserDirectorySync() {
+    return Platform.environment['USERPROFILE']; // Windows 전용
+  }
 
-    // 실행파일과 같은 경로 기준 assets/adImages 폴더 접근
-    final adImageDir = Directory('${execDir.path}${Platform.pathSeparator}assets${Platform.pathSeparator}adImages');
+  /// 최종: 랜덤 이미지 파일 경로 반환
+  String? getRandomAdImagePath() {
+    final version = getAppVersionSync();
+    final userDir = getUserDirectorySync();
 
-    if (!adImageDir.existsSync()) {
-      print('[❌] 폴더 없음: ${adImageDir.path}');
+    if (version == null || userDir == null) {
+      print('❌ 사용자 디렉토리 또는 버전을 불러올 수 없습니다.');
       return null;
     }
 
-    final imageFiles = adImageDir
+    final adImageFolder = Directory(
+      '$userDir\\Snaptag\\$version\\assets\\adImages',
+    );
+
+    if (!adImageFolder.existsSync()) {
+      print('❌ 이미지 폴더가 존재하지 않습니다: ${adImageFolder.path}');
+      return null;
+    }
+
+    final imageFiles = adImageFolder
         .listSync()
         .whereType<File>()
         .where((f) =>
-            f.path.toLowerCase().endsWith('.png') ||
-            f.path.toLowerCase().endsWith('.jpg') ||
-            f.path.toLowerCase().endsWith('.jpeg'))
+            f.path.endsWith('.png') ||
+            f.path.endsWith('.jpg') ||
+            f.path.endsWith('.jpeg'))
         .toList();
 
     if (imageFiles.isEmpty) {
-      print('[⚠️] 이미지 없음: ${adImageDir.path}');
+      print('❌ 이미지 파일이 없습니다.');
       return null;
     }
 
-    final fileName = imageFiles[Random().nextInt(imageFiles.length)]
-        .uri
-        .pathSegments
-        .last;
+    final randomFile = imageFiles[Random().nextInt(imageFiles.length)];
+    final fileName = randomFile.uri.pathSegments.last;
 
-    // 항상 동일한 상대 경로 문자열로 반환
     return 'assets/adImages/$fileName';
-  } catch (e) {
-    print('[에러] 이미지 불러오기 실패: $e');
-    return null;
   }
-}
 }
