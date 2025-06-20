@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 
+import 'dart:io';
+
 class PrintProcessScreen extends ConsumerStatefulWidget {
   const PrintProcessScreen({super.key});
 
@@ -14,12 +16,8 @@ class PrintProcessScreen extends ConsumerStatefulWidget {
 class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
   @override
   Widget build(BuildContext context) {
-    final randomAdImage = ([
-      SnaptagImages.advertisingImage1,
-      SnaptagImages.advertisingImage2,
-      SnaptagImages.advertisingImage3,
-      SnaptagImages.advertisingImage4,
-    ]..shuffle()).first;
+
+    final randomAdImage = getRandomAdImagePath();
 
 
     /**
@@ -111,7 +109,7 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
       }
     });
     final kiosk = ref.watch(kioskInfoServiceProvider);
-
+    print("랜덤 이미지 : ${randomAdImage}");
     return DefaultTextStyle(
         style: TextStyle(
         fontFamily: context.locale.languageCode == 'ja'?
@@ -133,7 +131,8 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(10.r),
                 child: Image.asset(
-                  randomAdImage,// SnaptagImages.printLoading,
+                  (kiosk?.kioskMachineId ?? 0) == 1 ? SnaptagImages.printLoading :
+                  randomAdImage ?? SnaptagImages.printLoading,
                   fit: BoxFit.fill,
                 ),
               ),
@@ -156,5 +155,36 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
         ],
       ),
     ),);
+  }
+
+  List<String> getAdImagePaths() {
+    final execPath = Platform.resolvedExecutable;
+    final appDir = File(execPath).parent;
+    final folder = Directory('${appDir.path}/assets/adImages');
+
+    if (!folder.existsSync()) {
+      print('❌ adImages 폴더가 존재하지 않습니다: ${folder.path}');
+      return [];
+    }
+
+    final files = folder
+        .listSync()
+        .whereType<File>()
+        .where((file) =>
+            file.path.endsWith('.png') ||
+            file.path.endsWith('.jpg') ||
+            file.path.endsWith('.jpeg') ||
+            file.path.endsWith('.webp') ||
+            file.path.endsWith('.bmp'))
+        .toList();
+
+    return files.map((file) => file.path).toList();
+  }
+
+  String? getRandomAdImagePath() {
+    final paths = getAdImagePaths();
+    if (paths.isEmpty) return null;
+    paths.shuffle();
+    return paths.first;
   }
 }

@@ -13,7 +13,6 @@ import 'package:window_manager/window_manager.dart';
 void main() async {
   // 인증서 유효성 무시
   HttpOverrides.global = MyHttpOverrides();
-
   if (kDebugMode) {
     F.appFlavor = Flavor.dev;
   } else {
