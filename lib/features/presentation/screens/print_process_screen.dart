@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_snaptag_kiosk/features/move_me/widgets/non_gradient_container.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 
 import 'dart:io';
@@ -136,7 +137,7 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
               style: context.typography.kioskBody1B,
             ),
             SizedBox(height: 30.h),
-            GradientContainer(
+            NonGradientContainer(
               content: Padding(
                 padding: EdgeInsets.all(8.r),
                 child: ClipRRect(
