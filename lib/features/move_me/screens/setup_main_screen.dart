@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -9,16 +10,40 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_snaptag_kiosk/core/providers/version_notifier.dart';
 import 'package:flutter_snaptag_kiosk/core/utils/launcher_service.dart';
 
-class SetupMainScreen extends ConsumerWidget {
+class SetupMainScreen extends ConsumerStatefulWidget {
   const SetupMainScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<SetupMainScreen> createState() => _SetupMainScreenState();
+}
+
+class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+      // 여기에 실행하고 싶은 로직 작성
+      ref.read(printerServiceProvider.notifier).checkConnectedPrint();
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final versionState = ref.watch(versionStateProvider);
     final cardCountState = ref.watch(cardCountProvider);
     final currentVersion = versionState.currentVersion;
     final latestVersion = versionState.latestVersion;
     final isUpdateAvailable = currentVersion != latestVersion;
+    final isConnectedPrinter = ref.watch(printerServiceProvider.notifier).hasConnected;
     //final isUpdateAvailable = false;
 
     return Theme(
@@ -234,7 +259,8 @@ class SetupMainScreen extends ConsumerWidget {
                       onTap: () async {
                         await SoundManager().playSound();
 
-                        final connected = await ref.read(printerServiceProvider.notifier).isConnected();
+                        final connected =
+                            await ref.read(printerServiceProvider.notifier).checkConnectedWithPrinterLog();
                         final settingPrinter = ref.read(printerServiceProvider.notifier).settingPrinter();
 
                         if (!connected) {
@@ -363,6 +389,10 @@ class SetupMainScreen extends ConsumerWidget {
                   SizedBox(
                     width: 260.w,
                     height: 342.h,
+                    child: SetupMainCard(
+                      label: '프린트 연결 상태',
+                      assetName: isConnectedPrinter ? SnaptagSvg.printConnect : SnaptagSvg.printError,
+                    ),
                   ),
                 ],
               ),

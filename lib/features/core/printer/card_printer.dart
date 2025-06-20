@@ -33,9 +33,9 @@ class PrinterService extends _$PrinterService {
       // 1. 라이브러리 초기화 전에 이전 상태 정리
       _bindings.clearLibrary();
 
-      isConnected();
+      // checkConnectedWithPrinterLog();
 
-      settingPrinter();
+      // settingPrinter();
 
       logger.i('Printer initialization completed');
     } catch (e) {
@@ -45,7 +45,25 @@ class PrinterService extends _$PrinterService {
     }
   }
 
-  Future<bool> isConnected() async {
+  Future<bool> checkConnectedPrint() async {
+    try {
+      final connected = _bindings.connectPrinter();
+      _hasConnected = connected;
+
+      if (!connected) return false;
+
+      final printerLog = getPrinterLogData(_bindings);
+
+      final isReady = printerLog?.printerMainStatusCode == "1004";
+
+      return connected && isReady;
+    } catch (e) {
+      logger.e('Error checking printer connection: $e');
+      return false;
+    }
+  }
+
+  Future<bool> checkConnectedWithPrinterLog() async {
     try {
       final connected = _bindings.connectPrinter();
       _hasConnected = connected;
