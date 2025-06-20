@@ -5,14 +5,14 @@ import 'package:flutter_snaptag_kiosk/data/models/entities/version_state.dart';
 final versionRepositoryProvider = Provider((ref) => VersionRepository());
 
 final versionStateProvider = StateNotifierProvider<VersionNotifier, VersionState>(
-      (ref) => VersionNotifier(ref.read(versionRepositoryProvider)),
+  (ref) => VersionNotifier(ref.read(versionRepositoryProvider)),
 );
 
 class VersionNotifier extends StateNotifier<VersionState> {
   final VersionRepository _repo;
 
   VersionNotifier(this._repo)
-      : super(VersionState(currentVersion: 'v2.4.8', latestVersion: 'v2.4.8', isLoading: true)) {
+      : super(VersionState(currentVersion: 'v2.4.7', latestVersion: 'v2.4.7', isLoading: true)) {
     loadVersions();
   }
 

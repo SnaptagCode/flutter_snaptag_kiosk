@@ -23,6 +23,7 @@ class PrinterService extends _$PrinterService {
 
   @override
   FutureOr<void> build() async {
+    logger.i('Printer initialization..');
     _bindings = PrinterBindings();
     await _initializePrinter();
   }
