@@ -234,7 +234,7 @@ class SetupMainScreen extends ConsumerWidget {
                       onTap: () async {
                         await SoundManager().playSound();
 
-                        final connected = ref.read(printerServiceProvider.notifier).isConnected();
+                        final connected = await ref.read(printerServiceProvider.notifier).isConnected();
                         final settingPrinter = ref.read(printerServiceProvider.notifier).settingPrinter();
 
                         if (!connected) {
