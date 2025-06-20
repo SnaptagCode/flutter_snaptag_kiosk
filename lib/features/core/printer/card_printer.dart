@@ -49,7 +49,8 @@ class PrinterService extends _$PrinterService {
     try {
       final connected = _bindings.connectPrinter();
       _hasConnected = connected;
-
+      logger.e('checkConnectedPrint: $connected');
+      SlackLogService().sendLogToSlack('checkConnectedPrint: $connected');
       if (!connected) return false;
 
       final printerLog = getPrinterLogData(_bindings);
