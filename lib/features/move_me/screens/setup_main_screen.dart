@@ -235,11 +235,21 @@ class SetupMainScreen extends ConsumerWidget {
                         await SoundManager().playSound();
 
                         final connected = ref.read(printerServiceProvider.notifier).isConnected();
+                        final settingPrinter = ref.read(printerServiceProvider.notifier).settingPrinter();
 
                         if (!connected) {
                           final result = await DialogHelper.showSetupDialog(
                             context,
                             title: '프린터 연결 안됨',
+                          );
+
+                          return;
+                        }
+
+                        if (!settingPrinter) {
+                          final result = await DialogHelper.showSetupDialog(
+                            context,
+                            title: '카드 공급기를 확인해주세요.',
                           );
 
                           return;

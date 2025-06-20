@@ -35,6 +35,8 @@ class PrinterService extends _$PrinterService {
 
       isConnected();
 
+      settingPrinter();
+
       logger.i('Printer initialization completed');
     } catch (e) {
       final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
@@ -47,10 +49,11 @@ class PrinterService extends _$PrinterService {
     try {
       final connected = _bindings.connectPrinter();
       if (!connected) {
+        SlackLogService().sendErrorLogToSlack('Failed to connect printer');
         throw Exception('Failed to connect printer');
       }
 
-      settingPrinter();
+      startPrintLog();
 
       return connected;
     } catch (e) {
@@ -59,7 +62,7 @@ class PrinterService extends _$PrinterService {
     }
   }
 
-  void settingPrinter() {
+  bool settingPrinter() {
     try {
       // 3. 리본 설정
       // 레거시 코드와 동일하게 setRibbonOpt 호출
@@ -69,10 +72,13 @@ class PrinterService extends _$PrinterService {
       // 4. 프린터 준비 상태 확인
       final ready = _bindings.ensurePrinterReady();
       if (!ready) {
+        SlackLogService().sendErrorLogToSlack('Failed to connect printer');
         throw Exception('Failed to ensure printer ready');
       }
+      return true;
     } catch (e) {
       logger.e('Error settingPrinter: $e');
+      return false;
     }
   }
 
