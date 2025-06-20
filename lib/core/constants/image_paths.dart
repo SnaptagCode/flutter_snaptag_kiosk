@@ -16,7 +16,6 @@ class SnaptagImages {
   static const String loading = 'assets/images/loading.gif';
 
   static const String maintenance = 'assets/images/maintenance.png';
-
 }
 
 class SnaptagSounds {
@@ -65,4 +64,7 @@ class SnaptagSvg {
 
   static const String printDouble = 'assets/icons/print/print_double.svg';
   static const String printSingle = 'assets/icons/print/print_single.svg';
+
+  static const String printConnect = 'assets/icons/print/print_connect.svg';
+  static const String printError = 'assets/icons/print/print_error.svg';
 }
