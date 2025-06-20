@@ -19,14 +19,20 @@ class SetupMainScreen extends ConsumerStatefulWidget {
 
 class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
   Timer? _timer;
+  bool _isConnectedPrinter = false;
 
   @override
   void initState() {
     super.initState();
 
-    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+    _timer = Timer.periodic(Duration(seconds: 2), (timer) async {
       // 여기에 실행하고 싶은 로직 작성
-      ref.read(printerServiceProvider.notifier).checkConnectedPrint();
+      final connected = await ref.read(printerServiceProvider.notifier).checkConnectedPrint();
+      if (mounted) {
+        setState(() {
+          _isConnectedPrinter = connected;
+        });
+      }
     });
   }
 
@@ -43,7 +49,6 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
     final currentVersion = versionState.currentVersion;
     final latestVersion = versionState.latestVersion;
     final isUpdateAvailable = currentVersion != latestVersion;
-    final isConnectedPrinter = ref.watch(printerServiceProvider.notifier).hasConnected;
     //final isUpdateAvailable = false;
 
     return Theme(
@@ -391,7 +396,7 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
                     height: 342.h,
                     child: SetupMainCard(
                       label: '프린트 연결 상태',
-                      assetName: isConnectedPrinter ? SnaptagSvg.printConnect : SnaptagSvg.printError,
+                      assetName: _isConnectedPrinter ? SnaptagSvg.printConnect : SnaptagSvg.printError,
                     ),
                   ),
                 ],
