@@ -136,12 +136,16 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
               textAlign: TextAlign.center,
               style: context.typography.kioskBody1B,
             ),
-            ((kiosk?.kioskMachineId ?? 1) != 2 && (kiosk?.kioskMachineId ?? 1) != 3) || randomAdImage == null
+            ((kiosk?.kioskMachineId ?? 1) != 2 &&
+                        (kiosk?.kioskMachineId ?? 1) != 3) ||
+                    randomAdImage == null
                 ? SizedBox(height: 30.h)
                 : SizedBox(
                     height: 0.h,
                   ),
-            ((kiosk?.kioskMachineId ?? 1) != 2 && (kiosk?.kioskMachineId ?? 1) != 3) || randomAdImage == null
+            ((kiosk?.kioskMachineId ?? 1) != 2 &&
+                        (kiosk?.kioskMachineId ?? 1) != 3) ||
+                    randomAdImage == null
                 ? GradientContainer(
                     content: Padding(
                       padding: EdgeInsets.all(8.r),
@@ -154,11 +158,16 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
                             ),
                           )),
                     ),
-                  ): randomAdImage == null ? Image.asset(
-                     SnaptagImages.printLoading,
-                    fit: BoxFit.fill,
-                  ) : Image.file(File(randomAdImage)),
-            ((kiosk?.kioskMachineId ?? 1) != 2 && (kiosk?.kioskMachineId ?? 1) != 3) || randomAdImage == null
+                  )
+                : randomAdImage == null
+                    ? Image.asset(
+                        SnaptagImages.printLoading,
+                        fit: BoxFit.fill,
+                      )
+                    : Image.file(File(randomAdImage)),
+            ((kiosk?.kioskMachineId ?? 1) != 2 &&
+                        (kiosk?.kioskMachineId ?? 1) != 3) ||
+                    randomAdImage == null
                 ? SizedBox(height: 30.h)
                 : SizedBox(
                     height: 0.h,
@@ -244,12 +253,15 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
     return 'assets/adImages/$fileName';
   }
 
-    String? getRandomAdImageFilePath() {
+  String? getRandomAdImageFilePath() {
     final version = getAppVersionSync();
     final userDir = getUserDirectorySync();
-
+    final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
     if (version == null || userDir == null) {
-      print('❌ 사용자 디렉토리 또는 버전을 불러올 수 없습니다.');
+      if (machineId == 2 || machineId == 3) {
+        SlackLogService()
+            .sendLogToSlack('machineId: $machineId 배너를 불러오기 위한 사용자 디렉토리 또는 버전을 불러올 수 없습니다.');
+      }
       return null;
     }
 
@@ -258,6 +270,10 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
     );
 
     if (!adImageFolder.existsSync()) {
+      if (machineId == 2 || machineId == 3) {
+        SlackLogService()
+            .sendLogToSlack('machineId: $machineId 배너를 불러오기 위한 이미지 폴더가 존재하지 않습니다.');
+      }
       print('❌ 이미지 폴더가 존재하지 않습니다: ${adImageFolder.path}');
       return null;
     }
@@ -272,12 +288,14 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
         .toList();
 
     if (imageFiles.isEmpty) {
-      print('❌ 이미지 파일이 없습니다.');
+      if (machineId == 2 || machineId == 3) {
+        SlackLogService()
+            .sendLogToSlack('machineId: $machineId 배너를 불러오기 위한 이미지 폴더내부에 이미지가 존재하지 않습니다.');
+      }
       return null;
     }
 
     final randomFile = imageFiles[Random().nextInt(imageFiles.length)];
     return randomFile.path; // ⬅️ 여기서 전체 파일 경로 반환
   }
-
 }
