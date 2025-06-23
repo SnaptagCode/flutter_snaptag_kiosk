@@ -120,6 +120,7 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
     });
     final kiosk = ref.watch(kioskInfoServiceProvider);
     print("랜덤 이미지 : ${randomAdImage}");
+    print("키오스크 번호 : ${(kiosk?.kioskMachineId ?? 1)}");
     return DefaultTextStyle(
       style: TextStyle(
         fontFamily: context.locale.languageCode == 'ja'
@@ -136,22 +137,50 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
               textAlign: TextAlign.center,
               style: context.typography.kioskBody1B,
             ),
-            SizedBox(height: 30.h),
-            NonGradientContainer(
+            (kiosk?.kioskMachineId ?? 1) == 1
+                ? SizedBox(height: 30.h)
+                : SizedBox(
+                    height: 0.h,
+                  ),
+
+            (kiosk?.kioskMachineId ?? 1) == 1
+            ? NonGradientContainer(
               content: Padding(
                 padding: EdgeInsets.all(8.r),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(10.r),
-                  child: Image.asset(
-                    (kiosk?.kioskMachineId ?? 4) == 1
-                        ? SnaptagImages.printLoading
-                        : randomAdImage ?? SnaptagImages.printLoading,
-                    fit: BoxFit.fill,
-                  ),
+                  child: (kiosk?.kioskMachineId ?? 1) == 1
+                      ? SizedBox(
+                          child: Image.asset(
+                            SnaptagImages.printLoading,
+                            fit: BoxFit.fill,
+                          ),
+                        )
+                      : Image.asset(
+                          randomAdImage ?? SnaptagImages.printLoading,
+                          fit: BoxFit.fill,
+                        ),
+                ),
+              ),
+            ) : GradientContainer(
+              content: Padding(
+                padding: EdgeInsets.all(8.r),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(10.r),
+                  child: SizedBox(
+                          child: Image.asset(
+                            SnaptagImages.printLoading,
+                            fit: BoxFit.fill,
+                          ),
+                        )
                 ),
               ),
             ),
-            SizedBox(height: 30.h),
+            (kiosk?.kioskMachineId ?? 1) == 1
+                ? SizedBox(height: 30.h)
+                : SizedBox(
+                    height: 0.h,
+                  ),
             Text(
               LocaleKeys.sub03_txt_02.tr(),
               textAlign: TextAlign.center,
