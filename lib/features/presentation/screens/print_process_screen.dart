@@ -142,40 +142,23 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
                 : SizedBox(
                     height: 0.h,
                   ),
-
             (kiosk?.kioskMachineId ?? 1) == 1
-            ? NonGradientContainer(
-              content: Padding(
-                padding: EdgeInsets.all(8.r),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(10.r),
-                  child: (kiosk?.kioskMachineId ?? 1) == 1
-                      ? SizedBox(
-                          child: Image.asset(
-                            SnaptagImages.printLoading,
-                            fit: BoxFit.fill,
-                          ),
-                        )
-                      : Image.asset(
-                          randomAdImage ?? SnaptagImages.printLoading,
-                          fit: BoxFit.fill,
-                        ),
-                ),
-              ),
-            ) : GradientContainer(
-              content: Padding(
-                padding: EdgeInsets.all(8.r),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(10.r),
-                  child: SizedBox(
-                          child: Image.asset(
-                            SnaptagImages.printLoading,
-                            fit: BoxFit.fill,
-                          ),
-                        )
-                ),
-              ),
-            ),
+                ? GradientContainer(
+                    content: Padding(
+                      padding: EdgeInsets.all(8.r),
+                      child: ClipRRect(
+                          borderRadius: BorderRadius.circular(10.r),
+                          child: SizedBox(
+                            child: Image.asset(
+                              SnaptagImages.printLoading,
+                              fit: BoxFit.fill,
+                            ),
+                          )),
+                    ),
+                  ): Image.asset(
+                    randomAdImage ?? SnaptagImages.printLoading,
+                    fit: BoxFit.fill,
+                  ),
             (kiosk?.kioskMachineId ?? 1) == 1
                 ? SizedBox(height: 30.h)
                 : SizedBox(
