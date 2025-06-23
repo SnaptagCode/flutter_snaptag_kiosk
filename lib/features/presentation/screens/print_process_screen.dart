@@ -2,7 +2,6 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_snaptag_kiosk/features/move_me/widgets/non_gradient_container.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 
 import 'dart:io';
@@ -18,7 +17,7 @@ class PrintProcessScreen extends ConsumerStatefulWidget {
 class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
   @override
   Widget build(BuildContext context) {
-    final randomAdImage = getRandomAdImagePath();
+    final randomAdImage = getRandomAdImageFilePath();
     /**
          final printProcess = ref.watch(printProcessScreenProviderProvider);
     if (printProcess.isLoading) {
@@ -155,10 +154,10 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
                             ),
                           )),
                     ),
-                  ): Image.asset(
-                    randomAdImage ?? SnaptagImages.printLoading,
+                  ): randomAdImage == null ? Image.asset(
+                     SnaptagImages.printLoading,
                     fit: BoxFit.fill,
-                  ),
+                  ) : Image.file(File(randomAdImage)),
             ((kiosk?.kioskMachineId ?? 1) != 2 && (kiosk?.kioskMachineId ?? 1) != 3) || randomAdImage == null
                 ? SizedBox(height: 30.h)
                 : SizedBox(
@@ -244,4 +243,41 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
 
     return 'assets/adImages/$fileName';
   }
+
+    String? getRandomAdImageFilePath() {
+    final version = getAppVersionSync();
+    final userDir = getUserDirectorySync();
+
+    if (version == null || userDir == null) {
+      print('❌ 사용자 디렉토리 또는 버전을 불러올 수 없습니다.');
+      return null;
+    }
+
+    final adImageFolder = Directory(
+      '$userDir\\Snaptag\\$version\\assets\\adImages',
+    );
+
+    if (!adImageFolder.existsSync()) {
+      print('❌ 이미지 폴더가 존재하지 않습니다: ${adImageFolder.path}');
+      return null;
+    }
+
+    final imageFiles = adImageFolder
+        .listSync()
+        .whereType<File>()
+        .where((f) =>
+            f.path.endsWith('.png') ||
+            f.path.endsWith('.jpg') ||
+            f.path.endsWith('.jpeg'))
+        .toList();
+
+    if (imageFiles.isEmpty) {
+      print('❌ 이미지 파일이 없습니다.');
+      return null;
+    }
+
+    final randomFile = imageFiles[Random().nextInt(imageFiles.length)];
+    return randomFile.path; // ⬅️ 여기서 전체 파일 경로 반환
+  }
+
 }
