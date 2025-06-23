@@ -137,12 +137,12 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
               textAlign: TextAlign.center,
               style: context.typography.kioskBody1B,
             ),
-            (kiosk?.kioskMachineId ?? 1) == 1
+            (kiosk?.kioskMachineId ?? 1) != 2 && (kiosk?.kioskMachineId ?? 1) != 3
                 ? SizedBox(height: 30.h)
                 : SizedBox(
                     height: 0.h,
                   ),
-            (kiosk?.kioskMachineId ?? 1) == 1
+            (kiosk?.kioskMachineId ?? 1) != 2 && (kiosk?.kioskMachineId ?? 1) != 3
                 ? GradientContainer(
                     content: Padding(
                       padding: EdgeInsets.all(8.r),
@@ -159,7 +159,7 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
                     randomAdImage ?? SnaptagImages.printLoading,
                     fit: BoxFit.fill,
                   ),
-            (kiosk?.kioskMachineId ?? 1) == 1
+            (kiosk?.kioskMachineId ?? 1) != 2 && (kiosk?.kioskMachineId ?? 1) != 3
                 ? SizedBox(height: 30.h)
                 : SizedBox(
                     height: 0.h,

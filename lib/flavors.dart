@@ -21,7 +21,6 @@ class F {
 
   static String get adminBaseUrl {
     switch (F.appFlavor) {
-      
       case Flavor.dev:
         return 'https://kiosk-admin-dev-server.snaptag.co.kr';
       case Flavor.prod:
