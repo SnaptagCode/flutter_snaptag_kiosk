@@ -18,8 +18,7 @@ part 'card_printer.g.dart';
 class PrinterService extends _$PrinterService {
   late final PrinterBindings _bindings;
 
-  bool _hasConnected = false;
-  bool get hasConnected => _hasConnected;
+  bool _firstConnectedFailed = false;
 
   @override
   FutureOr<void> build() async {
@@ -48,32 +47,18 @@ class PrinterService extends _$PrinterService {
   Future<bool> checkConnectedPrint() async {
     try {
       final connected = _bindings.connectPrinter();
-      _hasConnected = connected;
+
       logger.e('checkConnectedPrint: $connected');
-      SlackLogService().sendLogToSlack('checkConnectedPrint: $connected');
-      if (!connected) return false;
 
-      final printerLog = getPrinterLogData(_bindings);
-
-      final isReady = printerLog?.printerMainStatusCode == "1004";
-
-      return connected && isReady;
-    } catch (e) {
-      logger.e('Error checking printer connection: $e');
-      return false;
-    }
-  }
-
-  Future<bool> checkConnectedWithPrinterLog() async {
-    try {
-      final connected = _bindings.connectPrinter();
-      _hasConnected = connected;
       if (!connected) {
-        SlackLogService().sendErrorLogToSlack('Failed to connect printer');
-        throw Exception('Failed to connect printer');
+        if (!_firstConnectedFailed) {
+          _firstConnectedFailed = true;
+          SlackLogService().sendErrorLogToSlack('PrintConnected Failed - First Attempt');
+        }
+        return false;
       }
 
-      final printerLog = await startPrintLog();
+      final printerLog = getPrinterLogData(_bindings);
 
       final isReady = printerLog?.printerMainStatusCode == "1004";
 
@@ -94,7 +79,6 @@ class PrinterService extends _$PrinterService {
       // 4. 프린터 준비 상태 확인
       final ready = _bindings.ensurePrinterReady();
       if (!ready) {
-        SlackLogService().sendErrorLogToSlack('Failed to connect printer');
         throw Exception('Failed to ensure printer ready');
       }
       return true;

@@ -65,6 +65,6 @@ class SnaptagSvg {
   static const String printDouble = 'assets/icons/print/print_double.svg';
   static const String printSingle = 'assets/icons/print/print_single.svg';
 
-  static const String printConnect = 'assets/icons/print/print_connect.svg';
-  static const String printError = 'assets/icons/print/print_error.svg';
+  static const String printConnect = 'assets/icons/print/print_ready.svg';
+  static const String printError = 'assets/icons/print/print_not_ready.svg';
 }

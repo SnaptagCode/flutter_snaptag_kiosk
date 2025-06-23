@@ -25,12 +25,24 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
   void initState() {
     super.initState();
 
+    final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
+
     _timer = Timer.periodic(Duration(seconds: 2), (timer) async {
       // 여기에 실행하고 싶은 로직 작성
       final connected = await ref.read(printerServiceProvider.notifier).checkConnectedPrint();
       if (mounted) {
         setState(() {
-          _isConnectedPrinter = connected;
+          SlackLogService()
+              .sendLogToSlack('MachineId : $machineId Connected Printer ${connected ? 'Success' : 'Failed'}');
+          if (connected) {
+            final settingCompleted = ref.read(printerServiceProvider.notifier).settingPrinter();
+            _isConnectedPrinter = settingCompleted;
+
+            SlackLogService()
+                .sendLogToSlack('MachineId : $machineId Setting Printer ${settingCompleted ? 'Success' : 'Failed'}');
+          } else {
+            _isConnectedPrinter = false;
+          }
         });
       }
     });
@@ -49,6 +61,7 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
     final currentVersion = versionState.currentVersion;
     final latestVersion = versionState.latestVersion;
     final isUpdateAvailable = currentVersion != latestVersion;
+    final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
     //final isUpdateAvailable = false;
 
     return Theme(
@@ -264,25 +277,20 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
                       onTap: () async {
                         await SoundManager().playSound();
 
-                        final connected =
-                            await ref.read(printerServiceProvider.notifier).checkConnectedWithPrinterLog();
+                        final connected = await ref.read(printerServiceProvider.notifier).checkConnectedPrint();
                         final settingPrinter = ref.read(printerServiceProvider.notifier).settingPrinter();
 
                         if (!connected) {
-                          final result = await DialogHelper.showSetupDialog(
-                            context,
-                            title: '프린터 연결 안됨',
-                          );
-
+                          SlackLogService().sendErrorLogToSlack(
+                              'MachineId : $machineId  PrintConnected Failed - Attempted to run event');
+                          await DialogHelper.showPrintWaitingDialog(context);
                           return;
                         }
 
                         if (!settingPrinter) {
-                          final result = await DialogHelper.showSetupDialog(
-                            context,
-                            title: '카드 공급기를 확인해주세요.',
-                          );
-
+                          SlackLogService().sendErrorLogToSlack(
+                              'MachineId : $machineId  SettingPrint Failed - Attempted to run event');
+                          await DialogHelper.showCheckPrintStateDialog(context);
                           return;
                         }
 
@@ -347,13 +355,8 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
                     width: 260.w,
                     height: 342.h,
                     child: SetupMainCard(
-                      label: '서비스 점검',
-                      assetName: SnaptagSvg.maintenance,
-                      onTap: () async {
-                        await SoundManager().playSound();
-
-                        MaintenanceRouteData().go(context);
-                      },
+                      label: _isConnectedPrinter ? '프린트\n사용가능' : '프린트\n준비중',
+                      assetName: _isConnectedPrinter ? SnaptagSvg.printConnect : SnaptagSvg.printError,
                     ),
                   ),
                   SizedBox(
@@ -362,7 +365,7 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
                     child: SetupUpdateCard(
                       title: '현재 버전',
                       //version: currentVersion,
-                      version: "v2.4.7",
+                      version: "v2.4.8",
                       buttonName: '업데이트',
                       isActive: isUpdateAvailable,
                       onUpdatePressed: () async {
@@ -395,8 +398,13 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
                     width: 260.w,
                     height: 342.h,
                     child: SetupMainCard(
-                      label: '프린트 연결 상태',
-                      assetName: _isConnectedPrinter ? SnaptagSvg.printConnect : SnaptagSvg.printError,
+                      label: '서비스 점검',
+                      assetName: SnaptagSvg.maintenance,
+                      onTap: () async {
+                        await SoundManager().playSound();
+
+                        MaintenanceRouteData().go(context);
+                      },
                     ),
                   ),
                 ],
