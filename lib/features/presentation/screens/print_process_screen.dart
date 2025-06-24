@@ -136,13 +136,7 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
               textAlign: TextAlign.center,
               style: context.typography.kioskBody1B,
             ),
-            ((kiosk?.kioskMachineId ?? 1) != 2 &&
-                        (kiosk?.kioskMachineId ?? 1) != 3) ||
-                    randomAdImage == null
-                ? SizedBox(height: 30.h)
-                : SizedBox(
-                    height: 0.h,
-                  ),
+            SizedBox(height: 30.h),
             ((kiosk?.kioskMachineId ?? 1) != 2 &&
                         (kiosk?.kioskMachineId ?? 1) != 3) ||
                     randomAdImage == null
@@ -165,13 +159,7 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
                         fit: BoxFit.fill,
                       )
                     : Image.file(File(randomAdImage)),
-            ((kiosk?.kioskMachineId ?? 1) != 2 &&
-                        (kiosk?.kioskMachineId ?? 1) != 3) ||
-                    randomAdImage == null
-                ? SizedBox(height: 30.h)
-                : SizedBox(
-                    height: 0.h,
-                  ),
+            SizedBox(height: 30.h),
             Text(
               LocaleKeys.sub03_txt_02.tr(),
               textAlign: TextAlign.center,
