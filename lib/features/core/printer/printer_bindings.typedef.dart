@@ -114,3 +114,6 @@ typedef R600IsFeederNoEmpty = int Function(Pointer<Int32>);
 
 typedef R600GetRbnAndFilmRemainingNative = Uint32 Function(Pointer<Short> pRbnRemaining, Pointer<Short> pFilmRemaining);
 typedef R600GetRbnAndFilmRemaining = int Function(Pointer<Short> pRbnRemaining, Pointer<Short> pFilmRemaining);
+
+typedef R600SetImgVisualParamNative = Uint32 Function(Int32 nBrightness, Int32 nContrast, Int32 nSaturation);
+typedef R600SetImgVisualParam = int Function(int nBrightness, int nContrast, int nSaturation);

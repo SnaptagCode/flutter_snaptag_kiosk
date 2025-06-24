@@ -37,37 +37,76 @@ class PrinterBindings {
   late final R600DrawImage _drawImage;
   late final R600IsFeederNoEmpty _isFeederNoEmpty;
   late final R600GetRbnAndFilmRemaining _getRbnAndFilmRemaining;
+  late final R600SetImgVisualParam _setImgVisualBritness;
 
   PrinterBindings() {
     // DLL 로드
     _dll = DynamicLibrary.open(FilePaths.printerDLL.buildPath);
 
-    _libInit = _dll.lookupFunction<R600LibInitNative, R600LibInit>('R600LibInit');
-    _getErrorInfo = _dll.lookupFunction<R600GetErrorOuterInfoNative, R600GetErrorOuterInfo>('R600GetErrorOuterInfo');
-    _isPrtHaveCard = _dll.lookupFunction<R600IsPrtHaveCardNative, R600IsPrtHaveCard>('R600IsPrtHaveCard');
-    _prepareCanvas = _dll.lookupFunction<R600PrepareCanvasNative, R600PrepareCanvas>('R600PrepareCanvas');
-    _drawImage = _dll.lookupFunction<R600DrawImageNative, R600DrawImage>('R600DrawImage');
-    _drawText = _dll.lookupFunction<R600DrawTextNative, R600DrawText>('R600DrawText');
-    _cardInject = _dll.lookupFunction<R600CardInjectNative, R600CardInject>('R600CardInject');
-    _printDraw = _dll.lookupFunction<R600PrintDrawNative, R600PrintDraw>('R600PrintDraw');
-    _cardEject = _dll.lookupFunction<R600CardEjectNative, R600CardEject>('R600CardEject');
+    _libInit =
+        _dll.lookupFunction<R600LibInitNative, R600LibInit>('R600LibInit');
+    _getErrorInfo =
+        _dll.lookupFunction<R600GetErrorOuterInfoNative, R600GetErrorOuterInfo>(
+            'R600GetErrorOuterInfo');
+    _isPrtHaveCard =
+        _dll.lookupFunction<R600IsPrtHaveCardNative, R600IsPrtHaveCard>(
+            'R600IsPrtHaveCard');
+    _prepareCanvas =
+        _dll.lookupFunction<R600PrepareCanvasNative, R600PrepareCanvas>(
+            'R600PrepareCanvas');
+    _drawImage = _dll
+        .lookupFunction<R600DrawImageNative, R600DrawImage>('R600DrawImage');
+    _drawText =
+        _dll.lookupFunction<R600DrawTextNative, R600DrawText>('R600DrawText');
+    _cardInject = _dll
+        .lookupFunction<R600CardInjectNative, R600CardInject>('R600CardInject');
+    _printDraw = _dll
+        .lookupFunction<R600PrintDrawNative, R600PrintDraw>('R600PrintDraw');
+    _cardEject = _dll
+        .lookupFunction<R600CardEjectNative, R600CardEject>('R600CardEject');
     _setCanvasPortrait =
-        _dll.lookupFunction<R600SetCanvasPortraitNative, R600SetCanvasPortrait>('R600SetCanvasPortrait');
-    _setCoatRgn = _dll.lookupFunction<R600SetCoatRgnNative, R600SetCoatRgn>('R600SetCoatRgn');
-    _setImagePara = _dll.lookupFunction<R600SetImageParaNative, R600SetImagePara>('R600SetImagePara');
-    _queryPrinterStatus = _dll.lookupFunction<R600QueryPrtStatusNative, R600QueryPrtStatus>('R600QueryPrtStatus');
-    _enumUsbPrt = _dll.lookupFunction<R600EnumUsbPrtNative, R600EnumUsbPrt>('R600EnumUsbPrt');
-    _usbSetTimeout = _dll.lookupFunction<R600UsbSetTimeoutNative, R600UsbSetTimeout>('R600UsbSetTimeout');
-    _commitCanvas = _dll.lookupFunction<R600CommitCanvasNative, R600CommitCanvas>('R600CommitCanvas');
-    _selectPrinter = _dll.lookupFunction<R600SelectPrtNative, R600SelectPrt>('R600SelectPrt');
-    _libClear = _dll.lookupFunction<R600LibClearNative, R600LibClear>('R600LibClear');
-    _setRibbonOpt = _dll.lookupFunction<R600SetRibbonOptNative, R600SetRibbonOpt>('R600SetRibbonOpt');
-    _drawWaterMark = _dll.lookupFunction<R600DrawWaterMarkNative, R600DrawWaterMark>('R600DrawWaterMark');
-    _setFont = _dll.lookupFunction<R600SetFontNative, R600SetFont>('R600SetFont');
-    _setTextIsStrong = _dll.lookupFunction<R600SetTextIsStrongNative, R600SetTextIsStrong>('R600SetTextIsStrong');
-    _isFeederNoEmpty = _dll.lookupFunction<R600IsFeederNoEmptyNative, R600IsFeederNoEmpty>('R600IsFeederNoEmpty');
-    _getRbnAndFilmRemaining =
-        _dll.lookupFunction<R600GetRbnAndFilmRemainingNative, R600GetRbnAndFilmRemaining>('R600GetRbnAndFilmRemaining');
+        _dll.lookupFunction<R600SetCanvasPortraitNative, R600SetCanvasPortrait>(
+            'R600SetCanvasPortrait');
+    _setCoatRgn = _dll
+        .lookupFunction<R600SetCoatRgnNative, R600SetCoatRgn>('R600SetCoatRgn');
+    _setImagePara =
+        _dll.lookupFunction<R600SetImageParaNative, R600SetImagePara>(
+            'R600SetImagePara');
+    _queryPrinterStatus =
+        _dll.lookupFunction<R600QueryPrtStatusNative, R600QueryPrtStatus>(
+            'R600QueryPrtStatus');
+    _enumUsbPrt = _dll
+        .lookupFunction<R600EnumUsbPrtNative, R600EnumUsbPrt>('R600EnumUsbPrt');
+    _usbSetTimeout =
+        _dll.lookupFunction<R600UsbSetTimeoutNative, R600UsbSetTimeout>(
+            'R600UsbSetTimeout');
+    _commitCanvas =
+        _dll.lookupFunction<R600CommitCanvasNative, R600CommitCanvas>(
+            'R600CommitCanvas');
+    _selectPrinter = _dll
+        .lookupFunction<R600SelectPrtNative, R600SelectPrt>('R600SelectPrt');
+    _libClear =
+        _dll.lookupFunction<R600LibClearNative, R600LibClear>('R600LibClear');
+    _setRibbonOpt =
+        _dll.lookupFunction<R600SetRibbonOptNative, R600SetRibbonOpt>(
+            'R600SetRibbonOpt');
+    _drawWaterMark =
+        _dll.lookupFunction<R600DrawWaterMarkNative, R600DrawWaterMark>(
+            'R600DrawWaterMark');
+    _setFont =
+        _dll.lookupFunction<R600SetFontNative, R600SetFont>('R600SetFont');
+    _setTextIsStrong =
+        _dll.lookupFunction<R600SetTextIsStrongNative, R600SetTextIsStrong>(
+            'R600SetTextIsStrong');
+    _isFeederNoEmpty =
+        _dll.lookupFunction<R600IsFeederNoEmptyNative, R600IsFeederNoEmpty>(
+            'R600IsFeederNoEmpty');
+    _getRbnAndFilmRemaining = _dll.lookupFunction<
+        R600GetRbnAndFilmRemainingNative,
+        R600GetRbnAndFilmRemaining>('R600GetRbnAndFilmRemaining');
+    _setImgVisualBritness =
+        _dll.lookupFunction<R600SetImgVisualParamNative, R600SetImgVisualParam>(
+            'R600SetImgVisualParam');
   }
 
   int initLibrary() {
@@ -117,6 +156,18 @@ class PrinterBindings {
     }
   }
 
+  // 밝기 조절 함수 drawImage이전에 호출
+  void setBritness({
+    required int nBrightness,
+    required int nContrast,
+    required int nSaturation,
+  }) {
+    final result = _setImgVisualBritness(nBrightness, nContrast, nSaturation);
+    if (result != 0) {
+      throw Exception("밝기 조절 실패 : ${result}");
+    }
+  }
+
   // 이미지 그리기 함수
   void drawImage({
     required String imagePath,
@@ -131,7 +182,8 @@ class PrinterBindings {
 
     final pathPointer = imagePath.toNativeUtf8();
     try {
-      final result = _drawImage(x, y, width, height, pathPointer.cast(), noAbsoluteBlack ? 1 : 0);
+      final result = _drawImage(
+          x, y, width, height, pathPointer.cast(), noAbsoluteBlack ? 1 : 0);
       logger.i('DrawImage result: $result'); // 결과 코드 확인
       if (result != 0) {
         final error = getErrorInfo(result);
@@ -153,7 +205,8 @@ class PrinterBindings {
   }) {
     final textPointer = text.toNativeUtf8();
     try {
-      final result = _drawText(x, y, width, height, textPointer.cast(), noAbsoluteBlack ? 1 : 0);
+      final result = _drawText(
+          x, y, width, height, textPointer.cast(), noAbsoluteBlack ? 1 : 0);
       if (result != 0) {
         throw Exception('Failed to draw text');
       }
@@ -213,7 +266,8 @@ class PrinterBindings {
     required bool isFront,
     required bool isErase,
   }) {
-    final result = _setCoatRgn(x, y, width, height, isFront ? 1 : 0, isErase ? 1 : 0);
+    final result =
+        _setCoatRgn(x, y, width, height, isFront ? 1 : 0, isErase ? 1 : 0);
     if (result != 0) {
       throw Exception('Failed to set coating region');
     }

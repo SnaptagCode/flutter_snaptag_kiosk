@@ -166,6 +166,13 @@ class PrinterService extends _$PrinterService {
     _bindings.setCanvasOrientation(true);
     _bindings.prepareCanvas(isColor: true);
 
+    logger.i('Set Britness...');
+    _bindings.setBritness(
+      nBrightness: 100,
+      nContrast: 0,
+      nSaturation: 0,
+    );
+    
     logger.i('Drawing image...');
     _bindings.drawImage(
       imagePath: imagePath,
