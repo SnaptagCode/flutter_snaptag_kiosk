@@ -16,7 +16,6 @@ class SnaptagImages {
   static const String loading = 'assets/images/loading.gif';
 
   static const String maintenance = 'assets/images/maintenance.png';
-
 }
 
 class SnaptagSounds {

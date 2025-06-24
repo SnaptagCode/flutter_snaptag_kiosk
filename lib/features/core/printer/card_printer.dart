@@ -127,7 +127,7 @@ class PrinterService extends _$PrinterService {
 
       logger.i('6. Printing card...');
 
-      if (isSingleMode){
+      if (isSingleMode) {
         _bindings.printCard(
           frontImageInfo: rearBuffer?.toString(),
           backImageInfo: null,

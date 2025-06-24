@@ -73,6 +73,7 @@ flutter:
     - assets/lang/
     - assets/luca/
     - assets/sounds/
+    - assets/adImages/
     - assets/.env.version
 
   fonts:
