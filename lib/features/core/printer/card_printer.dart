@@ -49,7 +49,8 @@ class PrinterService extends _$PrinterService {
       logger.i('Printer initialization completed');
     } catch (e) {
       final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
-      SlackLogService().sendErrorLogToSlack('Machine ID: $machineId, Printer initialization error: $e');
+      SlackLogService().sendErrorLogToSlack(
+          'Machine ID: $machineId, Printer initialization error: $e');
       rethrow;
     }
   }
@@ -62,7 +63,8 @@ class PrinterService extends _$PrinterService {
       /*if (frontFile == null && embeddedFile == null) {
         throw Exception('There is nothing to print');
       }*/
-      final isSingleMode = (ref.read(pagePrintProvider) == PagePrintType.single);
+      final isSingleMode =
+          (ref.read(pagePrintProvider) == PagePrintType.single);
       state = const AsyncValue.loading();
       // 피더 상태 체크 추가
       logger.i('Checking feeder status...');
@@ -127,7 +129,7 @@ class PrinterService extends _$PrinterService {
 
       logger.i('6. Printing card...');
 
-      if (isSingleMode){
+      if (isSingleMode) {
         _bindings.printCard(
           frontImageInfo: rearBuffer?.toString(),
           backImageInfo: null,
@@ -157,12 +159,14 @@ class PrinterService extends _$PrinterService {
       final log = printerLog.copyWith(kioskMachineId: machineId);
       if (machineId != 0) {
         await ref.read(kioskRepositoryProvider).updatePrintLog(request: log);
-        SlackLogService().sendLogToSlack('Machine ID: $machineId , PrintState : $log');
+        SlackLogService()
+            .sendLogToSlack('Machine ID: $machineId , PrintState : $log');
       }
     }
   }
 
-  Future<void> _prepareAndDrawImage(StringBuffer buffer, String imagePath, bool isFront) async {
+  Future<void> _prepareAndDrawImage(
+      StringBuffer buffer, String imagePath, bool isFront) async {
     _bindings.setCanvasOrientation(true);
     _bindings.prepareCanvas(isColor: true);
 
@@ -196,7 +200,8 @@ class PrinterService extends _$PrinterService {
       final status = _bindings.getPrinterStatus();
       if (status != null) {
         if (status.errorStatus != 0) {
-          state = AsyncError('Printer error: ${status.errorStatus}', StackTrace.current);
+          state = AsyncError(
+              'Printer error: ${status.errorStatus}', StackTrace.current);
           break;
         }
       }
@@ -235,7 +240,8 @@ class PrinterService extends _$PrinterService {
           sdkSubCode: (printerStatus?.mainCode ?? 0).toString(),
           printerMainStatusCode: (printerStatus?.mainStatus ?? 0).toString(),
           printerErrorStatusCode: (printerStatus?.errorStatus ?? 0).toString(),
-          printerWarningStatusCode: (printerStatus?.warningStatus ?? 0).toString(),
+          printerWarningStatusCode:
+              (printerStatus?.warningStatus ?? 0).toString(),
           chassisTemperature: printerStatus?.chassisTemperature ?? 0,
           printerHeadTemperature: printerStatus?.printHeadTemperature ?? 0,
           heaterTemperature: printerStatus?.heaterTemperature ?? 0,

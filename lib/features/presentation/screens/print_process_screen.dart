@@ -44,31 +44,25 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
         await next.when(
           error: (error, stack) async {
             logger.e('Print process error', error: error, stackTrace: stack);
-            final machineId =
-                ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
-            SlackLogService().sendErrorLogToSlack(
-                'Machine ID: $machineId, Print process error\nError: $error');
-            SlackLogService()
-                .sendErrorLogToSlack('Print process error\nError: $error');
+            final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
+            SlackLogService().sendErrorLogToSlack('Machine ID: $machineId, Print process error\nError: $error');
+            SlackLogService().sendErrorLogToSlack('Print process error\nError: $error');
             final errorMessage = error.toString();
             // 에러 발생 시 환불 처리
             try {
               await ref.read(paymentServiceProvider.notifier).refund();
               ref.read(cardCountProvider.notifier).increase();
             } catch (refundError) {
-              SlackLogService()
-                  .sendErrorLogToSlack('Refund failed \nError: $refundError');
+              SlackLogService().sendErrorLogToSlack('Refund failed \nError: $refundError');
               logger.e('Refund failed', error: refundError);
             }
             if (errorMessage.contains('Card feeder is empty')) {
               if (ref.read(cardCountProvider) < 1) {
                 ref.read(pagePrintProvider.notifier).set(PagePrintType.double);
-                SlackLogService().sendLogToSlack(
-                    'machineId: $machineId, change pagePrintType double');
+                SlackLogService().sendLogToSlack('machineId: $machineId, change pagePrintType double');
               } else {
                 ref.read(pagePrintProvider.notifier).set(PagePrintType.single);
-                SlackLogService().sendLogToSlack(
-                    'machineId: $machineId, change pagePrintType single');
+                SlackLogService().sendLogToSlack('machineId: $machineId, change pagePrintType single');
               }
               await DialogHelper.showPrintCardRefillDialog(
                 context,
@@ -79,12 +73,10 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
             } else {
               if (ref.read(cardCountProvider) < 1) {
                 ref.read(pagePrintProvider.notifier).set(PagePrintType.double);
-                SlackLogService().sendLogToSlack(
-                    'machineId: $machineId, change pagePrintType double');
+                SlackLogService().sendLogToSlack('machineId: $machineId, change pagePrintType double');
               } else {
                 ref.read(pagePrintProvider.notifier).set(PagePrintType.single);
-                SlackLogService().sendLogToSlack(
-                    'machineId: $machineId, change pagePrintType single');
+                SlackLogService().sendLogToSlack('machineId: $machineId, change pagePrintType single');
               }
               await DialogHelper.showPrintErrorDialog(
                 context,
@@ -96,16 +88,13 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
           },
           loading: () => null,
           data: (_) async {
-            final machineId =
-                ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
+            final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
             if (ref.read(cardCountProvider) < 1) {
               ref.read(pagePrintProvider.notifier).set(PagePrintType.double);
-              SlackLogService().sendLogToSlack(
-                  'machineId: $machineId, change pagePrintType double');
+              SlackLogService().sendLogToSlack('machineId: $machineId, change pagePrintType double');
             } else {
               ref.read(pagePrintProvider.notifier).set(PagePrintType.single);
-              SlackLogService().sendLogToSlack(
-                  'machineId: $machineId, change pagePrintType single');
+              SlackLogService().sendLogToSlack('machineId: $machineId, change pagePrintType single');
             }
             await DialogHelper.showPrintCompleteDialog(
               context,
@@ -118,13 +107,9 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
       }
     });
     final kiosk = ref.watch(kioskInfoServiceProvider);
-    print("랜덤 이미지 : ${randomAdImage}");
-    print("키오스크 번호 : ${(kiosk?.kioskMachineId ?? 1)}");
     return DefaultTextStyle(
       style: TextStyle(
-        fontFamily: context.locale.languageCode == 'ja'
-            ? 'MPLUSRounded'
-            : 'Cafe24Ssurround2',
+        fontFamily: context.locale.languageCode == 'ja' ? 'MPLUSRounded' : 'Cafe24Ssurround2',
       ),
       child: Center(
         child: Column(
@@ -137,9 +122,7 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
               style: context.typography.kioskBody1B,
             ),
             SizedBox(height: 30.h),
-            ((kiosk?.kioskMachineId ?? 1) != 2 &&
-                        (kiosk?.kioskMachineId ?? 1) != 3) ||
-                    randomAdImage == null
+            ((kiosk?.kioskMachineId ?? 1) != 2 && (kiosk?.kioskMachineId ?? 1) != 3) || randomAdImage == null
                 ? GradientContainer(
                     content: Padding(
                       padding: EdgeInsets.all(8.r),
@@ -170,9 +153,7 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
               LocaleKeys.sub03_txt_03.tr(),
               textAlign: TextAlign.center,
               style: context.typography.kioskBody2B.copyWith(
-                color: Color(int.parse(
-                    kiosk?.couponTextColor.replaceFirst('#', '0xff') ??
-                        '0xffffff')),
+                color: Color(int.parse(kiosk?.couponTextColor.replaceFirst('#', '0xff') ?? '0xffffff')),
                 //fontFamily: 'Pretendard',
               ),
             ),
@@ -224,10 +205,7 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
     final imageFiles = adImageFolder
         .listSync()
         .whereType<File>()
-        .where((f) =>
-            f.path.endsWith('.png') ||
-            f.path.endsWith('.jpg') ||
-            f.path.endsWith('.jpeg'))
+        .where((f) => f.path.endsWith('.png') || f.path.endsWith('.jpg') || f.path.endsWith('.jpeg'))
         .toList();
 
     if (imageFiles.isEmpty) {
@@ -247,8 +225,7 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
     final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
     if (version == null || userDir == null) {
       if (machineId == 2 || machineId == 3) {
-        SlackLogService()
-            .sendLogToSlack('machineId: $machineId 배너를 불러오기 위한 사용자 디렉토리 또는 버전을 불러올 수 없습니다.');
+        SlackLogService().sendLogToSlack('machineId: $machineId 배너를 불러오기 위한 사용자 디렉토리 또는 버전을 불러올 수 없습니다.');
       }
       return null;
     }
@@ -259,8 +236,7 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
 
     if (!adImageFolder.existsSync()) {
       if (machineId == 2 || machineId == 3) {
-        SlackLogService()
-            .sendLogToSlack('machineId: $machineId 배너를 불러오기 위한 이미지 폴더가 존재하지 않습니다.');
+        SlackLogService().sendLogToSlack('machineId: $machineId 배너를 불러오기 위한 이미지 폴더가 존재하지 않습니다.');
       }
       print('❌ 이미지 폴더가 존재하지 않습니다: ${adImageFolder.path}');
       return null;
@@ -269,16 +245,12 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
     final imageFiles = adImageFolder
         .listSync()
         .whereType<File>()
-        .where((f) =>
-            f.path.endsWith('.png') ||
-            f.path.endsWith('.jpg') ||
-            f.path.endsWith('.jpeg'))
+        .where((f) => f.path.endsWith('.png') || f.path.endsWith('.jpg') || f.path.endsWith('.jpeg'))
         .toList();
 
     if (imageFiles.isEmpty) {
       if (machineId == 2 || machineId == 3) {
-        SlackLogService()
-            .sendLogToSlack('machineId: $machineId 배너를 불러오기 위한 이미지 폴더내부에 이미지가 존재하지 않습니다.');
+        SlackLogService().sendLogToSlack('machineId: $machineId 배너를 불러오기 위한 이미지 폴더내부에 이미지가 존재하지 않습니다.');
       }
       return null;
     }
