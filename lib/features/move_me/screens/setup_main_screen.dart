@@ -462,8 +462,7 @@ class SetupMainCard extends StatelessWidget {
       ),
       clipBehavior: Clip.antiAlias,
       color: Colors.white,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(12),
+      child: GestureDetector(
         onTap: onTap,
         child: SizedBox(
           width: double.infinity,
