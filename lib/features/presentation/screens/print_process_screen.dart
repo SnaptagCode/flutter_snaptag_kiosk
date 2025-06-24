@@ -141,7 +141,10 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
                         SnaptagImages.printLoading,
                         fit: BoxFit.fill,
                       )
-                    : Image.file(File(randomAdImage)),
+                    : Image.file(
+                        File(randomAdImage),
+                        fit: BoxFit.fill,
+                      ),
             SizedBox(height: 30.h),
             Text(
               LocaleKeys.sub03_txt_02.tr(),
