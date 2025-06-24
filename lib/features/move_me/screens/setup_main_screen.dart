@@ -236,84 +236,88 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  SizedBox(
-                    width: 260.w,
-                    height: 342.h,
-                    child: SetupMainCard(
-                      label: '이벤트\n미리보기',
-                      assetName: SnaptagSvg.eventPreview,
-                      onTap: () async {
-                        if (ref.read(pagePrintProvider) != PagePrintType.none) {
-                          await SoundManager().playSound();
-                          if (cardCountState < 1) {
-                            ref.read(pagePrintProvider.notifier).set(PagePrintType.double);
-                          }
-                          KioskInfoRouteData().go(context);
-                        } else {
-                          print('이벤트를 선택해주세요');
-                        }
-                      },
-                    ),
-                  ),
-                  SizedBox(
-                    width: 260.w,
-                    height: 342.h,
-                    child: SetupMainCard(
-                      label: '출력 내역',
-                      assetName: SnaptagSvg.payment,
-                      onTap: () async {
-                        await SoundManager().playSound();
-
-                        PaymentHistoryRouteData().go(context);
-                      },
-                    ),
-                  ),
-                  SizedBox(
-                    width: 260.w,
-                    height: 342.h,
-                    child: SetupMainCard(
-                      label: '이벤트\n실행',
-                      assetName: SnaptagSvg.eventRun,
-                      onTap: () async {
-                        await SoundManager().playSound();
-
-                        final connected = await ref.read(printerServiceProvider.notifier).checkConnectedPrint();
-                        final settingPrinter = ref.read(printerServiceProvider.notifier).settingPrinter();
-
-                        if (!connected) {
-                          SlackLogService().sendErrorLogToSlack(
-                              'MachineId : $machineId  PrintConnected Failed - Attempted to run event');
-                          await DialogHelper.showPrintWaitingDialog(context);
-                          return;
-                        }
-
-                        if (!settingPrinter) {
-                          SlackLogService().sendErrorLogToSlack(
-                              'MachineId : $machineId  SettingPrint Failed - Attempted to run event');
-                          await DialogHelper.showCheckPrintStateDialog(context);
-                          return;
-                        }
-
-                        final result = await DialogHelper.showSetupDialog(
-                          context,
-                          title: '이벤트를 실행합니다.',
-                        );
-                        if (result) {
-                          final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
-                          SlackLogService().sendLogToSlack(
-                              'machineId:$machineId, currentVersion:$currentVersion, latestVersion:$latestVersion');
-                          if (cardCountState < 1) {
-                            ref.read(pagePrintProvider.notifier).set(PagePrintType.double);
-                            SlackLogService().sendLogToSlack(
-                                'machineId: $machineId, singleCard: $cardCountState, set pagePrintType double');
+                  Padding(
+                    padding: EdgeInsets.all(10.w),
+                    child: SizedBox(
+                      width: 260.w,
+                      height: 314.h,
+                      child: SetupMainCard(
+                        label: '이벤트\n미리보기',
+                        assetName: SnaptagSvg.eventPreview,
+                        onTap: () async {
+                          if (ref.read(pagePrintProvider) != PagePrintType.none) {
+                            await SoundManager().playSound();
+                            if (cardCountState < 1) {
+                              ref.read(pagePrintProvider.notifier).set(PagePrintType.double);
+                            }
+                            KioskInfoRouteData().go(context);
                           } else {
-                            ref.read(pagePrintProvider.notifier).set(PagePrintType.single);
-                            SlackLogService().sendLogToSlack(
-                                'machineId: $machineId, singleCard: $cardCountState, set pagePrintType single');
+                            print('이벤트를 선택해주세요');
                           }
-                          PhotoCardUploadRouteData().go(context);
-                        }
-                      },
+                        },
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.all(10.w),
+                    child: SizedBox(
+                      width: 260.w,
+                      height: 314.h,
+                      child: SetupMainCard(
+                        label: '출력 내역',
+                        assetName: SnaptagSvg.payment,
+                        onTap: () async {
+                          await SoundManager().playSound();
+                          PaymentHistoryRouteData().go(context);
+                        },
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.all(10.w),
+                    child: SizedBox(
+                      width: 260.w,
+                      height: 314.h,
+                      child: SetupMainCard(
+                        label: '이벤트\n실행',
+                        assetName: SnaptagSvg.eventRun,
+                        onTap: () async {
+                          await SoundManager().playSound();
+                          final connected = await ref.read(printerServiceProvider.notifier).checkConnectedPrint();
+                          final settingPrinter = ref.read(printerServiceProvider.notifier).settingPrinter();
+                          if (!connected) {
+                            SlackLogService().sendErrorLogToSlack(
+                                'MachineId : $machineId  PrintConnected Failed - Attempted to run event');
+                            await DialogHelper.showPrintWaitingDialog(context);
+                            return;
+                          }
+                          if (!settingPrinter) {
+                            SlackLogService().sendErrorLogToSlack(
+                                'MachineId : $machineId  SettingPrint Failed - Attempted to run event');
+                            await DialogHelper.showCheckPrintStateDialog(context);
+                            return;
+                          }
+                          final result = await DialogHelper.showSetupDialog(
+                            context,
+                            title: '이벤트를 실행합니다.',
+                          );
+                          if (result) {
+                            final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
+                            SlackLogService().sendLogToSlack(
+                                'machineId:$machineId, currentVersion:$currentVersion, latestVersion:$latestVersion');
+                            if (cardCountState < 1) {
+                              ref.read(pagePrintProvider.notifier).set(PagePrintType.double);
+                              SlackLogService().sendLogToSlack(
+                                  'machineId: $machineId, singleCard: $cardCountState, set pagePrintType double');
+                            } else {
+                              ref.read(pagePrintProvider.notifier).set(PagePrintType.single);
+                              SlackLogService().sendLogToSlack(
+                                  'machineId: $machineId, singleCard: $cardCountState, set pagePrintType single');
+                            }
+                            PhotoCardUploadRouteData().go(context);
+                          }
+                        },
+                      ),
                     ),
                   ),
                 ],
@@ -323,27 +327,31 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    SizedBox(
-                      width: 260.w,
-                      height: 342.h,
-                      child: SetupMainCard(
-                          label: 'Unit Test',
-                          onTap: () async {
-                            await SoundManager().playSound();
-
-                            UnitTestRouteData().go(context);
-                          }),
+                    Padding(
+                      padding: EdgeInsets.all(10.w),
+                      child: SizedBox(
+                        width: 260.w,
+                        height: 314.h,
+                        child: SetupMainCard(
+                            label: 'Unit Test',
+                            onTap: () async {
+                              await SoundManager().playSound();
+                              UnitTestRouteData().go(context);
+                            }),
+                      ),
                     ),
-                    SizedBox(
-                      width: 260.w,
-                      height: 342.h,
-                      child: SetupMainCard(
-                          label: 'Kiosk\nComponents',
-                          onTap: () async {
-                            await SoundManager().playSound();
-
-                            KioskComponentsRouteData().go(context);
-                          }),
+                    Padding(
+                      padding: EdgeInsets.all(10.w),
+                      child: SizedBox(
+                        width: 260.w,
+                        height: 314.h,
+                        child: SetupMainCard(
+                            label: 'Kiosk\nComponents',
+                            onTap: () async {
+                              await SoundManager().playSound();
+                              KioskComponentsRouteData().go(context);
+                            }),
+                      ),
                     ),
                   ],
                 ),
@@ -351,60 +359,69 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  SizedBox(
-                    width: 260.w,
-                    height: 342.h,
-                    child: SetupMainCard(
-                      label: _isConnectedPrinter ? '프린트\n사용가능' : '프린트\n준비중',
-                      assetName: _isConnectedPrinter ? SnaptagSvg.printConnect : SnaptagSvg.printError,
+                  Padding(
+                    padding: EdgeInsets.all(10.w),
+                    child: SizedBox(
+                      width: 260.w,
+                      height: 314.h,
+                      child: SetupMainCard(
+                        label: _isConnectedPrinter ? '프린트\n사용가능' : '프린트\n준비중',
+                        textColor: _isConnectedPrinter ? Color(0xFF1C1C1C) : Color(0xFFD5D5D5),
+                        assetName: _isConnectedPrinter ? SnaptagSvg.printConnect : SnaptagSvg.printError,
+                      ),
                     ),
                   ),
-                  SizedBox(
-                    width: 260.w,
-                    height: 342.h,
-                    child: SetupUpdateCard(
-                      title: '현재 버전',
-                      //version: currentVersion,
-                      version: "v2.4.8",
-                      buttonName: '업데이트',
-                      isActive: isUpdateAvailable,
-                      onUpdatePressed: () async {
-                        final result = await DialogHelper.showSetupTwoDialog(
-                          context,
-                          title: '업데이트 하시겠습니까?',
-                          contentText: '업데이트 시 앱이 재시작 됩니다.',
-                        );
-                        if (result) {
-                          try {
-                            final launcherPath = await LauncherPathUtil.getLauncherPath();
-                            await ForceUpdateWriter.writeForceUpdateTrue();
-                            print("Process.start");
-                            await Process.start(
-                              launcherPath,
-                              ['f'],
-                              runInShell: true,
-                              mode: ProcessStartMode.detached,
-                            );
-                            print("Process.start(launcherPath, ['f'])");
-                            exit(0);
-                          } catch (e) {
-                            print("런처 실행 실패: $e");
-                          }
-                        } else {}
-                      },
+                  Padding(
+                    padding: EdgeInsets.all(10.w),
+                    child: SizedBox(
+                      width: 260.w,
+                      height: 314.h,
+                      child: SetupUpdateCard(
+                        title: '현재 버전',
+                        //version: currentVersion,
+                        version: "v2.4.8",
+                        buttonName: '업데이트',
+                        isActive: isUpdateAvailable,
+                        onUpdatePressed: () async {
+                          final result = await DialogHelper.showSetupTwoDialog(
+                            context,
+                            title: '업데이트 하시겠습니까?',
+                            contentText: '업데이트 시 앱이 재시작 됩니다.',
+                          );
+                          if (result) {
+                            try {
+                              final launcherPath = await LauncherPathUtil.getLauncherPath();
+                              await ForceUpdateWriter.writeForceUpdateTrue();
+                              print("Process.start");
+                              await Process.start(
+                                launcherPath,
+                                ['f'],
+                                runInShell: true,
+                                mode: ProcessStartMode.detached,
+                              );
+                              print("Process.start(launcherPath, ['f'])");
+                              exit(0);
+                            } catch (e) {
+                              print("런처 실행 실패: $e");
+                            }
+                          } else {}
+                        },
+                      ),
                     ),
                   ),
-                  SizedBox(
-                    width: 260.w,
-                    height: 342.h,
-                    child: SetupMainCard(
-                      label: '서비스 점검',
-                      assetName: SnaptagSvg.maintenance,
-                      onTap: () async {
-                        await SoundManager().playSound();
-
-                        MaintenanceRouteData().go(context);
-                      },
+                  Padding(
+                    padding: EdgeInsets.all(10.w),
+                    child: SizedBox(
+                      width: 260.w,
+                      height: 314.h,
+                      child: SetupMainCard(
+                        label: '서비스 점검',
+                        assetName: SnaptagSvg.maintenance,
+                        onTap: () async {
+                          await SoundManager().playSound();
+                          MaintenanceRouteData().go(context);
+                        },
+                      ),
                     ),
                   ),
                 ],
@@ -429,52 +446,78 @@ class SetupMainCard extends StatelessWidget {
   final String label;
   final String? assetName;
   final void Function()? onTap;
-  const SetupMainCard({
-    super.key,
-    required this.label,
-    this.assetName,
-    this.onTap,
-  });
+  final Color? textColor;
+
+  const SetupMainCard({super.key, required this.label, this.assetName, this.onTap, this.textColor});
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.all(8.w),
-      child: Container(
-        width: 260.w,
-        height: 342.h,
-        padding: EdgeInsets.only(top: 50.w),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          border: Border.all(
-            color: Color(0xFFE6E8EB),
-          ),
-          borderRadius: const BorderRadius.all(Radius.circular(12)),
+    return Material(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(
+          color: Color(0xFFE6E8EB),
+          width: 2,
         ),
-        child: InkWell(
-          borderRadius: const BorderRadius.all(Radius.circular(12)),
-          onTap: onTap,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              if (assetName != null) ...[
-                SvgPicture.asset(
-                  assetName ?? '',
-                  width: 100.w,
-                  height: 100.w,
+      ),
+      clipBehavior: Clip.antiAlias,
+      color: Colors.white,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: onTap,
+        child: SizedBox(
+          width: double.infinity,
+          height: double.infinity,
+          child: assetName != null
+              ? Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    SizedBox(height: 10.h),
+                    SvgPicture.asset(
+                      assetName ?? '',
+                      width: 260.w,
+                      height: 200.w,
+                      fit: BoxFit.cover,
+                    ),
+                    Spacer(),
+                    Padding(
+                      padding: EdgeInsets.only(bottom: 22.h),
+                      child: SizedBox(
+                        width: 260.w,
+                        child: Text(
+                          label,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 34.sp,
+                            fontWeight: FontWeight.w700,
+                            color: textColor ?? Color(0xFF1C1C1C),
+                            letterSpacing: -0.1,
+                            height: 1.2,
+                          ),
+                        ),
+                      ),
+                    ),
+                    Spacer(),
+                  ],
                 )
-              ],
-              SizedBox(height: 50.w),
-              Align(
-                alignment: Alignment.bottomCenter,
-                child: Text(
-                  label,
-                  textAlign: TextAlign.center,
-                  style: context.typography.kioskInput2B,
+              : Expanded(
+                  child: Center(
+                    child: SizedBox(
+                      width: 260.w,
+                      child: Text(
+                        label,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 34.sp,
+                          fontWeight: FontWeight.w700,
+                          color: textColor ?? Color(0xFF1C1C1C),
+                          letterSpacing: -0.1,
+                          height: 1.2,
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
-              ),
-            ],
-          ),
         ),
       ),
     );
@@ -566,19 +609,20 @@ class SetupUpdateCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.all(8.w),
+    return Material(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(
+          color: Color(0xFFE6E8EB),
+          width: 2,
+        ),
+      ),
+      clipBehavior: Clip.antiAlias,
+      color: Colors.white,
       child: Container(
         width: 260.w,
         height: 342.h,
         padding: EdgeInsets.only(top: 63.h),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          border: Border.all(
-            color: Color(0xFFE6E8EB),
-          ),
-          borderRadius: const BorderRadius.all(Radius.circular(12)),
-        ),
         child: Column(
           children: [
             SizedBox(height: 40.w),
@@ -604,9 +648,13 @@ class SetupUpdateCard extends StatelessWidget {
                   ),
                 ),
                 child: Text(
-                  '$buttonName',
-                  style: context.typography.kioskBody2B.copyWith(
+                  buttonName,
+                  style: TextStyle(
+                    fontSize: 26.sp,
+                    fontWeight: FontWeight.w600,
                     color: Colors.white,
+                    letterSpacing: -0.2,
+                    height: 1.0,
                   ),
                 ),
               ),

@@ -43,7 +43,7 @@ class SnaptagSvg {
 
   static const String off = 'assets/icons/off.svg';
 
-  static const String payment = 'assets/icons/payment.svg';
+  static const String payment = 'assets/icons/payment_list.svg';
 
   static const String maintenance = 'assets/icons/maintenance.svg';
 
