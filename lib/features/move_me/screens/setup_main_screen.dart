@@ -303,6 +303,7 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
                           );
                           if (result) {
                             final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
+                            await ref.read(printerServiceProvider.notifier).startPrintLog();
                             SlackLogService().sendLogToSlack(
                                 'machineId:$machineId, currentVersion:$currentVersion, latestVersion:$latestVersion');
                             if (cardCountState < 1) {
