@@ -5,7 +5,7 @@ import 'package:flutter_snaptag_kiosk/data/models/entities/version_state.dart';
 final versionRepositoryProvider = Provider((ref) => VersionRepository());
 
 final versionStateProvider = StateNotifierProvider<VersionNotifier, VersionState>(
-      (ref) => VersionNotifier(ref.read(versionRepositoryProvider)),
+  (ref) => VersionNotifier(ref.read(versionRepositoryProvider)),
 );
 
 class VersionNotifier extends StateNotifier<VersionState> {

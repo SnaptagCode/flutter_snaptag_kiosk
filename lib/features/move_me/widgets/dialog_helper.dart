@@ -23,35 +23,35 @@ class DialogHelper {
       context: context,
       builder: (BuildContext context) {
         return DefaultTextStyle(
-            style: TextStyle(
-            fontFamily: context.locale.languageCode == 'ja'?
-            'MPLUSRounded' : 'Cafe24Ssurround2',
-        ),
-        child: AlertDialog(
-          backgroundColor: Colors.white,
-          insetPadding: EdgeInsets.symmetric(horizontal: 100.w),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20.r),
+          style: TextStyle(
+            fontFamily: context.locale.languageCode == 'ja' ? 'MPLUSRounded' : 'Cafe24Ssurround2',
           ),
-          title: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              SvgPicture.asset(
-                SnaptagSvg.error,
-                width: 44.w,
-                height: 44.w,
-              ),
-              SizedBox(width: 20.w),
-              Text(
-                '환불이 실패했습니다.',
-                style: context.typography.kioskAlert1B.copyWith(
-                  fontFamily: 'Pretendard',
-                  color: Colors.black,
+          child: AlertDialog(
+            backgroundColor: Colors.white,
+            insetPadding: EdgeInsets.symmetric(horizontal: 100.w),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20.r),
+            ),
+            title: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SvgPicture.asset(
+                  SnaptagSvg.error,
+                  width: 44.w,
+                  height: 44.w,
                 ),
-              ),
-            ],
+                SizedBox(width: 20.w),
+                Text(
+                  '환불이 실패했습니다.',
+                  style: context.typography.kioskAlert1B.copyWith(
+                    fontFamily: 'Pretendard',
+                    color: Colors.black,
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),);
+        );
       },
     );
   }
@@ -63,35 +63,35 @@ class DialogHelper {
       context: context,
       builder: (BuildContext context) {
         return DefaultTextStyle(
-            style: TextStyle(
-            fontFamily: context.locale.languageCode == 'ja'?
-            'MPLUSRounded' : 'Cafe24Ssurround2',
-        ),
-        child: AlertDialog(
-          backgroundColor: Colors.white,
-          insetPadding: EdgeInsets.symmetric(horizontal: 100.w),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20.r),
+          style: TextStyle(
+            fontFamily: context.locale.languageCode == 'ja' ? 'MPLUSRounded' : 'Cafe24Ssurround2',
           ),
-          title: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              SvgPicture.asset(
-                SnaptagSvg.success,
-                width: 44.w,
-                height: 44.4,
-              ),
-              SizedBox(width: 20.w),
-              Text(
-                '환불이 완료되었습니다.',
-                style: context.typography.kioskAlert1B.copyWith(
-                  fontFamily: 'Pretendard',
-                  color: Colors.black,
+          child: AlertDialog(
+            backgroundColor: Colors.white,
+            insetPadding: EdgeInsets.symmetric(horizontal: 100.w),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20.r),
+            ),
+            title: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SvgPicture.asset(
+                  SnaptagSvg.success,
+                  width: 44.w,
+                  height: 44.4,
                 ),
-              ),
-            ],
+                SizedBox(width: 20.w),
+                Text(
+                  '환불이 완료되었습니다.',
+                  style: context.typography.kioskAlert1B.copyWith(
+                    fontFamily: 'Pretendard',
+                    color: Colors.black,
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),);
+        );
       },
     );
   }
@@ -107,57 +107,57 @@ class DialogHelper {
       barrierDismissible: false,
       builder: (BuildContext context) {
         return DefaultTextStyle(
-            style: TextStyle(
-            fontFamily: context.locale.languageCode == 'ja'?
-            'MPLUSRounded' : 'Cafe24Ssurround2',
-        ),
-        child: AlertDialog(
-          backgroundColor: Colors.white,
-          insetPadding: EdgeInsets.symmetric(horizontal: 100.w),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20.r),
+          style: TextStyle(
+            fontFamily: context.locale.languageCode == 'ja' ? 'MPLUSRounded' : 'Cafe24Ssurround2',
           ),
-          title: Center(
-            child: Text(
-              title,
-              style: context.typography.kioskAlert1B.copyWith(
-                fontFamily: 'Pretendard',
-                color: Colors.black,
+          child: AlertDialog(
+            backgroundColor: Colors.white,
+            insetPadding: EdgeInsets.symmetric(horizontal: 100.w),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20.r),
+            ),
+            title: Center(
+              child: Text(
+                title,
+                style: context.typography.kioskAlert1B.copyWith(
+                  fontFamily: 'Pretendard',
+                  color: Colors.black,
+                ),
               ),
             ),
+            actions: [
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () async {
+                        await SoundManager().playSound();
+                        Navigator.of(context).pop(false);
+                      },
+                      style: context.setupDialogCancelButtonStyle,
+                      child: Text(
+                        cancelButtonText,
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 12.w),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        await SoundManager().playSound();
+                        Navigator.of(context).pop(true);
+                      },
+                      style: context.setupDialogConfirmButtonStyle,
+                      child: Text(
+                        confirmButtonText,
+                      ),
+                    ),
+                  ),
+                ],
+              )
+            ],
           ),
-          actions: [
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () async {
-                      await SoundManager().playSound();
-                      Navigator.of(context).pop(false);
-                    },
-                    style: context.setupDialogCancelButtonStyle,
-                    child: Text(
-                      cancelButtonText,
-                    ),
-                  ),
-                ),
-                SizedBox(width: 12.w),
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () async {
-                      await SoundManager().playSound();
-                      Navigator.of(context).pop(true);
-                    },
-                    style: context.setupDialogConfirmButtonStyle,
-                    child: Text(
-                      confirmButtonText,
-                    ),
-                  ),
-                ),
-              ],
-            )
-          ],
-        ),);
+        );
       },
     );
   }
@@ -174,76 +174,75 @@ class DialogHelper {
       barrierDismissible: false,
       builder: (BuildContext context) {
         return DefaultTextStyle(
-            style: TextStyle(
-            fontFamily: context.locale.languageCode == 'ja'?
-            'MPLUSRounded' : 'Cafe24Ssurround2',
-        ),
-        child: AlertDialog(
-          backgroundColor: Colors.white,
-          insetPadding: EdgeInsets.symmetric(horizontal: 100.w),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20.r),
+          style: TextStyle(
+            fontFamily: context.locale.languageCode == 'ja' ? 'MPLUSRounded' : 'Cafe24Ssurround2',
           ),
-          title: Center(
-            child: Text(
-              title,
-              style: context.typography.kioskAlert1B.copyWith(
-                color: Colors.black,
-                fontFamily: context.locale.languageCode == 'ja'?
-                    'MPLUSRounded' : 'Cafe24Ssurround2',
+          child: AlertDialog(
+            backgroundColor: Colors.white,
+            insetPadding: EdgeInsets.symmetric(horizontal: 100.w),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20.r),
+            ),
+            title: Center(
+              child: Text(
+                title,
+                style: context.typography.kioskAlert1B.copyWith(
+                  color: Colors.black,
+                  fontFamily: context.locale.languageCode == 'ja' ? 'MPLUSRounded' : 'Cafe24Ssurround2',
+                ),
               ),
             ),
-          ),
-          content: Text(
-            message,
-            style: context.typography.kioskAlert2M.copyWith(
-              color: Colors.black,
-              fontFamily: 'Pretendard',
-            ),
-            textAlign: TextAlign.center,
-          ),
-          actions: [
-            Row(
-              children: [
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () {
-                      context.pop();
-                      if (onButtonPressed != null) {
-                        onButtonPressed();
-                      }
-                    },
-                    style: context.dialogButtonStyle,
-                    child: Text(
-                      buttonText,
+            content: message.isNotEmpty
+                ? Text(
+                    message,
+                    style: context.typography.kioskAlert2M.copyWith(
+                      color: Colors.black,
+                      fontFamily: 'Pretendard',
+                    ),
+                    textAlign: TextAlign.center,
+                  )
+                : null,
+            actions: [
+              Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        context.pop();
+                        if (onButtonPressed != null) {
+                          onButtonPressed();
+                        }
+                      },
+                      style: context.dialogButtonStyle,
+                      child: Text(
+                        buttonText,
+                      ),
                     ),
                   ),
-                ),
-              ],
-            )
-          ],
-        ),);
+                ],
+              )
+            ],
+          ),
+        );
       },
     );
     return true;
   }
 
   static Future<bool> showSetupTwoDialog(
-      BuildContext context, {
-        required String title,
-        required String contentText,
-        String cancelButtonText = '취소',
-        String confirmButtonText = '확인',
-      }) async {
+    BuildContext context, {
+    required String title,
+    required String contentText,
+    String cancelButtonText = '취소',
+    String confirmButtonText = '확인',
+  }) async {
     return await showDialog(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
         return DefaultTextStyle(
           style: TextStyle(
-            fontFamily: context.locale.languageCode == 'ja'
-                ? 'MPLUSRounded'
-                : 'Cafe24Ssurround2',
+            fontFamily: context.locale.languageCode == 'ja' ? 'MPLUSRounded' : 'Cafe24Ssurround2',
           ),
           child: AlertDialog(
             backgroundColor: Colors.white,
@@ -302,8 +301,6 @@ class DialogHelper {
     );
   }
 
-
-
   //showCustomDialog
   static Future<void> showCustomDialog(BuildContext context,
       {required String title,
@@ -320,12 +317,12 @@ class DialogHelper {
   }
 
   //    2.3.0 이하 버전용
-  static Future<void> showPrintCompleteDialog( //5초 후 자동으로 닫히고 QR 화면으로 이동
+  static Future<void> showPrintCompleteDialog(
+    //5초 후 자동으로 닫히고 QR 화면으로 이동
     BuildContext context, {
     VoidCallback? onButtonPressed,
   }) async {
     Future.delayed(const Duration(seconds: 5), () {
-
       if (Navigator.of(context, rootNavigator: true).canPop()) {
         PhotoCardUploadRouteData().go(context);
         Navigator.of(context, rootNavigator: true).pop();
@@ -450,7 +447,23 @@ class DialogHelper {
   }
   */
 
+  static Future<void> showPrintWaitingDialog(BuildContext context) async {
+    await _showOneButtonKioskDialog(
+      context,
+      title: "프린트가 준비중입니다.",
+      message: "",
+      buttonText: LocaleKeys.alert_btn_paymentcard_failure.tr(),
+    );
+  }
 
+  static Future<void> showCheckPrintStateDialog(BuildContext context) async {
+    await _showOneButtonKioskDialog(
+      context,
+      title: "프린트 기기 상태를 확인해주세요.",
+      message: "",
+      buttonText: LocaleKeys.alert_btn_paymentcard_failure.tr(),
+    );
+  }
 
   static Future<void> showErrorDialog(BuildContext context) async {
     await _showOneButtonKioskDialog(
@@ -493,9 +506,9 @@ class DialogHelper {
   }
 
   static Future<bool> showPrintCardRefillDialog(
-      BuildContext context, {
-        VoidCallback? onButtonPressed,
-      }) async {
+    BuildContext context, {
+    VoidCallback? onButtonPressed,
+  }) async {
     return await _showOneButtonKioskDialog(
       context,
       title: LocaleKeys.alert_title_card_refill.tr(),
@@ -506,36 +519,36 @@ class DialogHelper {
   }
 
   static Future<String?> showKeypadDialog(
-      BuildContext context, {
-        required ModeType mode,
-      }) async {
+    BuildContext context, {
+    required ModeType mode,
+  }) async {
     return await showDialog<String>(
       context: context,
       barrierDismissible: true,
       builder: (BuildContext context) {
         return DefaultTextStyle(
-            style: TextStyle(
-            fontFamily: context.locale.languageCode == 'ja'?
-            'MPLUSRounded' : 'Cafe24Ssurround2',
-        ),
-        child: AlertDialog(
-          backgroundColor: Colors.white,
-          insetPadding: EdgeInsets.symmetric(horizontal: 100.w),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20.r),
+          style: TextStyle(
+            fontFamily: context.locale.languageCode == 'ja' ? 'MPLUSRounded' : 'Cafe24Ssurround2',
           ),
-          content: SizedBox(
-            width: 418.w,
-            height: 600.h,
-            child: AuthCodeKeypad(
-              mode: mode,
-              onCompleted: (code) {
-                print("입력된 코드: $code");
-                Navigator.pop(context, code);
-              },
+          child: AlertDialog(
+            backgroundColor: Colors.white,
+            insetPadding: EdgeInsets.symmetric(horizontal: 100.w),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20.r),
+            ),
+            content: SizedBox(
+              width: 418.w,
+              height: 600.h,
+              child: AuthCodeKeypad(
+                mode: mode,
+                onCompleted: (code) {
+                  print("입력된 코드: $code");
+                  Navigator.pop(context, code);
+                },
+              ),
             ),
           ),
-        ),);
+        );
       },
     );
   }
