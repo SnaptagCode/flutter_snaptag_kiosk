@@ -703,7 +703,7 @@ class UpdateNoticeBanner extends StatelessWidget {
             children: [
               const TextSpan(text: '최신 버전 '),
               TextSpan(
-                text: '$latestVersion',
+                text: latestVersion,
                 style: const TextStyle(fontWeight: FontWeight.bold),
               ),
               TextSpan(
