@@ -372,9 +372,6 @@ class PrinterBindings {
     final numPtr = calloc<Int32>()..value = 10;
 
     try {
-      // 먼저 이전 상태를 정리
-      _libInit();
-
       logger.i('Enumerating USB printer...'); // 디버그 로그 추가
       // USB 프린터만 사용
       int result = _enumUsbPrt(enumListPtr.cast(), listLenPtr, numPtr);

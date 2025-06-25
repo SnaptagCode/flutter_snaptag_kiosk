@@ -32,6 +32,8 @@ class PrinterService extends _$PrinterService {
       // 1. 라이브러리 초기화 전에 이전 상태 정리
       _bindings.clearLibrary();
 
+      _bindings.initLibrary();
+
       // checkConnectedWithPrinterLog();
 
       // settingPrinter();
