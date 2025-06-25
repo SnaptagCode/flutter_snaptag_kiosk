@@ -18,8 +18,11 @@ part 'card_printer.g.dart';
 class PrinterService extends _$PrinterService {
   late final PrinterBindings _bindings;
 
+  bool _firstConnectedFailed = false;
+
   @override
   FutureOr<void> build() async {
+    logger.i('Printer initialization..');
     _bindings = PrinterBindings();
     await _initializePrinter();
   }
@@ -29,13 +32,47 @@ class PrinterService extends _$PrinterService {
       // 1. 라이브러리 초기화 전에 이전 상태 정리
       _bindings.clearLibrary();
 
-      // 2. 프린터 연결
-      final connected = _bindings.connectPrinter();
-      if (!connected) {
-        throw Exception('Failed to connect printer');
-      }
-      logger.i('Printer connected successfully');
+      _bindings.initLibrary();
 
+      // checkConnectedWithPrinterLog();
+
+      // settingPrinter();
+
+      logger.i('Printer initialization completed');
+    } catch (e) {
+      final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
+      SlackLogService().sendErrorLogToSlack('Machine ID: $machineId, Printer initialization error: $e');
+      rethrow;
+    }
+  }
+
+  Future<bool> checkConnectedPrint() async {
+    try {
+      final connected = _bindings.connectPrinter();
+
+      logger.e('checkConnectedPrint: $connected');
+
+      if (!connected) {
+        if (!_firstConnectedFailed) {
+          _firstConnectedFailed = true;
+          SlackLogService().sendErrorLogToSlack('PrintConnected Failed - First Attempt');
+        }
+        return false;
+      }
+
+      final printerLog = getPrinterLogData(_bindings);
+
+      final isReady = printerLog?.printerMainStatusCode == "1004";
+
+      return connected && isReady;
+    } catch (e) {
+      logger.e('Error checking printer connection: $e');
+      return false;
+    }
+  }
+
+  bool settingPrinter() {
+    try {
       // 3. 리본 설정
       // 레거시 코드와 동일하게 setRibbonOpt 호출
       _bindings.setRibbonOpt(1, 0, "2", 2);
@@ -46,11 +83,10 @@ class PrinterService extends _$PrinterService {
       if (!ready) {
         throw Exception('Failed to ensure printer ready');
       }
-      logger.i('Printer initialization completed');
+      return true;
     } catch (e) {
-      final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
-      SlackLogService().sendErrorLogToSlack('Machine ID: $machineId, Printer initialization error: $e');
-      rethrow;
+      logger.e('Error settingPrinter: $e');
+      return false;
     }
   }
 
@@ -127,7 +163,7 @@ class PrinterService extends _$PrinterService {
 
       logger.i('6. Printing card...');
 
-      if (isSingleMode){
+      if (isSingleMode) {
         _bindings.printCard(
           frontImageInfo: rearBuffer?.toString(),
           backImageInfo: null,
@@ -150,7 +186,7 @@ class PrinterService extends _$PrinterService {
     }
   }
 
-  Future<void> startPrintLog() async {
+  Future<PrinterLog?> startPrintLog() async {
     final printerLog = getPrinterLogData(_bindings);
     if (printerLog != null) {
       final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
@@ -159,7 +195,10 @@ class PrinterService extends _$PrinterService {
         await ref.read(kioskRepositoryProvider).updatePrintLog(request: log);
         SlackLogService().sendLogToSlack('Machine ID: $machineId , PrintState : $log');
       }
+      return printerLog;
     }
+
+    return null;
   }
 
   Future<void> _prepareAndDrawImage(StringBuffer buffer, String imagePath, bool isFront) async {
