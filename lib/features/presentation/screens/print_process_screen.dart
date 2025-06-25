@@ -35,7 +35,6 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
         context.loaderOverlay.hide();
       }
        */
-
       if (!next.isLoading) {
         // 로딩이 아닐 때만 처리
         await next.when(
@@ -48,11 +47,19 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
             // 에러 발생 시 환불 처리
             try {
               await ref.read(paymentServiceProvider.notifier).refund();
+              ref.read(cardCountProvider.notifier).increase();
             } catch (refundError) {
               SlackLogService().sendErrorLogToSlack('Refund failed \nError: $refundError');
               logger.e('Refund failed', error: refundError);
             }
             if (errorMessage.contains('Card feeder is empty')) {
+              if (ref.read(cardCountProvider) < 1) {
+                ref.read(pagePrintProvider.notifier).set(PagePrintType.double);
+                SlackLogService().sendLogToSlack('machineId: $machineId, change pagePrintType double');
+              } else {
+                ref.read(pagePrintProvider.notifier).set(PagePrintType.single);
+                SlackLogService().sendLogToSlack('machineId: $machineId, change pagePrintType single');
+              }
               await DialogHelper.showPrintCardRefillDialog(
                 context,
                 onButtonPressed: () {
@@ -60,6 +67,13 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
                 },
               );
             } else {
+              if (ref.read(cardCountProvider) < 1) {
+                ref.read(pagePrintProvider.notifier).set(PagePrintType.double);
+                SlackLogService().sendLogToSlack('machineId: $machineId, change pagePrintType double');
+              } else {
+                ref.read(pagePrintProvider.notifier).set(PagePrintType.single);
+                SlackLogService().sendLogToSlack('machineId: $machineId, change pagePrintType single');
+              }
               await DialogHelper.showPrintErrorDialog(
                 context,
                 onButtonPressed: () {
@@ -70,6 +84,14 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
           },
           loading: () => null,
           data: (_) async {
+            final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
+            if (ref.read(cardCountProvider) < 1) {
+              ref.read(pagePrintProvider.notifier).set(PagePrintType.double);
+              SlackLogService().sendLogToSlack('machineId: $machineId, change pagePrintType double');
+            } else {
+              ref.read(pagePrintProvider.notifier).set(PagePrintType.single);
+              SlackLogService().sendLogToSlack('machineId: $machineId, change pagePrintType single');
+            }
             await DialogHelper.showPrintCompleteDialog(
               context,
               onButtonPressed: () {

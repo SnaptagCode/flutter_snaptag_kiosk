@@ -16,10 +16,11 @@ class SetupMainScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
 
     final versionState = ref.watch(versionStateProvider);
-
+    final cardCountState = ref.watch(cardCountProvider);
     final currentVersion = versionState.currentVersion;
     final latestVersion = versionState.latestVersion;
     final isUpdateAvailable = currentVersion != latestVersion;
+    //final isUpdateAvailable = false;
 
     return Theme(
         data: Theme.of(context).copyWith(
@@ -73,7 +74,7 @@ class SetupMainScreen extends ConsumerWidget {
               ),
             ),
             SizedBox(height: 50.h),
-            /*Center(
+            Center(
                 child: Text(
                   '*인쇄 모드를 선택 후 미리보기를 해주세요.',
                   style: context.typography.kioskBody1B.copyWith(color: Colors.red),
@@ -116,6 +117,67 @@ class SetupMainScreen extends ConsumerWidget {
                 ),
               ],
             ),
+            SizedBox(height: 10,),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SizedBox(
+                  width: 240.w,
+                  height: 80.h,
+                  child: Align(
+                    alignment: Alignment.center,
+                    child: Text(
+                      '단면 카드 수량',
+                      textAlign: TextAlign.center,
+                      style: context.typography.kioskBody1B,
+                    ),
+                  ),
+                ),
+                //SizedBox(width: 40.w),
+                Container(
+                  width: 520.w,
+                  height: 80.h,
+                  //padding: EdgeInsets.only(top: 50.w),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    border: Border.all(
+                      color: ref.watch(pagePrintProvider) == PagePrintType.single? Colors.black : Color(0xFFECEDEF),
+                    ),
+                    borderRadius: const BorderRadius.all(Radius.circular(12)),
+                  ),
+                  child: InkWell(
+                    borderRadius: const BorderRadius.all(Radius.circular(12)),
+                    onTap: () async {
+                      final isActive = ref.read(pagePrintProvider) == PagePrintType.single;
+                      if (isActive) {
+                        String? value = await DialogHelper.showKeypadDialog(context, mode: ModeType.card);
+
+                        if (value == null || value.isEmpty) return; // 값이 없으면 종료
+                        int cardNumber = int.parse(value);
+                        final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
+                        ref.read(cardCountProvider.notifier).update(cardNumber);
+                        if(cardNumber <= 0) {
+                          ref.read(pagePrintProvider.notifier).set(PagePrintType.double);
+                        } else {
+                          ref.read(pagePrintProvider.notifier).set(PagePrintType.single);
+                        }
+                      } else {
+                        print('click when pagePringType not single');
+                      }
+                    },
+                    child: Align(
+                      alignment: Alignment.center,
+                      child: Text(
+                        (cardCountState).toString(),
+                        textAlign: TextAlign.center,
+                        style: ref.watch(pagePrintProvider) != PagePrintType.single? context.typography.kioskBody2B.copyWith(color: Color(0xFFECEDEF)) : context.typography.kioskBody2B.copyWith(color: Colors.black),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
             SizedBox(
               height: 80.h,
               width: 760.w, //780
@@ -123,7 +185,7 @@ class SetupMainScreen extends ConsumerWidget {
                 thickness: 1.h,
                 height: 0,
               ),
-            ),*/
+            ),
             Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
@@ -137,6 +199,9 @@ class SetupMainScreen extends ConsumerWidget {
                     onTap: () async {
                       if (ref.read(pagePrintProvider) != PagePrintType.none) {
                       await SoundManager().playSound();
+                      if (cardCountState < 1) {
+                        ref.read(pagePrintProvider.notifier).set(PagePrintType.double);
+                      }
                       KioskInfoRouteData().go(context);
                       } else {
                         print('이벤트를 선택해주세요');
@@ -173,6 +238,13 @@ class SetupMainScreen extends ConsumerWidget {
                       if (result) {
                         final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
                         SlackLogService().sendLogToSlack('machineId:$machineId, currentVersion:$currentVersion, latestVersion:$latestVersion');
+                        if(cardCountState < 1) {
+                          ref.read(pagePrintProvider.notifier).set(PagePrintType.double);
+                          SlackLogService().sendLogToSlack('machineId: $machineId, singleCard: $cardCountState, set pagePrintType double');
+                        } else {
+                          ref.read(pagePrintProvider.notifier).set(PagePrintType.single);
+                          SlackLogService().sendLogToSlack('machineId: $machineId, singleCard: $cardCountState, set pagePrintType single');
+                        }
                         PhotoCardUploadRouteData().go(context);
                       }
                     },
@@ -232,7 +304,7 @@ class SetupMainScreen extends ConsumerWidget {
                   child: SetupUpdateCard(
                     title: '현재 버전',
                     //version: currentVersion,
-                    version: "v2.4.7",
+                    version: "v2.4.8",
                     buttonName: '업데이트',
                     isActive: isUpdateAvailable,
                     onUpdatePressed: () async {

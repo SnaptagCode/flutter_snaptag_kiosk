@@ -8,6 +8,7 @@ import 'package:flutter_snaptag_kiosk/data/datasources/remote/slack_log_service.
 import 'package:flutter_snaptag_kiosk/data/repositories/kiosk_repository.dart';
 import 'package:flutter_snaptag_kiosk/features/core/printer/printer_log.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:flutter_snaptag_kiosk/lib.dart';
 
 import 'printer_bindings.dart';
 
@@ -58,10 +59,10 @@ class PrinterService extends _$PrinterService {
     required File? embeddedFile,
   }) async {
     try {
-      if (frontFile == null && embeddedFile == null) {
+      /*if (frontFile == null && embeddedFile == null) {
         throw Exception('There is nothing to print');
-      }
-
+      }*/
+      final isSingleMode = (ref.read(pagePrintProvider) == PagePrintType.single);
       state = const AsyncValue.loading();
       // 피더 상태 체크 추가
       logger.i('Checking feeder status...');
@@ -125,10 +126,18 @@ class PrinterService extends _$PrinterService {
       _bindings.injectCard();
 
       logger.i('6. Printing card...');
-      _bindings.printCard(
-        frontImageInfo: frontBuffer?.toString(),
-        backImageInfo: rearBuffer?.toString(),
-      );
+
+      if (isSingleMode){
+        _bindings.printCard(
+          frontImageInfo: rearBuffer?.toString(),
+          backImageInfo: null,
+        );
+      } else {
+        _bindings.printCard(
+          frontImageInfo: frontBuffer?.toString(),
+          backImageInfo: rearBuffer?.toString(),
+        );
+      }
 
       logger.i('7. Ejecting card...');
       _bindings.ejectCard();

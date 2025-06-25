@@ -16,3 +16,4 @@ export 'localization_text_test_widget.dart';
 export 'price_box.dart';
 export 'splash_screen.dart';
 export 'triple_tap_fab.dart';
+export 'printer_status_badge.dart';

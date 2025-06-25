@@ -5,7 +5,7 @@ part 'page_print_provider.g.dart';
 @Riverpod(keepAlive: true)
 class PagePrint extends _$PagePrint {
   @override
-  PagePrintType build() => PagePrintType.double; //단면_양면 기능 적용시 none
+  PagePrintType build() => PagePrintType.none; //단면_양면 기능 적용시 none
 
   void switchType() {
     state = state == PagePrintType.double ? PagePrintType.single : PagePrintType.double;

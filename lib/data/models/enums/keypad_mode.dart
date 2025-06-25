@@ -1,1 +1,1 @@
-enum ModeType {event, admin}
+enum ModeType {event, admin, card}
