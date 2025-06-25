@@ -12,7 +12,7 @@ class VersionNotifier extends StateNotifier<VersionState> {
   final VersionRepository _repo;
 
   VersionNotifier(this._repo)
-      : super(VersionState(currentVersion: 'v2.4.8', latestVersion: 'v2.4.8', isLoading: true)) {
+      : super(VersionState(currentVersion: 'v2.4.9', latestVersion: 'v2.4.9', isLoading: true)) {
     loadVersions();
   }
 
