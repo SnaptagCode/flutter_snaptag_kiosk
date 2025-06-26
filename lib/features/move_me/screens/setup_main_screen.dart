@@ -29,13 +29,13 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
 
     _timer = Timer.periodic(Duration(seconds: 2), (timer) async {
       // 여기에 실행하고 싶은 로직 작성
-      final connected = await ref.read(printerServiceProvider.notifier).checkConnectedPrint();
+      final connected = await ref.read(printerServiceProvider.notifier).connectedPrinter();
       if (mounted) {
-        setState(() {
+        setState(() async {
           SlackLogService()
               .sendLogToSlack('MachineId : $machineId Connected Printer ${connected ? 'Success' : 'Failed'}');
           if (connected) {
-            final settingCompleted = ref.read(printerServiceProvider.notifier).settingPrinter();
+            final settingCompleted = await ref.read(printerServiceProvider.notifier).checkSettingPrinter();
             _isConnectedPrinter = settingCompleted;
 
             SlackLogService()
@@ -283,8 +283,8 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
                         assetName: SnaptagSvg.eventRun,
                         onTap: () async {
                           await SoundManager().playSound();
-                          final connected = await ref.read(printerServiceProvider.notifier).checkConnectedPrint();
-                          final settingPrinter = ref.read(printerServiceProvider.notifier).settingPrinter();
+                          final connected = await ref.read(printerServiceProvider.notifier).checkSettingPrinter();
+                          final settingPrinter = await ref.read(printerServiceProvider.notifier).checkSettingPrinter();
                           if (!connected) {
                             SlackLogService().sendErrorLogToSlack(
                                 'MachineId : $machineId  PrintConnected Failed - Attempted to run event');
@@ -303,7 +303,9 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
                           );
                           if (result) {
                             final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
-                            await ref.read(printerServiceProvider.notifier).startPrintLog();
+
+                            await ref.read(printerServiceProvider.notifier).printerStateLog();
+
                             SlackLogService().sendLogToSlack(
                                 'machineId:$machineId, currentVersion:$currentVersion, latestVersion:$latestVersion');
                             if (cardCountState < 1) {
