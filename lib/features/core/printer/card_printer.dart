@@ -35,7 +35,12 @@ class PrinterService extends _$PrinterService {
       // checkConnectedWithPrinterLog();
 
       // settingPrinter();
-
+      // 2. 밝기 설정
+      _bindings.setImageVisualParameters(
+        brightness: 100,
+        contrast: 0,
+        saturation: 0,
+      );
       logger.i('Printer initialization completed');
     } catch (e) {
       final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
