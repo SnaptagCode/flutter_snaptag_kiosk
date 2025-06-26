@@ -37,11 +37,11 @@ class PrinterService extends _$PrinterService {
       // 2. 전역 밝기 설정 (한 번만 설정하여 테스트)
       try {
         _bindings.setImageVisualParameters(
-          brightness: 30,  // 밝기 조절 (-100 ~ 100)
+          brightness: 100,  // 밝기 조절 (-100 ~ 100)
           contrast: 0,     // 대비 유지
           saturation: 0,   // 채도 유지
         );
-        logger.i('Global image brightness set to 30');
+        logger.i('Global image brightness set to 100');
       } catch (e) {
         logger.w('Failed to set global brightness: $e');
       }
