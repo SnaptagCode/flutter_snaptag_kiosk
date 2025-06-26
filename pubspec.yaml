@@ -1,0 +1,159 @@
+name: flutter_snaptag_kiosk
+description: "A new Flutter project."
+publish_to: "none"
+version: 0.1.0
+
+environment:
+  sdk: ^3.6.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Network
+  dio: ^5.7.0
+  retrofit: ^4.4.1
+
+  # State Management
+  flutter_riverpod: ^2.6.1
+  riverpod_annotation: ^2.6.1
+
+  # Localization
+  easy_localization: ^3.0.7
+
+  # Routing
+  go_router: ^15.2.0
+
+  # Code Generation
+  freezed_annotation: ^2.4.4
+  json_annotation: ^4.9.0
+
+  # Utilities
+  logger: ^2.5.0
+  qr_flutter: ^4.1.0
+  flutter_screenutil: ^5.9.3
+  loader_overlay: ^5.0.0
+  url_launcher: ^6.3.1
+  faker: ^2.2.0
+  window_manager: ^0.4.3
+  http: ^1.2.2
+  image: ^4.5.2
+  file_picker: ^8.1.7
+  flutter_svg: ^2.0.17
+  flutter_soloud: ^2.1.7
+  flutter_dotenv: ^5.2.1
+  pretty_dio_logger: ^1.4.0
+  pretty_animated_buttons: ^0.0.2
+
+  package_info_plus: ^8.3.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^5.0.0
+  # Code Generation
+  build_runner: ^2.4.14
+  riverpod_generator: ^2.3.9
+  go_router_builder: ^3.0.0
+  freezed: ^2.5.7
+  json_serializable: ^6.9.0
+  retrofit_generator: ^9.1.5
+  mockito: ^5.4.5
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/.env
+    - assets/icons/
+    - assets/icons/print/
+    - assets/images/
+    - assets/labcurity/
+    - assets/lang/
+    - assets/luca/
+    - assets/sounds/
+    - assets/adImages/
+    - assets/.env.version
+
+  fonts:
+    - family: MPLUSRounded
+      fonts:
+        - asset: assets/fonts/MPLUSRounded1c-Bold.ttf
+        - weight: 100
+        - asset: assets/fonts/MPLUSRounded1c-Bold.ttf
+        - weight: 200
+        - asset: assets/fonts/MPLUSRounded1c-Bold.ttf
+        - weight: 300
+        - asset: assets/fonts/MPLUSRounded1c-Bold.ttf
+        - weight: 400
+        - asset: assets/fonts/MPLUSRounded1c-Bold.ttf
+        - weight: 500
+        - asset: assets/fonts/MPLUSRounded1c-Bold.ttf
+        - weight: 600
+        - asset: assets/fonts/MPLUSRounded1c-Bold.ttf
+        - weight: 700
+        - asset: assets/fonts/MPLUSRounded1c-Bold.ttf
+        - weight: 800
+        - asset: assets/fonts/MPLUSRounded1c-Bold.ttf
+        - weight: 900
+    - family: Cafe24Ssurround2
+      fonts:
+        - asset: assets/fonts/Cafe24Ssurround-v2.0.ttf
+          weight: 100
+        - asset: assets/fonts/Cafe24Ssurround-v2.0.ttf
+          weight: 200
+        - asset: assets/fonts/Cafe24Ssurround-v2.0.ttf
+          weight: 300
+        - asset: assets/fonts/Cafe24Ssurround-v2.0.ttf
+          weight: 400
+        - asset: assets/fonts/Cafe24Ssurround-v2.0.ttf
+          weight: 500
+        - asset: assets/fonts/Cafe24Ssurround-v2.0.ttf
+          weight: 600
+        - asset: assets/fonts/Cafe24Ssurround-v2.0.ttf
+          weight: 700
+        - asset: assets/fonts/Cafe24Ssurround-v2.0.ttf
+          weight: 800
+        - asset: assets/fonts/Cafe24Ssurround-v2.0.ttf
+          weight: 900
+    - family: PretendardJP
+      fonts:
+        - asset: assets/fonts/PretendardJP-Thin.ttf
+          weight: 100
+        - asset: assets/fonts/PretendardJP-ExtraLight.ttf
+          weight: 200
+        - asset: assets/fonts/PretendardJP-Light.ttf
+          weight: 300
+        - asset: assets/fonts/PretendardJP-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/PretendardJP-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/PretendardJP-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/PretendardJP-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/PretendardJP-ExtraBold.ttf
+          weight: 800
+        - asset: assets/fonts/PretendardJP-Black.ttf
+          weight: 900
+    - family: Pretendard
+      fonts:
+        - asset: assets/fonts/Pretendard-Thin.ttf
+          weight: 100
+        - asset: assets/fonts/Pretendard-ExtraLight.ttf
+          weight: 200
+        - asset: assets/fonts/Pretendard-Light.ttf
+          weight: 300
+        - asset: assets/fonts/Pretendard-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Pretendard-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Pretendard-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Pretendard-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/Pretendard-ExtraBold.ttf
+          weight: 800
+        - asset: assets/fonts/Pretendard-Black.ttf
+          weight: 900

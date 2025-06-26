@@ -1,0 +1,32 @@
+key	ko-KR	ja-JP	en-US	zh-CN
+main_txt_01_01	QR코드를 통해 뒷면 이미지를	QRコードで裏面の画像を選択	Please select or upload the image	请扫描二维码上传图片
+main_txt_01_02	선택 또는 업로드 해주세요.	またはアップロードしてください。	on the back through the QR code.	请上传图片
+main_txt_01_03	*앞면은 랜덤으로 출력됩니다.	*前面はランダムに出力されます。	*The front is randomly printed.	*前面是随机打印的。
+main_txt_02	이미지 업로드를 완료했나요?	画像のアップロードは完了しましたか？	Did you upload the image?	你上传图片了吗？
+main_btn_txt	인증번호 입력하기	認証番号を入力する	Enter Verification Code	输入验证码
+sub01_txt_01	사진 업로드 후 발급된 인증번호를 입력해 주세요.	写真をアップロード後、	After uploading the photo	上传照片后，请输入发出的验证码。
+sub01_txt_02	-	発行された認証番号を入力してください。	Please enter the issued verification code.	-
+sub01_btn_done	완료	完了	Done	完成
+alert_title_authNum_error	인증번호 오류	 認証番号エラー	Verification Code Error	验证码错误
+alert_txt_authNum_error	일치하는 인증번호가 없습니다.\r\n다시 확인해 주세요.	一致する認証番号がありません。\r\nもう一度確認をお願いします。	There is no matched verification code.\r\nPlease check again.	没有匹配的验证码。\r\n请再检查一次。
+alert_btn_authNum_error	돌아가기	帰る	Back	返回
+sub02_txt_01	포토카드 이미지를 확인해 주세요.	フォトカードの画像を確認してください。	Please check the photo CARD image.	请检查照片卡图像。
+sub02_btn_pay	결제하기	決済する	Pay Now	立即支付
+sub03_txt_01	포토카드를 출력 중입니다. 잠시만 기다려 주세요.	フォトカードを出力中です。 少々お待ちください.	The photo card is being printed. Please wait a moment.	照片卡正在打印中。请稍候。
+sub03_txt_02	카드가 출력되기까지 약 1분 정도의 시간이 소요됩니다.	カードが出力されるまで約1分程度の時間がかかります。	It takes about 1 minute for the card to print.	卡片打印大约需要1分钟。
+sub03_txt_03	출력이 완료될 때까지 카드를 뽑지 말아 주세요!	出力が完了するまでカードを抜かないでください！	Don't pick the card until the output is completed!	打印完成前请勿拔出卡片！
+alert_title_print_complete	출력 완료	出力完了	Print Completed	打印完成
+alert_txt_print_complete	포토카드 출력이 완료되었습니다.\r\n아래 포토카드 받는 곳에서 카드를 받아 가세요.\r\n감사합니다.	フォトカードの出力が完了しました。\r\n下のフォトカード\r\nを受け取るところからカードを受け取ってください。\r\nありがとうございます。	Your photo card has been printed!\r\nPlease check the output tray below.\r\nThank you!	您的照片卡已打印！\r\n请检查下面的输出托盘。\r\n谢谢！
+alert_txt_print_complete_02	3초 후 자동으로 팝업이 종료됩니다.	3秒後に自動的にポップアップが終了します。	The popup will be closed automatically after 3 seconds.	弹出窗口将在 3 秒后自动关闭。
+alert_btn_print_complete    확인	確認	OK	确定
+alert_title_purchase_failure	결제 실패	購入失敗	Payment Failed	支付失败
+alert_txt_purchase_failure	사용이 불가능한 카드입니다.\r\n다른 카드를 이용해 주세요.	購入が正常に完了しませんでした。\r\n再度お試しください。	The payment was not completed normally.\r\nPlease try again.	支付未正常完成。\r\n请再试一次。
+alert_btn_purchase_failure	돌아가기	戻る	Back	返回
+alert_title_paymentcard_failure	결제 불가 카드	お支払い不可カード	Card Not Available	无法使用卡付款
+alert_txt_paymentcard_failure	사용이 불가능한 카드입니다.\r\n다른 카드를 이용해 주세요.	使用できないカードです。\r\n別のカードをご利用ください。	This card is not valid.\r\nPlease use another card.	此卡无法使用。\r\n\n请使用另一张卡。
+alert_btn_paymentcard_failure	확인	確認	Confirm	确认
+alert_title_print_failure	출력 실패	印刷失敗	Print Failed	打印失败
+alert_title_card_refill	카드 리필 필요	カード詰め替えが必要	Card refill required	需要充值卡
+alert_txt_print_failure	출력이 정상적으로 이루어지지 않아 결제 금액이\r\n환불됩니다. 환불이 이루어지지 않은 경우,\r\n관리자에게 문의해 주시길 바랍니다.\r\n이용에 불편을 드려 죄송합니다。	印刷が正常に行われず、支払い金額は\r\n返金されます。返金が行われない場合は、\r\n管理者にお問い合わせください。\r\nご迷惑をおかけして申し訳ありません。	The payment amount will be refunded\r\n because the printout is not done properly.\r\n If the refund has not been made, please\r\n contact the administrator.\r\nWe apologize for the inconvenience \r\ncaused to you.	由于打印未正常完成，支付金额将被退还。\r\n如果未退款，请联系管理员。\r\n对给您带来的不便，我们深表歉意。
+alert_txt_card_refill	카드 잔량이 부족합니다.\r\n원활한 사용을 위해 관리자에 문의 후\r\n교체를 진행해 주세요.	カード残量が足りません。\r\n円滑な使用のために管理者に連絡した後\r\n交換を進めてください。	The card balance is insufficient.\r\nFor smooth use, please contact the administrator\r\nand proceed with replacement.	您的卡余额不足。\r\n为了顺利使用，请联系管理员。\r\n请继续进行替换。
+alert_btn_print_failure	확인	確認	Confirm	确认
