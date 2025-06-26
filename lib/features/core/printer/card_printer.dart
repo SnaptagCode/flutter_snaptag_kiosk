@@ -32,15 +32,20 @@ class PrinterService extends _$PrinterService {
       // 1. 라이브러리 초기화 전에 이전 상태 정리
       _bindings.clearLibrary();
 
-      // checkConnectedWithPrinterLog();
+      _bindings.initLibrary();
 
-      // settingPrinter();
-      // 2. 밝기 설정
-      _bindings.setImageVisualParameters(
-        brightness: 100,
-        contrast: 0,
-        saturation: 0,
-      );
+      // 2. 전역 밝기 설정 (한 번만 설정하여 테스트)
+      try {
+        _bindings.setImageVisualParameters(
+          brightness: 30,  // 밝기 조절 (-100 ~ 100)
+          contrast: 0,     // 대비 유지
+          saturation: 0,   // 채도 유지
+        );
+        logger.i('Global image brightness set to 30');
+      } catch (e) {
+        logger.w('Failed to set global brightness: $e');
+      }
+
       logger.i('Printer initialization completed');
     } catch (e) {
       final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
