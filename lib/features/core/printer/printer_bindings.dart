@@ -37,6 +37,7 @@ class PrinterBindings {
   late final R600DrawImage _drawImage;
   late final R600IsFeederNoEmpty _isFeederNoEmpty;
   late final R600GetRbnAndFilmRemaining _getRbnAndFilmRemaining;
+  late final R600SetImgVisualParam _setImgVisualParam; // 밝기 조절 함수
 
   PrinterBindings() {
     // DLL 로드
@@ -68,6 +69,7 @@ class PrinterBindings {
     _isFeederNoEmpty = _dll.lookupFunction<R600IsFeederNoEmptyNative, R600IsFeederNoEmpty>('R600IsFeederNoEmpty');
     _getRbnAndFilmRemaining =
         _dll.lookupFunction<R600GetRbnAndFilmRemainingNative, R600GetRbnAndFilmRemaining>('R600GetRbnAndFilmRemaining');
+    _setImgVisualParam = _dll.lookupFunction<R600SetImgVisualParamNative, R600SetImgVisualParam>('R600SetImgVisualParam');
   }
 
   int initLibrary() {
@@ -372,6 +374,7 @@ class PrinterBindings {
     final numPtr = calloc<Int32>()..value = 10;
 
     try {
+
       logger.i('Enumerating USB printer...'); // 디버그 로그 추가
       // USB 프린터만 사용
       int result = _enumUsbPrt(enumListPtr.cast(), listLenPtr, numPtr);
@@ -496,6 +499,30 @@ class PrinterBindings {
       return feederStatusPtr.value != 0;
     } finally {
       calloc.free(feederStatusPtr);
+    }
+  }
+
+  // 이미지 시각 효과 설정 함수 (밝기, 대비, 채도)
+  void setImageVisualParameters({
+    required int brightness,
+    required int contrast,
+    required int saturation,
+  }) {
+    // 범위 검증 (-100 ~ 100)
+    if (brightness < -100 || brightness > 100) {
+      throw ArgumentError('Brightness must be between -100 and 100');
+    }
+    if (contrast < -100 || contrast > 100) {
+      throw ArgumentError('Contrast must be between -100 and 100');
+    }
+    if (saturation < -100 || saturation > 100) {
+      throw ArgumentError('Saturation must be between -100 and 100');
+    }
+
+    final result = _setImgVisualParam(brightness, contrast, saturation);
+    if (result != 0) {
+      final error = getErrorInfo(result);
+      throw Exception('Failed to set image visual parameters: $error (code: $result)');
     }
   }
 }

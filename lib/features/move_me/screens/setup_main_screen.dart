@@ -174,7 +174,7 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
                       child: Text(
                         '단면 카드 수량',
                         textAlign: TextAlign.center,
-                        style: context.typography.kioskBody1B,
+                        style: context.typography.kioskBody1B.copyWith(color: Colors.black),
                       ),
                     ),
                   ),

@@ -34,6 +34,17 @@ class PrinterService extends _$PrinterService {
 
       _bindings.initLibrary();
 
+      try {
+        _bindings.setImageVisualParameters(
+          brightness: 0,
+          contrast: 0,
+          saturation: 0,
+        );
+      } catch (e) {
+        logger.e('Error setting image brightness: $e');
+        SlackLogService().sendErrorLogToSlack('Error setting image brightness: $e');
+      }
+
       // checkConnectedWithPrinterLog();
 
       // settingPrinter();
@@ -199,6 +210,25 @@ class PrinterService extends _$PrinterService {
     }
 
     return null;
+  }
+
+  // 이미지 밝기 조절 함수
+  void setImageBrightness({
+    int brightness = 0,
+    int contrast = 0,
+    int saturation = 0,
+  }) {
+    try {
+      _bindings.setImageVisualParameters(
+        brightness: brightness,
+        contrast: contrast,
+        saturation: saturation,
+      );
+      logger.i('Image visual parameters set - Brightness: $brightness, Contrast: $contrast, Saturation: $saturation');
+    } catch (e) {
+      logger.e('Error setting image visual parameters: $e');
+      rethrow;
+    }
   }
 
   Future<void> _prepareAndDrawImage(StringBuffer buffer, String imagePath, bool isFront) async {
