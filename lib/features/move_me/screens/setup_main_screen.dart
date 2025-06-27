@@ -58,6 +58,7 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
   Widget build(BuildContext context) {
     final versionState = ref.watch(versionStateProvider);
     final cardCountState = ref.watch(cardCountProvider);
+    final pagePrintType = ref.watch(pagePrintProvider);
     final currentVersion = versionState.currentVersion;
     final latestVersion = versionState.latestVersion;
     final isUpdateAvailable = currentVersion != latestVersion;
@@ -132,8 +133,7 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
                     height: 120.h,
                     child: SetupSubCard(
                       label: '양면 인쇄',
-                      mode: PagePrintType.double,
-                      currentModeSelector: (ref) => ref.watch(pagePrintProvider),
+                      isActive: PagePrintType.double == pagePrintType,
                       activeAssetName: SnaptagSvg.printDoubleActive,
                       inactiveAssetName: SnaptagSvg.printDoubleInactive,
                       onTap: () async {
@@ -147,8 +147,7 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
                     height: 120.h,
                     child: SetupSubCard(
                       label: '단면 인쇄',
-                      mode: PagePrintType.single,
-                      currentModeSelector: (ref) => ref.watch(pagePrintProvider),
+                      isActive: PagePrintType.single == pagePrintType,
                       activeAssetName: SnaptagSvg.printSingleActive,
                       inactiveAssetName: SnaptagSvg.printSingleInactive,
                       onTap: () async {
@@ -528,16 +527,14 @@ class SetupMainCard extends StatelessWidget {
 
 class SetupSubCard<T> extends ConsumerWidget {
   final String label;
-  final T mode;
-  final T Function(WidgetRef ref) currentModeSelector;
+  final bool isActive;
   final String activeAssetName;
   final String inactiveAssetName;
   final void Function()? onTap;
   const SetupSubCard({
     super.key,
+    required this.isActive,
     required this.label,
-    required this.mode,
-    required this.currentModeSelector,
     required this.activeAssetName,
     required this.inactiveAssetName,
     this.onTap,
@@ -545,10 +542,7 @@ class SetupSubCard<T> extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final T current = currentModeSelector(ref);
-    final bool isActive = current == mode;
-    print("current Type: $current");
-    print("isActive : $isActive");
+    print("isActive: $isActive");
     return Padding(
       padding: EdgeInsets.all(8.w),
       child: Container(

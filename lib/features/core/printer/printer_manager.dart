@@ -68,6 +68,7 @@ class PrinterManager {
           if (message is ConnectMessage) {
             replyPort = message.sendPort;
             final isConnected = await _checkConnectedPrint(bindings);
+            logger.i('_printEntry ConnectMessage: $isConnected');
             replyPort.send({'isConnected': isConnected});
             return;
           }
@@ -75,6 +76,7 @@ class PrinterManager {
           if (message is SettingPrinterMessage) {
             replyPort = message.sendPort;
             final isReady = _checkSettingPrinter(bindings);
+            logger.i('_printEntry SettingPrinterMessage: $isReady');
             replyPort.send({'isReady': isReady});
             return;
           }
@@ -82,6 +84,7 @@ class PrinterManager {
           if (message is PrintStateMessage) {
             replyPort = message.sendPort;
             final printerLog = getPrinterLogData(bindings);
+            logger.i('_printEntry PrintStateMessage: $printerLog');
             replyPort.send({'printStatus': printerLog});
             return;
           }
