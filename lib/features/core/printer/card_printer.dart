@@ -7,6 +7,7 @@ import 'package:flutter_snaptag_kiosk/data/datasources/cache/kiosk_info_service.
 import 'package:flutter_snaptag_kiosk/data/datasources/remote/slack_log_service.dart';
 import 'package:flutter_snaptag_kiosk/data/repositories/kiosk_repository.dart';
 import 'package:flutter_snaptag_kiosk/features/core/printer/printer_log.dart';
+import 'package:flutter_snaptag_kiosk/features/core/printer/ribbon_status.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 
@@ -36,7 +37,7 @@ class PrinterService extends _$PrinterService {
 
       try {
         _bindings.setImageVisualParameters(
-          brightness: 0,
+          brightness: 20,
           contrast: 0,
           saturation: 0,
         );
@@ -74,11 +75,27 @@ class PrinterService extends _$PrinterService {
       final printerLog = getPrinterLogData(_bindings);
 
       final isReady = printerLog?.printerMainStatusCode == "1004";
-
+      
       return connected && isReady;
     } catch (e) {
       logger.e('Error checking printer connection: $e');
       return false;
+    }
+  }
+
+  RibbonStatus getRibbonStatus() {
+    try {
+      final ribbonStatus = _bindings.getRbnAndFilmRemaining();
+      if (ribbonStatus != null) {
+        logger.i('Ribbon remaining: ${ribbonStatus.rbnRemaining}%, Film remaining: ${ribbonStatus.filmRemaining}%');
+        return ribbonStatus;
+      } else {
+        logger.w('Ribbon status is null');
+        return RibbonStatus(rbnRemaining: 0, filmRemaining: 0);
+      }
+    } catch (e) {
+      logger.e('Error getting ribbon status: $e');
+      return RibbonStatus(rbnRemaining: 0, filmRemaining: 0);
     }
   }
 
@@ -210,25 +227,6 @@ class PrinterService extends _$PrinterService {
     }
 
     return null;
-  }
-
-  // 이미지 밝기 조절 함수
-  void setImageBrightness({
-    int brightness = 0,
-    int contrast = 0,
-    int saturation = 0,
-  }) {
-    try {
-      _bindings.setImageVisualParameters(
-        brightness: brightness,
-        contrast: contrast,
-        saturation: saturation,
-      );
-      logger.i('Image visual parameters set - Brightness: $brightness, Contrast: $contrast, Saturation: $saturation');
-    } catch (e) {
-      logger.e('Error setting image visual parameters: $e');
-      rethrow;
-    }
   }
 
   Future<void> _prepareAndDrawImage(StringBuffer buffer, String imagePath, bool isFront) async {
