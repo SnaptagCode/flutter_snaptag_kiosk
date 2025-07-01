@@ -47,7 +47,13 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
                 .sendLogToSlack('MachineId : $machineId Setting Printer ${settingCompleted ? 'Success' : 'Failed'}');
           }
           // 리본 || 필름 잔량 확인 코드
-          if (ribbonAndFilmStatus.rbnRemaining < 4 && !_isRibbonValueIsLow) {
+          if (ribbonAndFilmStatus.rbnRemaining < 4 && ribbonAndFilmStatus.filmRemaining < 4 && !_isRibbonValueIsLow && !_isFilmValueIsLow) {
+            _isRibbonValueIsLow = true;
+            _isFilmValueIsLow = true;
+            SlackLogService()
+                .sendErrorLogToSlack('MachineId : $machineId Ribbon % Film value is on 3%, please check the printer');
+            DialogHelper.showNeedRibbonFilmDialog(context);
+          } else if (ribbonAndFilmStatus.rbnRemaining < 4 && !_isRibbonValueIsLow) {
             _isRibbonValueIsLow = true;
             SlackLogService()
                 .sendErrorLogToSlack('MachineId : $machineId Ribbon value is on 3%, please check the printer');
