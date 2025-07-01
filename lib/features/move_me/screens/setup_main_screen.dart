@@ -51,11 +51,12 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
             _isRibbonValueIsLow = true;
             SlackLogService()
                 .sendErrorLogToSlack('MachineId : $machineId Ribbon value is on 3%, please check the printer');
-          }
-          if (ribbonAndFilmStatus.filmRemaining < 4 && !_isFilmValueIsLow) {
+            DialogHelper.showNeedRibbonDialog(context);
+          } else if (ribbonAndFilmStatus.filmRemaining < 4 && !_isFilmValueIsLow) {
             _isFilmValueIsLow = true;
             SlackLogService()
                 .sendErrorLogToSlack('MachineId : $machineId Film value is on 3%, please check the printer');
+            DialogHelper.showNeedFilmDialog(context);
           }
         });
       }
