@@ -37,6 +37,7 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
         setState(() {
           SlackLogService()
               .sendLogToSlack('MachineId : $machineId Connected Printer ${connected ? 'Success' : 'Failed'}');
+          // 프린터 연결상태 우선 - 프린터 상태 연결 완료 이후 리본 잔량 및 필름 잔량 체크
           if (!connected) {
             _isConnectedPrinter = false;
             return;
@@ -57,7 +58,7 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
             _isRibbonValueIsLow = true;
             SlackLogService()
                 .sendErrorLogToSlack('MachineId : $machineId Ribbon value is on 3%, please check the printer');
-            DialogHelper.showNeedRibbonDialog(context);
+           DialogHelper.showNeedRibbonDialog(context);
           } else if (ribbonAndFilmStatus.filmRemaining < 4 && !_isFilmValueIsLow) {
             _isFilmValueIsLow = true;
             SlackLogService()
