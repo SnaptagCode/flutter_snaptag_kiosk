@@ -52,3 +52,4 @@ app.*.map.json
 # 보안
 *.env
 pubspec.lock
+macos/

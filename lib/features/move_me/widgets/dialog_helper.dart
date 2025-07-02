@@ -456,6 +456,16 @@ class DialogHelper {
     );
   }
 
+  static Future<void> showNeedRibbonFilmDialog(BuildContext context, VoidCallback? onButtonPressed) async {
+    await _showOneButtonKioskDialog(
+      context,
+      title: "프린터 상태를 확인해주세요.",
+      message: "관리자에게 문의해주세요.",
+      buttonText: LocaleKeys.alert_btn_paymentcard_failure.tr(),
+      onButtonPressed: onButtonPressed,
+    );
+  }
+
   static Future<void> showCheckPrintStateDialog(BuildContext context) async {
     await _showOneButtonKioskDialog(
       context,

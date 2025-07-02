@@ -7,6 +7,7 @@ import 'package:flutter_snaptag_kiosk/data/datasources/cache/kiosk_info_service.
 import 'package:flutter_snaptag_kiosk/data/datasources/remote/slack_log_service.dart';
 import 'package:flutter_snaptag_kiosk/data/repositories/kiosk_repository.dart';
 import 'package:flutter_snaptag_kiosk/features/core/printer/printer_log.dart';
+import 'package:flutter_snaptag_kiosk/features/core/printer/ribbon_status.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 
@@ -33,6 +34,18 @@ class PrinterService extends _$PrinterService {
       _bindings.clearLibrary();
 
       _bindings.initLibrary();
+
+      // 2. 프린터 밝기 설정 변경
+      try {
+        _bindings.setImageVisualParameters(
+          brightness: 0,
+          contrast: 0,
+          saturation: 0,
+        );
+      } catch (e) {
+        logger.e('Error setting image brightness: $e');
+        SlackLogService().sendErrorLogToSlack('Error setting image brightness: $e');
+      }
 
       // checkConnectedWithPrinterLog();
 
@@ -63,11 +76,27 @@ class PrinterService extends _$PrinterService {
       final printerLog = getPrinterLogData(_bindings);
 
       final isReady = printerLog?.printerMainStatusCode == "1004";
-
+      
       return connected && isReady;
     } catch (e) {
       logger.e('Error checking printer connection: $e');
       return false;
+    }
+  }
+
+  RibbonStatus getRibbonStatus() {
+    try {
+      final ribbonStatus = _bindings.getRbnAndFilmRemaining();
+      if (ribbonStatus != null) {
+        logger.i('Ribbon remaining: ${ribbonStatus.rbnRemaining}%, Film remaining: ${ribbonStatus.filmRemaining}%');
+        return ribbonStatus;
+      } else {
+        logger.w('Ribbon status is null');
+        return RibbonStatus(rbnRemaining: 0, filmRemaining: 0);
+      }
+    } catch (e) {
+      logger.e('Error getting ribbon status: $e');
+      return RibbonStatus(rbnRemaining: 0, filmRemaining: 0);
     }
   }
 
