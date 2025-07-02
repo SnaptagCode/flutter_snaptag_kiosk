@@ -204,7 +204,7 @@ class RibbonWarning extends _$RibbonWarning {
     if (ribbonLevel <= 2 && !state.isSentUnder2Ribbon) {
       SlackLogService().sendErrorLogToSlack(
           'MachineId : $machineId CRITICAL: Ribbon level is ${ribbonLevel.toInt()}% (under 2%), please replace immediately!');
-          setRibbonUnder20Sent(ribbonLevel); // 5% 미만이므로 20% 경고도 함께 설정
+      setRibbonUnder20Sent(ribbonLevel); // 5% 미만이므로 20% 경고도 함께 설정
       setRibbonUnder10Sent(ribbonLevel); // 5% 미만이므로 10% 경고도 함께 설정
       setRibbonUnder5Sent(ribbonLevel);
       setRibbonUnder2Sent(ribbonLevel);
