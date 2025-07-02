@@ -181,40 +181,6 @@ class RibbonWarningNotifier extends StateNotifier<RibbonWarningState> {
           'MachineId : $machineId INFO: Both Ribbon ($ribbonLevel%) and Film ($filmLevel%) are under 20%! Please check the printer');
     }
   }
-
-  /// 리본/필름이 교체되었을 때 호출 (레벨이 올라갔을 때 경고 상태 초기화)
-  void onSupplyReplaced(int newRibbonLevel, int newFilmLevel) {
-    // 레벨이 올라간 경우 해당 레벨의 경고 상태 초기화
-    if (newRibbonLevel > 20) {
-      state = state.copyWith(
-        isSentUnder20Ribbon: false,
-        isSentUnder10Ribbon: false,
-        isSentUnder5Ribbon: false,
-      );
-    } else if (newRibbonLevel > 10) {
-      state = state.copyWith(
-        isSentUnder10Ribbon: false,
-        isSentUnder5Ribbon: false,
-      );
-    } else if (newRibbonLevel > 5) {
-      state = state.copyWith(isSentUnder5Ribbon: false);
-    }
-
-    if (newFilmLevel > 20) {
-      state = state.copyWith(
-        isSentUnder20Film: false,
-        isSentUnder10Film: false,
-        isSentUnder5Film: false,
-      );
-    } else if (newFilmLevel > 10) {
-      state = state.copyWith(
-        isSentUnder10Film: false,
-        isSentUnder5Film: false,
-      );
-    } else if (newFilmLevel > 5) {
-      state = state.copyWith(isSentUnder5Film: false);
-    }
-  }
 }
 
 /// 리본/필름 경고 상태 Provider

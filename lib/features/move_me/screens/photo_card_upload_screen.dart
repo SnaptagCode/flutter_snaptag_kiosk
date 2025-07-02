@@ -14,7 +14,6 @@ class PhotoCardUploadScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final kiosk = ref.watch(kioskInfoServiceProvider);
     
-    // 위젯이 렌더링된 후에 리본/필름 경고 상태 확인
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(ribbonWarningProvider.notifier).checkAndSendWarnings(ref);
     });
