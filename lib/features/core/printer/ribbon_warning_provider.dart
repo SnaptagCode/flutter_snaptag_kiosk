@@ -1,5 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
+
+part 'ribbon_warning_provider.g.dart';
 
 /// 리본/필름 경고 상태를 관리하는 클래스
 class RibbonWarningState {
@@ -43,9 +46,13 @@ class RibbonWarningState {
   }
 }
 
-/// 리본/필름 경고 상태를 관리하는 StateNotifier
-class RibbonWarningNotifier extends StateNotifier<RibbonWarningState> {
-  RibbonWarningNotifier() : super(const RibbonWarningState());
+/// 리본/필름 경고 상태를 관리하는 Provider (코드 생성 방식)
+@Riverpod(keepAlive: true)
+class RibbonWarning extends _$RibbonWarning {
+  @override
+  RibbonWarningState build() {
+    return const RibbonWarningState();
+  }
 
   /// 20% 미만 리본 경고 전송 상태 설정
   void setRibbonUnder20Sent() {
@@ -114,8 +121,13 @@ class RibbonWarningNotifier extends StateNotifier<RibbonWarningState> {
     final ribbonLevel = ribbonStatus.rbnRemaining;
     final filmLevel = ribbonStatus.filmRemaining;
 
+    // 리본과 필름 레벨이 모두 30% 이상인 경우 경고 초기화
+    if (ribbonLevel > 30 && filmLevel > 30) {
+      resetAllWarnings();
+      return;
+    }
+    
     // 각 레벨별로 독립적으로 경고 상태 확인
-
     // 5% 미만 체크 (가장 심각한 경고)
     if (ribbonLevel <= 5 && !state.isSentUnder5Ribbon) {
       SlackLogService().sendErrorLogToSlack(
@@ -171,8 +183,3 @@ class RibbonWarningNotifier extends StateNotifier<RibbonWarningState> {
     }
   }
 }
-
-/// 리본/필름 경고 상태 Provider
-final ribbonWarningProvider = StateNotifierProvider<RibbonWarningNotifier, RibbonWarningState>((ref) {
-  return RibbonWarningNotifier();
-});
