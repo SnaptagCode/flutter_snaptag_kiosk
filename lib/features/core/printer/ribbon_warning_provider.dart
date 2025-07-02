@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_snaptag_kiosk/features/core/printer/ribbon_status.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_snaptag_kiosk/data/datasources/remote/slack_log_service.dart';
@@ -13,7 +14,9 @@ class RibbonWarningState {
   final bool isSentUnder10Film;
   final bool isSentUnder5Ribbon;
   final bool isSentUnder5Film;
-  
+  final bool isSentUnder2Ribbon;
+  final bool isSentUnder2Film;
+
   // 마지막으로 경고를 보낸 시점의 리본/필름 잔량
   final double lastWarnedRibbonLevel;
   final double lastWarnedFilmLevel;
@@ -25,8 +28,10 @@ class RibbonWarningState {
     this.isSentUnder10Film = false,
     this.isSentUnder5Ribbon = false,
     this.isSentUnder5Film = false,
-    this.lastWarnedRibbonLevel = 100.0,  // 초기값은 100%로 설정
-    this.lastWarnedFilmLevel = 100.0,    // 초기값은 100%로 설정
+    this.isSentUnder2Ribbon = false,
+    this.isSentUnder2Film = false,
+    this.lastWarnedRibbonLevel = 100.0, // 초기값은 100%로 설정
+    this.lastWarnedFilmLevel = 100.0, // 초기값은 100%로 설정
   });
 
   RibbonWarningState copyWith({
@@ -36,6 +41,8 @@ class RibbonWarningState {
     bool? isSentUnder10Film,
     bool? isSentUnder5Ribbon,
     bool? isSentUnder5Film,
+    bool? isSentUnder2Ribbon,
+    bool? isSentUnder2Film,
     double? lastWarnedRibbonLevel,
     double? lastWarnedFilmLevel,
   }) {
@@ -46,6 +53,8 @@ class RibbonWarningState {
       isSentUnder10Film: isSentUnder10Film ?? this.isSentUnder10Film,
       isSentUnder5Ribbon: isSentUnder5Ribbon ?? this.isSentUnder5Ribbon,
       isSentUnder5Film: isSentUnder5Film ?? this.isSentUnder5Film,
+      isSentUnder2Ribbon: isSentUnder2Ribbon ?? this.isSentUnder2Ribbon,
+      isSentUnder2Film: isSentUnder2Film ?? this.isSentUnder2Film,
       lastWarnedRibbonLevel: lastWarnedRibbonLevel ?? this.lastWarnedRibbonLevel,
       lastWarnedFilmLevel: lastWarnedFilmLevel ?? this.lastWarnedFilmLevel,
     );
@@ -113,6 +122,21 @@ class RibbonWarning extends _$RibbonWarning {
     );
   }
 
+  void setRibbonUnder2Sent(double currentLevel) {
+    state = state.copyWith(
+      isSentUnder2Ribbon: true,
+      lastWarnedRibbonLevel: currentLevel,
+    );
+  }
+
+  /// 2% 미만 필름 경고 전송 상태 설정
+  void setFilmUnder2Sent(double currentLevel) {
+    state = state.copyWith(
+      isSentUnder2Film: true,
+      lastWarnedFilmLevel: currentLevel,
+    );
+  }
+
   /// 모든 경고 상태 초기화
   void resetAllWarnings() {
     state = state.reset();
@@ -143,16 +167,12 @@ class RibbonWarning extends _$RibbonWarning {
   }
 
   /// 리본/필름 상태를 확인하고 필요시 경고 전송
-  void checkAndSendWarnings(WidgetRef ref) {
-    final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
-    final ribbonStatus = ref.read(printerServiceProvider.notifier).getRibbonStatus();
-
+  void checkAndSendWarnings(int machineId , RibbonStatus ribbonStatus) {
     _checkAndSendWarningsInternal(machineId, ribbonStatus);
   }
 
   /// 내부 로직 - 테스트에서 직접 호출 가능
   void _checkAndSendWarningsInternal(int machineId, dynamic ribbonStatus) {
-
     final ribbonLevel = ribbonStatus.rbnRemaining.toDouble();
     final filmLevel = ribbonStatus.filmRemaining.toDouble();
 
@@ -180,7 +200,20 @@ class RibbonWarning extends _$RibbonWarning {
     }
 
     // 각 레벨별로 독립적으로 경고 상태 확인
-    // 5% 미만 체크 (가장 심각한 경고)
+    // 2% 미만 체크 (가장 심각한 경고)
+    if (ribbonLevel <= 2 && !state.isSentUnder2Ribbon) {
+      SlackLogService().sendErrorLogToSlack(
+          'MachineId : $machineId CRITICAL: Ribbon level is ${ribbonLevel.toInt()}% (under 2%), please replace immediately!');
+      setRibbonUnder2Sent(ribbonLevel);
+    }
+
+    if (filmLevel <= 2 && !state.isSentUnder2Film) {
+      SlackLogService().sendErrorLogToSlack(
+          'MachineId : $machineId CRITICAL: Film level is ${filmLevel.toInt()}% (under 2%), please replace immediately!');
+      setFilmUnder2Sent(filmLevel);
+    }
+
+    // 5% 미만 체크
     if (ribbonLevel <= 5 && !state.isSentUnder5Ribbon) {
       SlackLogService().sendRibbonFilmWarningLog(
           'MachineId : $machineId CRITICAL: Ribbon level is ${ribbonLevel.toInt()}% (under 5%), please replace immediately!');
@@ -220,7 +253,10 @@ class RibbonWarning extends _$RibbonWarning {
     }
 
     // 둘 다 동시에 낮은 경우 추가 경고 (각 레벨별로 체크)
-    if (ribbonLevel <= 5 && filmLevel <= 5 && state.isSentUnder5Ribbon && state.isSentUnder5Film) {
+    if (ribbonLevel <= 2 && filmLevel <= 2 && state.isSentUnder2Ribbon && state.isSentUnder2Film) {
+      SlackLogService().sendErrorLogToSlack(
+          'MachineId : $machineId CRITICAL: Both Ribbon (${ribbonLevel.toInt()}%) and Film (${filmLevel.toInt()}%) are under 2%! Immediate replacement required!');
+    } else if (ribbonLevel <= 5 && filmLevel <= 5 && state.isSentUnder5Ribbon && state.isSentUnder5Film) {
       SlackLogService().sendRibbonFilmWarningLog(
           'MachineId : $machineId EMERGENCY: Both Ribbon (${ribbonLevel.toInt()}%) and Film (${filmLevel.toInt()}%) are under 5%! Immediate replacement required!');
     } else if (ribbonLevel <= 10 && filmLevel <= 10 && state.isSentUnder10Ribbon && state.isSentUnder10Film) {
@@ -230,5 +266,22 @@ class RibbonWarning extends _$RibbonWarning {
       SlackLogService().sendRibbonFilmWarningLog(
           'MachineId : $machineId INFO: Both Ribbon (${ribbonLevel.toInt()}%) and Film (${filmLevel.toInt()}%) are under 20%! Please check the printer');
     }
+  }
+
+  bool isRibbonShouldBeChanged(RibbonStatus ribbonStatus) {
+    final ribbonLevel = ribbonStatus.rbnRemaining.toDouble();
+    return ribbonLevel < 2;
+  }
+
+  bool isFilmShouldBeChanged(RibbonStatus ribbonStatus) {
+    final filmLevel = ribbonStatus.filmRemaining.toDouble();
+    return filmLevel < 2;
+  }
+
+  bool isBothRibbonAndFilmShouldBeChanged(RibbonStatus ribbonStatus) {
+    final ribbonLevel = ribbonStatus.rbnRemaining.toDouble();
+    final filmLevel = ribbonStatus.filmRemaining.toDouble();
+
+    return ribbonLevel < 2 && filmLevel < 2;
   }
 }

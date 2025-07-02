@@ -459,7 +459,7 @@ class DialogHelper {
   static Future<void> showNeedFilmDialog(BuildContext context) async {
     await _showOneButtonKioskDialog(
       context,
-      title: "필름 잔량을 확인해 주세요.",
+      title: "필름 잔량을 확인해주세요.",
       message: "관리자에게 문의하세요.",
       buttonText: LocaleKeys.alert_btn_paymentcard_failure.tr(),
     );
@@ -468,18 +468,19 @@ class DialogHelper {
   static Future<void> showNeedRibbonDialog(BuildContext context) async {
     await _showOneButtonKioskDialog(
       context,
-      title: "리본 잔량을 확인해 주세요.",
+      title: "리본 잔량을 확인해주세요.",
       message: "관리자에게 문의하세요.",
       buttonText: LocaleKeys.alert_btn_paymentcard_failure.tr(),
     );
   }
 
-  static Future<void> showNeedRibbonFilmDialog(BuildContext context) async {
+  static Future<void> showNeedRibbonFilmDialog(BuildContext context, VoidCallback? onButtonPressed) async {
     await _showOneButtonKioskDialog(
       context,
-      title: "리본 및 필름 잔량을 확인해 주세요.",
-      message: "관리자에게 문의하세요.",
+      title: "프린터 상태를 확인해주세요.",
+      message: "관리자에게 문의해주세요.",
       buttonText: LocaleKeys.alert_btn_paymentcard_failure.tr(),
+      onButtonPressed: onButtonPressed,
     );
   }
 
