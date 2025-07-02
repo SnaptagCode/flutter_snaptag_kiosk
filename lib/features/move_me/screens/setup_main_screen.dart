@@ -20,8 +20,6 @@ class SetupMainScreen extends ConsumerStatefulWidget {
 class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
   Timer? _timer;
   bool _isConnectedPrinter = false;
-  bool _isRibbonValueIsLow = false;
-  bool _isFilmValueIsLow = false;
 
   @override
   void initState() {
@@ -32,7 +30,6 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
     _timer = Timer.periodic(Duration(seconds: 2), (timer) async {
       // 여기에 실행하고 싶은 로직 작성
       final connected = await ref.read(printerServiceProvider.notifier).checkConnectedPrint();
-      final ribbonAndFilmStatus = await ref.read(printerServiceProvider.notifier).getRibbonStatus();
       if (mounted) {
         setState(() {
           SlackLogService()
@@ -40,30 +37,11 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
           // 프린터 연결상태 우선 - 프린터 상태 연결 완료 이후 리본 잔량 및 필름 잔량 체크
           if (!connected) {
             _isConnectedPrinter = false;
-            return;
           } else {
             final settingCompleted = ref.read(printerServiceProvider.notifier).settingPrinter();
             _isConnectedPrinter = settingCompleted;
             SlackLogService()
                 .sendLogToSlack('MachineId : $machineId Setting Printer ${settingCompleted ? 'Success' : 'Failed'}');
-          }
-          // 리본 || 필름 잔량 확인 코드
-          if (ribbonAndFilmStatus.rbnRemaining < 4 && ribbonAndFilmStatus.filmRemaining < 4 && !_isRibbonValueIsLow && !_isFilmValueIsLow) {
-            _isRibbonValueIsLow = true;
-            _isFilmValueIsLow = true;
-            SlackLogService()
-                .sendErrorLogToSlack('MachineId : $machineId Ribbon & Film value is on 3%, please check the printer');
-            DialogHelper.showNeedRibbonFilmDialog(context);
-          } else if (ribbonAndFilmStatus.rbnRemaining < 4 && !_isRibbonValueIsLow) {
-            _isRibbonValueIsLow = true;
-            SlackLogService()
-                .sendErrorLogToSlack('MachineId : $machineId Ribbon value is on 3%, please check the printer');
-           DialogHelper.showNeedRibbonDialog(context);
-          } else if (ribbonAndFilmStatus.filmRemaining < 4 && !_isFilmValueIsLow) {
-            _isFilmValueIsLow = true;
-            SlackLogService()
-                .sendErrorLogToSlack('MachineId : $machineId Film value is on 3%, please check the printer');
-            DialogHelper.showNeedFilmDialog(context);
           }
         });
       }
