@@ -2,22 +2,9 @@ import 'dart:convert';
 import 'dart:developer';
 
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 
-// 인터페이스 추상 클래스
-abstract class ISlackLogService {
-  Future<void> sendRibbonFilmWarningLog(String message);
-  Future<void> sendErrorLogToSlack(String message);
-  Future<void> sendLogToSlack(String message);
-}
-
-// SlackLogService 프로바이더
-final slackLogServiceProvider = Provider<ISlackLogService>((ref) {
-  return SlackLogService();
-});
-
-class SlackLogService implements ISlackLogService {
+class SlackLogService {
   static final SlackLogService _instance = SlackLogService._internal();
   factory SlackLogService() => _instance;
 
@@ -35,17 +22,14 @@ class SlackLogService implements ISlackLogService {
     sendLogToSlack("🚀 Flutter App Started!");
   }
 
-  @override
   Future<void> sendErrorLogToSlack(String message) async {
     await sendLog(slackWebhookErrorUrl, message);
   }
 
-  @override
   Future<void> sendLogToSlack(String message) async {
     await sendLog(slackWebhookUrl, message);
   }
 
-  @override
   Future<void> sendRibbonFilmWarningLog(String message) async {
     await sendLog(slackWebhookRibbonFilmWarnUrl, message);
   }
