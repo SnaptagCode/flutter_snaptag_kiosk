@@ -41,17 +41,6 @@ class RibbonWarningState {
   RibbonWarningState reset() {
     return const RibbonWarningState();
   }
-
-  @override
-  String toString() {
-    return 'RibbonWarningState('
-        'under20Ribbon: $isSentUnder20Ribbon, '
-        'under20Film: $isSentUnder20Film, '
-        'under10Ribbon: $isSentUnder10Ribbon, '
-        'under10Film: $isSentUnder10Film, '
-        'under5Ribbon: $isSentUnder5Ribbon, '
-        'under5Film: $isSentUnder5Film)';
-  }
 }
 
 /// 리본/필름 경고 상태를 관리하는 StateNotifier
