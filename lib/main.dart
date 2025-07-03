@@ -21,6 +21,12 @@ void main() async {
   await dotenv.load(fileName: "assets/.env");
   final slackCall = SlackLogService();
 
+  // 모든 동기 Flutter 오류
+  FlutterError.onError = (details) {
+    _logAndNotify(details.exception, details.stack);
+    FlutterError.presentError(details); // 개발 중엔 콘솔에도 출력
+  };
+
   // Zone으로 감싸서 모든 비동기 에러도 캐치
   runZonedGuarded(
     () async {
@@ -76,6 +82,10 @@ Future<void> windowManagerSetting() async {
       await windowManager.focus();
     });
   }
+}
+
+void _logAndNotify(Object error, StackTrace? stack) {
+  logger.e('PRINTER-CRASH : error: $error stack: $stack'); // 파일 로그 기록
 }
 
 // 🚨 SSL 인증서 오류(HandshakeException) 해결을 위한 설정

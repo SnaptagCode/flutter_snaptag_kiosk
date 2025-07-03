@@ -117,7 +117,7 @@ class PrinterManager {
               frontImageInfo = await drawImage(path: printPath.frontPath!, bindings: bindings);
             }
 
-            logger.i('7. PrintStart frontImageInfo: $behindImageInfo');
+            logger.i('7. PrintStart frontImageInfo: $frontImageInfo');
 
             if (printPath.backPath != null) {
               behindImageInfo = await drawImage(path: printPath.backPath!, bindings: bindings, isFront: false);
@@ -127,7 +127,7 @@ class PrinterManager {
               });
             }
 
-            logger.i('8. PrintStart frontImageInfo: $behindImageInfo');
+            logger.i('8. PrintStart behindImageInfo: $behindImageInfo');
 
             logger.i('9. Injecting card...');
             bindings.injectCard();
@@ -135,7 +135,7 @@ class PrinterManager {
             logger.i('10. Printing card... isSingleMode: $isSingleMode');
             if (isSingleMode) {
               bindings.printCard(
-                frontImageInfo: frontImageInfo,
+                frontImageInfo: behindImageInfo,
                 backImageInfo: null,
               );
             } else {
@@ -184,15 +184,20 @@ class PrinterManager {
 
   Future<bool> _checkConnectedPrint(PrinterBindings bindings) async {
     try {
-      final connected = bindings.connectPrinter();
+      int result = bindings.connectPrinter();
 
-      logger.e('checkConnectedPrint: $connected');
+      if (result != 0) {
+        logger.e('Printer connection failed with code: $result');
+        return false;
+      }
+
+      logger.e('checkConnectedPrint: $result');
 
       final printerLog = getPrinterLogData(bindings);
 
       final isReady = printerLog?.printerMainStatusCode == "1004";
 
-      return connected && isReady;
+      return result == 0 && isReady;
     } catch (e) {
       logger.e('Error checking printer connection: $e');
       return false;
@@ -304,7 +309,6 @@ class PrinterManager {
         );
       } catch (e) {
         logger.e('Error setting image brightness: $e');
-        SlackLogService().sendErrorLogToSlack('Error setting image brightness: $e');
       }
 
       logger.i('5. Printer initialization completed');

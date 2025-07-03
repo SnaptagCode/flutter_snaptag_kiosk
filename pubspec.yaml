@@ -22,7 +22,7 @@ dependencies:
   easy_localization: ^3.0.7
 
   # Routing
-  go_router: ^15.2.0
+  go_router: ^16.0.0
 
   # Code Generation
   freezed_annotation: ^2.4.4
@@ -46,6 +46,7 @@ dependencies:
   pretty_animated_buttons: ^0.0.2
 
   package_info_plus: ^8.3.0
+  video_player: ^2.10.0
 
 dev_dependencies:
   flutter_test:
@@ -77,26 +78,6 @@ flutter:
     - assets/.env.version
 
   fonts:
-    - family: MPLUSRounded
-      fonts:
-        - asset: assets/fonts/MPLUSRounded1c-Bold.ttf
-        - weight: 100
-        - asset: assets/fonts/MPLUSRounded1c-Bold.ttf
-        - weight: 200
-        - asset: assets/fonts/MPLUSRounded1c-Bold.ttf
-        - weight: 300
-        - asset: assets/fonts/MPLUSRounded1c-Bold.ttf
-        - weight: 400
-        - asset: assets/fonts/MPLUSRounded1c-Bold.ttf
-        - weight: 500
-        - asset: assets/fonts/MPLUSRounded1c-Bold.ttf
-        - weight: 600
-        - asset: assets/fonts/MPLUSRounded1c-Bold.ttf
-        - weight: 700
-        - asset: assets/fonts/MPLUSRounded1c-Bold.ttf
-        - weight: 800
-        - asset: assets/fonts/MPLUSRounded1c-Bold.ttf
-        - weight: 900
     - family: Cafe24Ssurround2
       fonts:
         - asset: assets/fonts/Cafe24Ssurround-v2.0.ttf

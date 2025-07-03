@@ -29,17 +29,16 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
 
     _timer = Timer.periodic(Duration(seconds: 2), (timer) async {
       // 여기에 실행하고 싶은 로직 작성
-      final connected = await ref.read(printerServiceProvider.notifier).connectedPrinter();
+      bool connected = await ref.read(printerServiceProvider.notifier).connectedPrinter();
+      SlackLogService().sendLogToSlack('MachineId : $machineId Connected Printer ${connected ? 'Success' : 'Failed'}');
+      if (connected) {
+        connected = await ref.read(printerServiceProvider.notifier).checkSettingPrinter();
+        SlackLogService().sendLogToSlack('MachineId : $machineId Setting Printer ${connected ? 'Success' : 'Failed'}');
+      }
+
       if (mounted) {
-        setState(() async {
-          SlackLogService()
-              .sendLogToSlack('MachineId : $machineId Connected Printer ${connected ? 'Success' : 'Failed'}');
-          if (connected) {
-            final settingCompleted = await ref.read(printerServiceProvider.notifier).checkSettingPrinter();
-            _isConnectedPrinter = settingCompleted;
-            SlackLogService()
-                .sendLogToSlack('MachineId : $machineId Setting Printer ${settingCompleted ? 'Success' : 'Failed'}');
-          }
+        setState(() {
+          _isConnectedPrinter = connected;
         });
       }
     });
@@ -279,20 +278,9 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
                         assetName: SnaptagSvg.eventRun,
                         onTap: () async {
                           await SoundManager().playSound();
-                          final connected = await ref.read(printerServiceProvider.notifier).connectedPrinter();
-                          final settingPrinter = await ref.read(printerServiceProvider.notifier).checkSettingPrinter();
-                          if (!connected) {
-                            SlackLogService().sendErrorLogToSlack(
-                                'MachineId : $machineId  PrintConnected Failed - Attempted to run event');
-                            await DialogHelper.showPrintWaitingDialog(context);
-                            return;
-                          }
-                          if (!settingPrinter) {
-                            SlackLogService().sendErrorLogToSlack(
-                                'MachineId : $machineId  SettingPrint Failed - Attempted to run event');
-                            await DialogHelper.showCheckPrintStateDialog(context);
-                            return;
-                          }
+
+                          await _checkConnectWithPrinterSetting(machineId);
+
                           final result = await DialogHelper.showSetupDialog(
                             context,
                             title: '이벤트를 실행합니다.',
@@ -438,6 +426,21 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _checkConnectWithPrinterSetting(int machineId) async {
+    final connected = await ref.read(printerServiceProvider.notifier).connectedPrinter();
+    final settingPrinter = await ref.read(printerServiceProvider.notifier).checkSettingPrinter();
+    if (!connected) {
+      SlackLogService().sendErrorLogToSlack('MachineId : $machineId  PrintConnected Failed - Attempted to run event');
+      await DialogHelper.showPrintWaitingDialog(context);
+      return;
+    }
+    if (!settingPrinter) {
+      SlackLogService().sendErrorLogToSlack('MachineId : $machineId  SettingPrint Failed - Attempted to run event');
+      await DialogHelper.showCheckPrintStateDialog(context);
+      return;
+    }
   }
 }
 

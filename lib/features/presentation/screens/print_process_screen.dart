@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
+import 'package:video_player/video_player.dart';
 
 import 'dart:io';
 import 'dart:math';
@@ -15,6 +16,29 @@ class PrintProcessScreen extends ConsumerStatefulWidget {
 }
 
 class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
+  late final String? _adVideoPath;
+  VideoPlayerController? _videoController;
+
+  @override
+  void initState() {
+    super.initState();
+    _adVideoPath = getRandomAdVideoFilePath(); // Re‑use existing function for now
+    if (_adVideoPath != null) {
+      _videoController = VideoPlayerController.file(File(_adVideoPath!))
+        ..setLooping(true)
+        ..initialize().then((_) {
+          setState(() {});
+          _videoController?.play();
+        });
+    }
+  }
+
+  @override
+  void dispose() {
+    _videoController?.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final randomAdImage = getRandomAdImageFilePath();
@@ -122,29 +146,15 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
               style: context.typography.kioskBody1B,
             ),
             SizedBox(height: 30.h),
-            ((kiosk?.kioskMachineId ?? 1) != 2 && (kiosk?.kioskMachineId ?? 1) != 3) || randomAdImage == null
-                ? GradientContainer(
-                    content: Padding(
-                      padding: EdgeInsets.all(8.r),
-                      child: ClipRRect(
-                          borderRadius: BorderRadius.circular(10.r),
-                          child: SizedBox(
-                            child: Image.asset(
-                              SnaptagImages.printLoading,
-                              fit: BoxFit.fill,
-                            ),
-                          )),
-                    ),
+            (_videoController != null && _videoController!.value.isInitialized)
+                ? AspectRatio(
+                    aspectRatio: _videoController!.value.aspectRatio,
+                    child: VideoPlayer(_videoController!),
                   )
-                : randomAdImage == null
-                    ? Image.asset(
-                        SnaptagImages.printLoading,
-                        fit: BoxFit.fill,
-                      )
-                    : Image.file(
-                        File(randomAdImage),
-                        fit: BoxFit.fill,
-                      ),
+                : Image.asset(
+                    SnaptagImages.printLoading,
+                    fit: BoxFit.fill,
+                  ),
             SizedBox(height: 30.h),
             Text(
               LocaleKeys.sub03_txt_02.tr(),
@@ -220,6 +230,33 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
     final fileName = randomFile.uri.pathSegments.last;
 
     return 'assets/adImages/$fileName';
+  }
+
+  String? getRandomAdVideoFilePath() {
+    final version = getAppVersionSync();
+    final userDir = getUserDirectorySync();
+
+    final adImageFolder = Directory(
+      '$userDir\\Snaptag\\$version\\assets\\adVideos',
+    );
+
+    if (!adImageFolder.existsSync()) {
+      print('❌ 영상 폴더가 존재하지 않습니다: ${adImageFolder.path}');
+      return null;
+    }
+
+    final imageFiles = adImageFolder
+        .listSync()
+        .whereType<File>()
+        .where((f) => f.path.endsWith('.mp4') || f.path.endsWith('.mov'))
+        .toList();
+
+    if (imageFiles.isEmpty) {
+      return null;
+    }
+
+    final randomFile = imageFiles[Random().nextInt(imageFiles.length)];
+    return randomFile.path; // ⬅️ 여기서 전체 파일 경로 반환
   }
 
   String? getRandomAdImageFilePath() {
