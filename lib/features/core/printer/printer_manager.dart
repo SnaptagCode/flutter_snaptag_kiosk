@@ -8,8 +8,10 @@ import 'package:ffi/ffi.dart'; // Utf8 사용을 위한 임포트
 import 'package:flutter_snaptag_kiosk/features/core/printer/connect_message.dart';
 import 'package:flutter_snaptag_kiosk/features/core/printer/print_message.dart';
 import 'package:flutter_snaptag_kiosk/features/core/printer/print_path.dart';
+import 'package:flutter_snaptag_kiosk/features/core/printer/print_ribbon_status.dart';
 import 'package:flutter_snaptag_kiosk/features/core/printer/print_state_message.dart';
 import 'package:flutter_snaptag_kiosk/features/core/printer/printer_log.dart';
+import 'package:flutter_snaptag_kiosk/features/core/printer/ribbon_status.dart';
 import 'package:flutter_snaptag_kiosk/features/core/printer/setting_printer_message.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:image/image.dart' as img;
@@ -23,6 +25,7 @@ class PrinterManager {
   static Future<PrinterManager> getInstance() async {
     try {
       if (_instance != null) return _instance!;
+      logger.i('PrinterManager Initializing PrinterManager...');
       _instance = PrinterManager._();
       await _instance!._init();
       return _instance!;
@@ -33,6 +36,7 @@ class PrinterManager {
 
   Future<void> _init() async {
     try {
+      logger.i('PrinterManager Starting PrinterManager initialization...');
       await _initPrintIsolate();
     } catch (e) {
       rethrow;
@@ -41,6 +45,7 @@ class PrinterManager {
 
   Future<void> _initPrintIsolate() async {
     try {
+      logger.i('PrinterManager Initializing print isolate...');
       final printReceivePort = ReceivePort();
 
       await Isolate.spawn(_printEntry, printReceivePort.sendPort);
@@ -54,6 +59,7 @@ class PrinterManager {
 
   void _printEntry(SendPort sendPort) async {
     try {
+      logger.i('PrinterManager Print isolate entry point started');
       final isolateReceivePort = ReceivePort();
       sendPort.send(isolateReceivePort.sendPort);
 
@@ -89,6 +95,14 @@ class PrinterManager {
             return;
           }
 
+          if (message is PrintRibbonStatus) {
+            replyPort = message.sendPort;
+            final ribbonStatus = _getRibbonStatus(bindings);
+            logger.i('_printEntry PrintRibbonStatus: $ribbonStatus');
+            replyPort.send({'printRibbonStatus': ribbonStatus});
+            return;
+          }
+
           if (message is PrintMessage) {
             final printPath = message.printPath;
             final isSingleMode = message.isSingleMode;
@@ -97,9 +111,13 @@ class PrinterManager {
             String? frontImageInfo;
             String? behindImageInfo;
 
+            logger.i('6. PrintStart');
+
             if (printPath.frontPath != null) {
               frontImageInfo = await drawImage(path: printPath.frontPath!, bindings: bindings);
             }
+
+            logger.i('7. PrintStart frontImageInfo: $behindImageInfo');
 
             if (printPath.backPath != null) {
               behindImageInfo = await drawImage(path: printPath.backPath!, bindings: bindings, isFront: false);
@@ -109,10 +127,12 @@ class PrinterManager {
               });
             }
 
-            logger.i('5. Injecting card...');
+            logger.i('8. PrintStart frontImageInfo: $behindImageInfo');
+
+            logger.i('9. Injecting card...');
             bindings.injectCard();
 
-            logger.i('6. Printing card...');
+            logger.i('10. Printing card... isSingleMode: $isSingleMode');
             if (isSingleMode) {
               bindings.printCard(
                 frontImageInfo: frontImageInfo,
@@ -264,12 +284,36 @@ class PrinterManager {
 
   Future<void> _initializePrinter(PrinterBindings bindings) async {
     try {
+      logger.i('1. Initializing printer...');
+
+      // 1. 프린터 라이브러리 초기화
+      logger.i('2. Initializing printer library...');
       bindings.clearLibrary();
+
+      logger.i('3. Printer library initialized');
       bindings.initLibrary();
-      logger.i('Printer initialization completed');
-    } catch (e) {
+
+      // 2. 프린터 밝기 설정 변경
+      try {
+        logger.i('4. Image brightness set to 0');
+
+        bindings.setImageVisualParameters(
+          brightness: 0,
+          contrast: 0,
+          saturation: 0,
+        );
+      } catch (e) {
+        logger.e('Error setting image brightness: $e');
+        SlackLogService().sendErrorLogToSlack('Error setting image brightness: $e');
+      }
+
+      logger.i('5. Printer initialization completed');
+    } catch (e, stack) {
       logger.i('Printer initialization error: $e');
-      rethrow;
+      Error.throwWithStackTrace(
+        Exception('Printer initialization error: $e'),
+        stack,
+      );
     }
   }
 
@@ -287,6 +331,39 @@ class PrinterManager {
     } catch (e, stack) {
       logger.i('startLog error: $e\nStack: $stack');
       return null;
+    }
+  }
+
+  Future<RibbonStatus> getRibbonStatus() async {
+    try {
+      final responsePort = ReceivePort();
+
+      _sendPort.send(
+        PrintRibbonStatus(sendPort: responsePort.sendPort),
+      );
+
+      final response = await responsePort.first as Map<String, dynamic>;
+
+      return response['printRibbonStatus'] as RibbonStatus;
+    } catch (e) {
+      logger.e('Error getting ribbon status: $e');
+      return RibbonStatus(rbnRemaining: 0, filmRemaining: 0);
+    }
+  }
+
+  RibbonStatus _getRibbonStatus(PrinterBindings bindings) {
+    try {
+      final ribbonStatus = bindings.getRbnAndFilmRemaining();
+      if (ribbonStatus != null) {
+        logger.i('Ribbon remaining: ${ribbonStatus.rbnRemaining}%, Film remaining: ${ribbonStatus.filmRemaining}%');
+        return ribbonStatus;
+      } else {
+        logger.w('Ribbon status is null');
+        return RibbonStatus(rbnRemaining: 0, filmRemaining: 0);
+      }
+    } catch (e) {
+      logger.e('Error getting ribbon status: $e');
+      return RibbonStatus(rbnRemaining: 0, filmRemaining: 0);
     }
   }
 

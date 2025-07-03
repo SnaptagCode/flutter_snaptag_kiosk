@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:ffi/ffi.dart'; // Utf8 사용을 위한 임포트
 import 'package:flutter_snaptag_kiosk/features/core/printer/printer_log.dart';
 import 'package:flutter_snaptag_kiosk/features/core/printer/printer_manager.dart';
+import 'package:flutter_snaptag_kiosk/features/core/printer/ribbon_status.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 
@@ -21,7 +22,8 @@ class PrinterService extends _$PrinterService {
 
       return isConnected;
     } catch (e) {
-      SlackLogService().sendLogToSlack('printerError: $e');
+      final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
+      SlackLogService().sendErrorLogToSlack('Machine ID: $machineId, Printer error: $e');
       return false;
     }
   }
@@ -45,6 +47,16 @@ class PrinterService extends _$PrinterService {
       final printerLog = await printerManager.startLog();
 
       await _printerStateLog(printerLog);
+    } catch (e) {
+      SlackLogService().sendLogToSlack('printerError: $e');
+      rethrow;
+    }
+  }
+
+  Future<RibbonStatus> getRibbonStatus() async {
+    try {
+      final printerManager = await PrinterManager.getInstance();
+      return await printerManager.getRibbonStatus();
     } catch (e) {
       SlackLogService().sendLogToSlack('printerError: $e');
       rethrow;

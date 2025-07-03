@@ -14,12 +14,12 @@ class PhotoCardUploadScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final kiosk = ref.watch(kioskInfoServiceProvider);
-    
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       int machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
-      RibbonStatus ribbonStatus = ref.read(printerServiceProvider.notifier).getRibbonStatus();
+      RibbonStatus ribbonStatus = await ref.read(printerServiceProvider.notifier).getRibbonStatus();
       ref.read(ribbonWarningProvider.notifier).checkAndSendWarnings(machineId, ribbonStatus);
-      showNeedRibbonFilmDialog(context, ref);
+      await showNeedRibbonFilmDialog(context, ref);
     });
 
     return DefaultTextStyle(
@@ -88,11 +88,12 @@ class PhotoCardUploadScreen extends ConsumerWidget {
     );
   }
 
-  void showNeedRibbonFilmDialog(BuildContext context, WidgetRef ref) {
-    RibbonStatus ribbonStatus = ref.read(printerServiceProvider.notifier).getRibbonStatus();
+  Future<void> showNeedRibbonFilmDialog(BuildContext context, WidgetRef ref) async {
+    RibbonStatus ribbonStatus = await ref.read(printerServiceProvider.notifier).getRibbonStatus();
     bool isRibbonShouldBeChanged = ref.read(ribbonWarningProvider.notifier).isRibbonShouldBeChanged(ribbonStatus);
     bool isFilmShouldBeChanged = ref.read(ribbonWarningProvider.notifier).isFilmShouldBeChanged(ribbonStatus);
-    bool isBothRibbonAndFilmShouldBeChanged = ref.read(ribbonWarningProvider.notifier).isBothRibbonAndFilmShouldBeChanged(ribbonStatus);
+    bool isBothRibbonAndFilmShouldBeChanged =
+        ref.read(ribbonWarningProvider.notifier).isBothRibbonAndFilmShouldBeChanged(ribbonStatus);
 
     if (isRibbonShouldBeChanged || isFilmShouldBeChanged || isBothRibbonAndFilmShouldBeChanged) {
       DialogHelper.showNeedRibbonFilmDialog(context, () {
