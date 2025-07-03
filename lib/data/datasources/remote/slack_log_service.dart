@@ -28,32 +28,16 @@ class SlackLogService {
     await sendLog(slackWebhookErrorUrl, message);
   }
 
-  Future<int> sendErrorLogToSlackWithStatus(String message) async {
-    return await sendLogWithStatus(slackWebhookErrorUrl, message);
-  }
-
   Future<void> sendLogToSlack(String message) async {
     await sendLog(slackWebhookUrl, message);
-  }
-
-  Future<int> sendLogToSlackWithStatus(String message) async {
-    return await sendLogWithStatus(slackWebhookUrl, message);
   }
 
   Future<void> sendRibbonFilmWarningLog(String message) async {
     await sendLog(slackWebhookRibbonFilmWarnUrl, message);
   }
 
-  Future<int> sendRibbonFilmWarningLogWithStatus(String message) async {
-    return await sendLogWithStatus(slackWebhookRibbonFilmWarnUrl, message);
-  }
-
   Future<void> sendWarningLogToSlack(String message) async {
     await sendLog(slackWebhookWarningUrl, message);
-  }
-
-  Future<int> sendWarningLogToSlackWithStatus(String message) async {
-    return await sendLogWithStatus(slackWebhookWarningUrl, message);
   }
 
   Future<void> sendLog(String? url, String message) async {
