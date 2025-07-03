@@ -53,8 +53,8 @@ class PrinterService extends _$PrinterService {
 
       logger.i('Printer initialization completed');
     } catch (e) {
-      final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
-      SlackLogService().sendErrorLogToSlack('Machine ID: $machineId, Printer initialization error: $e');
+      
+      SlackLogService().sendErrorLogToSlack('Printer initialization error: $e');
       rethrow;
     }
   }
@@ -62,7 +62,6 @@ class PrinterService extends _$PrinterService {
   Future<bool> checkConnectedPrint() async {
     try {
       final connected = _bindings.connectPrinter();
-
       logger.e('checkConnectedPrint: $connected');
 
       if (!connected) {
@@ -76,7 +75,7 @@ class PrinterService extends _$PrinterService {
       final printerLog = getPrinterLogData(_bindings);
 
       final isReady = printerLog?.printerMainStatusCode == "1004";
-      
+
       return connected && isReady;
     } catch (e) {
       logger.e('Error checking printer connection: $e');
