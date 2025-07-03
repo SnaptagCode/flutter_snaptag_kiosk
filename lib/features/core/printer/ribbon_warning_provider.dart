@@ -167,7 +167,7 @@ class RibbonWarning extends _$RibbonWarning {
   }
 
   /// 리본/필름 상태를 확인하고 필요시 경고 전송
-  void checkAndSendWarnings(int machineId , RibbonStatus ribbonStatus) {
+  void checkAndSendWarnings(int machineId, RibbonStatus ribbonStatus) {
     _checkAndSendWarningsInternal(machineId, ribbonStatus);
   }
 
@@ -203,7 +203,9 @@ class RibbonWarning extends _$RibbonWarning {
     // 2% 미만 체크 (가장 심각한 경고)
     if (ribbonLevel <= 2 && !state.isSentUnder2Ribbon) {
       SlackLogService().sendErrorLogToSlack(
-          'MachineId : $machineId CRITICAL: Ribbon level is ${ribbonLevel.toInt()}% (under 2%), please replace immediately!');
+          'MachineId : $machineId ERROR: Ribbon level is ${ribbonLevel.toInt()}% (under 2%), please replace immediately!');
+      SlackLogService().sendRibbonFilmWarningLog(
+          'MachineId : $machineId ERROR: Ribbon level is ${ribbonLevel.toInt()}% (under 2%), please replace immediately!');
       setRibbonUnder20Sent(ribbonLevel); // 5% 미만이므로 20% 경고도 함께 설정
       setRibbonUnder10Sent(ribbonLevel); // 5% 미만이므로 10% 경고도 함께 설정
       setRibbonUnder5Sent(ribbonLevel);
@@ -212,10 +214,12 @@ class RibbonWarning extends _$RibbonWarning {
 
     if (filmLevel <= 2 && !state.isSentUnder2Film) {
       SlackLogService().sendErrorLogToSlack(
-          'MachineId : $machineId CRITICAL: Film level is ${filmLevel.toInt()}% (under 2%), please replace immediately!');
+          'MachineId : $machineId ERROR: Film level is ${filmLevel.toInt()}% (under 2%), please replace immediately!');
+      SlackLogService().sendRibbonFilmWarningLog(
+          'MachineId : $machineId ERROR: Film level is ${filmLevel.toInt()}% (under 2%), please replace immediately!');
       setFilmUnder20Sent(filmLevel); // 5% 미만이므로 20% 경고도 함께 설정
       setFilmUnder10Sent(filmLevel); // 5% 미만이므로 10% 경고도 함께 설정
-      setFilmUnder5Sent(filmLevel);    
+      setFilmUnder5Sent(filmLevel);
       setFilmUnder2Sent(filmLevel);
     }
 
@@ -263,7 +267,6 @@ class RibbonWarning extends _$RibbonWarning {
           'MachineId : $machineId INFO: Film level is ${filmLevel.toInt()}% (under 20%), please check the printer');
       setFilmUnder20Sent(filmLevel);
     }
-
   }
 
   bool isRibbonShouldBeChanged(RibbonStatus ribbonStatus) {
