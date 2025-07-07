@@ -232,31 +232,21 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
     return 'assets/adImages/$fileName';
   }
 
+  String getAdVideoDir() {
+    final exeDir = File(Platform.resolvedExecutable).parent.path;
+    return '$exeDir\\assets\\adVideos';
+  }
+
   String? getRandomAdVideoFilePath() {
-    final version = getAppVersionSync();
-    final userDir = getUserDirectorySync();
-
-    final adImageFolder = Directory(
-      '$userDir\\Snaptag\\$version\\assets\\adVideos',
-    );
-
-    if (!adImageFolder.existsSync()) {
-      print('❌ 영상 폴더가 존재하지 않습니다: ${adImageFolder.path}');
+    final adDir = Directory(getAdVideoDir());
+    if (!adDir.existsSync()) {
+      print('❌ adVideos 폴더 없음: ${adDir.path}');
       return null;
     }
-
-    final imageFiles = adImageFolder
-        .listSync()
-        .whereType<File>()
-        .where((f) => f.path.endsWith('.mp4') || f.path.endsWith('.mov'))
-        .toList();
-
-    if (imageFiles.isEmpty) {
-      return null;
-    }
-
-    final randomFile = imageFiles[Random().nextInt(imageFiles.length)];
-    return randomFile.path; // ⬅️ 여기서 전체 파일 경로 반환
+    final files =
+        adDir.listSync().whereType<File>().where((f) => f.path.endsWith('.mp4') || f.path.endsWith('.mov')).toList();
+    if (files.isEmpty) return null;
+    return files[Random().nextInt(files.length)].path;
   }
 
   String? getRandomAdImageFilePath() {
