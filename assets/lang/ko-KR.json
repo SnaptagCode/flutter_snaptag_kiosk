@@ -30,6 +30,6 @@
   "alert_txt_print_failure": "출력이 정상적으로 이루어지지 않아 결제 금액이\r\n환불됩니다. 환불이 이루어지지 않은 경우,\r\n관리자에게 문의해 주시길 바랍니다.\r\n이용에 불편을 드려 죄송합니다.",
   "alert_txt_card_refill": "카드 잔량이 부족합니다.\r\n원활한 사용을 위해 관리자에 문의 후\r\n교체를 진행해 주세요.",
   "alert_btn_print_failure": "확인",
-  "alert_title_need_ribbon_film": "관리자에게 문의해주세요.",
-  "alert_txt_need_ribbon_film": "프린터 상태를 확인해주세요."
+  "alert_title_need_ribbon_film": "관리자에게 문의해 주세요.",
+  "alert_txt_need_ribbon_film": "프린터 상태를 확인해 주세요."
 }
