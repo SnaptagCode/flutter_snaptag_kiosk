@@ -50,7 +50,7 @@ class PrinterService extends _$PrinterService {
       // checkConnectedWithPrinterLog();
 
       // settingPrinter();
-
+      final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
       logger.i('Machine ID: $machineId, Printer initialization completed');
     } catch (e) {
       
