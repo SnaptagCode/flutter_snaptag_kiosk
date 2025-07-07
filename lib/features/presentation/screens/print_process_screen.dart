@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
@@ -20,16 +23,18 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
   VideoPlayerController? _videoController;
 
   @override
-  void initState() {
+  void initState() async {
     super.initState();
-    _adVideoPath = getRandomAdVideoFilePath(); // Re‑use existing function for now
+    _initVideo();
+  }
+
+  Future<void> _initVideo() async {
+    _adVideoPath = await getRandomBundledVideo();
     if (_adVideoPath != null) {
-      _videoController = VideoPlayerController.file(File(_adVideoPath!))
-        ..setLooping(true)
-        ..initialize().then((_) {
-          setState(() {});
-          _videoController?.play();
-        });
+      _videoController = VideoPlayerController.asset(_adVideoPath)..setLooping(true);
+      await _videoController!.initialize();
+      if (mounted) setState(() {});
+      _videoController!.play();
     }
   }
 
@@ -237,16 +242,14 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
     return '$exeDir\\assets\\adVideos';
   }
 
-  String? getRandomAdVideoFilePath() {
-    final adDir = Directory(getAdVideoDir());
-    if (!adDir.existsSync()) {
-      print('❌ adVideos 폴더 없음: ${adDir.path}');
-      return null;
-    }
-    final files =
-        adDir.listSync().whereType<File>().where((f) => f.path.endsWith('.mp4') || f.path.endsWith('.mov')).toList();
-    if (files.isEmpty) return null;
-    return files[Random().nextInt(files.length)].path;
+  Future<String?> getRandomBundledVideo() async {
+    final manifest = await rootBundle.loadString('AssetManifest.json');
+    final Map<String, dynamic> paths = json.decode(manifest);
+    final vids = paths.keys
+        .where((p) => p.startsWith('assets/adVideos/') && (p.endsWith('.mp4') || p.endsWith('.mov')))
+        .toList();
+    if (vids.isEmpty) return null;
+    return vids[Random().nextInt(vids.length)];
   }
 
   String? getRandomAdImageFilePath() {
