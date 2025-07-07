@@ -111,6 +111,9 @@ class PrinterManager {
             String? frontImageInfo;
             String? behindImageInfo;
 
+            _checkFeeder(bindings);
+            _checkCardInPrinter(bindings);
+
             logger.i('6. PrintStart');
 
             if (printPath.frontPath != null) {
@@ -159,6 +162,23 @@ class PrinterManager {
       });
     } catch (e) {
       rethrow;
+    }
+  }
+
+  void _checkFeeder(PrinterBindings bindings) {
+    logger.i('Checking feeder status...');
+    final hasCard = bindings.checkFeederStatus();
+    if (!hasCard) {
+      throw Exception('Card feeder is empty');
+    }
+  }
+
+  void _checkCardInPrinter(PrinterBindings bindings) {
+    logger.i('Checking card in printer...');
+    final isCardInPrinter = bindings.checkCardPosition();
+    if (!isCardInPrinter) {
+      logger.i('Card found, ejecting...');
+      bindings.ejectCard();
     }
   }
 
