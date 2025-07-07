@@ -50,11 +50,12 @@ class PrinterService extends _$PrinterService {
       // checkConnectedWithPrinterLog();
 
       // settingPrinter();
-
+      final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
       logger.i('Machine ID: $machineId, Printer initialization completed');
     } catch (e) {
-      
-      SlackLogService().sendErrorLogToSlack('Machine ID: $machineId, Printer initialization error: $e');
+      final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
+
+      SlackLogService().sendErrorLogToSlack('*[Machine ID: $machineId]*, Printer initialization error: $e');
       rethrow;
     }
   }
