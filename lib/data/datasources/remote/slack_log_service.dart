@@ -12,6 +12,10 @@ class SlackLogService {
 
   final slackWebhookErrorUrl = dotenv.env['SLACK_WEBHOOK_ERROR_LOG_URL'];
 
+  final slackWebhookRibbonFilmWarnUrl = dotenv.env['SLACK_WEBHOOK_RIBBON_FILM_WARN_URL'];
+
+  final slackWebhookWarningUrl = dotenv.env['SLACK_WEBHOOK_WARNING_URL'];
+
   SlackLogService._internal() {
     init();
   }
@@ -26,6 +30,14 @@ class SlackLogService {
 
   Future<void> sendLogToSlack(String message) async {
     await sendLog(slackWebhookUrl, message);
+  }
+
+  Future<void> sendRibbonFilmWarningLog(String message) async {
+    await sendLog(slackWebhookRibbonFilmWarnUrl, message);
+  }
+
+  Future<void> sendWarningLogToSlack(String message) async {
+    await sendLog(slackWebhookWarningUrl, message);
   }
 
   Future<void> sendLog(String? url, String message) async {

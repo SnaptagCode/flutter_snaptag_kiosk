@@ -7,6 +7,7 @@ import 'package:flutter_snaptag_kiosk/data/datasources/cache/kiosk_info_service.
 import 'package:flutter_snaptag_kiosk/data/datasources/remote/slack_log_service.dart';
 import 'package:flutter_snaptag_kiosk/data/repositories/kiosk_repository.dart';
 import 'package:flutter_snaptag_kiosk/features/core/printer/printer_log.dart';
+import 'package:flutter_snaptag_kiosk/features/core/printer/ribbon_status.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 
@@ -34,14 +35,27 @@ class PrinterService extends _$PrinterService {
 
       _bindings.initLibrary();
 
+      // 2. 프린터 밝기 설정 변경
+      try {
+        _bindings.setImageVisualParameters(
+          brightness: 5,
+          contrast: 0,
+          saturation: 0,
+        );
+      } catch (e) {
+        logger.e('Error setting image brightness: $e');
+        SlackLogService().sendErrorLogToSlack('Error setting image brightness: $e');
+      }
+
       // checkConnectedWithPrinterLog();
 
       // settingPrinter();
-
-      logger.i('Printer initialization completed');
+      final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
+      logger.i('Machine ID: $machineId, Printer initialization completed');
     } catch (e) {
       final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
-      SlackLogService().sendErrorLogToSlack('Machine ID: $machineId, Printer initialization error: $e');
+
+      SlackLogService().sendErrorLogToSlack('*[Machine ID: $machineId]*, Printer initialization error: $e');
       rethrow;
     }
   }
@@ -49,7 +63,6 @@ class PrinterService extends _$PrinterService {
   Future<bool> checkConnectedPrint() async {
     try {
       final connected = _bindings.connectPrinter();
-
       logger.e('checkConnectedPrint: $connected');
 
       if (!connected) {
@@ -68,6 +81,22 @@ class PrinterService extends _$PrinterService {
     } catch (e) {
       logger.e('Error checking printer connection: $e');
       return false;
+    }
+  }
+
+  RibbonStatus getRibbonStatus() {
+    try {
+      final ribbonStatus = _bindings.getRbnAndFilmRemaining();
+      if (ribbonStatus != null) {
+        logger.i('Ribbon remaining: ${ribbonStatus.rbnRemaining}%, Film remaining: ${ribbonStatus.filmRemaining}%');
+        return ribbonStatus;
+      } else {
+        logger.w('Ribbon status is null');
+        return RibbonStatus(rbnRemaining: 0, filmRemaining: 0);
+      }
+    } catch (e) {
+      logger.e('Error getting ribbon status: $e');
+      return RibbonStatus(rbnRemaining: 0, filmRemaining: 0);
     }
   }
 

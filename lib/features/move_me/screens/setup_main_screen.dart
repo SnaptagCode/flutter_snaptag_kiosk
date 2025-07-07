@@ -34,14 +34,14 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
         setState(() {
           SlackLogService()
               .sendLogToSlack('MachineId : $machineId Connected Printer ${connected ? 'Success' : 'Failed'}');
-          if (connected) {
+          // 프린터 연결상태 우선 - 프린터 상태 연결 완료 이후 리본 잔량 및 필름 잔량 체크
+          if (!connected) {
+            _isConnectedPrinter = false;
+          } else {
             final settingCompleted = ref.read(printerServiceProvider.notifier).settingPrinter();
             _isConnectedPrinter = settingCompleted;
-
             SlackLogService()
                 .sendLogToSlack('MachineId : $machineId Setting Printer ${settingCompleted ? 'Success' : 'Failed'}');
-          } else {
-            _isConnectedPrinter = false;
           }
         });
       }
@@ -174,7 +174,7 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
                       child: Text(
                         '단면 카드 수량',
                         textAlign: TextAlign.center,
-                        style: context.typography.kioskBody1B,
+                        style: context.typography.kioskBody1B.copyWith(color: Colors.black),
                       ),
                     ),
                   ),
@@ -287,13 +287,13 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
                           final settingPrinter = ref.read(printerServiceProvider.notifier).settingPrinter();
                           if (!connected) {
                             SlackLogService().sendErrorLogToSlack(
-                                'MachineId : $machineId  PrintConnected Failed - Attempted to run event');
+                                '*[MachineId : $machineId]*  \nPrintConnected Failed - Attempted to run event');
                             await DialogHelper.showPrintWaitingDialog(context);
                             return;
                           }
                           if (!settingPrinter) {
                             SlackLogService().sendErrorLogToSlack(
-                                'MachineId : $machineId  SettingPrint Failed - Attempted to run event');
+                                '*[MachineId : $machineId]*  \nSettingPrint Failed - Attempted to run event');
                             await DialogHelper.showCheckPrintStateDialog(context);
                             return;
                           }
@@ -380,7 +380,7 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
                       child: SetupUpdateCard(
                         title: '현재 버전',
                         //version: currentVersion,
-                        version: "v2.4.9",
+                        version: "v2.5.0",
                         buttonName: '업데이트',
                         isActive: isUpdateAvailable,
                         onUpdatePressed: () async {

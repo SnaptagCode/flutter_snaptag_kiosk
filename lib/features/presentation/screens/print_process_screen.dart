@@ -45,7 +45,7 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
           error: (error, stack) async {
             logger.e('Print process error', error: error, stackTrace: stack);
             final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
-            SlackLogService().sendErrorLogToSlack('Machine ID: $machineId, Print process error\nError: $error');
+            SlackLogService().sendErrorLogToSlack('*[Machine ID: $machineId]*\nPrint process error\nError: $error');
             SlackLogService().sendErrorLogToSlack('Print process error\nError: $error');
             final errorMessage = error.toString();
             // 에러 발생 시 환불 처리
@@ -53,16 +53,16 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
               await ref.read(paymentServiceProvider.notifier).refund();
               ref.read(cardCountProvider.notifier).increase();
             } catch (refundError) {
-              SlackLogService().sendErrorLogToSlack('Refund failed \nError: $refundError');
+              SlackLogService().sendErrorLogToSlack('*[Machine ID: $machineId]*, Refund failed \nError: $refundError');
               logger.e('Refund failed', error: refundError);
             }
             if (errorMessage.contains('Card feeder is empty')) {
               if (ref.read(cardCountProvider) < 1) {
                 ref.read(pagePrintProvider.notifier).set(PagePrintType.double);
-                SlackLogService().sendLogToSlack('machineId: $machineId, change pagePrintType double');
+                SlackLogService().sendLogToSlack('MachineId: $machineId, change pagePrintType double');
               } else {
                 ref.read(pagePrintProvider.notifier).set(PagePrintType.single);
-                SlackLogService().sendLogToSlack('machineId: $machineId, change pagePrintType single');
+                SlackLogService().sendLogToSlack('MachineId: $machineId, change pagePrintType single');
               }
               await DialogHelper.showPrintCardRefillDialog(
                 context,

@@ -35,10 +35,10 @@
 	<CardReader>
 		<Vendor>none</Vendor>		<!-- Manufacturer. none: Not dependent on reader library; 0: DECARD -->
 		<Model>0</Model>		<!-- 0: three-in-one; 1: contactless; 2: contact; -->
-		<ActionNeedCardReader>0</ActionNeedCardReader> <!-- Is a CARD reader required for CARD entry and exit. 0: Not required; 1: Need; The three in one CARD reader should be 1. -->
+		<ActionNeedCardReader>0</ActionNeedCardReader> <!-- Is a card reader required for card entry and exit. 0: Not required; 1: Need; The three in one card reader should be 1. -->
 		<!-- Magnetic stripe reader settings -->
 		<MagReader>
-			<IsOpenMag>1</IsOpenMag>	<!-- Using a magnetic stripe CARD reader; 0: Off, 1: On; -->		
+			<IsOpenMag>1</IsOpenMag>	<!-- Using a magnetic stripe card reader; 0: Off, 1: On; -->		
 		</MagReader>
 	</CardReader>
 </PrtCfg>
