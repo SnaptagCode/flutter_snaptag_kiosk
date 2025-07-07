@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:easy_localization/easy_localization.dart';
@@ -289,5 +290,58 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
 
     final randomFile = imageFiles[Random().nextInt(imageFiles.length)];
     return randomFile.path; // ⬅️ 여기서 전체 파일 경로 반환
+  }
+
+  Future<String?> _randomAssetVideo() async {
+    final manifest = await rootBundle.loadString('AssetManifest.json');
+    final map = jsonDecode(manifest) as Map<String, dynamic>;
+    final vids =
+        map.keys.where((p) => p.startsWith('assets/adVideos/') && (p.endsWith('.mp4') || p.endsWith('.mov'))).toList();
+    return vids.isEmpty ? null : vids[Random().nextInt(vids.length)];
+  }
+
+  Future<bool> probeAssetVideo(String assetPath) async {
+    final player = Player();
+    final Completer<bool> result = Completer<bool>();
+
+    // ① 영상·오디오 트랙 파싱 여부
+    late final StreamSubscription tracksSub;
+    tracksSub = player.stream.tracks.listen((tracks) {
+      if (tracks.video.isNotEmpty) {
+        print('🎞️  video track ${tracks.video.first.codec}');
+      }
+    });
+
+    // ② 재생 진행 확인
+    late final StreamSubscription posSub;
+    posSub = player.stream.position.listen((pos) {
+      if (pos > const Duration(seconds: 1)) {
+        result.complete(true); // ✅ OK
+      }
+    });
+
+    // ③ 오류 스트림
+    late final StreamSubscription errSub;
+    errSub = player.stream.error.listen((err) {
+      result.complete(false); // ❌ 실패
+    });
+
+    await player.open(
+      Media('asset:///$assetPath'),
+      play: true,
+    );
+
+    // ④ 5초 타임아웃
+    return result.future
+        .timeout(
+      const Duration(seconds: 5),
+      onTimeout: () => false,
+    )
+        .whenComplete(() async {
+      await tracksSub.cancel();
+      await posSub.cancel();
+      await errSub.cancel();
+      await player.dispose();
+    });
   }
 }
