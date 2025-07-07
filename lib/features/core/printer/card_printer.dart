@@ -38,7 +38,7 @@ class PrinterService extends _$PrinterService {
       // 2. 프린터 밝기 설정 변경
       try {
         _bindings.setImageVisualParameters(
-          brightness: 3,
+          brightness: 5,
           contrast: 0,
           saturation: 0,
         );
