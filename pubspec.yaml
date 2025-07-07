@@ -46,7 +46,10 @@ dependencies:
   pretty_animated_buttons: ^0.0.2
 
   package_info_plus: ^8.3.0
-  video_player: ^2.10.0
+  media_kit: ^1.1.11
+  media_kit_video: ^1.2.5
+  media_kit_libs_video: ^1.0.5
+  media_kit_libs_audio: ^1.0.5
 
 dev_dependencies:
   flutter_test:

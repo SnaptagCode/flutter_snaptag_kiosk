@@ -6,7 +6,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
-import 'package:video_player/video_player.dart';
+import 'package:media_kit/media_kit.dart';
+import 'package:media_kit_video/media_kit_video.dart';
 
 import 'dart:io';
 import 'dart:math';
@@ -20,7 +21,10 @@ class PrintProcessScreen extends ConsumerStatefulWidget {
 
 class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
   late final String? _adVideoPath;
-  VideoPlayerController? _videoController;
+
+  late final _player = Player();
+  // Create a [VideoController] to handle video output from [Player].
+  late final controller = VideoController(_player);
 
   @override
   void initState() async {
@@ -29,18 +33,18 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
   }
 
   Future<void> _initVideo() async {
-    _adVideoPath = await getRandomBundledVideo();
-    if (_adVideoPath != null) {
-      _videoController = VideoPlayerController.asset(_adVideoPath)..setLooping(true);
-      await _videoController!.initialize();
-      if (mounted) setState(() {});
-      _videoController!.play();
-    }
+    final asset = await getRandomBundledVideo();
+    if (asset == null) return; // 없으면 그냥 리턴
+    // ④ 'asset:///' 스킴으로 열기
+    await _player.open(
+      Media('asset:///$asset'),
+      play: true, // 바로 재생
+    );
   }
 
   @override
   void dispose() {
-    _videoController?.dispose();
+    _player.dispose();
     super.dispose();
   }
 
@@ -151,15 +155,10 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
               style: context.typography.kioskBody1B,
             ),
             SizedBox(height: 30.h),
-            (_videoController != null && _videoController!.value.isInitialized)
-                ? AspectRatio(
-                    aspectRatio: _videoController!.value.aspectRatio,
-                    child: VideoPlayer(_videoController!),
-                  )
-                : Image.asset(
-                    SnaptagImages.printLoading,
-                    fit: BoxFit.fill,
-                  ),
+            AspectRatio(
+              aspectRatio: 16 / 9,
+              child: Video(controller: controller),
+            ),
             SizedBox(height: 30.h),
             Text(
               LocaleKeys.sub03_txt_02.tr(),
