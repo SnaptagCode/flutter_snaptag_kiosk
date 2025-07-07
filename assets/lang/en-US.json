@@ -29,5 +29,7 @@
   "alert_title_card_refill": "Card refill required",
   "alert_txt_print_failure": "The payment amount will be refunded\r\n because the printout is not done properly.\r\n If the refund has not been made, please\r\n contact the administrator.\r\nWe apologize for the inconvenience \r\ncaused to you.",
   "alert_txt_card_refill": "The card balance is insufficient.\r\n For smooth use, please contact the administrator\r\n and proceed with replacement.",
-  "alert_btn_print_failure": "OK"
+  "alert_btn_print_failure": "OK",
+  "alert_title_need_ribbon_film": "Please contact administrator.",
+  "alert_txt_need_ribbon_film": "Please check the printer status."
 }

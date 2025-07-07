@@ -28,11 +28,14 @@ jobs:
           flutter create --platforms=windows .
           flutter pub get
 
-      - name: Create .env file with default content if missing
+      - name: Create .env file with Slack webhook secrets
         run: |
           $envFilePath = "assets/.env"
           if (-Not (Test-Path $envFilePath)) {
-              "a" | Set-Content -Path $envFilePath
+            "SLACK_WEBHOOK_URL=${{ secrets.SLACK_WEBHOOK_URL }}" | Out-File -FilePath $envFilePath -Encoding utf8
+            "SLACK_WEBHOOK_ERROR_LOG_URL=${{ secrets.SLACK_WEBHOOK_ERROR_LOG_URL }}" | Add-Content -Path $envFilePath
+            "SLACK_WEBHOOK_RIBBON_FILM_WARN_URL=${{ secrets.SLACK_WEBHOOK_RIBBON_FILM_WARN_URL }}" | Add-Content -Path $envFilePath
+            "SLACK_WEBHOOK_WARNING_URL=${{ secrets.SLACK_WEBHOOK_WARNING_URL }}" | Add-Content -Path $envFilePath
           }
 
       - name: Upgrade Flutter Packages

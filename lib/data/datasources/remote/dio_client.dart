@@ -8,19 +8,12 @@ final dioProvider = Provider.family<Dio, String>((ref, baseUrl) {
     ..options.baseUrl = baseUrl
     ..options.connectTimeout = const Duration(seconds: 30)
     ..options.receiveTimeout = const Duration(seconds: 30);
-  dio.interceptors.add(
-      DioLogger(
-        sendHook: (log) {
-          if (log.contains('DioError')) {
-            SlackLogService().sendErrorLogToSlack(log);
-            SlackLogService().sendLogToSlack(log);
-          } else {
-            SlackLogService().sendLogToSlack(log);
-          }
-        },
-        request: false,
-      )
-  );
+  dio.interceptors.add(DioLogger(
+    sendHook: (log) {
+      SlackLogService().sendLogToSlack(log);
+    },
+    request: false,
+  ));
   dio.interceptors.add(
     PrettyDioLogger(
       requestHeader: true,
@@ -52,6 +45,25 @@ final dioProvider = Provider.family<Dio, String>((ref, baseUrl) {
     // Error가 발생했을 때 실행됩니다.
     // 예를 들어, 네트워크 오류 처리를 할 수 있습니다.
     onError: (DioException err, handler) async {
+      final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
+      final statusCode = err.response?.statusCode ?? 0;
+      
+      // DioLogger를 사용해서 예쁘게 가공된 로그 메시지를 받아서 상태 코드별로 분기
+      final errorLogger = DioLogger(
+        sendHook: (log) {
+          final formattedMessage = '*[MachineId : $machineId]*\n$log';
+          if (statusCode >= 400 && statusCode < 500) {
+            SlackLogService().sendWarningLogToSlack(formattedMessage);
+          } else if (statusCode >= 500) {
+            SlackLogService().sendErrorLogToSlack(formattedMessage);
+          } 
+        },
+        request: false,
+      );
+      
+      // DioLogger를 실제로 실행시켜서 sendHook이 호출되도록 함
+      errorLogger.onError(err, handler);
+
       if (err.response?.data != null) {
         try {
           // ServerException으로 wrapping

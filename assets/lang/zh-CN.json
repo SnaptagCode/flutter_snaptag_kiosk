@@ -28,5 +28,7 @@
   "alert_title_card_refill": "需要充值卡",
   "alert_txt_print_failure": "由于打印未正常完成，支付金额将被退还。\r\n如果未退款，请联系管理员。\r\n对给您带来的不便，我们深表歉意。",
   "alert_txt_card_refill": "您的卡余额不足。\r\n为了顺利使用，请联系管理员。\r\n请继续进行替换。",
-  "alert_btn_print_failure": "确定"
+  "alert_btn_print_failure": "确定",
+  "alert_title_need_ribbon_film": "请联系管理员。",
+  "alert_txt_need_ribbon_film": "请检查打印机状态。"
 }

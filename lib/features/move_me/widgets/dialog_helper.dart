@@ -459,8 +459,8 @@ class DialogHelper {
   static Future<void> showNeedRibbonFilmDialog(BuildContext context, VoidCallback? onButtonPressed) async {
     await _showOneButtonKioskDialog(
       context,
-      title: "프린터 상태를 확인해주세요.",
-      message: "관리자에게 문의해주세요.",
+      title: LocaleKeys.alert_title_need_ribbon_film.tr(),
+      message: LocaleKeys.alert_txt_need_ribbon_film.tr(),
       buttonText: LocaleKeys.alert_btn_paymentcard_failure.tr(),
       onButtonPressed: onButtonPressed,
     );

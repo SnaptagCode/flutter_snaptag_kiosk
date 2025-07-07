@@ -36,7 +36,7 @@ class PaymentService extends _$PaymentService {
       final approvalNo = paymentResponse.approvalNo ?? '';
       final machineId = ref.read(kioskInfoServiceProvider)!.kioskMachineId;
       if (approvalNo.trim().isEmpty && paymentResponse.res == '0000') {
-        SlackLogService().sendErrorLogToSlack('machineId: $machineId, Null approvalNo Card');
+        SlackLogService().sendWarningLogToSlack('*[MachineId: $machineId]*\nNull approvalNo Card');
         final BackPhotoStatusResponse response = await ref.read(kioskRepositoryProvider).updateBackPhotoStatus(UpdateBackPhotoRequest(
           photoAuthNumber : backPhoto.photoAuthNumber,
           status : "STARTED",
