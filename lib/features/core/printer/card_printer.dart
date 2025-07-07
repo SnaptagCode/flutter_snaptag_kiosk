@@ -38,7 +38,7 @@ class PrinterService extends _$PrinterService {
       // 2. 프린터 밝기 설정 변경
       try {
         _bindings.setImageVisualParameters(
-          brightness: 0,
+          brightness: 5,
           contrast: 0,
           saturation: 0,
         );
@@ -51,9 +51,9 @@ class PrinterService extends _$PrinterService {
 
       // settingPrinter();
 
-      logger.i('Printer initialization completed');
+      logger.i('Machine ID: $machineId, Printer initialization completed');
     } catch (e) {
-      final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
+      
       SlackLogService().sendErrorLogToSlack('Machine ID: $machineId, Printer initialization error: $e');
       rethrow;
     }
@@ -62,7 +62,6 @@ class PrinterService extends _$PrinterService {
   Future<bool> checkConnectedPrint() async {
     try {
       final connected = _bindings.connectPrinter();
-
       logger.e('checkConnectedPrint: $connected');
 
       if (!connected) {
@@ -76,7 +75,7 @@ class PrinterService extends _$PrinterService {
       final printerLog = getPrinterLogData(_bindings);
 
       final isReady = printerLog?.printerMainStatusCode == "1004";
-      
+
       return connected && isReady;
     } catch (e) {
       logger.e('Error checking printer connection: $e');

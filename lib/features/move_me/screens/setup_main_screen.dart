@@ -287,13 +287,13 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
                           final settingPrinter = ref.read(printerServiceProvider.notifier).settingPrinter();
                           if (!connected) {
                             SlackLogService().sendErrorLogToSlack(
-                                'MachineId : $machineId  PrintConnected Failed - Attempted to run event');
+                                '*[MachineId : $machineId]*  \nPrintConnected Failed - Attempted to run event');
                             await DialogHelper.showPrintWaitingDialog(context);
                             return;
                           }
                           if (!settingPrinter) {
                             SlackLogService().sendErrorLogToSlack(
-                                'MachineId : $machineId  SettingPrint Failed - Attempted to run event');
+                                '*[MachineId : $machineId]*  \nSettingPrint Failed - Attempted to run event');
                             await DialogHelper.showCheckPrintStateDialog(context);
                             return;
                           }
