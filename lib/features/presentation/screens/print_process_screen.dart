@@ -7,11 +7,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
-import 'package:media_kit/media_kit.dart';
-import 'package:media_kit_video/media_kit_video.dart';
 
 import 'dart:io';
 import 'dart:math';
+
+import 'package:video_player/video_player.dart';
 
 class PrintProcessScreen extends ConsumerStatefulWidget {
   const PrintProcessScreen({super.key});
@@ -23,9 +23,7 @@ class PrintProcessScreen extends ConsumerStatefulWidget {
 class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
   late final String? _adVideoPath;
 
-  late final _player = Player();
-  // Create a [VideoController] to handle video output from [Player].
-  late final controller = VideoController(_player);
+  VideoPlayerController? _videoController;
 
   @override
   void initState() async {
@@ -34,18 +32,20 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
   }
 
   Future<void> _initVideo() async {
-    final asset = await getRandomBundledVideo();
-    if (asset == null) return; // 없으면 그냥 리턴
-    // ④ 'asset:///' 스킴으로 열기
-    await _player.open(
-      Media('asset:///$asset'),
-      play: true, // 바로 재생
-    );
+    _adVideoPath = await _randomAssetVideo();
+    if (_adVideoPath != null) {
+      _videoController = VideoPlayerController.asset(_adVideoPath)..setLooping(true);
+      await _videoController!.initialize();
+      if (mounted) setState(() {});
+      _videoController!.play();
+    }
   }
 
   @override
   void dispose() {
-    _player.dispose();
+    if (_videoController != null) {
+      _videoController!.dispose();
+    }
     super.dispose();
   }
 
@@ -158,7 +158,7 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
             SizedBox(height: 30.h),
             AspectRatio(
               aspectRatio: 16 / 9,
-              child: Video(controller: controller),
+              child: VideoPlayer(_videoController!),
             ),
             SizedBox(height: 30.h),
             Text(
@@ -298,50 +298,5 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
     final vids =
         map.keys.where((p) => p.startsWith('assets/adVideos/') && (p.endsWith('.mp4') || p.endsWith('.mov'))).toList();
     return vids.isEmpty ? null : vids[Random().nextInt(vids.length)];
-  }
-
-  Future<bool> probeAssetVideo(String assetPath) async {
-    final player = Player();
-    final Completer<bool> result = Completer<bool>();
-
-    // ① 영상·오디오 트랙 파싱 여부
-    late final StreamSubscription tracksSub;
-    tracksSub = player.stream.tracks.listen((tracks) {
-      if (tracks.video.isNotEmpty) {
-        print('🎞️  video track ${tracks.video.first.codec}');
-      }
-    });
-
-    // ② 재생 진행 확인
-    late final StreamSubscription posSub;
-    posSub = player.stream.position.listen((pos) {
-      if (pos > const Duration(seconds: 1)) {
-        result.complete(true); // ✅ OK
-      }
-    });
-
-    // ③ 오류 스트림
-    late final StreamSubscription errSub;
-    errSub = player.stream.error.listen((err) {
-      result.complete(false); // ❌ 실패
-    });
-
-    await player.open(
-      Media('asset:///$assetPath'),
-      play: true,
-    );
-
-    // ④ 5초 타임아웃
-    return result.future
-        .timeout(
-      const Duration(seconds: 5),
-      onTimeout: () => false,
-    )
-        .whenComplete(() async {
-      await tracksSub.cancel();
-      await posSub.cancel();
-      await errSub.cancel();
-      await player.dispose();
-    });
   }
 }

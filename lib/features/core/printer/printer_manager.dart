@@ -323,7 +323,7 @@ class PrinterManager {
         logger.i('4. Image brightness set to 0');
 
         bindings.setImageVisualParameters(
-          brightness: 0,
+          brightness: 5,
           contrast: 0,
           saturation: 0,
         );
