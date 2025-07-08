@@ -34,7 +34,7 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
   Future<void> _initVideo() async {
     _adVideoPath = await _randomAssetVideo();
     if (_adVideoPath != null) {
-      _videoController = VideoPlayerController.asset(_adVideoPath)..setLooping(true);
+      _videoController = VideoPlayerController.file(File(_adVideoPath))..setLooping(true);
       await _videoController!.initialize();
       if (mounted) setState(() {});
       _videoController!.play();
@@ -156,10 +156,11 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
               style: context.typography.kioskBody1B,
             ),
             SizedBox(height: 30.h),
-            AspectRatio(
-              aspectRatio: 16 / 9,
-              child: VideoPlayer(_videoController!),
-            ),
+            if (_videoController != null)
+              AspectRatio(
+                aspectRatio: 16 / 9,
+                child: VideoPlayer(_videoController!),
+              ),
             SizedBox(height: 30.h),
             Text(
               LocaleKeys.sub03_txt_02.tr(),
