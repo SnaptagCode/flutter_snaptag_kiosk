@@ -26,7 +26,7 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
   VideoPlayerController? _videoController;
 
   @override
-  void initState() async {
+  void initState() {
     super.initState();
     _initVideo();
   }
@@ -157,9 +157,18 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
             ),
             SizedBox(height: 30.h),
             if (_videoController != null)
-              AspectRatio(
-                aspectRatio: 16 / 9,
-                child: VideoPlayer(_videoController!),
+              SizedBox(
+                width: 1080,
+                height: 400,
+                child: FittedBox(
+                  fit: BoxFit.contain,
+                  alignment: Alignment.topCenter,
+                  child: SizedBox(
+                    width: _videoController!.value.size.width,
+                    height: _videoController!.value.size.height,
+                    child: VideoPlayer(_videoController!),
+                  ),
+                ),
               ),
             SizedBox(height: 30.h),
             Text(
