@@ -32,7 +32,7 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
   }
 
   Future<void> _initVideo() async {
-    _adVideoPath = await _randomAssetVideo();
+    _adVideoPath = _randomAssetVideo();
     if (_adVideoPath != null) {
       _videoController = VideoPlayerController.file(File(_adVideoPath))..setLooping(true);
       await _videoController!.initialize();
@@ -302,11 +302,29 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
     return randomFile.path; // ⬅️ 여기서 전체 파일 경로 반환
   }
 
-  Future<String?> _randomAssetVideo() async {
-    final manifest = await rootBundle.loadString('AssetManifest.json');
-    final map = jsonDecode(manifest) as Map<String, dynamic>;
-    final vids =
-        map.keys.where((p) => p.startsWith('assets/adVideos/') && (p.endsWith('.mp4') || p.endsWith('.mov'))).toList();
-    return vids.isEmpty ? null : vids[Random().nextInt(vids.length)];
+  String? _randomAssetVideo() {
+    final adVideoDir = getAdVideoDir();
+    final adVideoFolder = Directory(adVideoDir);
+
+    if (!adVideoFolder.existsSync()) {
+      print('❌ 영상 폴더가 존재하지 않습니다: ${adVideoFolder.path}');
+      return null;
+    }
+
+    final videoFiles = adVideoFolder
+        .listSync()
+        .whereType<File>()
+        .where((f) => f.path.endsWith('.mp4') || f.path.endsWith('.mov'))
+        .toList();
+
+    if (videoFiles.isEmpty) {
+      print('❌ 영상 파일이 없습니다.');
+      return null;
+    }
+
+    final randomFile = videoFiles[Random().nextInt(videoFiles.length)];
+    final fileName = randomFile.uri.pathSegments.last;
+
+    return 'assets/adVideos/$fileName';
   }
 }
