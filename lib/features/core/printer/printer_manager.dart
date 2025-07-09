@@ -176,7 +176,7 @@ class PrinterManager {
   void _checkCardInPrinter(PrinterBindings bindings) {
     logger.i('Checking card in printer...');
     final isCardInPrinter = bindings.checkCardPosition();
-    if (!isCardInPrinter) {
+    if (isCardInPrinter) {
       logger.i('Card found, ejecting...');
       bindings.ejectCard();
     }
