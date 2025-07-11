@@ -299,8 +299,8 @@ class PrinterManager {
       } else {
         throw Exception(errorMsg);
       }
-    } catch (e, stack) {
-      logger.i('error: $e stack: $stack');
+    } catch (e) {
+      logger.i('error: $e');
       rethrow;
     }
   }

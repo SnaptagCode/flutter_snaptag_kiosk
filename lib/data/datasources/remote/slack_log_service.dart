@@ -24,8 +24,8 @@ class SlackLogService {
     sendLogToSlack("🚀 Flutter App Started!");
   }
 
-  Future<void> sendErrorLogToSlack(String message) async {
-    await sendLog(slackWebhookErrorUrl, message);
+  Future<void> sendErrorLogToSlack({int machineId = 0, required String message}) async {
+    await sendLog(slackWebhookErrorUrl, '*[MachineId : $machineId]*\n$message');
   }
 
   Future<void> sendLogToSlack(String message) async {

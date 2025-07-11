@@ -203,7 +203,8 @@ class RibbonWarning extends _$RibbonWarning {
     // 2% 미만 체크 (가장 심각한 경고)
     if (ribbonLevel < 2 && !state.isSentUnder2Ribbon) {
       SlackLogService().sendErrorLogToSlack(
-          '*[MachineId : $machineId]* ERROR: Ribbon level is ${ribbonLevel.toInt()}% (under 1%), please replace immediately!');
+          machineId: machineId,
+          message: 'ERROR: Ribbon level is ${ribbonLevel.toInt()}% (under 1%), please replace immediately!');
       SlackLogService().sendRibbonFilmWarningLog(
           '*[MachineId : $machineId]* ERROR: Ribbon level is ${ribbonLevel.toInt()}% (under 1%), please replace immediately!');
       setRibbonUnder20Sent(ribbonLevel); // 5% 미만이므로 20% 경고도 함께 설정
@@ -214,7 +215,8 @@ class RibbonWarning extends _$RibbonWarning {
 
     if (filmLevel < 2 && !state.isSentUnder2Film) {
       SlackLogService().sendErrorLogToSlack(
-          '*[MachineId : $machineId]* ERROR: Film level is ${filmLevel.toInt()}% (under 1%), please replace immediately!');
+          machineId: machineId,
+          message: 'ERROR: Film level is ${filmLevel.toInt()}% (under 1%), please replace immediately!');
       SlackLogService().sendRibbonFilmWarningLog(
           '*[MachineId : $machineId]* ERROR: Film level is ${filmLevel.toInt()}% (under 1%), please replace immediately!');
       setFilmUnder20Sent(filmLevel); // 5% 미만이므로 20% 경고도 함께 설정

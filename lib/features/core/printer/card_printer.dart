@@ -23,7 +23,7 @@ class PrinterService extends _$PrinterService {
       return isConnected;
     } catch (e) {
       final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
-      SlackLogService().sendErrorLogToSlack('Machine ID: $machineId, Printer error: $e');
+      SlackLogService().sendLogToSlack('Machine ID: $machineId, Printer error: $e');
       return false;
     }
   }
@@ -35,7 +35,8 @@ class PrinterService extends _$PrinterService {
 
       return isSetting;
     } catch (e) {
-      SlackLogService().sendLogToSlack('printerError: $e');
+      final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
+      SlackLogService().sendLogToSlack('*[MachineId : $machineId]* \n printerError: $e');
       return false;
     }
   }
@@ -48,7 +49,8 @@ class PrinterService extends _$PrinterService {
 
       await _printerStateLog(printerLog);
     } catch (e) {
-      SlackLogService().sendLogToSlack('printerError: $e');
+      final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
+      SlackLogService().sendLogToSlack('*[MachineId : $machineId]* \n printerError: $e');
       rethrow;
     }
   }
@@ -58,7 +60,8 @@ class PrinterService extends _$PrinterService {
       final printerManager = await PrinterManager.getInstance();
       return await printerManager.getRibbonStatus();
     } catch (e) {
-      SlackLogService().sendLogToSlack('printerError: $e');
+      final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
+      SlackLogService().sendLogToSlack('*[MachineId : $machineId]* \n printerError: $e');
       rethrow;
     }
   }
@@ -77,7 +80,6 @@ class PrinterService extends _$PrinterService {
 
       await _printerStateLog(printerLog);
     } catch (e) {
-      SlackLogService().sendLogToSlack('printerError: $e');
       rethrow;
     }
   }
