@@ -3,7 +3,7 @@ import 'dart:io';
 
 import 'package:ffi/ffi.dart'; // Utf8 사용을 위한 임포트
 import 'package:flutter_snaptag_kiosk/features/core/printer/printer_log.dart';
-import 'package:flutter_snaptag_kiosk/features/core/printer/printer_manager.dart';
+import 'package:flutter_snaptag_kiosk/features/core/printer/isolate/printer_manager.dart';
 import 'package:flutter_snaptag_kiosk/features/core/printer/ribbon_status.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';

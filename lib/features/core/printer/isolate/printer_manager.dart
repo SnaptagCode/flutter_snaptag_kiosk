@@ -6,12 +6,9 @@ import 'dart:isolate';
 import 'dart:typed_data';
 import 'package:ffi/ffi.dart'; // Utf8 사용을 위한 임포트
 import 'package:flutter_snaptag_kiosk/features/core/printer/isolate/model/connect_message.dart';
-import 'package:flutter_snaptag_kiosk/features/core/printer/isolate/model/connect_reply.dart';
 import 'package:flutter_snaptag_kiosk/features/core/printer/isolate/model/print_message.dart';
-import 'package:flutter_snaptag_kiosk/features/core/printer/isolate/model/print_reply.dart';
 import 'package:flutter_snaptag_kiosk/features/core/printer/isolate/model/print_ribbon_status_reply.dart';
 import 'package:flutter_snaptag_kiosk/features/core/printer/isolate/model/print_state_reply.dart';
-import 'package:flutter_snaptag_kiosk/features/core/printer/isolate/model/setting_printer_reply.dart';
 import 'package:flutter_snaptag_kiosk/features/core/printer/print_path.dart';
 import 'package:flutter_snaptag_kiosk/features/core/printer/isolate/model/print_ribbon_status_message.dart';
 import 'package:flutter_snaptag_kiosk/features/core/printer/isolate/model/print_state_message.dart';
@@ -80,9 +77,9 @@ class PrinterManager {
             try {
               final isConnected = await _checkConnectedPrint(bindings);
               logger.i('_printEntry ConnectMessage: $isConnected');
-              replyPort.send(ConnectReply(isConnected: isConnected));
+              replyPort.send({'isConnected': isConnected, 'errorMsg': ''});
             } catch (e) {
-              replyPort.send(ConnectReply(isConnected: false, errorMsg: e.toString()));
+              replyPort.send({'isConnected': false, 'errorMsg': e.toString()});
             }
             return;
           }
@@ -92,9 +89,9 @@ class PrinterManager {
             try {
               final isReady = _checkSettingPrinter(bindings);
               logger.i('_printEntry SettingPrinterMessage: $isReady');
-              replyPort.send(SettingPrinterReply(isReady: isReady));
+              replyPort.send({'isReady': isReady, 'errorMsg': ''});
             } catch (e) {
-              replyPort.send(SettingPrinterReply(isReady: false, errorMsg: e.toString()));
+              replyPort.send({'isReady': false, 'errorMsg': e.toString()});
             }
             return;
           }
@@ -104,9 +101,9 @@ class PrinterManager {
             try {
               final printerLog = _getPrinterLogData(bindings);
               logger.i('_printEntry PrintStateMessage: $printerLog');
-              replyPort.send(PrintStateReply(printerLog: printerLog));
+              replyPort.send({'printerLog': printerLog, 'errorMsg': ''});
             } catch (e) {
-              replyPort.send(PrintStateReply(printerLog: null, errorMsg: e.toString()));
+              replyPort.send({'printerLog': null, 'errorMsg': e.toString()});
             }
             return;
           }
@@ -116,9 +113,9 @@ class PrinterManager {
             try {
               final ribbonStatus = _getRibbonStatus(bindings);
               logger.i('_printEntry PrintRibbonStatus: $ribbonStatus');
-              replyPort.send(PrintRibbonStatusReply(ribbonStatus: ribbonStatus));
+              replyPort.send({'ribbonStatus': ribbonStatus, 'errorMsg': ''});
             } catch (e) {
-              replyPort.send(PrintRibbonStatusReply(errorMsg: e.toString(), ribbonStatus: null));
+              replyPort.send({'ribbonStatus': null, 'errorMsg': e.toString()});
             }
             return;
           }
@@ -173,9 +170,9 @@ class PrinterManager {
 
               final printerLog = _getPrinterLogData(bindings);
 
-              replyPort.send(PrintReply(printerLog: printerLog));
+              replyPort.send({'printStatus': printerLog, 'errorMsg': ''});
             } catch (e) {
-              replyPort.send(PrintReply(printerLog: null, errorMsg: e.toString()));
+              replyPort.send({'printStatus': null, 'error': e.toString()});
             }
           }
         } catch (e) {
@@ -214,13 +211,15 @@ class PrinterManager {
         ),
       );
 
-      final response = await responsePort.first as ConnectReply;
+      final response = await responsePort.first as Map<String, dynamic>;
+      final isConnected = response['isConnected'] as bool;
+      final errorMsg = response['errorMsg'] as String;
 
-      if (response.errorMsg.isNotEmpty) {
-        throw Exception('Error in checking printer connection: ${response.errorMsg}');
+      if (errorMsg.isNotEmpty) {
+        throw Exception('Error in checking printer connection: $errorMsg');
       }
 
-      return response.isConnected;
+      return isConnected;
     } catch (e) {
       logger.e('Error checking printer connection: $e');
       rethrow;
@@ -259,13 +258,15 @@ class PrinterManager {
         ),
       );
 
-      final response = await responsePort.first as SettingPrinterReply;
+      final response = await responsePort.first as Map<String, dynamic>;
+      final isReady = response['isReady'] as bool;
+      final errorMsg = response['errorMsg'] as String;
 
-      if (response.errorMsg.isNotEmpty) {
-        throw Exception('Error in setting printer: ${response.errorMsg}');
+      if (errorMsg.isNotEmpty) {
+        throw Exception('Error in setting printer: $errorMsg');
       }
 
-      return response.isReady;
+      return isReady;
     } catch (e) {
       logger.e('Error checking printer connection: $e');
       rethrow;
@@ -314,12 +315,14 @@ class PrinterManager {
         ),
       );
 
-      final response = await responsePort.first as PrintReply;
+      final response = await responsePort.first as Map<String, dynamic>;
+      final printStatus = response['printStatus'] as PrinterLog?;
+      final errorMsg = response['errorMsg'] as String;
 
-      if (response.errorMsg.isEmpty) {
-        return response.printerLog;
+      if (errorMsg.isEmpty) {
+        return printStatus;
       } else {
-        throw Exception(response.errorMsg);
+        throw Exception(errorMsg);
       }
     } catch (e) {
       logger.i('error: $e');
@@ -365,15 +368,17 @@ class PrinterManager {
         PrintStateMessage(sendPort: responsePort.sendPort),
       );
 
-      final response = await responsePort.first as PrintStateReply;
+      final response = await responsePort.first as Map<String, dynamic>;
+      final printerLog = response['printerLog'] as PrinterLog;
+      final errorMsg = response['errorMsg'] as String;
 
-      if (response.errorMsg.isNotEmpty) {
-        throw Exception('Error in starting printer log: ${response.errorMsg}');
+      if (errorMsg.isNotEmpty) {
+        throw Exception('Error in starting printer log: $errorMsg');
       }
 
-      return response.printerLog;
-    } catch (e, stack) {
-      logger.i('startLog error: $e\nStack: $stack');
+      return printerLog;
+    } catch (e) {
+      logger.i('startLog error: $e');
       rethrow;
     }
   }
@@ -386,13 +391,15 @@ class PrinterManager {
         PrintRibbonStatusMessage(sendPort: responsePort.sendPort),
       );
 
-      final response = await responsePort.first as PrintRibbonStatusReply;
+      final response = await responsePort.first as Map<String, dynamic>;
+      final ribbonStatus = response['ribbonStatus'] as RibbonStatus?;
+      final errorMsg = response['errorMsg'] as String;
 
-      if (response.errorMsg.isNotEmpty) {
-        throw Exception('Error in getting ribbon status: ${response.errorMsg}');
+      if (errorMsg.isNotEmpty) {
+        throw Exception('Error in getting ribbon status: $errorMsg');
       }
 
-      return response.ribbonStatus ?? RibbonStatus(rbnRemaining: 0, filmRemaining: 0);
+      return ribbonStatus ?? RibbonStatus(rbnRemaining: 0, filmRemaining: 0);
     } catch (e) {
       logger.e('Error getting ribbon status: $e');
       rethrow;
