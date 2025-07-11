@@ -5,14 +5,19 @@ import 'dart:ffi' as ffi; // ffi 임포트 확인
 import 'dart:isolate';
 import 'dart:typed_data';
 import 'package:ffi/ffi.dart'; // Utf8 사용을 위한 임포트
-import 'package:flutter_snaptag_kiosk/features/core/printer/connect_message.dart';
-import 'package:flutter_snaptag_kiosk/features/core/printer/print_message.dart';
+import 'package:flutter_snaptag_kiosk/features/core/printer/isolate/model/connect_message.dart';
+import 'package:flutter_snaptag_kiosk/features/core/printer/isolate/model/connect_reply.dart';
+import 'package:flutter_snaptag_kiosk/features/core/printer/isolate/model/print_message.dart';
+import 'package:flutter_snaptag_kiosk/features/core/printer/isolate/model/print_reply.dart';
+import 'package:flutter_snaptag_kiosk/features/core/printer/isolate/model/print_ribbon_status_reply.dart';
+import 'package:flutter_snaptag_kiosk/features/core/printer/isolate/model/print_state_reply.dart';
+import 'package:flutter_snaptag_kiosk/features/core/printer/isolate/model/setting_printer_reply.dart';
 import 'package:flutter_snaptag_kiosk/features/core/printer/print_path.dart';
-import 'package:flutter_snaptag_kiosk/features/core/printer/print_ribbon_status.dart';
-import 'package:flutter_snaptag_kiosk/features/core/printer/print_state_message.dart';
+import 'package:flutter_snaptag_kiosk/features/core/printer/isolate/model/print_ribbon_status_message.dart';
+import 'package:flutter_snaptag_kiosk/features/core/printer/isolate/model/print_state_message.dart';
 import 'package:flutter_snaptag_kiosk/features/core/printer/printer_log.dart';
 import 'package:flutter_snaptag_kiosk/features/core/printer/ribbon_status.dart';
-import 'package:flutter_snaptag_kiosk/features/core/printer/setting_printer_message.dart';
+import 'package:flutter_snaptag_kiosk/features/core/printer/isolate/model/setting_printer_message.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:image/image.dart' as img;
 
@@ -69,95 +74,112 @@ class PrinterManager {
       _initializePrinter(bindings);
 
       isolateReceivePort.listen((message) async {
-        SendPort? replyPort;
         try {
           if (message is ConnectMessage) {
-            replyPort = message.sendPort;
-            final isConnected = await _checkConnectedPrint(bindings);
-            logger.i('_printEntry ConnectMessage: $isConnected');
-            replyPort.send({'isConnected': isConnected});
+            final replyPort = message.sendPort;
+            try {
+              final isConnected = await _checkConnectedPrint(bindings);
+              logger.i('_printEntry ConnectMessage: $isConnected');
+              replyPort.send(ConnectReply(isConnected: isConnected));
+            } catch (e) {
+              replyPort.send(ConnectReply(isConnected: false, errorMsg: e.toString()));
+            }
             return;
           }
 
           if (message is SettingPrinterMessage) {
-            replyPort = message.sendPort;
-            final isReady = _checkSettingPrinter(bindings);
-            logger.i('_printEntry SettingPrinterMessage: $isReady');
-            replyPort.send({'isReady': isReady});
+            final replyPort = message.sendPort;
+            try {
+              final isReady = _checkSettingPrinter(bindings);
+              logger.i('_printEntry SettingPrinterMessage: $isReady');
+              replyPort.send(SettingPrinterReply(isReady: isReady));
+            } catch (e) {
+              replyPort.send(SettingPrinterReply(isReady: false, errorMsg: e.toString()));
+            }
             return;
           }
 
           if (message is PrintStateMessage) {
-            replyPort = message.sendPort;
-            final printerLog = getPrinterLogData(bindings);
-            logger.i('_printEntry PrintStateMessage: $printerLog');
-            replyPort.send({'printStatus': printerLog});
+            final replyPort = message.sendPort;
+            try {
+              final printerLog = _getPrinterLogData(bindings);
+              logger.i('_printEntry PrintStateMessage: $printerLog');
+              replyPort.send(PrintStateReply(printerLog: printerLog));
+            } catch (e) {
+              replyPort.send(PrintStateReply(printerLog: null, errorMsg: e.toString()));
+            }
             return;
           }
 
-          if (message is PrintRibbonStatus) {
-            replyPort = message.sendPort;
-            final ribbonStatus = _getRibbonStatus(bindings);
-            logger.i('_printEntry PrintRibbonStatus: $ribbonStatus');
-            replyPort.send({'printRibbonStatus': ribbonStatus});
+          if (message is PrintRibbonStatusMessage) {
+            final replyPort = message.sendPort;
+            try {
+              final ribbonStatus = _getRibbonStatus(bindings);
+              logger.i('_printEntry PrintRibbonStatus: $ribbonStatus');
+              replyPort.send(PrintRibbonStatusReply(ribbonStatus: ribbonStatus));
+            } catch (e) {
+              replyPort.send(PrintRibbonStatusReply(errorMsg: e.toString(), ribbonStatus: null));
+            }
             return;
           }
 
           if (message is PrintMessage) {
             final printPath = message.printPath;
             final isSingleMode = message.isSingleMode;
-            replyPort = message.sendPort;
+            final replyPort = message.sendPort;
+            try {
+              String? frontImageInfo;
+              String? behindImageInfo;
 
-            String? frontImageInfo;
-            String? behindImageInfo;
+              _checkFeeder(bindings);
+              _checkCardInPrinter(bindings);
 
-            _checkFeeder(bindings);
-            _checkCardInPrinter(bindings);
+              logger.i('6. PrintStart');
 
-            logger.i('6. PrintStart');
+              if (printPath.frontPath != null) {
+                frontImageInfo = await drawImage(path: printPath.frontPath!, bindings: bindings);
+              }
 
-            if (printPath.frontPath != null) {
-              frontImageInfo = await drawImage(path: printPath.frontPath!, bindings: bindings);
+              logger.i('7. PrintStart frontImageInfo: $frontImageInfo');
+
+              if (printPath.backPath != null) {
+                behindImageInfo = await drawImage(path: printPath.backPath!, bindings: bindings, isFront: false);
+                // ❗️ 프로세스 충돌 발생, 파일을 삭제해야 됨.
+                await File(printPath.backPath!).delete().catchError((_) {
+                  logger.i('Failed to delete rotated rear image');
+                });
+              }
+
+              logger.i('8. PrintStart behindImageInfo: $behindImageInfo');
+
+              logger.i('9. Injecting card...');
+              bindings.injectCard();
+
+              logger.i('10. Printing card... isSingleMode: $isSingleMode');
+              if (isSingleMode) {
+                bindings.printCard(
+                  frontImageInfo: behindImageInfo,
+                  backImageInfo: null,
+                );
+              } else {
+                bindings.printCard(
+                  frontImageInfo: frontImageInfo,
+                  backImageInfo: behindImageInfo,
+                );
+              }
+
+              logger.i('7. Ejecting card...');
+              bindings.ejectCard();
+
+              final printerLog = _getPrinterLogData(bindings);
+
+              replyPort.send(PrintReply(printerLog: printerLog));
+            } catch (e) {
+              replyPort.send(PrintReply(printerLog: null, errorMsg: e.toString()));
             }
-
-            logger.i('7. PrintStart frontImageInfo: $frontImageInfo');
-
-            if (printPath.backPath != null) {
-              behindImageInfo = await drawImage(path: printPath.backPath!, bindings: bindings, isFront: false);
-              // ❗️ 프로세스 충돌 발생, 파일을 삭제해야 됨.
-              await File(printPath.backPath!).delete().catchError((_) {
-                logger.i('Failed to delete rotated rear image');
-              });
-            }
-
-            logger.i('8. PrintStart behindImageInfo: $behindImageInfo');
-
-            logger.i('9. Injecting card...');
-            bindings.injectCard();
-
-            logger.i('10. Printing card... isSingleMode: $isSingleMode');
-            if (isSingleMode) {
-              bindings.printCard(
-                frontImageInfo: behindImageInfo,
-                backImageInfo: null,
-              );
-            } else {
-              bindings.printCard(
-                frontImageInfo: frontImageInfo,
-                backImageInfo: behindImageInfo,
-              );
-            }
-
-            logger.i('7. Ejecting card...');
-            bindings.ejectCard();
-
-            final printerLog = getPrinterLogData(bindings);
-
-            replyPort.send({'printStatus': printerLog, 'error': ''});
           }
         } catch (e) {
           logger.i('isolateReceivePort: $e');
-          replyPort?.send({'printStatus': PrinterLog(), 'error': e.toString()});
         }
       });
     } catch (e) {
@@ -192,13 +214,16 @@ class PrinterManager {
         ),
       );
 
-      final response = await responsePort.first as Map<String, dynamic>;
-      final isConnected = response['isConnected'] as bool;
+      final response = await responsePort.first as ConnectReply;
 
-      return isConnected;
+      if (response.errorMsg.isNotEmpty) {
+        throw Exception('Error in checking printer connection: ${response.errorMsg}');
+      }
+
+      return response.isConnected;
     } catch (e) {
       logger.e('Error checking printer connection: $e');
-      return false;
+      rethrow;
     }
   }
 
@@ -213,7 +238,7 @@ class PrinterManager {
 
       logger.e('checkConnectedPrint: $result');
 
-      final printerLog = getPrinterLogData(bindings);
+      final printerLog = _getPrinterLogData(bindings);
 
       final isReady = printerLog?.printerMainStatusCode == "1004";
 
@@ -234,33 +259,32 @@ class PrinterManager {
         ),
       );
 
-      final response = await responsePort.first as Map<String, dynamic>;
-      final isConnected = response['isReady'] as bool;
+      final response = await responsePort.first as SettingPrinterReply;
 
-      return isConnected;
+      if (response.errorMsg.isNotEmpty) {
+        throw Exception('Error in setting printer: ${response.errorMsg}');
+      }
+
+      return response.isReady;
     } catch (e) {
       logger.e('Error checking printer connection: $e');
-      return false;
+      rethrow;
     }
   }
 
   bool _checkSettingPrinter(PrinterBindings bindings) {
-    try {
-      // 3. 리본 설정
-      // 레거시 코드와 동일하게 setRibbonOpt 호출
-      bindings.setRibbonOpt(1, 0, "2", 2);
-      bindings.setRibbonOpt(1, 1, "255", 4);
+    // 3. 리본 설정
+    // 레거시 코드와 동일하게 setRibbonOpt 호출
+    bindings.setRibbonOpt(1, 0, "2", 2);
+    bindings.setRibbonOpt(1, 1, "255", 4);
 
-      // 4. 프린터 준비 상태 확인
-      final ready = bindings.ensurePrinterReady();
-      if (!ready) {
-        throw Exception('Failed to ensure printer ready');
-      }
-      return true;
-    } catch (e) {
-      logger.e('Error settingPrinter: $e');
-      return false;
+    // 4. 프린터 준비 상태 확인
+    final ready = bindings.ensurePrinterReady();
+    if (!ready) {
+      throw Exception('Failed to ensure printer ready');
     }
+
+    return true;
   }
 
   Future<PrinterLog?> startPrint({
@@ -290,14 +314,12 @@ class PrinterManager {
         ),
       );
 
-      final response = await responsePort.first as Map<String, dynamic>;
-      final printStatus = response['printStatus'] as PrinterLog?;
-      final errorMsg = response['error'] as String;
+      final response = await responsePort.first as PrintReply;
 
-      if (errorMsg.isEmpty) {
-        return printStatus;
+      if (response.errorMsg.isEmpty) {
+        return response.printerLog;
       } else {
-        throw Exception(errorMsg);
+        throw Exception(response.errorMsg);
       }
     } catch (e) {
       logger.i('error: $e');
@@ -343,12 +365,16 @@ class PrinterManager {
         PrintStateMessage(sendPort: responsePort.sendPort),
       );
 
-      final response = await responsePort.first as Map<String, dynamic>;
+      final response = await responsePort.first as PrintStateReply;
 
-      return response['printStatus'] as PrinterLog;
+      if (response.errorMsg.isNotEmpty) {
+        throw Exception('Error in starting printer log: ${response.errorMsg}');
+      }
+
+      return response.printerLog;
     } catch (e, stack) {
       logger.i('startLog error: $e\nStack: $stack');
-      return null;
+      rethrow;
     }
   }
 
@@ -357,62 +383,56 @@ class PrinterManager {
       final responsePort = ReceivePort();
 
       _sendPort.send(
-        PrintRibbonStatus(sendPort: responsePort.sendPort),
+        PrintRibbonStatusMessage(sendPort: responsePort.sendPort),
       );
 
-      final response = await responsePort.first as Map<String, dynamic>;
+      final response = await responsePort.first as PrintRibbonStatusReply;
 
-      return response['printRibbonStatus'] as RibbonStatus;
+      if (response.errorMsg.isNotEmpty) {
+        throw Exception('Error in getting ribbon status: ${response.errorMsg}');
+      }
+
+      return response.ribbonStatus ?? RibbonStatus(rbnRemaining: 0, filmRemaining: 0);
     } catch (e) {
       logger.e('Error getting ribbon status: $e');
-      return RibbonStatus(rbnRemaining: 0, filmRemaining: 0);
+      rethrow;
     }
   }
 
   RibbonStatus _getRibbonStatus(PrinterBindings bindings) {
-    try {
-      final ribbonStatus = bindings.getRbnAndFilmRemaining();
-      if (ribbonStatus != null) {
-        logger.i('Ribbon remaining: ${ribbonStatus.rbnRemaining}%, Film remaining: ${ribbonStatus.filmRemaining}%');
-        return ribbonStatus;
-      } else {
-        logger.w('Ribbon status is null');
-        return RibbonStatus(rbnRemaining: 0, filmRemaining: 0);
-      }
-    } catch (e) {
-      logger.e('Error getting ribbon status: $e');
+    final ribbonStatus = bindings.getRbnAndFilmRemaining();
+    if (ribbonStatus != null) {
+      logger.i('Ribbon remaining: ${ribbonStatus.rbnRemaining}%, Film remaining: ${ribbonStatus.filmRemaining}%');
+      return ribbonStatus;
+    } else {
+      logger.w('Ribbon status is null');
       return RibbonStatus(rbnRemaining: 0, filmRemaining: 0);
     }
   }
 
-  PrinterLog? getPrinterLogData(PrinterBindings bindings) {
-    try {
-      final printerStatus = bindings.getPrinterStatus();
-      final ribbonStatus = bindings.getRbnAndFilmRemaining();
-      final isPrintingNow = bindings.checkCardPosition();
-      final isFeederEmpty = !bindings.checkFeederStatus();
-      // final errorMsg = printerStatus.$2 == null ? '' : bindings.getErrorInfo(printerStatus.$2 ?? 0);
-      logger.i(
-          'Printer status: $printerStatus, ribbon status: $ribbonStatus, isPrintingNow: $isPrintingNow isFeederEmpty: $isFeederEmpty');
+  PrinterLog? _getPrinterLogData(PrinterBindings bindings) {
+    final printerStatus = bindings.getPrinterStatus();
+    final ribbonStatus = bindings.getRbnAndFilmRemaining();
+    final isPrintingNow = bindings.checkCardPosition();
+    final isFeederEmpty = !bindings.checkFeederStatus();
+    // final errorMsg = printerStatus.$2 == null ? '' : bindings.getErrorInfo(printerStatus.$2 ?? 0);
+    logger.i(
+        'Printer status: $printerStatus, ribbon status: $ribbonStatus, isPrintingNow: $isPrintingNow isFeederEmpty: $isFeederEmpty');
 
-      return PrinterLog(
-          sdkMainCode: (printerStatus?.mainCode ?? 0).toString(),
-          sdkSubCode: (printerStatus?.mainCode ?? 0).toString(),
-          printerMainStatusCode: (printerStatus?.mainStatus ?? 0).toString(),
-          printerErrorStatusCode: (printerStatus?.errorStatus ?? 0).toString(),
-          printerWarningStatusCode: (printerStatus?.warningStatus ?? 0).toString(),
-          chassisTemperature: printerStatus?.chassisTemperature ?? 0,
-          printerHeadTemperature: printerStatus?.printHeadTemperature ?? 0,
-          heaterTemperature: printerStatus?.heaterTemperature ?? 0,
-          rbnRemainingRatio: ribbonStatus?.rbnRemaining ?? 0,
-          filmRemainingRatio: ribbonStatus?.filmRemaining ?? 0,
-          isPrintingNow: isPrintingNow,
-          isFeederEmpty: isFeederEmpty,
-          sdkErrorMessage: '');
-    } catch (e) {
-      logger.i(e);
-      return null;
-    }
+    return PrinterLog(
+        sdkMainCode: (printerStatus?.mainCode ?? 0).toString(),
+        sdkSubCode: (printerStatus?.mainCode ?? 0).toString(),
+        printerMainStatusCode: (printerStatus?.mainStatus ?? 0).toString(),
+        printerErrorStatusCode: (printerStatus?.errorStatus ?? 0).toString(),
+        printerWarningStatusCode: (printerStatus?.warningStatus ?? 0).toString(),
+        chassisTemperature: printerStatus?.chassisTemperature ?? 0,
+        printerHeadTemperature: printerStatus?.printHeadTemperature ?? 0,
+        heaterTemperature: printerStatus?.heaterTemperature ?? 0,
+        rbnRemainingRatio: ribbonStatus?.rbnRemaining ?? 0,
+        filmRemainingRatio: ribbonStatus?.filmRemaining ?? 0,
+        isPrintingNow: isPrintingNow,
+        isFeederEmpty: isFeederEmpty,
+        sdkErrorMessage: '');
   }
 
   Future<String> _rearImage({required File file}) async {
