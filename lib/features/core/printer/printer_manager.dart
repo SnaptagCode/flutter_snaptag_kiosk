@@ -297,10 +297,8 @@ class PrinterManager {
       if (errorMsg.isEmpty) {
         return printStatus;
       } else {
-        Exception(errorMsg);
+        throw Exception(errorMsg);
       }
-
-      return null;
     } catch (e, stack) {
       logger.i('error: $e stack: $stack');
       rethrow;
@@ -319,17 +317,13 @@ class PrinterManager {
       bindings.initLibrary();
 
       // 2. 프린터 밝기 설정 변경
-      try {
-        logger.i('4. Image brightness set to 0');
+      logger.i('4. Image brightness set to 0');
 
-        bindings.setImageVisualParameters(
-          brightness: 5,
-          contrast: 0,
-          saturation: 0,
-        );
-      } catch (e) {
-        logger.e('Error setting image brightness: $e');
-      }
+      bindings.setImageVisualParameters(
+        brightness: 5,
+        contrast: 0,
+        saturation: 0,
+      );
 
       logger.i('5. Printer initialization completed');
     } catch (e, stack) {
