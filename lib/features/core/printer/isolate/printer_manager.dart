@@ -1,20 +1,19 @@
 import 'dart:async';
+import 'dart:ffi' as ffi; // ffi 임포트 확인
 import 'dart:ffi';
 import 'dart:io';
-import 'dart:ffi' as ffi; // ffi 임포트 확인
 import 'dart:isolate';
 import 'dart:typed_data';
+
 import 'package:ffi/ffi.dart'; // Utf8 사용을 위한 임포트
 import 'package:flutter_snaptag_kiosk/features/core/printer/isolate/model/connect_message.dart';
 import 'package:flutter_snaptag_kiosk/features/core/printer/isolate/model/print_message.dart';
-import 'package:flutter_snaptag_kiosk/features/core/printer/isolate/model/print_ribbon_status_reply.dart';
-import 'package:flutter_snaptag_kiosk/features/core/printer/isolate/model/print_state_reply.dart';
-import 'package:flutter_snaptag_kiosk/features/core/printer/print_path.dart';
 import 'package:flutter_snaptag_kiosk/features/core/printer/isolate/model/print_ribbon_status_message.dart';
 import 'package:flutter_snaptag_kiosk/features/core/printer/isolate/model/print_state_message.dart';
+import 'package:flutter_snaptag_kiosk/features/core/printer/isolate/model/setting_printer_message.dart';
+import 'package:flutter_snaptag_kiosk/features/core/printer/print_path.dart';
 import 'package:flutter_snaptag_kiosk/features/core/printer/printer_log.dart';
 import 'package:flutter_snaptag_kiosk/features/core/printer/ribbon_status.dart';
-import 'package:flutter_snaptag_kiosk/features/core/printer/isolate/model/setting_printer_message.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:image/image.dart' as img;
 
@@ -124,14 +123,10 @@ class PrinterManager {
             final printPath = message.printPath;
             final isSingleMode = message.isSingleMode;
             final replyPort = message.sendPort;
+
             try {
               String? frontImageInfo;
               String? behindImageInfo;
-
-              _checkFeeder(bindings);
-              _checkCardInPrinter(bindings);
-
-              logger.i('6. PrintStart');
 
               if (printPath.frontPath != null) {
                 frontImageInfo = await drawImage(path: printPath.frontPath!, bindings: bindings);
@@ -148,6 +143,14 @@ class PrinterManager {
               }
 
               logger.i('8. PrintStart behindImageInfo: $behindImageInfo');
+
+              _checkFeeder(bindings);
+
+              logger.i('PrintCheck _checkFeeder');
+
+              _checkCardInPrinter(bindings);
+
+              logger.i('PrintCheck _checkCardInPrinter');
 
               logger.i('9. Injecting card...');
               bindings.injectCard();
@@ -319,6 +322,8 @@ class PrinterManager {
       final printStatus = response['printStatus'] as PrinterLog?;
       final errorMsg = response['errorMsg'] as String;
 
+      logger.i('FINISHED printStatus: $printStatus msg: $errorMsg');
+
       if (errorMsg.isEmpty) {
         return printStatus;
       } else {
@@ -334,7 +339,6 @@ class PrinterManager {
     try {
       logger.i('1. Initializing printer...');
 
-      // 1. 프린터 라이브러리 초기화
       logger.i('2. Initializing printer library...');
       bindings.clearLibrary();
 
