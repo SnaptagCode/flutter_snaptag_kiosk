@@ -71,6 +71,11 @@ class PrinterManager {
 
       isolateReceivePort.listen((message) async {
         try {
+          Timer.periodic(const Duration(milliseconds: 200), (timer) {
+            final printerLog = _getPrinterLogData(bindings);
+            print('statusCode: ${printerLog?.sdkMainCode}');
+          });
+
           if (message is ConnectMessage) {
             final replyPort = message.sendPort;
             try {
@@ -132,27 +137,19 @@ class PrinterManager {
 
               logger.i('6. PrintCheck _checkFeeder');
 
-              await Future.delayed(Duration(milliseconds: 300));
-
               _checkCardInPrinter(bindings);
 
               logger.i('6. PrintCheck _checkCardInPrinter');
 
-              await Future.delayed(Duration(milliseconds: 300));
-
               if (printPath.frontPath != null) {
                 frontImageInfo = await drawImage(path: printPath.frontPath!, bindings: bindings);
               }
-
-              await Future.delayed(Duration(milliseconds: 300));
 
               logger.i('7. PrintStart frontImageInfo: $frontImageInfo');
 
               if (printPath.backPath != null) {
                 behindImageInfo = await drawImage(path: printPath.backPath!, bindings: bindings, isFront: false);
               }
-
-              await Future.delayed(Duration(milliseconds: 300));
 
               logger.i('8. PrintStart behindImageInfo: $behindImageInfo');
 
@@ -161,7 +158,7 @@ class PrinterManager {
               logger.i('9. Injecting card...');
               bindings.injectCard();
 
-              await Future.delayed(Duration(milliseconds: 300));
+              await Future.delayed(Duration(milliseconds: 1000));
 
               logger.i('10. Printing card... isSingleMode: $isSingleMode');
               if (isSingleMode) {
