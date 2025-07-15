@@ -128,32 +128,40 @@ class PrinterManager {
               String? frontImageInfo;
               String? behindImageInfo;
 
+              _checkFeeder(bindings);
+
+              logger.i('6. PrintCheck _checkFeeder');
+
+              await Future.delayed(Duration(milliseconds: 300));
+
+              _checkCardInPrinter(bindings);
+
+              logger.i('6. PrintCheck _checkCardInPrinter');
+
+              await Future.delayed(Duration(milliseconds: 300));
+
               if (printPath.frontPath != null) {
                 frontImageInfo = await drawImage(path: printPath.frontPath!, bindings: bindings);
               }
+
+              await Future.delayed(Duration(milliseconds: 300));
 
               logger.i('7. PrintStart frontImageInfo: $frontImageInfo');
 
               if (printPath.backPath != null) {
                 behindImageInfo = await drawImage(path: printPath.backPath!, bindings: bindings, isFront: false);
-                // ❗️ 프로세스 충돌 발생, 파일을 삭제해야 됨.
-                await File(printPath.backPath!).delete().catchError((_) {
-                  logger.i('Failed to delete rotated rear image');
-                });
               }
 
+              await Future.delayed(Duration(milliseconds: 300));
+
               logger.i('8. PrintStart behindImageInfo: $behindImageInfo');
-
-              _checkFeeder(bindings);
-
-              logger.i('PrintCheck _checkFeeder');
-
-              _checkCardInPrinter(bindings);
 
               logger.i('PrintCheck _checkCardInPrinter');
 
               logger.i('9. Injecting card...');
               bindings.injectCard();
+
+              await Future.delayed(Duration(milliseconds: 300));
 
               logger.i('10. Printing card... isSingleMode: $isSingleMode');
               if (isSingleMode) {
@@ -479,6 +487,13 @@ class PrinterManager {
     } catch (e, stack) {
       logger.i('Error in front canvas preparation: $e\nStack: $stack');
       throw Exception('Failed to prepare ${isFront ? 'Front' : 'Back'} canvas: $e');
+    } finally {
+      if (!isFront) {
+        // ❗️ 프로세스 충돌 발생, 파일을 삭제해야 됨.
+        await File(path).delete().catchError((_) {
+          logger.i('Failed to delete rotated rear image');
+        });
+      }
     }
   }
 
