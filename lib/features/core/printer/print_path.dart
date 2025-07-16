@@ -1,8 +1,8 @@
-class PrintPath {
-  String? frontPath;
-  String? backPath;
+class PrintImageBuffer {
+  String? frontBuffer;
+  String? backBuffer;
 
-  PrintPath({this.frontPath, this.backPath});
+  PrintImageBuffer({this.frontBuffer, this.backBuffer});
 }
 
 class PrintParam {
