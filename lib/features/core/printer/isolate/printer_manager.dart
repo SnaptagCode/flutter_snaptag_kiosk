@@ -313,7 +313,7 @@ class PrinterManager {
 
       logger.i('8. Preparing front image...');
 
-      if (frontFile != null) {
+      if (!isSingleMode && frontFile != null) {
         frontImageInfo = await _imageBufferResponse(DrawImageMessage(isFront: true, path: frontFile.path));
       }
 
