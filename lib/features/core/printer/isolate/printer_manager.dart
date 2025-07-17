@@ -313,8 +313,8 @@ class PrinterManager {
 
       logger.i('8. Preparing front image...');
 
-      if (frontPath != null) {
-        frontImageInfo = await _imageBufferResponse(DrawImageMessage(isFront: true, path: frontPath));
+      if (frontFile != null) {
+        frontImageInfo = await _imageBufferResponse(DrawImageMessage(isFront: true, path: frontFile.path));
       }
 
       logger.i('9. Preparing back image...');
@@ -333,6 +333,9 @@ class PrinterManager {
       final buffer = isSingleMode
           ? PrintImageBuffer(frontBuffer: behindImageInfo, backBuffer: null)
           : PrintImageBuffer(frontBuffer: frontImageInfo, backBuffer: behindImageInfo);
+
+      await SlackLogService().sendLogToSlack(
+          '*[PRINTING LOG]* isSingleMode: $isSingleMode \n frontImageInfo: $frontImageInfo \n behindImageInfo: $behindImageInfo');
 
       await _sendAndHandleResponse(PrintMessage(isSingleMode: isSingleMode, printPath: buffer));
 
