@@ -21,10 +21,13 @@ import 'package:flutter_snaptag_kiosk/features/core/printer/printer_log.dart';
 import 'package:flutter_snaptag_kiosk/features/core/printer/ribbon_status.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:image/image.dart' as img;
+import 'package:synchronized/synchronized.dart';
 
 class PrinterManager {
   static PrinterManager? _instance;
   late SendPort _sendPort;
+
+  final _lock = Lock();
 
   PrinterManager._();
 
@@ -292,9 +295,6 @@ class PrinterManager {
     required File? embeddedFile,
     required bool isSingleMode,
   }) async {
-    String? frontPath = frontFile?.path;
-    String? rotatedRearPath;
-
     try {
       if (frontFile == null && embeddedFile == null) {
         throw Exception('There is nothing to print');
@@ -305,28 +305,38 @@ class PrinterManager {
 
       logger.i('6. Starting print process...');
 
-      await _sendAndHandleResponse(CheckFeederMessage());
+      await _lock.synchronized(() async {
+        await _sendAndHandleResponse(CheckFeederMessage());
+      });
 
       logger.i('7. Checking card position...');
 
-      await _sendAndHandleResponse(CheckCardPositionMessage());
+      await _lock.synchronized(() async {
+        await _sendAndHandleResponse(CheckCardPositionMessage());
+      });
 
       logger.i('8. Preparing front image...');
 
       if (!isSingleMode && frontFile != null) {
-        frontImageInfo = await _imageBufferResponse(DrawImageMessage(isFront: true, path: frontFile.path));
+        await _lock.synchronized(() async {
+          frontImageInfo = await _imageBufferResponse(DrawImageMessage(isFront: true, path: frontFile.path));
+        });
       }
 
       logger.i('9. Preparing back image...');
 
       if (embeddedFile != null) {
-        rotatedRearPath = await _rearImage(file: embeddedFile);
-        behindImageInfo = await _imageBufferResponse(DrawImageMessage(isFront: false, path: rotatedRearPath));
+        await _lock.synchronized(() async {
+          final rotatedRearPath = await _rearImage(file: embeddedFile);
+          behindImageInfo = await _imageBufferResponse(DrawImageMessage(isFront: false, path: rotatedRearPath));
+        });
       }
 
       logger.i('10. Preparing for printing...');
 
-      await _sendAndHandleResponse(InjectMessage());
+      await _lock.synchronized(() async {
+        await _sendAndHandleResponse(InjectMessage());
+      });
 
       logger.i('11. Injecting card completed');
 
@@ -337,15 +347,22 @@ class PrinterManager {
       await SlackLogService().sendLogToSlack(
           '*[PRINTING LOG]* isSingleMode: $isSingleMode \n frontImageInfo: $frontImageInfo \n behindImageInfo: $behindImageInfo');
 
-      await _sendAndHandleResponse(PrintMessage(isSingleMode: isSingleMode, printPath: buffer));
+      await _lock.synchronized(() async {
+        await _sendAndHandleResponse(PrintMessage(isSingleMode: isSingleMode, printPath: buffer));
+      });
 
       logger.i('13. Printing completed');
 
-      await _sendAndHandleResponse(EjectMessage());
+      await _lock.synchronized(() async {
+        await _sendAndHandleResponse(CheckCardPositionMessage());
+      });
 
       logger.i('13. Ejecting card completed');
 
-      final printerLog = await startLog();
+      final printerLog = await _lock.synchronized(() async {
+        final log = await startLog();
+        return log;
+      });
 
       logger.i('14. Printer log $printerLog');
 
