@@ -409,19 +409,26 @@ class PrinterManager {
       logger.i('1. Initializing printer...');
 
       logger.i('2. Initializing printer library...');
-      bindings.clearLibrary();
+
+      await _lock.synchronized(() async {
+        bindings.clearLibrary();
+      });
 
       logger.i('3. Printer library initialized');
-      bindings.initLibrary();
+      await _lock.synchronized(() async {
+        bindings.initLibrary();
+      });
 
       // 2. 프린터 밝기 설정 변경
       logger.i('4. Image brightness set to 0');
 
-      bindings.setImageVisualParameters(
-        brightness: 5,
-        contrast: 0,
-        saturation: 0,
-      );
+      await _lock.synchronized(() async {
+        bindings.setImageVisualParameters(
+          brightness: 0,
+          contrast: 0,
+          saturation: 0,
+        );
+      });
 
       logger.i('5. Printer initialization completed');
     } catch (e, stack) {
