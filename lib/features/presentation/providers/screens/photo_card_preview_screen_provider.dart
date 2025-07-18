@@ -17,7 +17,7 @@ class PhotoCardPreviewScreenProvider extends _$PhotoCardPreviewScreenProvider {
     } catch (e, stack) {
       try {
         await ref.read(paymentServiceProvider.notifier).refund();
-        ref.read(cardCountProvider.notifier).increase();
+        if (ref.read(pagePrintProvider) == PagePrintType.single) ref.read(cardCountProvider.notifier).increase();
       } catch (refundError) {
         logger.e('Payment and refund failed', error: refundError);
       }
