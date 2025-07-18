@@ -309,11 +309,17 @@ class PrinterManager {
         await _sendAndHandleResponse(CheckFeederMessage());
       });
 
-      logger.i('7. Checking card position...');
+      logger.i('7. Checking Setting Card...');
 
-      await _lock.synchronized(() async {
-        await _sendAndHandleResponse(CheckCardPositionMessage());
+      final ready = await _lock.synchronized(() async {
+        await checkSettingPrinter();
       });
+
+      if (ready) {
+        logger.i('Printer is ready for printing');
+      } else {
+        throw Exception('Printer is not ready for printing');
+      }
 
       logger.i('8. Preparing front image...');
 
@@ -354,7 +360,7 @@ class PrinterManager {
       logger.i('13. Printing completed');
 
       await _lock.synchronized(() async {
-        await _sendAndHandleResponse(CheckCardPositionMessage());
+        await _sendAndHandleResponse(EjectMessage());
       });
 
       logger.i('13. Ejecting card completed');
