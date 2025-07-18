@@ -11,22 +11,24 @@ class PaymentService extends _$PaymentService {
   FutureOr<void> build() => null;
 
   Future<void> processPayment() async {
+
+    // 1. 사전 검증
+    final settings = ref.read(kioskInfoServiceProvider);
+    final backPhoto = ref.watch(verifyPhotoCardProvider).value;
+
+    if (settings == null) {
+      throw PreconditionFailedExption('No kiosk settings available');
+    }
+    if (backPhoto == null) {
+      throw PreconditionFailedExption('No back photo available');
+    }
+
+    // 2. 주문 생성
+    final orderResponse = await _createOrder().catchError(
+        (e) => throw OrderCreationException('Create order fail: $e'));
+    ref.read(createOrderInfoProvider.notifier).update(orderResponse);
+
     try {
-      // 1. 사전 검증
-      final settings = ref.read(kioskInfoServiceProvider);
-      final backPhoto = ref.watch(verifyPhotoCardProvider).value;
-
-      if (settings == null) {
-        throw Exception('No kiosk settings available');
-      }
-      if (backPhoto == null) {
-        throw Exception('No back photo available');
-      }
-
-      // 2. 주문 생성
-      final orderResponse = await _createOrder();
-      ref.read(createOrderInfoProvider.notifier).update(orderResponse);
-
       // 3. 결제 승인
       final price = ref.read(kioskInfoServiceProvider)!.photoCardPrice;
       final paymentResponse = await ref.read(paymentRepositoryProvider).approve(
@@ -35,18 +37,21 @@ class PaymentService extends _$PaymentService {
       ref.read(paymentResponseStateProvider.notifier).update(paymentResponse);
       final approvalNo = paymentResponse.approvalNo ?? '';
       final machineId = ref.read(kioskInfoServiceProvider)!.kioskMachineId;
-      if (approvalNo.trim().isEmpty && paymentResponse.res == '0000') {
-        SlackLogService().sendWarningLogToSlack('*[MachineId: $machineId]*\nNull approvalNo Card');
-        final BackPhotoStatusResponse response = await ref.read(kioskRepositoryProvider).updateBackPhotoStatus(UpdateBackPhotoRequest(
-          photoAuthNumber : backPhoto.photoAuthNumber,
-          status : "STARTED",
-        ));
+      if (approvalNo.trim().isEmpty && paymentResponse.res == '0000') { //승인번호가 빈 결제 건
+        SlackLogService().sendWarningLogToSlack(
+            '*[MachineId: $machineId]*\nNull approvalNo Card');
+        final BackPhotoStatusResponse response = await ref
+            .read(kioskRepositoryProvider)
+            .updateBackPhotoStatus(UpdateBackPhotoRequest(
+              photoAuthNumber: backPhoto.photoAuthNumber,
+              status: "STARTED",
+            ));
         print("update status response : $response");
         ref.read(paymentFailureProvider.notifier).triggerFailure();
         final failResponse = await _updateFailOrder();
         ref.read(updateOrderInfoProvider.notifier).update(failResponse);
       } else {
-        final response = await _updateOrder();
+        final response = await _updateOrder(); //결제 취소, 정상 결제
         ref.read(updateOrderInfoProvider.notifier).update(response);
         if (paymentResponse.res == '0000') {
           ref.read(cardCountProvider.notifier).decrease();
@@ -131,7 +136,9 @@ class PaymentService extends _$PaymentService {
         detail: approval?.KSNET ?? '{}',
       );
 
-      return await ref.read(kioskRepositoryProvider).updateOrderStatus(orderId.toInt(), request);
+      return await ref
+          .read(kioskRepositoryProvider)
+          .updateOrderStatus(orderId.toInt(), request);
     } catch (e) {
       rethrow;
     }
@@ -160,9 +167,29 @@ class PaymentService extends _$PaymentService {
         detail: approval?.KSNET ?? '{}',
       );
 
-      return await ref.read(kioskRepositoryProvider).updateOrderStatus(orderId.toInt(), request);
+      return await ref
+          .read(kioskRepositoryProvider)
+          .updateOrderStatus(orderId.toInt(), request);
     } catch (e) {
       rethrow;
     }
   }
+}
+
+class OrderCreationException implements Exception {
+  final String message;
+
+  OrderCreationException(this.message);
+
+  @override
+  String toString() => 'OrderCreationException: $message';
+}
+
+class PreconditionFailedExption implements Exception {
+  final String message;
+
+  PreconditionFailedExption(this.message);
+
+  @override
+  String toString() => 'PreconditionFailedExption: $message';
 }
