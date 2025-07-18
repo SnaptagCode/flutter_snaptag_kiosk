@@ -15,7 +15,7 @@ class PhotoCardPreviewScreenProvider extends _$PhotoCardPreviewScreenProvider {
       await ref.read(paymentServiceProvider.notifier).processPayment();
       state = const AsyncValue.data(null);
     } catch (e, stack) {
-      if (e is! OrderCreationException && e is! PreconditionFailedExption) {
+      if (e is! OrderCreationException && e is! PreconditionFailedException) {
         try {
           await ref.read(paymentServiceProvider.notifier).refund();
           if (ref.read(pagePrintProvider) == PagePrintType.single) ref.read(cardCountProvider.notifier).increase();

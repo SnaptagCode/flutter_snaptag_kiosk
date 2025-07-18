@@ -17,10 +17,10 @@ class PaymentService extends _$PaymentService {
     final backPhoto = ref.watch(verifyPhotoCardProvider).value;
 
     if (settings == null) {
-      throw PreconditionFailedExption('No kiosk settings available');
+      throw PreconditionFailedException('No kiosk settings available');
     }
     if (backPhoto == null) {
-      throw PreconditionFailedExption('No back photo available');
+      throw PreconditionFailedException('No back photo available');
     }
 
     // 2. 주문 생성
@@ -92,7 +92,11 @@ class PaymentService extends _$PaymentService {
       logger.e('Refund failed', error: e);
       rethrow;
     } finally {
-      await _updateOrder();
+      final response = await _updateOrder();
+      if (response.status == OrderStatus.refunded) {
+        ref.read(paymentResponseStateProvider.notifier).reset();
+        SlackLogService().sendLogToSlack('paymentResponseState Reset'); //paymentTestSlack
+      }
     }
   }
 
@@ -185,10 +189,10 @@ class OrderCreationException implements Exception {
   String toString() => 'OrderCreationException: $message';
 }
 
-class PreconditionFailedExption implements Exception {
+class PreconditionFailedException implements Exception {
   final String message;
 
-  PreconditionFailedExption(this.message);
+  PreconditionFailedException(this.message);
 
   @override
   String toString() => 'PreconditionFailedExption: $message';

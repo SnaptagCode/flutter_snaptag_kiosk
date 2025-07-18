@@ -96,6 +96,8 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
               ref.read(pagePrintProvider.notifier).set(PagePrintType.single);
               SlackLogService().sendLogToSlack('machineId: $machineId, change pagePrintType single');
             }
+            ref.read(paymentResponseStateProvider.notifier).reset();
+            SlackLogService().sendLogToSlack('machineId: $machineId, paymentResponseState Reset'); //paymentTestSlack
             await DialogHelper.showPrintCompleteDialog(
               context,
               onButtonPressed: () {
