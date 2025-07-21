@@ -305,15 +305,11 @@ class PrinterManager {
 
       logger.i('6. Starting print process...');
 
-      await _lock.synchronized(() async {
-        await _sendAndHandleResponse(CheckFeederMessage());
-      });
+      await _sendAndHandleResponse(CheckFeederMessage());
 
       logger.i('7. Checking Setting Card...');
 
-      final ready = await _lock.synchronized(() async {
-        await checkSettingPrinter();
-      });
+      final ready = await checkSettingPrinter();
 
       if (ready) {
         logger.i('Printer is ready for printing');
@@ -324,25 +320,19 @@ class PrinterManager {
       logger.i('8. Preparing front image...');
 
       if (!isSingleMode && frontFile != null) {
-        await _lock.synchronized(() async {
-          frontImageInfo = await _imageBufferResponse(DrawImageMessage(isFront: true, path: frontFile.path));
-        });
+        frontImageInfo = await _imageBufferResponse(DrawImageMessage(isFront: true, path: frontFile.path));
       }
 
       logger.i('9. Preparing back image...');
 
       if (embeddedFile != null) {
-        await _lock.synchronized(() async {
-          final rotatedRearPath = await _rearImage(file: embeddedFile);
-          behindImageInfo = await _imageBufferResponse(DrawImageMessage(isFront: false, path: rotatedRearPath));
-        });
+        final rotatedRearPath = await _rearImage(file: embeddedFile);
+        behindImageInfo = await _imageBufferResponse(DrawImageMessage(isFront: false, path: rotatedRearPath));
       }
 
       logger.i('10. Preparing for printing...');
 
-      await _lock.synchronized(() async {
-        await _sendAndHandleResponse(InjectMessage());
-      });
+      await _sendAndHandleResponse(InjectMessage());
 
       logger.i('11. Injecting card completed');
 
@@ -353,22 +343,15 @@ class PrinterManager {
       await SlackLogService().sendLogToSlack(
           '*[PRINTING LOG]* isSingleMode: $isSingleMode \n frontImageInfo: $frontImageInfo \n behindImageInfo: $behindImageInfo');
 
-      await _lock.synchronized(() async {
-        await _sendAndHandleResponse(PrintMessage(isSingleMode: isSingleMode, printPath: buffer));
-      });
+      await _sendAndHandleResponse(PrintMessage(isSingleMode: isSingleMode, printPath: buffer));
 
       logger.i('13. Printing completed');
 
-      await _lock.synchronized(() async {
-        await _sendAndHandleResponse(EjectMessage());
-      });
+      await _sendAndHandleResponse(EjectMessage());
 
       logger.i('13. Ejecting card completed');
 
-      final printerLog = await _lock.synchronized(() async {
-        final log = await startLog();
-        return log;
-      });
+      final printerLog = await startLog();
 
       logger.i('14. Printer log $printerLog');
 
@@ -416,25 +399,19 @@ class PrinterManager {
 
       logger.i('2. Initializing printer library...');
 
-      await _lock.synchronized(() async {
-        bindings.clearLibrary();
-      });
+      bindings.clearLibrary();
 
       logger.i('3. Printer library initialized');
-      await _lock.synchronized(() async {
-        bindings.initLibrary();
-      });
+      bindings.initLibrary();
 
       // 2. 프린터 밝기 설정 변경
       logger.i('4. Image brightness set to 0');
 
-      await _lock.synchronized(() async {
-        bindings.setImageVisualParameters(
-          brightness: 0,
-          contrast: 0,
-          saturation: 0,
-        );
-      });
+      bindings.setImageVisualParameters(
+        brightness: 0,
+        contrast: 0,
+        saturation: 0,
+      );
 
       logger.i('5. Printer initialization completed');
     } catch (e, stack) {
