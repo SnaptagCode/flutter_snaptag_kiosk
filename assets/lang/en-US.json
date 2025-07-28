@@ -31,5 +31,15 @@
   "alert_txt_card_refill": "The card balance is insufficient.\r\n For smooth use, please contact the administrator\r\n and proceed with replacement.",
   "alert_btn_print_failure": "OK",
   "alert_title_need_ribbon_film": "Please contact administrator.",
-  "alert_txt_need_ribbon_film": "Please check the printer status."
+  "alert_txt_need_ribbon_film": "Please check the printer status.",
+  "alert_title_authNum_reissue_complete": "Refund Completed,\r\nVerification Code\r\nReissue Required",
+  "alert_txt_authNum_reissue_complete": "The refund has been successfully\r\ncompleted.\r\nPlease request a new verification code\r\nand try again.",
+  "alert_btn_authNum_reissue_complete": "OK",
+  "alert_title_authNum_reissue_failure": "Refund Failed",
+  "alert_txt_authNum_reissue_failure": "The refund could not be processed\r\nsuccessfully.\r\nPlease check the card information\r\nand try again.",
+  "alert_btn_authNum_reissue_failure": "OK",
+  "alert_title_refund_info": "Refund Notice",
+  "alert_txt_refund_info": "There are transactions that haven’t\r\nbeen refunded.\r\nPlease insert the previously used card\r\ninto the terminal and proceed with the refund.",
+  "alert_btn_cancel": "Cancel",
+  "alert_btn_ok": "OK"
 }

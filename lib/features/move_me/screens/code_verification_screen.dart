@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -27,8 +28,38 @@ class CodeVerificationScreen extends ConsumerWidget {
         // 에러 처리
         next.whenOrNull(
           error: (error, stack) async {
-            await DialogHelper.showErrorDialog(context);
-            logger.e('Error verifying photo card: $error stacktrace $stack');
+            if (error is DioException) {
+              final statusCode = error.response?.statusCode;
+              final data = error.response?.data;
+              if (statusCode == 409) { //KioskBackPhotoCardStatus.REFUNDED_FAILED_BEFORE_PRINTED
+                final orderDto = data?['res']['order'];
+                final result = await DialogHelper.showTwoButtonKioskDialog(
+                    context,
+                    title: LocaleKeys.alert_title_refund_info.tr(),
+                    contentText: LocaleKeys.alert_txt_refund_info.tr(),
+                    cancelButtonText: LocaleKeys.alert_btn_cancel.tr(),
+                    confirmButtonText: LocaleKeys.alert_btn_ok.tr()
+                );
+                if (result) {
+                  if (orderDto != null) {
+                    final order = OrderErrorEntity.fromJson(orderDto);
+                    print('환불 대상 completedAt: ${order.completedAt}');
+                    print('환불 대상 인증번호: ${order.authSeqNumber}');
+                    try {
+                      final response = await ref.read(paymentServiceProvider.notifier).error409_refund(order);
+                      await (response ?  DialogHelper.showAuthNumReissueCompleteDialog(context) : DialogHelper.showAuthNumReissueFailureDialog(context));
+                    } catch(e) {
+                      await DialogHelper.showAuthNumReissueFailureDialog(context);
+                    }
+                  }
+                } else {}
+              } else {
+                await DialogHelper.showErrorDialog(context);
+                SlackLogService().sendLogToSlack(
+                    'Error verifying photo card: $error stacktrace $stack');
+                logger.e('Error verifying photo card: $error stacktrace $stack');
+              }
+            }
             // 에러 시 입력값 초기화
             ref.read(authCodeProvider.notifier).clear();
           },

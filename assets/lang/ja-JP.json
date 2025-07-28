@@ -31,5 +31,15 @@
   "alert_txt_card_refill": "カード残量が足りません。\r\n円滑な使用のために管理者に連絡した後\r\n交換を進めてください。",
   "alert_btn_print_failure": "確認",
   "alert_title_need_ribbon_film": "管理者にお問い合わせください。",
-  "alert_txt_need_ribbon_film": "プリンターの状態を確認してください。"
+  "alert_txt_need_ribbon_film": "プリンターの状態を確認してください。",
+  "alert_title_authNum_reissue_complete": "返金完了,\r\n認証コードの再発行\r\nが必要です",
+  "alert_txt_authNum_reissue_complete": "返金が正常に完了しました。\r\n新しい認証コードを発行して、もう一度お試\r\nしください。",
+  "alert_btn_authNum_reissue_complete": "確認",
+  "alert_title_authNum_reissue_failure": "返金に失敗しました",
+  "alert_txt_authNum_reissue_failure": "返金が正常に処理されませんでした。\r\n使用するカード情報を確認のうえ、再度お試\r\nしください。",
+  "alert_btn_authNum_reissue_failure": "確認",
+  "alert_title_refund_info": "返金のお知らせ",
+  "alert_txt_refund_info": "まだ返金が完了していない取引があります。\r\n以前に使用したカードを端末に挿入した後\r\n払い戻しを行ってください。",
+  "alert_btn_cancel": "キャンセル",
+  "alert_btn_ok": "確認"
 }

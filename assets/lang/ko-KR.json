@@ -31,5 +31,15 @@
   "alert_txt_card_refill": "카드 잔량이 부족합니다.\r\n원활한 사용을 위해 관리자에 문의 후\r\n교체를 진행해 주세요.",
   "alert_btn_print_failure": "확인",
   "alert_title_need_ribbon_film": "관리자에게 문의해 주세요.",
-  "alert_txt_need_ribbon_film": "프린터 상태를 확인해 주세요."
+  "alert_txt_need_ribbon_film": "프린터 상태를 확인해 주세요.",
+  "alert_title_authNum_reissue_complete": "환불 완료\r\n인증번호 재발급 필요",
+  "alert_txt_authNum_reissue_complete": "환불이 정상적으로 완료되었습니다.\r\n인증번호를 새로 발급받은 뒤 다시 시도해 주세요.",
+  "alert_btn_authNum_reissue_complete": "확인",
+  "alert_title_authNum_reissue_failure": "환불 실패",
+  "alert_txt_authNum_reissue_failure": "환불이 정상적으로 처리되지 않았습니다.\r\n환불 진행할 카드 정보를 확인한 후\r\n다시 시도해 주세요.",
+  "alert_btn_authNum_reissue_failure": "확인",
+  "alert_title_refund_info": "환불 안내",
+  "alert_txt_refund_info": "환불되지 않은 내역이 있습니다.\r\n이전에 사용한 카드를 단말기에 삽입한 후\r\n환불을 진행해 주세요.",
+  "alert_btn_cancel": "취소",
+  "alert_btn_ok": "확인"
 }

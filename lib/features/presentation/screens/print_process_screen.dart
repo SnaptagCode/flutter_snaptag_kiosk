@@ -51,7 +51,7 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
             // 에러 발생 시 환불 처리
             try {
               await ref.read(paymentServiceProvider.notifier).refund();
-              ref.read(cardCountProvider.notifier).increase();
+              if (ref.read(pagePrintProvider) == PagePrintType.single) ref.read(cardCountProvider.notifier).increase();
             } catch (refundError) {
               SlackLogService().sendErrorLogToSlack('*[Machine ID: $machineId]*, Refund failed \nError: $refundError');
               logger.e('Refund failed', error: refundError);
@@ -96,6 +96,8 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
               ref.read(pagePrintProvider.notifier).set(PagePrintType.single);
               SlackLogService().sendLogToSlack('machineId: $machineId, change pagePrintType single');
             }
+            ref.read(paymentResponseStateProvider.notifier).reset();
+            SlackLogService().sendLogToSlack('machineId: $machineId, paymentResponseState Reset'); //paymentTestSlack
             await DialogHelper.showPrintCompleteDialog(
               context,
               onButtonPressed: () {
