@@ -384,10 +384,12 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
                         buttonName: '업데이트',
                         isActive: isUpdateAvailable,
                         onUpdatePressed: () async {
-                          final result = await DialogHelper.showSetupTwoDialog(
+                          final result = await DialogHelper.showTwoButtonKioskDialog(
                             context,
                             title: '업데이트 하시겠습니까?',
                             contentText: '업데이트 시 앱이 재시작 됩니다.',
+                            cancelButtonText: '취소',
+                            confirmButtonText: '완료'
                           );
                           if (result) {
                             try {
