@@ -35,4 +35,14 @@ abstract class LocaleKeys {
   static const alert_btn_card_refill = 'alert_btn_print_failure'; //'확인' 문구로 동일
   static const alert_title_need_ribbon_film = 'alert_title_need_ribbon_film';
   static const alert_txt_need_ribbon_film = 'alert_txt_need_ribbon_film';
+  static const alert_title_authNum_reissue_complete = 'alert_title_authNum_reissue_complete';
+  static const alert_txt_authNum_reissue_complete = 'alert_txt_authNum_reissue_complete';
+  static const alert_btn_authNum_reissue_complete = 'alert_btn_authNum_reissue_complete';
+  static const alert_title_authNum_reissue_failure = 'alert_title_authNum_reissue_failure';
+  static const alert_txt_authNum_reissue_failure = 'alert_txt_authNum_reissue_failure';
+  static const alert_btn_authNum_reissue_failure = 'alert_btn_authNum_reissue_failure';
+  static const alert_title_refund_info = 'alert_title_refund_info';
+  static const alert_txt_refund_info = 'alert_txt_refund_info';
+  static const alert_btn_cancel = 'alert_btn_cancel';
+  static const alert_btn_ok = 'alert_btn_ok';
 }
