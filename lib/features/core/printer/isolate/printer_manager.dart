@@ -340,9 +340,6 @@ class PrinterManager {
           ? PrintImageBuffer(frontBuffer: behindImageInfo, backBuffer: null)
           : PrintImageBuffer(frontBuffer: frontImageInfo, backBuffer: behindImageInfo);
 
-      await SlackLogService().sendLogToSlack(
-          '*[PRINTING LOG]* isSingleMode: $isSingleMode \n frontImageInfo: $frontImageInfo \n behindImageInfo: $behindImageInfo');
-
       await _sendAndHandleResponse(PrintMessage(isSingleMode: isSingleMode, printPath: buffer));
 
       logger.i('13. Printing completed');
@@ -358,6 +355,7 @@ class PrinterManager {
       return printerLog;
     } catch (e) {
       logger.i('error: $e');
+      await SlackLogService().sendLogToSlack('Print Error: $e');
       rethrow;
     }
   }
