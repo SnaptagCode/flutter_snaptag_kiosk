@@ -51,7 +51,7 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
             // 에러 발생 시 환불 처리
             try {
               await ref.read(paymentServiceProvider.notifier).refund();
-              ref.read(cardCountProvider.notifier).increase();
+              if (ref.read(pagePrintProvider) == PagePrintType.single) ref.read(cardCountProvider.notifier).increase();
             } catch (refundError) {
               SlackLogService().sendErrorLogToSlack('*[Machine ID: $machineId]*, Refund failed \nError: $refundError');
               logger.e('Refund failed', error: refundError);
@@ -96,6 +96,8 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
               ref.read(pagePrintProvider.notifier).set(PagePrintType.single);
               SlackLogService().sendLogToSlack('machineId: $machineId, change pagePrintType single');
             }
+            ref.read(paymentResponseStateProvider.notifier).reset();
+            SlackLogService().sendLogToSlack('machineId: $machineId, paymentResponseState Reset'); //paymentTestSlack
             await DialogHelper.showPrintCompleteDialog(
               context,
               onButtonPressed: () {
@@ -122,7 +124,7 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
               style: context.typography.kioskBody1B,
             ),
             SizedBox(height: 30.h),
-            ((kiosk?.kioskMachineId ?? 1) != 2 && (kiosk?.kioskMachineId ?? 1) != 3) || randomAdImage == null
+            randomAdImage == null
                 ? GradientContainer(
                     content: Padding(
                       padding: EdgeInsets.all(8.r),
@@ -136,15 +138,10 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
                           )),
                     ),
                   )
-                : randomAdImage == null
-                    ? Image.asset(
-                        SnaptagImages.printLoading,
-                        fit: BoxFit.fill,
-                      )
-                    : Image.file(
-                        File(randomAdImage),
-                        fit: BoxFit.fill,
-                      ),
+                : Image.file(
+                    File(randomAdImage),
+                    fit: BoxFit.fill,
+                  ),
             SizedBox(height: 30.h),
             Text(
               LocaleKeys.sub03_txt_02.tr(),
@@ -227,20 +224,16 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
     final userDir = getUserDirectorySync();
     final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
     if (version == null || userDir == null) {
-      if (machineId == 2 || machineId == 3) {
-        SlackLogService().sendLogToSlack('machineId: $machineId 배너를 불러오기 위한 사용자 디렉토리 또는 버전을 불러올 수 없습니다.');
-      }
+      SlackLogService().sendLogToSlack('machineId: $machineId 배너를 불러오기 위한 사용자 디렉토리 또는 버전을 불러올 수 없습니다.');
       return null;
     }
 
-    final adImageFolder = Directory(
-      '$userDir\\Snaptag\\$version\\assets\\adImages',
-    );
+    final adImageFolder = Directory((machineId == 2 || machineId == 3)
+        ? '$userDir\\Snaptag\\$version\\assets\\adImages\\suwon'
+        : '$userDir\\Snaptag\\$version\\assets\\adImages\\eland');
 
     if (!adImageFolder.existsSync()) {
-      if (machineId == 2 || machineId == 3) {
-        SlackLogService().sendLogToSlack('machineId: $machineId 배너를 불러오기 위한 이미지 폴더가 존재하지 않습니다.');
-      }
+      SlackLogService().sendLogToSlack('machineId: $machineId 배너를 불러오기 위한 이미지 폴더가 존재하지 않습니다.');
       print('❌ 이미지 폴더가 존재하지 않습니다: ${adImageFolder.path}');
       return null;
     }
@@ -252,9 +245,7 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
         .toList();
 
     if (imageFiles.isEmpty) {
-      if (machineId == 2 || machineId == 3) {
-        SlackLogService().sendLogToSlack('machineId: $machineId 배너를 불러오기 위한 이미지 폴더내부에 이미지가 존재하지 않습니다.');
-      }
+      SlackLogService().sendLogToSlack('machineId: $machineId 배너를 불러오기 위한 이미지 폴더내부에 이미지가 존재하지 않습니다.');
       return null;
     }
 
