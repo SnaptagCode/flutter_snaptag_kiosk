@@ -268,20 +268,16 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
     final userDir = getUserDirectorySync();
     final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
     if (version == null || userDir == null) {
-      if (machineId == 2 || machineId == 3) {
-        SlackLogService().sendLogToSlack('machineId: $machineId 배너를 불러오기 위한 사용자 디렉토리 또는 버전을 불러올 수 없습니다.');
-      }
+      SlackLogService().sendLogToSlack('machineId: $machineId 배너를 불러오기 위한 사용자 디렉토리 또는 버전을 불러올 수 없습니다.');
       return null;
     }
 
-    final adImageFolder = Directory(
-      '$userDir\\Snaptag\\$version\\assets\\adImages',
-    );
+    final adImageFolder = Directory((machineId == 2 || machineId == 3)
+        ? '$userDir\\Snaptag\\$version\\assets\\adImages\\suwon'
+        : '$userDir\\Snaptag\\$version\\assets\\adImages\\eland');
 
     if (!adImageFolder.existsSync()) {
-      if (machineId == 2 || machineId == 3) {
-        SlackLogService().sendLogToSlack('machineId: $machineId 배너를 불러오기 위한 이미지 폴더가 존재하지 않습니다.');
-      }
+      SlackLogService().sendLogToSlack('machineId: $machineId 배너를 불러오기 위한 이미지 폴더가 존재하지 않습니다.');
       print('❌ 이미지 폴더가 존재하지 않습니다: ${adImageFolder.path}');
       return null;
     }
@@ -293,9 +289,7 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
         .toList();
 
     if (imageFiles.isEmpty) {
-      if (machineId == 2 || machineId == 3) {
-        SlackLogService().sendLogToSlack('machineId: $machineId 배너를 불러오기 위한 이미지 폴더내부에 이미지가 존재하지 않습니다.');
-      }
+      SlackLogService().sendLogToSlack('machineId: $machineId 배너를 불러오기 위한 이미지 폴더내부에 이미지가 존재하지 않습니다.');
       return null;
     }
 

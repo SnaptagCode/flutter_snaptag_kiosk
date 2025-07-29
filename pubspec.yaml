@@ -77,8 +77,8 @@ flutter:
     - assets/lang/
     - assets/luca/
     - assets/sounds/
-    - assets/adImages/
-    - assets/adVideos/
+    - assets/adImages/eland/
+    - assets/adImages/suwon/
     - assets/.env.version
 
   fonts:
