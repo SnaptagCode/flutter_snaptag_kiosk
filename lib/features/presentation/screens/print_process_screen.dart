@@ -229,8 +229,8 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
     }
 
     final adImageFolder = Directory((machineId == 2 || machineId == 3)
-        ? '$userDir\\Snaptag\\$version\\assets\\suwon\\adImages'
-        : '$userDir\\Snaptag\\$version\\assets\\eland\\adImages');
+        ? '$userDir\\Snaptag\\$version\\assets\\adImages\\suwon'
+        : '$userDir\\Snaptag\\$version\\assets\\adImages\\eland');
 
     if (!adImageFolder.existsSync()) {
       SlackLogService().sendLogToSlack('machineId: $machineId 배너를 불러오기 위한 이미지 폴더가 존재하지 않습니다.');
