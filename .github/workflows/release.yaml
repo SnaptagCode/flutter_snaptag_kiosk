@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: startsWith(github.ref, 'refs/tags/test')
     runs-on: windows-latest
 
     steps:
@@ -91,12 +91,12 @@ jobs:
           Compress-Archive -Path build/windows/x64/runner/Release/* -DestinationPath Release.zip
           Compress-Archive -Path build/windows/x64/runner/Debug/* -DestinationPath Debug.zip
 
-      - name: Upload Release and Debug to GitHub
-        uses: softprops/action-gh-release@v1
+      - name: AWS configure credentials
+        uses: aws-actions/configure-aws-credentials@v1
         with:
-          files: |
-            Release.zip
-            Debug.zip
-          tag_name: ${{ github.ref_name }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            aws-access-key-id: ${{ secrets.AWS_ACCESSKEY }}
+            aws-secret-access-key: ${{ secrets.AWS_SECRETKEY }}
+            aws-region: ap-northeast-2
+
+      - name: upload to S3
+        run: aws s3 cp --region ap-northeast-2 ./dev-center-prod.tar.gz s3://photocode-kiosk-repository/archive/
