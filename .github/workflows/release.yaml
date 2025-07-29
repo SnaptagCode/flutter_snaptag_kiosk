@@ -99,4 +99,7 @@ jobs:
             aws-region: ap-northeast-2
 
       - name: upload to S3
-        run: aws s3 cp --region ap-northeast-2 ./dev-center-prod.tar.gz s3://photocode-kiosk-repository/archive/
+        run: |
+          aws s3 cp --region ap-northeast-2 ./Release.zip s3://photocode-kiosk-repository/archive/
+          aws s3 cp --region ap-northeast-2 ./Debug.zip s3://photocode-kiosk-repository/archive/
+
