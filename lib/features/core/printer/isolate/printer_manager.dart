@@ -21,13 +21,10 @@ import 'package:flutter_snaptag_kiosk/features/core/printer/printer_log.dart';
 import 'package:flutter_snaptag_kiosk/features/core/printer/ribbon_status.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:image/image.dart' as img;
-import 'package:synchronized/synchronized.dart';
 
 class PrinterManager {
   static PrinterManager? _instance;
   late SendPort _sendPort;
-
-  final _lock = Lock();
 
   PrinterManager._();
 
