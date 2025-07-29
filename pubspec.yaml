@@ -73,8 +73,8 @@ flutter:
     - assets/lang/
     - assets/luca/
     - assets/sounds/
-    - assets/adImages/eland
-    - assets/adImages/suwon
+    - assets/adImages/eland/
+    - assets/adImages/suwon/
     - assets/.env.version
 
   fonts:
