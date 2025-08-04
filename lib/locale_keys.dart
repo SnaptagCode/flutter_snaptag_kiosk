@@ -12,6 +12,9 @@ abstract class LocaleKeys {
   static const alert_title_authNum_error = 'alert_title_authNum_error';
   static const alert_txt_authNum_error = 'alert_txt_authNum_error';
   static const alert_btn_authNum_error = 'alert_btn_authNum_error';
+  static const alert_title_verification_code_expried = 'alert_title_verification_code_expried';
+  static const alert_txt_verification_code_expried = 'alert_txt_verification_code_expried';
+  static const alert_btn_verification_code_expried = 'alert_btn_verification_code_expried';
   static const sub02_txt_01 = 'sub02_txt_01';
   static const sub02_btn_pay = 'sub02_btn_pay';
   static const sub03_txt_01 = 'sub03_txt_01';

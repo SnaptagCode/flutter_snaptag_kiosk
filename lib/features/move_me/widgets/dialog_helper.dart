@@ -280,9 +280,7 @@ class DialogHelper {
                         Navigator.of(context).pop(false);
                       },
                       style: context.refundDialogCancelButtonStyle,
-                      child: Text(cancelButtonText, style: TextStyle(
-                        color: Color(0xFF999999))
-                      ),
+                      child: Text(cancelButtonText, style: TextStyle(color: Color(0xFF999999))),
                     ),
                   ),
                   SizedBox(width: 12.w),
@@ -293,9 +291,7 @@ class DialogHelper {
                         Navigator.of(context).pop(true);
                       },
                       style: context.refundDialogConfirmButtonStyle,
-                      child: Text(confirmButtonText, style: TextStyle(
-        color: Color(0xFFFFFFFF))
-        ),
+                      child: Text(confirmButtonText, style: TextStyle(color: Color(0xFFFFFFFF))),
                     ),
                   ),
                 ],
@@ -505,6 +501,15 @@ class DialogHelper {
       title: LocaleKeys.alert_title_authNum_error.tr(),
       message: LocaleKeys.alert_txt_authNum_error.tr(),
       buttonText: LocaleKeys.alert_btn_authNum_error.tr(),
+    );
+  }
+
+  static Future<void> showVerificationCodeExpriedDialog(BuildContext context) async {
+    await _showOneButtonKioskDialog(
+      context,
+      title: LocaleKeys.alert_title_verification_code_expried.tr(),
+      message: LocaleKeys.alert_txt_verification_code_expried.tr(),
+      buttonText: LocaleKeys.alert_btn_verification_code_expried.tr(),
     );
   }
 
