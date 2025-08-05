@@ -58,6 +58,11 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
             if (result) {
               // 에러 발생 시 환불 처리
               await refund();
+            } else {
+              final response = await ref.read(paymentServiceProvider.notifier).updateOrder(isRefund: true);
+              if (response.status == OrderStatus.refunded) {
+                ref.read(paymentResponseStateProvider.notifier).reset();
+              }
             }
 
             // 카드 단일 카드 수량 확인

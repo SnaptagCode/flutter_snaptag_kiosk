@@ -12,7 +12,6 @@ class PaymentService extends _$PaymentService {
   FutureOr<void> build() => null;
 
   Future<void> processPayment() async {
-
     // 1. 사전 검증
     final settings = ref.read(kioskInfoServiceProvider);
     final backPhoto = ref.watch(verifyPhotoCardProvider).value;
@@ -25,8 +24,7 @@ class PaymentService extends _$PaymentService {
     }
 
     // 2. 주문 생성
-    final orderResponse = await _createOrder().catchError(
-        (e) => throw OrderCreationException('Create order fail: $e'));
+    final orderResponse = await _createOrder().catchError((e) => throw OrderCreationException('Create order fail: $e'));
     ref.read(createOrderInfoProvider.notifier).update(orderResponse);
 
     try {
@@ -38,28 +36,27 @@ class PaymentService extends _$PaymentService {
       ref.read(paymentResponseStateProvider.notifier).update(paymentResponse);
       final approvalNo = paymentResponse.approvalNo ?? '';
       final machineId = ref.read(kioskInfoServiceProvider)!.kioskMachineId;
-      if (approvalNo.trim().isEmpty && paymentResponse.res == '0000') { //승인번호가 빈 결제 건
-        SlackLogService().sendWarningLogToSlack(
-            '*[MachineId: $machineId]*\nNull approvalNo Card');
-        final BackPhotoStatusResponse response = await ref
-            .read(kioskRepositoryProvider)
-            .updateBackPhotoStatus(UpdateBackPhotoRequest(
-              photoAuthNumber: backPhoto.photoAuthNumber,
-              status: "STARTED",
-            ));
+      if (approvalNo.trim().isEmpty && paymentResponse.res == '0000') {
+        //승인번호가 빈 결제 건
+        SlackLogService().sendWarningLogToSlack('*[MachineId: $machineId]*\nNull approvalNo Card');
+        final BackPhotoStatusResponse response =
+            await ref.read(kioskRepositoryProvider).updateBackPhotoStatus(UpdateBackPhotoRequest(
+                  photoAuthNumber: backPhoto.photoAuthNumber,
+                  status: "STARTED",
+                ));
         print("update status response : $response");
         ref.read(paymentFailureProvider.notifier).triggerFailure();
         final failResponse = await _updateFailOrder();
         ref.read(updateOrderInfoProvider.notifier).update(failResponse);
       } else {
-        final response = await _updateOrder(isRefund: false); //결제 취소, 정상 결제
+        final response = await updateOrder(isRefund: false); //결제 취소, 정상 결제
         ref.read(updateOrderInfoProvider.notifier).update(response);
         if (paymentResponse.res == '0000') {
           ref.read(cardCountProvider.notifier).decrease();
         }
       }
     } catch (e) {
-      final response = await _updateOrder(isRefund: false);
+      final response = await updateOrder(isRefund: false);
       ref.read(updateOrderInfoProvider.notifier).update(response);
       logger.e('Payment process failed', error: e);
       rethrow;
@@ -93,7 +90,7 @@ class PaymentService extends _$PaymentService {
       logger.e('Refund failed', error: e);
       rethrow;
     } finally {
-      final response = await _updateOrder(isRefund: true);
+      final response = await updateOrder(isRefund: true);
       if (response.status == OrderStatus.refunded) {
         ref.read(paymentResponseStateProvider.notifier).reset();
         SlackLogService().sendLogToSlack('paymentResponseState Reset'); //paymentTestSlack
@@ -117,10 +114,10 @@ class PaymentService extends _$PaymentService {
 
       final price = ref.read(kioskInfoServiceProvider)!.photoCardPrice;
       final paymentResponse = await ref.read(paymentRepositoryProvider).cancel(
-        totalAmount: price,
-        originalApprovalNo: approvalInfo.authSeqNumber ?? '',
-        originalApprovalDate: DateFormat('yyMMdd').format(approvalInfo.completedAt!),
-      );
+            totalAmount: price,
+            originalApprovalNo: approvalInfo.authSeqNumber ?? '',
+            originalApprovalDate: DateFormat('yyMMdd').format(approvalInfo.completedAt!),
+          );
       SlackLogService().sendLogToSlack('error409_refund paymentResponse: $paymentResponse'); //paymentTestSlack
       // logger.i(
       //     'respCode: ${approvalInfo.respCode} \trespCode: ${approvalInfo.respCode} \nORDER STATUS: ${approvalInfo.orderState}');
@@ -132,7 +129,7 @@ class PaymentService extends _$PaymentService {
       rethrow;
     } finally {
       final code = ref.read(authCodeProvider);
-      final response = await _updateOrder(isRefund: true, orderid: order.orderId, photoAuthNumber: code);
+      final response = await updateOrder(isRefund: true, orderid: order.orderId, photoAuthNumber: code);
       SlackLogService().sendLogToSlack('error409 response: $response'); //paymentTestSlack
       if (response.status == OrderStatus.refunded) {
         ref.read(paymentResponseStateProvider.notifier).reset();
@@ -159,10 +156,10 @@ class PaymentService extends _$PaymentService {
     return await ref.read(kioskRepositoryProvider).createOrderStatus(request);
   }
 
-  Future<UpdateOrderResponse> _updateOrder({required bool isRefund, int? orderid, String? photoAuthNumber}) async {
+  Future<UpdateOrderResponse> updateOrder({required bool isRefund, int? orderid, String? photoAuthNumber}) async {
     try {
       final settings = ref.read(kioskInfoServiceProvider);
-      final backPhotoAuthNumber = photoAuthNumber?? ref.read(verifyPhotoCardProvider).value?.photoAuthNumber; //여기서 예외
+      final backPhotoAuthNumber = photoAuthNumber ?? ref.read(verifyPhotoCardProvider).value?.photoAuthNumber; //여기서 예외
       final approval = ref.read(paymentResponseStateProvider);
       final orderId = orderid ?? ref.read(createOrderInfoProvider)?.orderId;
       if (orderId == null) {
@@ -171,7 +168,9 @@ class PaymentService extends _$PaymentService {
       logger.i(
           'respCode: ${approval?.respCode} \trespCode: ${approval?.respCode} \nORDER STATUS: ${approval?.orderState}');
       final OrderStatus defaultStatus = isRefund ? OrderStatus.refunded_failed : OrderStatus.failed;
-      final OrderStatus orderStatus = (isRefund && approval?.orderState == OrderStatus.failed) ? OrderStatus.refunded_failed : approval?.orderState ?? defaultStatus;
+      final OrderStatus orderStatus = (isRefund && approval?.orderState == OrderStatus.failed)
+          ? OrderStatus.refunded_failed
+          : approval?.orderState ?? defaultStatus;
       final request = UpdateOrderRequest(
         kioskEventId: settings!.kioskEventId,
         kioskMachineId: settings.kioskMachineId,
@@ -184,9 +183,7 @@ class PaymentService extends _$PaymentService {
         detail: approval?.KSNET ?? '{}',
       );
 
-      return await ref
-          .read(kioskRepositoryProvider)
-          .updateOrderStatus(orderId.toInt(), request);
+      return await ref.read(kioskRepositoryProvider).updateOrderStatus(orderId.toInt(), request);
     } catch (e) {
       SlackLogService().sendWarningLogToSlack('update order error: $e');
       rethrow;
@@ -216,9 +213,7 @@ class PaymentService extends _$PaymentService {
         detail: approval?.KSNET ?? '{}',
       );
 
-      return await ref
-          .read(kioskRepositoryProvider)
-          .updateOrderStatus(orderId.toInt(), request);
+      return await ref.read(kioskRepositoryProvider).updateOrderStatus(orderId.toInt(), request);
     } catch (e) {
       rethrow;
     }
