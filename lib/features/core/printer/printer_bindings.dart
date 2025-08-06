@@ -98,7 +98,7 @@ class PrinterBindings {
     try {
       final result = _isPrtHaveCard(flag);
       if (result != 0) {
-        throw Exception('Failed to check card position');
+        throw Exception('Failed to check card position (code: $result)');
       }
       return flag.value != 0;
     } finally {
@@ -158,7 +158,7 @@ class PrinterBindings {
     try {
       final result = _drawText(x, y, width, height, textPointer.cast(), noAbsoluteBlack ? 1 : 0);
       if (result != 0) {
-        throw Exception('Failed to draw text');
+        throw Exception('Failed to draw text (code: $result)');
       }
     } finally {
       calloc.free(textPointer);
@@ -169,7 +169,7 @@ class PrinterBindings {
   void injectCard() {
     final result = _cardInject(0); // 0: 기본 위치
     if (result != 0) {
-      throw Exception('Failed to inject card');
+      throw Exception('Failed to inject card (code: $result)');
     }
   }
 
@@ -183,7 +183,7 @@ class PrinterBindings {
     try {
       final result = _printDraw(frontPointer, backPointer);
       if (result != 0) {
-        throw Exception('Failed to print card');
+        throw Exception('Failed to print card (code: $result)');
       }
     } finally {
       calloc.free(frontPointer);
@@ -197,14 +197,14 @@ class PrinterBindings {
   void ejectCard() {
     final result = _cardEject(0); // 0: 왼쪽으로 배출
     if (result != 0) {
-      throw Exception('Failed to eject card');
+      throw Exception('Failed to eject card (code: $result)');
     }
   }
 
   void setCanvasOrientation(bool isPortrait) {
     final result = _setCanvasPortrait(isPortrait ? 1 : 0);
     if (result != 0) {
-      throw Exception('Failed to set canvas orientation');
+      throw Exception('Failed to set canvas orientation (code: $result)');
     }
   }
 
@@ -261,7 +261,7 @@ class PrinterBindings {
       );
 
       if (result != 0) {
-        logger.i('Query printer status failed with code: $result'); // 디버그용
+        logger.i('Query printer status failed with (code: $result)'); // 디버그용
         return null; // null 반환으로 변경
       }
 
@@ -304,7 +304,7 @@ class PrinterBindings {
     try {
       final result = _getRbnAndFilmRemaining(rbnRemaining, filmRemaining);
       if (result != 0) {
-        throw Exception('Failed to get ribbon and film remaining');
+        throw Exception('Failed to get ribbon and film remaining (code: $result)');
       }
       logger.i('Ribbon remaining: ${rbnRemaining.value}');
       logger.i('Film remaining: ${filmRemaining.value}');
@@ -332,19 +332,19 @@ class PrinterBindings {
       // USB 프린터 열거
       final enumResult = _enumUsbPrt(enumListPtr.cast(), listLenPtr, numPtr);
       if (enumResult != 0) {
-        throw Exception('Failed to enumerate USB printer');
+        throw Exception('Failed to enumerate USB printer (code: $enumResult)');
       }
 
       // USB 시간 초과 설정
       final timeoutResult = _usbSetTimeout(3000, 3000);
       if (timeoutResult != 0) {
-        throw Exception('Failed to set USB timeout');
+        throw Exception('Failed to set USB timeout (code: $timeoutResult)');
       }
 
       // 프린터 선택
       final selectResult = _selectPrinter(enumListPtr.cast());
       if (selectResult != 0) {
-        throw Exception('Failed to select printer');
+        throw Exception('Failed to select printer (code: $selectResult)');
       }
     } finally {
       calloc.free(enumListPtr);
@@ -450,7 +450,7 @@ class PrinterBindings {
     try {
       final result = _setRibbonOpt(isWrite, key, valuePtr, valueLen);
       if (result != 0) {
-        throw Exception('Failed to set ribbon opt');
+        throw Exception('Failed to set ribbon opt (code: $result)');
       }
     } finally {
       calloc.free(valuePtr);
@@ -494,7 +494,7 @@ class PrinterBindings {
       final result = _isFeederNoEmpty(feederStatusPtr);
       if (result != 0) {
         final error = getErrorInfo(result);
-        throw Exception('Failed to check feeder status: $error');
+        throw Exception('Failed to check feeder status : $error (code: $result)');
       }
       return feederStatusPtr.value != 0;
     } finally {
