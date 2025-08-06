@@ -137,8 +137,8 @@ ${def.description}
   }) {
     final cardInfo =
       '''
-      ${cardCount == 0 ? "단면 -> 양면 모드" : "단면 모드 설정"}
-      단면 설정 개수 : $cardCount개
+${cardCount == 0 ? "단면 -> 양면 모드" : "단면 모드 설정"}
+        단면 설정 개수 : $cardCount개
       '''
     ;
 
@@ -151,8 +151,8 @@ ${def.description}
 
     final formattedTitle =
     (title == "점검 완료" || title == "점검 시작")
-        ? '*[$title]*'
-        : '$emoji $title';
+        ? '     *[$title]*'
+        : '$emoji  *$title*';
 
     final guidePart = guideText != null
         ? "[${guideUrl != null ? '<$guideUrl|$guideText>' : guideText}]"
@@ -160,14 +160,14 @@ ${def.description}
 
     return '''
 $formattedTitle
+        ────────────────────────────────────────
+        KioskID: $kioskId  /  앱버전: $appVersion  /  업체: $serviceName
+        ────────────────────────────────────────
+        $description
+        ${ title == "카드 인쇄 모드 변경" ? cardInfo : ""}
+        ────────────────────────────────────────
+        $guidePart
 
-  •  이벤트: $serviceName  •  KioskID: $kioskId  •  앱버전: $appVersion
-────────────────────────────────────────
-
-$description
-${ title == "카드 인쇄 모드 변경" ? cardInfo : ""}
-
-$guidePart
 ''';
   }
 }
