@@ -49,41 +49,30 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
             errorLogging(error.toString(), stack);
 
             // 환불 알럿
-            final result = await DialogHelper.showTwoButtonKioskDialog(context,
-                title: LocaleKeys.alert_title_auto_refund_alert.tr(),
-                contentText: LocaleKeys.alert_txt_auto_refund_alert.tr(),
-                cancelButtonText: LocaleKeys.alert_btn_cancel.tr(),
-                confirmButtonText: LocaleKeys.alert_btn_ok.tr());
-
-            if (result) {
+            await DialogHelper.showAutoRefundDescriptionDialog(context, onButtonPressed: () async {
               // 에러 발생 시 환불 처리
               await refund();
-            } else {
-              final response = await ref.read(paymentServiceProvider.notifier).updateOrder(isRefund: true);
-              if (response.status == OrderStatus.refunded) {
-                ref.read(paymentResponseStateProvider.notifier).reset();
+
+              // 카드 단일 카드 수량 확인
+              checkCardSingleCardCount();
+
+              // 카드 공급기가 비어있는지 확인
+              if (checkCardFeederIsEmpty(errorMessage)) {
+                await DialogHelper.showPrintCardRefillDialog(
+                  context,
+                  onButtonPressed: () {
+                    PhotoCardUploadRouteData().go(context);
+                  },
+                );
+              } else {
+                await DialogHelper.showPrintErrorDialog(
+                  context,
+                  onButtonPressed: () {
+                    PhotoCardUploadRouteData().go(context);
+                  },
+                );
               }
-            }
-
-            // 카드 단일 카드 수량 확인
-            checkCardSingleCardCount();
-
-            // 카드 공급기가 비어있는지 확인
-            if (checkCardFeederIsEmpty(errorMessage)) {
-              await DialogHelper.showPrintCardRefillDialog(
-                context,
-                onButtonPressed: () {
-                  PhotoCardUploadRouteData().go(context);
-                },
-              );
-            } else {
-              await DialogHelper.showPrintErrorDialog(
-                context,
-                onButtonPressed: () {
-                  PhotoCardUploadRouteData().go(context);
-                },
-              );
-            }
+            });
           },
           loading: () => null,
           data: (_) async {
