@@ -41,6 +41,7 @@ class KioskInfoScreen extends ConsumerWidget {
               final result = await DialogHelper.showSetupDialog(context, title: '최신 이벤트로 새로고침 됩니다.');
               if (result == true) {
                 await ref.read(kioskInfoServiceProvider.notifier).refreshWithMachineId(int.parse(value));
+                SlackLogService().sendBroadcastLogToSlack(InfoKey.inspectionStart.key);
               }
             },
             icon: SvgPicture.asset(

@@ -26,7 +26,7 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
     super.initState();
 
     final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
-
+    ref.read(alertDefinitionProvider.notifier).load();
     _timer = Timer.periodic(Duration(seconds: 2), (timer) async {
       // 여기에 실행하고 싶은 로직 작성
       final connected = await ref.read(printerServiceProvider.notifier).checkConnectedPrint();
@@ -56,6 +56,7 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ref.read(alertDefinitionProvider);
     final versionState = ref.watch(versionStateProvider);
     final cardCountState = ref.watch(cardCountProvider);
     final currentVersion = versionState.currentVersion;
@@ -137,8 +138,10 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
                       activeAssetName: SnaptagSvg.printDoubleActive,
                       inactiveAssetName: SnaptagSvg.printDoubleInactive,
                       onTap: () async {
-                        await SoundManager().playSound();
-                        ref.read(pagePrintProvider.notifier).set(PagePrintType.double);
+                        if (cardCountState < 1) {
+                          await SoundManager().playSound();
+                          ref.read(pagePrintProvider.notifier).set(PagePrintType.double);
+                        }
                       },
                     ),
                   ),
@@ -205,6 +208,7 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
                             ref.read(pagePrintProvider.notifier).set(PagePrintType.double);
                           } else {
                             ref.read(pagePrintProvider.notifier).set(PagePrintType.single);
+                            SlackLogService().sendBroadcastLogToSlack(InfoKey.cardPrintModeSwitchSingle.key);
                           }
                         } else {
                           print('click when pagePringType not single');
@@ -315,6 +319,7 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
                               SlackLogService().sendLogToSlack(
                                   'machineId: $machineId, singleCard: $cardCountState, set pagePrintType single');
                             }
+                            SlackLogService().sendBroadcastLogToSlack(InfoKey.inspectionEnd.key);
                             PhotoCardUploadRouteData().go(context);
                           }
                         },
@@ -384,13 +389,11 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
                         buttonName: '업데이트',
                         isActive: isUpdateAvailable,
                         onUpdatePressed: () async {
-                          final result = await DialogHelper.showTwoButtonKioskDialog(
-                            context,
-                            title: '업데이트 하시겠습니까?',
-                            contentText: '업데이트 시 앱이 재시작 됩니다.',
-                            cancelButtonText: '취소',
-                            confirmButtonText: '완료'
-                          );
+                          final result = await DialogHelper.showTwoButtonKioskDialog(context,
+                              title: '업데이트 하시겠습니까?',
+                              contentText: '업데이트 시 앱이 재시작 됩니다.',
+                              cancelButtonText: '취소',
+                              confirmButtonText: '완료');
                           if (result) {
                             try {
                               final launcherPath = await LauncherPathUtil.getLauncherPath();
