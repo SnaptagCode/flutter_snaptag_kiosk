@@ -69,4 +69,7 @@ abstract class KioskApiClient {
   Future<void> updatePrintLog({
     @Body() required Map<String, dynamic> body,
   });
+
+  @GET('/v1/error-code')
+  Future<List<AlertDefinitionResponse>> getAlertDefinitions();
 }

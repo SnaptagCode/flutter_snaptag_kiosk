@@ -29,6 +29,15 @@ class _KioskRepository {
     }
   }
 
+  // Slack Alert definitions
+  Future<List<AlertDefinitionResponse>> getAlertDefinition() async {
+    try {
+      return await _apiClient.getAlertDefinitions();
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   // Machine Info Operations
   Future<KioskMachineInfo> getKioskMachineInfo(int machineId) async {
     try {
