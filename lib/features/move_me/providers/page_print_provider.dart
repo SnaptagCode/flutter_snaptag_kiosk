@@ -16,9 +16,10 @@ class PagePrint extends _$PagePrint {
   }
 
   void set(PagePrintType type) {
+    final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
     if (type != state) {
       print("chaneg Printe type : $type");
-      if (type == PagePrintType.double) SlackLogService().sendBroadcastLogToSlack(InfoKey.cardPrintModeSwitchDuplex.key);
+      if (type == PagePrintType.double && machineId != 0) SlackLogService().sendBroadcastLogToSlack(InfoKey.cardPrintModeSwitchDuplex.key);
     }
     state = type;
   }

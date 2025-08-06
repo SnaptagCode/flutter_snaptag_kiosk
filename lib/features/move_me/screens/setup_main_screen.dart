@@ -141,6 +141,9 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
                         if (cardCountState < 1) {
                           await SoundManager().playSound();
                           ref.read(pagePrintProvider.notifier).set(PagePrintType.double);
+                          if (machineId != 0) {
+                            SlackLogService().sendBroadcastLogToSlack(InfoKey.cardPrintModeSwitchSingle.key);
+                          }
                         }
                       },
                     ),
@@ -208,7 +211,9 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
                             ref.read(pagePrintProvider.notifier).set(PagePrintType.double);
                           } else {
                             ref.read(pagePrintProvider.notifier).set(PagePrintType.single);
-                            SlackLogService().sendBroadcastLogToSlack(InfoKey.cardPrintModeSwitchSingle.key);
+                            if (machineId != 0) {
+                              SlackLogService().sendBroadcastLogToSlack(InfoKey.cardPrintModeSwitchSingle.key);
+                            }
                           }
                         } else {
                           print('click when pagePringType not single');
