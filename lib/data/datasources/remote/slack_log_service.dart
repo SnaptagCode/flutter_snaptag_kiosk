@@ -46,7 +46,7 @@ class SlackLogService {
     await sendLog(slackWebhookWarningUrl, message);
   }
 
-  Future<void> sendBroadcastLogToSlack(String errorKey) async {
+  Future<void> sendBroadcastLogToSlack(String errorKey, {String? authNum, String? paymentDescription, String? approvalNum}) async {
     final definitions = _container.read(alertDefinitionProvider);
     final def = definitions.firstWhereOrNull((e) => e.key == errorKey);
     final kioskInfo = _container.read(kioskInfoServiceProvider);
@@ -61,6 +61,11 @@ class SlackLogService {
       "KEEFO": "성수 B'Day",
     };
 
+    final paymentKey = [
+      InfoKey.paymentFail.key,
+      InfoKey.paymentRefund.key,
+      InfoKey.paymentFail.key,
+    ];
     final serviceName = serviceNameMap[eventType] ?? '-';
     String description;
     if (def != null) {
@@ -69,11 +74,18 @@ class SlackLogService {
           '''
 ${def.description}
 
- - 단면 카드 입력 수량 : $cardCount
- - 불러온 이벤트 : $eventName
- - 프린터 연결 상태 : 정상
+     - 단면 카드 입력 수량 : $cardCount
+     - 불러온 이벤트 : $eventName
+     - 프린터 연결 상태 : 정상
 '''
           ;
+      } else if (paymentKey.contains(def.key)){
+        description =
+            '''
+${def.description}
+            
+     - $paymentDescription
+''';
       } else {
         description = def.description;
       }
@@ -165,7 +177,7 @@ $formattedTitle
         ────────────────────────────────────────
         $description
         ${ title == "카드 인쇄 모드 변경" ? cardInfo : ""}
-        ────────────────────────────────────────
+        
         $guidePart
 
 ''';

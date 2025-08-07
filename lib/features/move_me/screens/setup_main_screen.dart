@@ -510,8 +510,7 @@ class SetupMainCard extends StatelessWidget {
                     Spacer(),
                   ],
                 )
-              : Expanded(
-                  child: Center(
+              : Center(
                     child: SizedBox(
                       width: 260.w,
                       child: Text(
@@ -526,7 +525,6 @@ class SetupMainCard extends StatelessWidget {
                         ),
                       ),
                     ),
-                  ),
                 ),
         ),
       ),

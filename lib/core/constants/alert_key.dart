@@ -26,6 +26,9 @@ enum WarningKey {
 enum InfoKey {
   cardPrintModeSwitchDuplex("Card_PrintMode_Switch_Duplex"),
   cardPrintModeSwitchSingle("Card_PrintMode_Switch_Single"),
+  paymentFail("Payment_Fail"),
+  paymentRefund("Payment_Refund"),
+  paymentRefundFail("Payment_Refund_Fail"),
   inspectionStart("Inspection_Start"),
   inspectionEnd("Inspection_End");
 
