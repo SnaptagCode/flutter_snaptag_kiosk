@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_snaptag_kiosk/core/utils/sound_manager.dart';
-import 'package:flutter_snaptag_kiosk/features/core/printer/print_connect_state.dart';
+import 'package:flutter_snaptag_kiosk/features/core/printer/printer_connect_state.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_snaptag_kiosk/core/providers/version_notifier.dart';
@@ -30,12 +30,17 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
 
       if (mounted) {
         setState(() {
-          // 프린터 연결상태 우선 - 프린터 상태 연결 완료 이후 리본 잔량 및 필름 잔량 체크
           if (connected) {
             final settingCompleted = ref.read(printerServiceProvider.notifier).settingPrinter();
-            ref.read(printConnectProvider.notifier).update(
-                  settingCompleted ? PrintConnectState.connected : PrintConnectState.disconnected,
+            ref.read(printerConnectProvider.notifier).update(
+                  connected && settingCompleted
+                      ? PrinterConnectState.connected
+                      : settingCompleted
+                          ? PrinterConnectState.connected
+                          : PrinterConnectState.setupInComplete,
                 );
+          } else {
+            ref.read(printerConnectProvider.notifier).update(PrinterConnectState.disconnected);
           }
         });
       }
@@ -55,8 +60,7 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
     final currentVersion = versionState.currentVersion;
     final latestVersion = versionState.latestVersion;
     final isUpdateAvailable = currentVersion != latestVersion;
-    final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
-    final isConnectedPrinter = ref.watch(printConnectProvider) == PrintConnectState.connected;
+    final isConnectedPrinter = ref.watch(printerConnectProvider) == PrinterConnectState.connected;
     //final isUpdateAvailable = false;
 
     return Theme(
@@ -194,7 +198,6 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
 
                           if (value == null || value.isEmpty) return; // 값이 없으면 종료
                           int cardNumber = int.parse(value);
-                          final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
                           ref.read(cardCountProvider.notifier).update(cardNumber);
                           if (cardNumber <= 0) {
                             ref.read(pagePrintProvider.notifier).set(PagePrintType.double);
