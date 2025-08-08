@@ -16,8 +16,6 @@ part 'card_printer.g.dart';
 class PrinterService extends _$PrinterService {
   late final PrinterBindings _bindings;
 
-  bool _firstConnectedFailed = false;
-
   @override
   FutureOr<void> build() async {
     logger.i('Printer initialization..');
@@ -57,19 +55,10 @@ class PrinterService extends _$PrinterService {
     }
   }
 
-  Future<bool> checkConnectedPrint() async {
+  bool checkConnectedPrint() {
     try {
       final connected = _bindings.connectPrinter();
       logger.e('checkConnectedPrint: $connected');
-
-      if (!connected) {
-        if (!_firstConnectedFailed) {
-          _firstConnectedFailed = true;
-          SlackLogService().sendErrorLogToSlack('PrintConnected Failed - First Attempt');
-        }
-        return false;
-      }
-
       final printerLog = getPrinterLogData(_bindings);
 
       final isReady = printerLog?.printerMainStatusCode == "1004";
