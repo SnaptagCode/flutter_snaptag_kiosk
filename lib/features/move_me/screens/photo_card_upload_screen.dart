@@ -107,29 +107,6 @@ class PhotoCardUploadScreen extends ConsumerWidget {
   }
 
   Future<void> showNeedRibbonFilmDialog(BuildContext context, WidgetRef ref) async {
-    int machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
-    final connected = await ref.read(printerServiceProvider.notifier).checkConnectedPrint();
-
-    if (!connected) {
-      SlackLogService()
-          .sendErrorLogToSlack('*[MachineId: $machineId]*\nPrinter ${PrinterConnectState.disconnected.name}');
-      DialogHelper.showNeedRibbonFilmDialog(context, () {
-        showNeedRibbonFilmDialog(context, ref);
-      });
-      return;
-    }
-    if (connected) {
-      final settingCompleted = ref.read(printerServiceProvider.notifier).settingPrinter();
-      if (!settingCompleted) {
-        SlackLogService()
-            .sendErrorLogToSlack('*[MachineId: $machineId]*\nPrinter ${PrinterConnectState.setupInComplete.name}');
-        DialogHelper.showNeedRibbonFilmDialog(context, () {
-          showNeedRibbonFilmDialog(context, ref);
-        });
-        return;
-      }
-    }
-
     RibbonStatus ribbonStatus = ref.read(printerServiceProvider.notifier).getRibbonStatus();
     bool isRibbonShouldBeChanged = ref.read(ribbonWarningProvider.notifier).isRibbonShouldBeChanged(ribbonStatus);
     bool isFilmShouldBeChanged = ref.read(ribbonWarningProvider.notifier).isFilmShouldBeChanged(ribbonStatus);
