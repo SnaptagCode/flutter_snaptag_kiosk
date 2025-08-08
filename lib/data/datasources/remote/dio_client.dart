@@ -56,6 +56,7 @@ final dioProvider = Provider.family<Dio, String>((ref, baseUrl) {
             SlackLogService().sendWarningLogToSlack(formattedMessage);
           } else if (statusCode >= 500) {
             SlackLogService().sendErrorLogToSlack(formattedMessage);
+            SlackLogService().sendBroadcastLogToSlack(ErrorKey.severError.key);
           } 
         },
         request: false,
@@ -69,7 +70,7 @@ final dioProvider = Provider.family<Dio, String>((ref, baseUrl) {
           // ServerException으로 wrapping
           return handler.reject(ServerException.fromDioError(err));
         } catch (e) {
-          logger.i('ServerError 파싱 실패: $e');
+          logger.i('SeverError 파싱 실패: $e');
         }
       }
       return handler.next(err); // 원래 에러 전달
