@@ -25,8 +25,8 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
   void initState() {
     super.initState();
 
-    _timer = Timer.periodic(Duration(seconds: 2), (timer) async {
-      final connected = await ref.read(printerServiceProvider.notifier).checkConnectedPrint();
+    _timer = Timer.periodic(Duration(seconds: 2), (timer) {
+      final connected = ref.read(printerServiceProvider.notifier).checkConnectedPrint();
 
       if (mounted) {
         setState(() {
