@@ -27,11 +27,11 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
 
     ref.read(alertDefinitionProvider.notifier).load();
     _timer = Timer.periodic(Duration(seconds: 2), (timer) async {
-      final connected = await ref.read(printerServiceProvider.notifier).checkConnectedPrint();
+      final connected = await ref.read(printerServiceProvider.notifier).connectedPrinter();
       if (mounted) {
-        setState(() {
+        setState(() async {
           if (connected) {
-            final settingCompleted = ref.read(printerServiceProvider.notifier).settingPrinter();
+            final settingCompleted = await ref.read(printerServiceProvider.notifier).checkSettingPrinter();
             ref.read(printerConnectProvider.notifier).update(
                   connected && settingCompleted
                       ? PrinterConnectState.connected
@@ -291,23 +291,18 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
                         assetName: SnaptagSvg.eventRun,
                         onTap: () async {
                           await SoundManager().playSound();
-                          final connected = await ref.read(printerServiceProvider.notifier).checkConnectedPrint();
-                          final settingPrinter = ref.read(printerServiceProvider.notifier).settingPrinter();
-                          if (!connected) {
-                            await DialogHelper.showPrintWaitingDialog(context);
-                            return;
-                          }
-                          if (!settingPrinter) {
-                            await DialogHelper.showCheckPrintStateDialog(context);
-                            return;
-                          }
+
+                          await _checkConnectWithPrinterSetting(machineId);
+
                           final result = await DialogHelper.showSetupDialog(
                             context,
                             title: '이벤트를 실행합니다.',
                           );
                           if (result) {
                             final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
-                            await ref.read(printerServiceProvider.notifier).startPrintLog();
+
+                            await ref.read(printerServiceProvider.notifier).printerStateLog();
+
                             SlackLogService().sendLogToSlack(
                                 'machineId:$machineId, currentVersion:$currentVersion, latestVersion:$latestVersion');
                             if (cardCountState < 1) {
@@ -452,6 +447,26 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _checkConnectWithPrinterSetting(int machineId) async {
+    final connected = await ref.read(printerServiceProvider.notifier).connectedPrinter();
+    final settingPrinter = await ref.read(printerServiceProvider.notifier).checkSettingPrinter();
+    if (!connected) {
+      SlackLogService()
+          .sendErrorLogToSlack('*[MachineId : $machineId]*\nConnectedPrinter Failed - Attempted to run event');
+      if (mounted) {
+        await DialogHelper.showPrintWaitingDialog(context);
+      }
+      return;
+    }
+    if (!settingPrinter) {
+      SlackLogService().sendErrorLogToSlack('*[MachineId : $machineId]*\nSettingPrint Failed - Attempted to run event');
+      if (mounted) {
+        await DialogHelper.showCheckPrintStateDialog(context);
+      }
+      return;
+    }
   }
 }
 

@@ -369,7 +369,7 @@ class PrinterBindings {
     return result;
   }
 
-  bool connectPrinter({bool isEtherNet = false}) {
+  int connectPrinter({bool isEtherNet = false}) {
     final enumListPtr = calloc<Uint8>(500);
     final listLenPtr = calloc<Uint32>()..value = 500;
     final numPtr = calloc<Int32>()..value = 10;
@@ -380,25 +380,25 @@ class PrinterBindings {
       int result = _enumUsbPrt(enumListPtr.cast(), listLenPtr, numPtr);
       if (result != 0) {
         logger.i('Failed to enumerate printer: $result');
-        return false;
+        return result;
       }
 
       logger.i('Setting USB timeout...'); // 디버그 로그 추가
       result = _usbSetTimeout(3000, 3000);
       if (result != 0) {
         logger.i('Failed to set USB timeout: $result');
-        return false;
+        return result;
       }
 
       logger.i('Selecting printer...'); // 디버그 로그 추가
       result = _selectPrinter(enumListPtr.cast());
       if (result != 0) {
         logger.i('Failed to select printer: $result');
-        return false;
+        return result;
       }
 
       logger.i('Printer connected successfully'); // 디버그 로그 추가
-      return true;
+      return 0;
     } finally {
       calloc.free(enumListPtr);
       calloc.free(listLenPtr);

@@ -16,28 +16,28 @@ class PhotoCardUploadScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final kiosk = ref.watch(kioskInfoServiceProvider);
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       int machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
-      final connected = ref.read(printerServiceProvider.notifier).checkConnectedPrint();
+      final connected = await ref.read(printerServiceProvider.notifier).connectedPrinter();
       if (!connected) {
         SlackLogService()
             .sendErrorLogToSlack('*[MachineId: $machineId]*\nPrinter ${PrinterConnectState.disconnected.name}');
-        showNeedRibbonFilmDialog(context, ref);
+        await showNeedRibbonFilmDialog(context, ref);
         return;
       }
       if (connected) {
-        final settingCompleted = ref.read(printerServiceProvider.notifier).settingPrinter();
+        final settingCompleted = await ref.read(printerServiceProvider.notifier).checkSettingPrinter();
         if (!settingCompleted) {
           SlackLogService()
               .sendErrorLogToSlack('*[MachineId: $machineId]*\nPrinter ${PrinterConnectState.setupInComplete.name}');
-          showNeedRibbonFilmDialog(context, ref);
+          await showNeedRibbonFilmDialog(context, ref);
           return;
         }
       }
 
-      RibbonStatus ribbonStatus = ref.read(printerServiceProvider.notifier).getRibbonStatus();
+      RibbonStatus ribbonStatus = await ref.read(printerServiceProvider.notifier).getRibbonStatus();
       ref.read(ribbonWarningProvider.notifier).checkAndSendWarnings(machineId, ribbonStatus);
-      showNeedRibbonFilmDialog(context, ref);
+      await showNeedRibbonFilmDialog(context, ref);
     });
 
     return DefaultTextStyle(
@@ -106,8 +106,8 @@ class PhotoCardUploadScreen extends ConsumerWidget {
     );
   }
 
-  void showNeedRibbonFilmDialog(BuildContext context, WidgetRef ref) {
-    RibbonStatus ribbonStatus = ref.read(printerServiceProvider.notifier).getRibbonStatus();
+  Future<void> showNeedRibbonFilmDialog(BuildContext context, WidgetRef ref) async {
+    RibbonStatus ribbonStatus = await ref.read(printerServiceProvider.notifier).getRibbonStatus();
     bool isRibbonShouldBeChanged = ref.read(ribbonWarningProvider.notifier).isRibbonShouldBeChanged(ribbonStatus);
     bool isFilmShouldBeChanged = ref.read(ribbonWarningProvider.notifier).isFilmShouldBeChanged(ribbonStatus);
     bool isBothRibbonAndFilmShouldBeChanged =

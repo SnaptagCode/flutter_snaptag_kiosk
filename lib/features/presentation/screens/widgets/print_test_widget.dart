@@ -49,7 +49,7 @@ class ProcessedImage extends _$ProcessedImage {
       try {
         await ref.read(printerServiceProvider.notifier).printImage(
               frontFile: state.frontFile!,
-              embeddedFile: null,
+              backFile: null,
             );
       } finally {}
       return;
@@ -65,7 +65,7 @@ class ProcessedImage extends _$ProcessedImage {
     try {
       await ref.read(printerServiceProvider.notifier).printImage(
             frontFile: state.frontFile!,
-            embeddedFile: tempFile,
+            backFile: tempFile,
           );
     } catch (e) {
       rethrow;
