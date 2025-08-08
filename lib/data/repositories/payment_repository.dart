@@ -1,4 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_snaptag_kiosk/data/models/request/kscat_device_request.dart';
+import 'package:flutter_snaptag_kiosk/data/models/response/kscat_device_response.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -37,6 +39,14 @@ class PaymentRepository {
     return _request(request);
   }
 
+  Future<KscatDeviceResponse> check() async {
+    final request = KscatDeviceRequest(
+      req: 'C0',
+    );
+
+    return _deviceRequest(request);
+  }
+
   Future<PaymentResponse> cancel({
     required int totalAmount,
     required String originalApprovalNo,
@@ -57,6 +67,19 @@ class PaymentRepository {
   Future<PaymentResponse> _request(PaymentRequest request) async {
     try {
       final response = await _client.requestPayment(
+        _getCallback(),
+        request.serialize(),
+      );
+
+      return response;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<KscatDeviceResponse> _deviceRequest(KscatDeviceRequest request) async {
+    try {
+      final response = await _client.requestDeivce(
         _getCallback(),
         request.serialize(),
       );

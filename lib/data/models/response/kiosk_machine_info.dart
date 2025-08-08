@@ -11,6 +11,7 @@ class KioskMachineInfo with _$KioskMachineInfo {
     @Default('') String kioskMachineName,
     @Default('') String kioskMachineDescription,
     @Default(0) int photoCardPrice,
+    @Default('') String eventType,
     @Default('') String printedEventName,
     @Default('') String topBannerUrl,
     @Default('') String mainImageUrl,

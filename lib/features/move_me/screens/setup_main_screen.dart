@@ -25,9 +25,11 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
   void initState() {
     super.initState();
 
-    _timer = Timer.periodic(Duration(seconds: 2), (timer) {
-      final connected = ref.read(printerServiceProvider.notifier).checkConnectedPrint();
 
+    ref.read(alertDefinitionProvider.notifier).load();
+    _timer = Timer.periodic(Duration(seconds: 2), (timer) async {
+      
+      final connected = await ref.read(printerServiceProvider.notifier).checkConnectedPrint();
       if (mounted) {
         setState(() {
           if (connected) {
@@ -55,6 +57,7 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ref.read(alertDefinitionProvider);
     final versionState = ref.watch(versionStateProvider);
     final cardCountState = ref.watch(cardCountProvider);
     final currentVersion = versionState.currentVersion;
@@ -136,8 +139,13 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
                       activeAssetName: SnaptagSvg.printDoubleActive,
                       inactiveAssetName: SnaptagSvg.printDoubleInactive,
                       onTap: () async {
-                        await SoundManager().playSound();
-                        ref.read(pagePrintProvider.notifier).set(PagePrintType.double);
+                        if (cardCountState < 1) {
+                          await SoundManager().playSound();
+                          ref.read(pagePrintProvider.notifier).set(PagePrintType.double);
+                          if (machineId != 0) {
+                            SlackLogService().sendBroadcastLogToSlack(InfoKey.cardPrintModeSwitchSingle.key);
+                          }
+                        }
                       },
                     ),
                   ),
@@ -203,6 +211,9 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
                             ref.read(pagePrintProvider.notifier).set(PagePrintType.double);
                           } else {
                             ref.read(pagePrintProvider.notifier).set(PagePrintType.single);
+                            if (machineId != 0) {
+                              SlackLogService().sendBroadcastLogToSlack(InfoKey.cardPrintModeSwitchSingle.key);
+                            }
                           }
                         } else {
                           print('click when pagePringType not single');
@@ -310,6 +321,14 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
                                   'machineId: $machineId, singleCard: $cardCountState, set pagePrintType single');
                             }
                             PhotoCardUploadRouteData().go(context);
+                            try{
+                              final response = await ref.read(paymentRepositoryProvider).check();
+                              SlackLogService().sendBroadcastLogToSlack(InfoKey.inspectionEnd.key, isPaymentOn: true);
+                              SlackLogService().sendLogToSlack("Payment Device check: $response");
+                            } catch (e){
+                              SlackLogService().sendBroadcastLogToSlack(InfoKey.inspectionEnd.key, isPaymentOn: false);
+                              SlackLogService().sendErrorLogToSlack("Payment Device check: $e");
+                            }
                           }
                         },
                       ),
@@ -494,8 +513,7 @@ class SetupMainCard extends StatelessWidget {
                     Spacer(),
                   ],
                 )
-              : Expanded(
-                  child: Center(
+              : Center(
                     child: SizedBox(
                       width: 260.w,
                       child: Text(
@@ -510,7 +528,6 @@ class SetupMainCard extends StatelessWidget {
                         ),
                       ),
                     ),
-                  ),
                 ),
         ),
       ),
