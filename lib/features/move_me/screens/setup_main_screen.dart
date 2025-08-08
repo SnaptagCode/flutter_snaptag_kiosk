@@ -25,10 +25,8 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
   void initState() {
     super.initState();
 
-
     ref.read(alertDefinitionProvider.notifier).load();
     _timer = Timer.periodic(Duration(seconds: 2), (timer) async {
-      
       final connected = await ref.read(printerServiceProvider.notifier).checkConnectedPrint();
       if (mounted) {
         setState(() {
@@ -58,6 +56,7 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
   @override
   Widget build(BuildContext context) {
     ref.read(alertDefinitionProvider);
+    final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
     final versionState = ref.watch(versionStateProvider);
     final cardCountState = ref.watch(cardCountProvider);
     final currentVersion = versionState.currentVersion;
@@ -321,11 +320,11 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
                                   'machineId: $machineId, singleCard: $cardCountState, set pagePrintType single');
                             }
                             PhotoCardUploadRouteData().go(context);
-                            try{
+                            try {
                               final response = await ref.read(paymentRepositoryProvider).check();
                               SlackLogService().sendBroadcastLogToSlack(InfoKey.inspectionEnd.key, isPaymentOn: true);
                               SlackLogService().sendLogToSlack("Payment Device check: $response");
-                            } catch (e){
+                            } catch (e) {
                               SlackLogService().sendBroadcastLogToSlack(InfoKey.inspectionEnd.key, isPaymentOn: false);
                               SlackLogService().sendErrorLogToSlack("Payment Device check: $e");
                             }
@@ -514,20 +513,20 @@ class SetupMainCard extends StatelessWidget {
                   ],
                 )
               : Center(
-                    child: SizedBox(
-                      width: 260.w,
-                      child: Text(
-                        label,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 34.sp,
-                          fontWeight: FontWeight.w700,
-                          color: textColor ?? Color(0xFF1C1C1C),
-                          letterSpacing: -0.1,
-                          height: 1.2,
-                        ),
+                  child: SizedBox(
+                    width: 260.w,
+                    child: Text(
+                      label,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 34.sp,
+                        fontWeight: FontWeight.w700,
+                        color: textColor ?? Color(0xFF1C1C1C),
+                        letterSpacing: -0.1,
+                        height: 1.2,
                       ),
                     ),
+                  ),
                 ),
         ),
       ),
