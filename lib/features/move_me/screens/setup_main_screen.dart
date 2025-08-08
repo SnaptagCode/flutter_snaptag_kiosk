@@ -324,8 +324,15 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
                               SlackLogService().sendLogToSlack(
                                   'machineId: $machineId, singleCard: $cardCountState, set pagePrintType single');
                             }
-                            SlackLogService().sendBroadcastLogToSlack(InfoKey.inspectionEnd.key);
                             PhotoCardUploadRouteData().go(context);
+                            try{
+                              final response = await ref.read(paymentRepositoryProvider).check();
+                              SlackLogService().sendBroadcastLogToSlack(InfoKey.inspectionEnd.key, isPaymentOn: true);
+                              SlackLogService().sendLogToSlack("Payment Device check: $response");
+                            } catch (e){
+                              SlackLogService().sendBroadcastLogToSlack(InfoKey.inspectionEnd.key, isPaymentOn: false);
+                              SlackLogService().sendErrorLogToSlack("Payment Device check: $e");
+                            }
                           }
                         },
                       ),

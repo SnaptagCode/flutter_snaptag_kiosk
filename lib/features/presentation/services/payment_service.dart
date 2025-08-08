@@ -102,7 +102,7 @@ class PaymentService extends _$PaymentService {
       final paymentRes = approvalInfo?.res;
       final response = await _updateOrder(isRefund: true);
       if (response.status == OrderStatus.refunded) {
-        SlackLogService().sendBroadcastLogToSlack(InfoKey.paymentRefund.key, paymentDescription: "승인번호: ${approvalInfo?.approvalNo ?? "-"}");
+        SlackLogService().sendBroadcastLogToSlack(InfoKey.paymentRefund.key, paymentDescription: "동작로직: 자동환불\n        승인번호: ${approvalInfo?.approvalNo ?? "-"}");
         ref.read(paymentResponseStateProvider.notifier).reset();
         SlackLogService().sendLogToSlack('paymentResponseState Reset'); //paymentTestSlack
       } else {

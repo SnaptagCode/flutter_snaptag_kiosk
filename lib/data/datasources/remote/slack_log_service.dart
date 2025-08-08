@@ -46,7 +46,7 @@ class SlackLogService {
     await sendLog(slackWebhookWarningUrl, message);
   }
 
-  Future<void> sendBroadcastLogToSlack(String errorKey, {String? authNum, String? paymentDescription, String? approvalNum}) async {
+  Future<void> sendBroadcastLogToSlack(String errorKey, {String? authNum, String? paymentDescription, String? approvalNum, bool? isPaymentOn}) async {
     final definitions = _container.read(alertDefinitionProvider);
     final def = definitions.firstWhereOrNull((e) => e.key == errorKey);
     final kioskInfo = _container.read(kioskInfoServiceProvider);
@@ -64,7 +64,7 @@ class SlackLogService {
     final paymentKey = [
       InfoKey.paymentFail.key,
       InfoKey.paymentRefund.key,
-      InfoKey.paymentFail.key,
+      InfoKey.paymentRefundFail.key,
     ];
     final serviceName = serviceNameMap[eventType] ?? '-';
     String description;
@@ -77,6 +77,7 @@ ${def.description}
      - 단면 카드 입력 수량 : $cardCount
      - 불러온 이벤트 : $eventName
      - 프린터 연결 상태 : 정상
+     - 결제 단말기 연결 상태 : ${isPaymentOn == true ? '정상' : '미연결'}
 '''
           ;
       } else if (paymentKey.contains(def.key)){
