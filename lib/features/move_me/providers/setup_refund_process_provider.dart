@@ -29,7 +29,6 @@ class SetupRefundProcess extends _$SetupRefundProcess {
 
       state = AsyncValue.data(response);
       await _updateOrderStatus(order);
-
       // 현재 페이지 정보를 가져와서 동일한 페이지로 새로고침
       final currentPage = ref.read(ordersPageProvider()).requireValue.paging.currentPage;
       ref.read(ordersPageProvider().notifier).goToPage(currentPage);
@@ -64,11 +63,25 @@ class SetupRefundProcess extends _$SetupRefundProcess {
             order.orderId.toInt(),
             request.copyWith(status: OrderStatus.refunded),
           );
+      SlackLogService().sendBroadcastLogToSlack(InfoKey.paymentRefundFail.key, paymentDescription: "동작로직: 관리자 환불\n        사유: 기취소된 거래\n        승인번호: ${order.paymentAuthNumber ?? "-"}");
     } else {
       await ref.read(kioskRepositoryProvider).updateOrderStatus(
             order.orderId.toInt(),
             request,
           );
+      switch(payment?.res) {
+        case '0000':
+          SlackLogService().sendBroadcastLogToSlack(InfoKey.paymentRefund.key, paymentDescription: "동작로직: 관리자 환불\n        승인번호: ${order.paymentAuthNumber ?? "-"}");
+          break;
+        case '1000':
+          SlackLogService().sendBroadcastLogToSlack(InfoKey.paymentRefundFail.key, paymentDescription: "동작로직: 관리자 환불\n        사유: 결제취소\n        승인번호: ${order.paymentAuthNumber ?? "-"}");
+          break;
+        case '1004':
+          SlackLogService().sendBroadcastLogToSlack(InfoKey.paymentRefundFail.key, paymentDescription: "동작로직: 관리자 환불\n        사유: 시간초과\n        승인번호: ${order.paymentAuthNumber ?? "-"}");
+          break;
+        default:
+          SlackLogService().sendBroadcastLogToSlack(InfoKey.paymentRefundFail.key, paymentDescription: "동작로직: 관리자 환불\n        사유: 확인필요\n        승인번호: ${order.paymentAuthNumber ?? "-"}");
+      }
     }
   }
 }

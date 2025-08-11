@@ -43,6 +43,8 @@
   "alert_btn_authNum_reissue_failure": "확인",
   "alert_title_refund_info": "환불 안내",
   "alert_txt_refund_info": "환불되지 않은 내역이 있습니다.\r\n이전에 사용한 카드를 단말기에 삽입한 후\r\n환불을 진행해 주세요.",
+  "alert_title_auto_refund_alert": "환불 안내",
+  "alert_txt_auto_refund_alert": "프린터가 정상 작동하지 않아\r\n환불을 진행합니다.",
   "alert_btn_cancel": "취소",
   "alert_btn_ok": "확인"
 }

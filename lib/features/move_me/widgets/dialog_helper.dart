@@ -531,6 +531,19 @@ class DialogHelper {
     );
   }
 
+  static Future<void> showAutoRefundDescriptionDialog(
+    BuildContext context, {
+    VoidCallback? onButtonPressed,
+  }) async {
+    await _showOneButtonKioskDialog(
+      context,
+      title: LocaleKeys.alert_title_auto_refund_alert.tr(),
+      message: LocaleKeys.alert_txt_auto_refund_alert.tr(),
+      buttonText: LocaleKeys.alert_btn_paymentcard_failure.tr(),
+      onButtonPressed: onButtonPressed,
+    );
+  }
+
   static Future<bool> showPrintErrorDialog(
     BuildContext context, {
     VoidCallback? onButtonPressed,

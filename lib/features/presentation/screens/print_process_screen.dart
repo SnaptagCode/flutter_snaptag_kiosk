@@ -19,25 +19,25 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
   Widget build(BuildContext context) {
     final randomAdImage = getRandomAdImageFilePath();
     /**
-         final printProcess = ref.watch(printProcessScreenProviderProvider);
-    if (printProcess.isLoading) {
-      if (!context.loaderOverlay.visible) context.loaderOverlay.show();
-    } else {
-      if (context.loaderOverlay.visible) context.loaderOverlay.hide();
-    }
+        final printProcess = ref.watch(printProcessScreenProviderProvider);
+        if (printProcess.isLoading) {
+        if (!context.loaderOverlay.visible) context.loaderOverlay.show();
+        } else {
+        if (context.loaderOverlay.visible) context.loaderOverlay.hide();
+        }
      */
 
     // listen 부분에서는 로딩 오버레이 처리를 제거
     ref.listen(printProcessScreenProviderProvider, (previous, next) async {
       /**
-            if (next.isLoading && !context.loaderOverlay.visible) {
-        context.loaderOverlay.show();
-        return;
-      }
+          if (next.isLoading && !context.loaderOverlay.visible) {
+          context.loaderOverlay.show();
+          return;
+          }
 
-      if (context.loaderOverlay.visible) {
-        context.loaderOverlay.hide();
-      }
+          if (context.loaderOverlay.visible) {
+          context.loaderOverlay.hide();
+          }
        */
       if (!next.isLoading) {
         // 로딩이 아닐 때만 처리
@@ -47,57 +47,58 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
             final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
             SlackLogService().sendErrorLogToSlack('*[Machine ID: $machineId]*\nPrint process error\nError: $error');
             SlackLogService().sendErrorLogToSlack('Print process error\nError: $error');
+            switch (error) {
+              case "Card feeder is empty":
+                SlackLogService().sendBroadcastLogToSlack(ErrorKey.printerCardEmpty.key);
+                break;
+              case "Failed to eject card":
+                SlackLogService().sendBroadcastLogToSlack(ErrorKey.printerEjectFail.key);
+                break;
+              case "Printer is not ready":
+                SlackLogService().sendBroadcastLogToSlack(ErrorKey.printerReadyFail.key);
+                break;
+              default:
+                SlackLogService().sendBroadcastLogToSlack(ErrorKey.printerPrintFail.key);
+                break;
+            }
+
             final errorMessage = error.toString();
-            // 에러 발생 시 환불 처리
-            try {
-              await ref.read(paymentServiceProvider.notifier).refund();
-              if (ref.read(pagePrintProvider) == PagePrintType.single) ref.read(cardCountProvider.notifier).increase();
-            } catch (refundError) {
-              SlackLogService().sendErrorLogToSlack('*[Machine ID: $machineId]*, Refund failed \nError: $refundError');
-              logger.e('Refund failed', error: refundError);
-            }
-            if (errorMessage.contains('Card feeder is empty')) {
-              if (ref.read(cardCountProvider) < 1) {
-                ref.read(pagePrintProvider.notifier).set(PagePrintType.double);
-                SlackLogService().sendLogToSlack('MachineId: $machineId, change pagePrintType double');
+
+            // 슬랙에 에러 로그 전송
+            errorLogging(error.toString(), stack);
+
+            // 환불 알럿
+            await DialogHelper.showAutoRefundDescriptionDialog(context, onButtonPressed: () async {
+              // 에러 발생 시 환불 처리
+              await refund();
+
+              // 카드 단일 카드 수량 확인
+              checkCardSingleCardCount();
+
+              // 카드 공급기가 비어있는지 확인
+              if (checkCardFeederIsEmpty(errorMessage)) {
+                await DialogHelper.showPrintCardRefillDialog(
+                  context,
+                  onButtonPressed: () {
+                    PhotoCardUploadRouteData().go(context);
+                  },
+                );
               } else {
-                ref.read(pagePrintProvider.notifier).set(PagePrintType.single);
-                SlackLogService().sendLogToSlack('MachineId: $machineId, change pagePrintType single');
+                await DialogHelper.showPrintErrorDialog(
+                  context,
+                  onButtonPressed: () {
+                    PhotoCardUploadRouteData().go(context);
+                  },
+                );
               }
-              await DialogHelper.showPrintCardRefillDialog(
-                context,
-                onButtonPressed: () {
-                  PhotoCardUploadRouteData().go(context);
-                },
-              );
-            } else {
-              if (ref.read(cardCountProvider) < 1) {
-                ref.read(pagePrintProvider.notifier).set(PagePrintType.double);
-                SlackLogService().sendLogToSlack('machineId: $machineId, change pagePrintType double');
-              } else {
-                ref.read(pagePrintProvider.notifier).set(PagePrintType.single);
-                SlackLogService().sendLogToSlack('machineId: $machineId, change pagePrintType single');
-              }
-              await DialogHelper.showPrintErrorDialog(
-                context,
-                onButtonPressed: () {
-                  PhotoCardUploadRouteData().go(context);
-                },
-              );
-            }
+            });
           },
           loading: () => null,
           data: (_) async {
-            final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
-            if (ref.read(cardCountProvider) < 1) {
-              ref.read(pagePrintProvider.notifier).set(PagePrintType.double);
-              SlackLogService().sendLogToSlack('machineId: $machineId, change pagePrintType double');
-            } else {
-              ref.read(pagePrintProvider.notifier).set(PagePrintType.single);
-              SlackLogService().sendLogToSlack('machineId: $machineId, change pagePrintType single');
-            }
+            checkCardSingleCardCount();
+
             ref.read(paymentResponseStateProvider.notifier).reset();
-            SlackLogService().sendLogToSlack('machineId: $machineId, paymentResponseState Reset'); //paymentTestSlack
+
             await DialogHelper.showPrintCompleteDialog(
               context,
               onButtonPressed: () {
@@ -161,6 +162,39 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
         ),
       ),
     );
+  }
+
+  bool checkCardFeederIsEmpty(String errorMessage) {
+    return errorMessage.contains('Card feeder is empty');
+  }
+
+  void checkCardSingleCardCount() {
+    final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
+
+    if (ref.read(cardCountProvider) < 1) {
+      ref.read(pagePrintProvider.notifier).set(PagePrintType.double);
+      SlackLogService().sendLogToSlack('*[MachineId : $machineId]*, change pagePrintType double');
+    } else {
+      ref.read(pagePrintProvider.notifier).set(PagePrintType.single);
+      SlackLogService().sendLogToSlack('*[MachineId : $machineId]*, change pagePrintType single');
+    }
+  }
+
+  void errorLogging(String error, StackTrace stack) {
+    logger.e('Print process error', error: error, stackTrace: stack);
+    final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
+    SlackLogService().sendErrorLogToSlack('*[MachineId : $machineId]*, Print process error\nError: $error');
+  }
+
+  Future<void> refund() async {
+    final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
+    try {
+      await ref.read(paymentServiceProvider.notifier).refund();
+      if (ref.read(pagePrintProvider) == PagePrintType.single) ref.read(cardCountProvider.notifier).increase();
+    } catch (e) {
+      SlackLogService().sendErrorLogToSlack('*[MachineId : $machineId]*, 환불 처리 중 오류 발생: $e');
+      logger.e('환불 처리 중 오류 발생', error: e);
+    }
   }
 
   /// .env.version 파일에서 버전 문자열을 동기적으로 읽어옵니다.

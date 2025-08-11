@@ -1,4 +1,6 @@
+import 'package:flutter/cupertino.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:flutter_snaptag_kiosk/lib.dart';
 
 part 'page_print_provider.g.dart';
 
@@ -9,8 +11,18 @@ class PagePrint extends _$PagePrint {
 
   void switchType() {
     state = state == PagePrintType.double ? PagePrintType.single : PagePrintType.double;
+    SlackLogService().sendBroadcastLogToSlack(
+        state == PagePrintType.single ? InfoKey.cardPrintModeSwitchSingle.key : InfoKey.cardPrintModeSwitchDuplex.key);
   }
-  void set(PagePrintType type) => state = type;
+
+  void set(PagePrintType type) {
+    final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
+    if (type != state) {
+      print("chaneg Printe type : $type");
+      if (type == PagePrintType.double && machineId != 0) SlackLogService().sendBroadcastLogToSlack(InfoKey.cardPrintModeSwitchDuplex.key);
+    }
+    state = type;
+  }
 }
 
 enum PagePrintType {

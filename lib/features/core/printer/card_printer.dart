@@ -2,13 +2,10 @@ import 'dart:ffi' as ffi; // ffi 임포트 확인
 import 'dart:io';
 
 import 'package:ffi/ffi.dart'; // Utf8 사용을 위한 임포트
-import 'package:flutter_snaptag_kiosk/core/utils/logger_service.dart';
-import 'package:flutter_snaptag_kiosk/data/datasources/cache/kiosk_info_service.dart';
-import 'package:flutter_snaptag_kiosk/data/datasources/remote/slack_log_service.dart';
-import 'package:flutter_snaptag_kiosk/data/repositories/kiosk_repository.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
 import 'package:flutter_snaptag_kiosk/features/core/printer/printer_log.dart';
 import 'package:flutter_snaptag_kiosk/features/core/printer/ribbon_status.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 
 import 'printer_bindings.dart';
@@ -18,8 +15,6 @@ part 'card_printer.g.dart';
 @Riverpod(keepAlive: true)
 class PrinterService extends _$PrinterService {
   late final PrinterBindings _bindings;
-
-  bool _firstConnectedFailed = false;
 
   @override
   FutureOr<void> build() async {
@@ -60,19 +55,10 @@ class PrinterService extends _$PrinterService {
     }
   }
 
-  Future<bool> checkConnectedPrint() async {
+  bool checkConnectedPrint() {
     try {
       final connected = _bindings.connectPrinter();
       logger.e('checkConnectedPrint: $connected');
-
-      if (!connected) {
-        if (!_firstConnectedFailed) {
-          _firstConnectedFailed = true;
-          SlackLogService().sendErrorLogToSlack('PrintConnected Failed - First Attempt');
-        }
-        return false;
-      }
-
       final printerLog = getPrinterLogData(_bindings);
 
       final isReady = printerLog?.printerMainStatusCode == "1004";
@@ -279,7 +265,7 @@ class PrinterService extends _$PrinterService {
     try {
       final result = _bindings.commitCanvas(strPtr, lenPtr);
       if (result != 0) {
-        throw Exception('Failed to commit canvas');
+        throw Exception('Failed to commit canvas ($result)');
       }
       return strPtr.toDartString();
     } finally {
