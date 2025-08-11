@@ -56,8 +56,8 @@ class SlackLogService {
     final eventType = kioskInfo?.eventType ?? "-";
     final eventName = kioskInfo?.printedEventName ?? "-";
     final serviceNameMap = {
-      "SUF": "서울 이랜드 FC",
-      "SEF": "수원 FC",
+      "SUF": "수원FC",
+      "SEF": "서울 이랜드 FC",
       "KEEFO": "성수 B'Day",
     };
 
