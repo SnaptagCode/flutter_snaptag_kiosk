@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_snaptag_kiosk/core/utils/sound_manager.dart';
+import 'package:flutter_snaptag_kiosk/features/core/printer/printer_connect_state.dart';
 import 'package:flutter_snaptag_kiosk/features/core/printer/ribbon_status.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_snaptag_kiosk/features/core/printer/ribbon_warning_provider.dart';
@@ -14,9 +15,26 @@ class PhotoCardUploadScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final kiosk = ref.watch(kioskInfoServiceProvider);
-    
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       int machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
+      final connected = ref.read(printerServiceProvider.notifier).checkConnectedPrint();
+      if (!connected) {
+        SlackLogService()
+            .sendErrorLogToSlack('*[MachineId: $machineId]*\nPrinter ${PrinterConnectState.disconnected.name}');
+        showNeedRibbonFilmDialog(context, ref);
+        return;
+      }
+      if (connected) {
+        final settingCompleted = ref.read(printerServiceProvider.notifier).settingPrinter();
+        if (!settingCompleted) {
+          SlackLogService()
+              .sendErrorLogToSlack('*[MachineId: $machineId]*\nPrinter ${PrinterConnectState.setupInComplete.name}');
+          showNeedRibbonFilmDialog(context, ref);
+          return;
+        }
+      }
+
       RibbonStatus ribbonStatus = ref.read(printerServiceProvider.notifier).getRibbonStatus();
       ref.read(ribbonWarningProvider.notifier).checkAndSendWarnings(machineId, ribbonStatus);
       showNeedRibbonFilmDialog(context, ref);
@@ -92,7 +110,8 @@ class PhotoCardUploadScreen extends ConsumerWidget {
     RibbonStatus ribbonStatus = ref.read(printerServiceProvider.notifier).getRibbonStatus();
     bool isRibbonShouldBeChanged = ref.read(ribbonWarningProvider.notifier).isRibbonShouldBeChanged(ribbonStatus);
     bool isFilmShouldBeChanged = ref.read(ribbonWarningProvider.notifier).isFilmShouldBeChanged(ribbonStatus);
-    bool isBothRibbonAndFilmShouldBeChanged = ref.read(ribbonWarningProvider.notifier).isBothRibbonAndFilmShouldBeChanged(ribbonStatus);
+    bool isBothRibbonAndFilmShouldBeChanged =
+        ref.read(ribbonWarningProvider.notifier).isBothRibbonAndFilmShouldBeChanged(ribbonStatus);
 
     if (isRibbonShouldBeChanged || isFilmShouldBeChanged || isBothRibbonAndFilmShouldBeChanged) {
       DialogHelper.showNeedRibbonFilmDialog(context, () {

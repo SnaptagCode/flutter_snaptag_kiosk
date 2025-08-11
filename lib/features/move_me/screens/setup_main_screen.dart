@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_snaptag_kiosk/core/utils/sound_manager.dart';
+import 'package:flutter_snaptag_kiosk/features/core/printer/printer_connect_state.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_snaptag_kiosk/core/providers/version_notifier.dart';
@@ -19,29 +20,27 @@ class SetupMainScreen extends ConsumerStatefulWidget {
 
 class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
   Timer? _timer;
-  bool _isConnectedPrinter = false;
 
   @override
   void initState() {
     super.initState();
 
-    final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
-
+    ref.read(alertDefinitionProvider.notifier).load();
     _timer = Timer.periodic(Duration(seconds: 2), (timer) async {
-      // 여기에 실행하고 싶은 로직 작성
       final connected = await ref.read(printerServiceProvider.notifier).checkConnectedPrint();
       if (mounted) {
         setState(() {
-          SlackLogService()
-              .sendLogToSlack('MachineId : $machineId Connected Printer ${connected ? 'Success' : 'Failed'}');
-          // 프린터 연결상태 우선 - 프린터 상태 연결 완료 이후 리본 잔량 및 필름 잔량 체크
-          if (!connected) {
-            _isConnectedPrinter = false;
-          } else {
+          if (connected) {
             final settingCompleted = ref.read(printerServiceProvider.notifier).settingPrinter();
-            _isConnectedPrinter = settingCompleted;
-            SlackLogService()
-                .sendLogToSlack('MachineId : $machineId Setting Printer ${settingCompleted ? 'Success' : 'Failed'}');
+            ref.read(printerConnectProvider.notifier).update(
+                  connected && settingCompleted
+                      ? PrinterConnectState.connected
+                      : settingCompleted
+                          ? PrinterConnectState.connected
+                          : PrinterConnectState.setupInComplete,
+                );
+          } else {
+            ref.read(printerConnectProvider.notifier).update(PrinterConnectState.disconnected);
           }
         });
       }
@@ -56,12 +55,14 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ref.read(alertDefinitionProvider);
+    final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
     final versionState = ref.watch(versionStateProvider);
     final cardCountState = ref.watch(cardCountProvider);
     final currentVersion = versionState.currentVersion;
     final latestVersion = versionState.latestVersion;
     final isUpdateAvailable = currentVersion != latestVersion;
-    final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
+    final isConnectedPrinter = ref.watch(printerConnectProvider) == PrinterConnectState.connected;
     //final isUpdateAvailable = false;
 
     return Theme(
@@ -137,8 +138,13 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
                       activeAssetName: SnaptagSvg.printDoubleActive,
                       inactiveAssetName: SnaptagSvg.printDoubleInactive,
                       onTap: () async {
-                        await SoundManager().playSound();
-                        ref.read(pagePrintProvider.notifier).set(PagePrintType.double);
+                        if (cardCountState < 1) {
+                          await SoundManager().playSound();
+                          ref.read(pagePrintProvider.notifier).set(PagePrintType.double);
+                          if (machineId != 0) {
+                            SlackLogService().sendBroadcastLogToSlack(InfoKey.cardPrintModeSwitchSingle.key);
+                          }
+                        }
                       },
                     ),
                   ),
@@ -199,12 +205,14 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
 
                           if (value == null || value.isEmpty) return; // 값이 없으면 종료
                           int cardNumber = int.parse(value);
-                          final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
                           ref.read(cardCountProvider.notifier).update(cardNumber);
                           if (cardNumber <= 0) {
                             ref.read(pagePrintProvider.notifier).set(PagePrintType.double);
                           } else {
                             ref.read(pagePrintProvider.notifier).set(PagePrintType.single);
+                            if (machineId != 0) {
+                              SlackLogService().sendBroadcastLogToSlack(InfoKey.cardPrintModeSwitchSingle.key);
+                            }
                           }
                         } else {
                           print('click when pagePringType not single');
@@ -286,14 +294,10 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
                           final connected = await ref.read(printerServiceProvider.notifier).checkConnectedPrint();
                           final settingPrinter = ref.read(printerServiceProvider.notifier).settingPrinter();
                           if (!connected) {
-                            SlackLogService().sendErrorLogToSlack(
-                                '*[MachineId : $machineId]*  \nPrintConnected Failed - Attempted to run event');
                             await DialogHelper.showPrintWaitingDialog(context);
                             return;
                           }
                           if (!settingPrinter) {
-                            SlackLogService().sendErrorLogToSlack(
-                                '*[MachineId : $machineId]*  \nSettingPrint Failed - Attempted to run event');
                             await DialogHelper.showCheckPrintStateDialog(context);
                             return;
                           }
@@ -316,6 +320,14 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
                                   'machineId: $machineId, singleCard: $cardCountState, set pagePrintType single');
                             }
                             PhotoCardUploadRouteData().go(context);
+                            try {
+                              final response = await ref.read(paymentRepositoryProvider).check();
+                              SlackLogService().sendBroadcastLogToSlack(InfoKey.inspectionEnd.key, isPaymentOn: true);
+                              SlackLogService().sendLogToSlack("Payment Device check: $response");
+                            } catch (e) {
+                              SlackLogService().sendBroadcastLogToSlack(InfoKey.inspectionEnd.key, isPaymentOn: false);
+                              SlackLogService().sendErrorLogToSlack("Payment Device check: $e");
+                            }
                           }
                         },
                       ),
@@ -366,9 +378,9 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
                       width: 260.w,
                       height: 314.h,
                       child: SetupMainCard(
-                        label: _isConnectedPrinter ? '프린트\n사용가능' : '프린트\n준비중',
-                        textColor: _isConnectedPrinter ? Color(0xFF1C1C1C) : Color(0xFFD5D5D5),
-                        assetName: _isConnectedPrinter ? SnaptagSvg.printConnect : SnaptagSvg.printError,
+                        label: isConnectedPrinter ? '프린트\n사용가능' : '프린트\n준비중',
+                        textColor: isConnectedPrinter ? Color(0xFF1C1C1C) : Color(0xFFD5D5D5),
+                        assetName: isConnectedPrinter ? SnaptagSvg.printConnect : SnaptagSvg.printError,
                       ),
                     ),
                   ),
@@ -500,20 +512,18 @@ class SetupMainCard extends StatelessWidget {
                     Spacer(),
                   ],
                 )
-              : Expanded(
-                  child: Center(
-                    child: SizedBox(
-                      width: 260.w,
-                      child: Text(
-                        label,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 34.sp,
-                          fontWeight: FontWeight.w700,
-                          color: textColor ?? Color(0xFF1C1C1C),
-                          letterSpacing: -0.1,
-                          height: 1.2,
-                        ),
+              : Center(
+                  child: SizedBox(
+                    width: 260.w,
+                    child: Text(
+                      label,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 34.sp,
+                        fontWeight: FontWeight.w700,
+                        color: textColor ?? Color(0xFF1C1C1C),
+                        letterSpacing: -0.1,
+                        height: 1.2,
                       ),
                     ),
                   ),

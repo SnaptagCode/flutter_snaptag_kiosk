@@ -44,11 +44,18 @@ void main() async {
           path: 'assets/lang',
           fallbackLocale: const Locale('ko', 'KR'),
           child: ProviderScope(
-            child: ScreenUtilInit(
-              designSize: const Size(1080, 1920),
-              minTextAdapt: true,
-              splitScreenMode: true,
-              child: App(),
+            child: Builder(
+              builder: (context) {
+                final container = ProviderScope.containerOf(context);
+                SlackLogService().init(container);
+                return ScreenUtilInit(
+                  designSize: const Size(1080, 1920),
+                  minTextAdapt: true,
+                  splitScreenMode: true,
+                  child: App(),
+
+                );
+              },
             ),
           ),
         ),
