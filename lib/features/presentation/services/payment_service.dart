@@ -52,7 +52,7 @@ class PaymentService extends _$PaymentService {
             paymentDescription:
                 "사유: 승인번호가 빈 결제 건\n        인증번호: ${backPhoto.photoAuthNumber}\n        승인번호: ${paymentResponse.approvalNo}");
       } else {
-        final response = await updateOrder(isRefund: false); //결제 취소, 정상 결제
+        final response = await _updateOrder(isRefund: false); //결제 취소, 정상 결제
         ref.read(updateOrderInfoProvider.notifier).update(response);
         if (paymentResponse.res == '0000') {
           ref.read(cardCountProvider.notifier).decrease();
@@ -67,7 +67,7 @@ class PaymentService extends _$PaymentService {
         }
       }
     } catch (e) {
-      final response = await updateOrder(isRefund: false);
+      final response = await _updateOrder(isRefund: false);
       ref.read(updateOrderInfoProvider.notifier).update(response);
       logger.e('Payment process failed', error: e);
       rethrow;
@@ -158,7 +158,7 @@ class PaymentService extends _$PaymentService {
       rethrow;
     } finally {
       final code = ref.read(authCodeProvider);
-      final response = await updateOrder(isRefund: true, orderid: order.orderId, photoAuthNumber: code);
+      final response = await _updateOrder(isRefund: true, orderid: order.orderId, photoAuthNumber: code);
       SlackLogService().sendLogToSlack('error409 response: $response'); //paymentTestSlack
       if (response.status == OrderStatus.refunded) {
         ref.read(paymentResponseStateProvider.notifier).reset();
@@ -203,7 +203,7 @@ class PaymentService extends _$PaymentService {
     return await ref.read(kioskRepositoryProvider).createOrderStatus(request);
   }
 
-  Future<UpdateOrderResponse> updateOrder({required bool isRefund, int? orderid, String? photoAuthNumber}) async {
+  Future<UpdateOrderResponse> _updateOrder({required bool isRefund, int? orderid, String? photoAuthNumber}) async {
     try {
       final settings = ref.read(kioskInfoServiceProvider);
       final backPhotoAuthNumber = photoAuthNumber ?? ref.read(verifyPhotoCardProvider).value?.photoAuthNumber; //여기서 예외
