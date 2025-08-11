@@ -42,6 +42,8 @@
   "alert_btn_authNum_reissue_failure": "确定",
   "alert_title_refund_info": "退款信息",
   "alert_txt_refund_info": "有未退款的商品。\r\n请将之前使用的卡插入终端并进行退款。",
+  "alert_title_auto_refund_alert": "退款信息",
+  "alert_txt_auto_refund_alert": "由于打印机无法正常工作，\\r\\n将进行退款。",
   "alert_btn_cancel": "返回",
   "alert_btn_ok": "确定"
 }
