@@ -25,7 +25,9 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
   void initState() {
     super.initState();
 
-    ref.read(alertDefinitionProvider.notifier).load();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(alertDefinitionProvider.notifier).load();
+    });
     _timer = Timer.periodic(Duration(seconds: 2), (timer) async {
       final connected = await ref.read(printerServiceProvider.notifier).checkConnectedPrint();
       if (mounted) {
@@ -431,6 +433,7 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
                         label: '서비스 점검',
                         assetName: SnaptagSvg.maintenance,
                         onTap: () async {
+                          SlackLogService().sendBroadcastLogToSlack(InfoKey.serviceMaintenanceEnter.key);
                           await SoundManager().playSound();
                           MaintenanceRouteData().go(context);
                         },

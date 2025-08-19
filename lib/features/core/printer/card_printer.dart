@@ -60,7 +60,12 @@ class PrinterService extends _$PrinterService {
       final connected = _bindings.connectPrinter();
       logger.e('checkConnectedPrint: $connected');
       final printerLog = getPrinterLogData(_bindings);
-
+      if (printerLog != null) {
+        ref.read(printerLogProvider.notifier).update(printerLog);
+      }
+      else {
+        SlackLogService().sendLogToSlack("CheckConnected Print - PrinterLog is null");
+      }
       final isReady = printerLog?.printerMainStatusCode == "1004";
 
       return connected && isReady;

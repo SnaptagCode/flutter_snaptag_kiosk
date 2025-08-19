@@ -53,12 +53,16 @@ class SlackLogService {
     final machineId = kioskInfo?.kioskMachineId ?? 0;
     final version =  _container.read(versionStateProvider).currentVersion;
     final cardCount = _container.read(cardCountProvider);
+    final printLog = _container.read(printerLogProvider);
+    final printerheadTemp = printLog?.heaterTemperature ?? 0;
+    final printerheadTempString = printerheadTemp != 0? "${(printerheadTemp/100).toStringAsFixed(2)}" : "알 수 없음";
     final eventType = kioskInfo?.eventType ?? "-";
     final eventName = kioskInfo?.printedEventName ?? "-";
     final serviceNameMap = {
       "SUF": "수원FC",
       "SEF": "서울 이랜드 FC",
       "KEEFO": "성수 B'Day",
+      "AGFC": "안산그리너스FC"
     };
 
     final paymentKey = [
@@ -74,10 +78,13 @@ class SlackLogService {
           '''
 ${def.description}
 
-     - 단면 카드 입력 수량 : $cardCount
-     - 불러온 이벤트 : $eventName
-     - 프린터 연결 상태 : 정상
-     - 결제 단말기 연결 상태 : ${isPaymentOn == true ? '정상' : '미연결'}
+- 단면 카드 입력 수량 : $cardCount
+- 불러온 이벤트 : $eventName
+- 프린터 연결 상태 : 정상
+- 결제 단말기 연결 상태 : ${isPaymentOn == true ? '정상' : '미연결'}
+- 프린터 온도 : $printerheadTempString°C
+- 리본 잔량 : ${printLog?.rbnRemainingRatio != null ? "${printLog?.rbnRemainingRatio}%" : "알 수 없음"}
+- 필름 잔량 : ${printLog?.filmRemainingRatio != null ? "${printLog?.filmRemainingRatio}%": "알 수 없음"}
 '''
           ;
       } else if (paymentKey.contains(def.key)){
@@ -85,8 +92,7 @@ ${def.description}
             '''
 ${def.description}
             
-     - $paymentDescription
-''';
+- $paymentDescription''';
       } else {
         description = def.description;
       }
@@ -150,8 +156,7 @@ ${def.description}
   }) {
     final cardInfo =
       '''
-${cardCount == 0 ? "단면 -> 양면 모드" : "단면 모드 설정"}
-        단면 설정 개수 : $cardCount개
+${cardCount == 0 ? "- 단면 -> 양면 모드" : "- 단면 모드 설정\n- 단면 설정 개수 : $cardCount개"}
       '''
     ;
 
@@ -164,7 +169,7 @@ ${cardCount == 0 ? "단면 -> 양면 모드" : "단면 모드 설정"}
 
     final formattedTitle =
     (title == "점검 완료" || title == "점검 시작")
-        ? '     *[$title]*'
+        ? '*[$title]*'
         : '$emoji  *$title*';
 
     final guidePart = guideText != null
@@ -173,14 +178,13 @@ ${cardCount == 0 ? "단면 -> 양면 모드" : "단면 모드 설정"}
 
     return '''
 $formattedTitle
-        ────────────────────────────────────────
-        KioskID: $kioskId  /  앱버전: $appVersion  /  업체: $serviceName
-        ────────────────────────────────────────
-        $description
-        ${ title == "카드 인쇄 모드 변경" ? cardInfo : ""}
-        
-        $guidePart
-
+───────────────────
+Kiosk: $kioskId  /  ${appVersion}
+업체(구단): $serviceName
+───────────────────
+$description
+${ title == "카드 인쇄 모드 변경" ? cardInfo : ""}
+$guidePart
 ''';
   }
 }
