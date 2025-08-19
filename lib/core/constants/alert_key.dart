@@ -30,7 +30,10 @@ enum InfoKey {
   paymentRefund("Payment_Refund"),
   paymentRefundFail("Payment_Refund_Fail"),
   inspectionStart("Inspection_Start"),
-  inspectionEnd("Inspection_End");
+  inspectionEnd("Inspection_End"),
+  serviceMaintenanceEnter("Service_Maintenance_Enter"),
+  serviceMaintenanceExit("Service_Maintenance_Exit"),
+  adminModeEnter("Admin_Mode_Enter");
 
   final String key;
   const InfoKey(this.key);

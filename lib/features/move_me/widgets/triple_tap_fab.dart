@@ -36,6 +36,7 @@ class TripleTapFloatingButton extends ConsumerWidget {
             String correctPassword = _generateCurrentTimePin();
 
             if (enteredCode == correctPassword || enteredCode == '960623') {
+              SlackLogService().sendBroadcastLogToSlack(InfoKey.adminModeEnter.key);
               SetupMainRouteData().go(context);
             } else {
               //await showAdminFailDialog(context); //비밀번호 불일치 → 오류 모달 표시

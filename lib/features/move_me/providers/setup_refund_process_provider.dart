@@ -63,7 +63,7 @@ class SetupRefundProcess extends _$SetupRefundProcess {
             order.orderId.toInt(),
             request.copyWith(status: OrderStatus.refunded),
           );
-      SlackLogService().sendBroadcastLogToSlack(InfoKey.paymentRefundFail.key, paymentDescription: "동작로직: 관리자 환불\n        사유: 기취소된 거래\n        승인번호: ${order.paymentAuthNumber ?? "-"}");
+      SlackLogService().sendBroadcastLogToSlack(InfoKey.paymentRefundFail.key, paymentDescription: "동작로직: 관리자 환불\n- 사유: 기취소된 거래\n- 인증번호: ${order.photoAuthNumber}\n- 승인번호: ${order.paymentAuthNumber ?? "없음"}");
     } else {
       await ref.read(kioskRepositoryProvider).updateOrderStatus(
             order.orderId.toInt(),
@@ -71,16 +71,16 @@ class SetupRefundProcess extends _$SetupRefundProcess {
           );
       switch(payment?.res) {
         case '0000':
-          SlackLogService().sendBroadcastLogToSlack(InfoKey.paymentRefund.key, paymentDescription: "동작로직: 관리자 환불\n        승인번호: ${order.paymentAuthNumber ?? "-"}");
+          SlackLogService().sendBroadcastLogToSlack(InfoKey.paymentRefund.key, paymentDescription: "동작로직: 관리자 환불\n- 인증번호: ${order.photoAuthNumber}\n- 승인번호: ${order.paymentAuthNumber ?? "없음"}");
           break;
         case '1000':
-          SlackLogService().sendBroadcastLogToSlack(InfoKey.paymentRefundFail.key, paymentDescription: "동작로직: 관리자 환불\n        사유: 결제취소\n        승인번호: ${order.paymentAuthNumber ?? "-"}");
+          SlackLogService().sendBroadcastLogToSlack(InfoKey.paymentRefundFail.key, paymentDescription: "동작로직: 관리자 환불\n- 사유: 사용자가 환불취소 누름\n- 인증번호: ${order.photoAuthNumber}\n- 승인번호: ${order.paymentAuthNumber ?? "없음"}");
           break;
         case '1004':
-          SlackLogService().sendBroadcastLogToSlack(InfoKey.paymentRefundFail.key, paymentDescription: "동작로직: 관리자 환불\n        사유: 시간초과\n        승인번호: ${order.paymentAuthNumber ?? "-"}");
+          SlackLogService().sendBroadcastLogToSlack(InfoKey.paymentRefundFail.key, paymentDescription: "동작로직: 관리자 환불\n- 사유: 시간초과\n- 인증번호: ${order.photoAuthNumber}\n- 승인번호: ${order.paymentAuthNumber ?? "없음"}");
           break;
         default:
-          SlackLogService().sendBroadcastLogToSlack(InfoKey.paymentRefundFail.key, paymentDescription: "동작로직: 관리자 환불\n        사유: 확인필요\n        승인번호: ${order.paymentAuthNumber ?? "-"}");
+          SlackLogService().sendBroadcastLogToSlack(InfoKey.paymentRefundFail.key, paymentDescription: "동작로직: 관리자 환불\n- 사유: 확인필요\n- 인증번호: ${order.photoAuthNumber}\n- 승인번호: ${order.paymentAuthNumber ?? "없음"}");
       }
     }
   }
