@@ -47,7 +47,7 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
             final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
             SlackLogService().sendErrorLogToSlack('*[Machine ID: $machineId]*\nPrint process error\nError: $error');
             SlackLogService().sendErrorLogToSlack('Print process error\nError: $error');
-            switch (error) {
+            switch (error.toString().replaceFirst('Exception: ', '').trim()) {
               case "Card feeder is empty":
                 SlackLogService().sendBroadcastLogToSlack(ErrorKey.printerCardEmpty.key);
                 break;
