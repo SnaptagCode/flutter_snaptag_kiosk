@@ -28,21 +28,21 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(alertDefinitionProvider.notifier).load();
     });
-    // _timer = Timer.periodic(Duration(seconds: 2), (timer) async {
-    //   final connected = await ref.read(printerServiceProvider.notifier).connectedPrinter();
-    //   if (connected) {
-    //     final settingCompleted = await ref.read(printerServiceProvider.notifier).checkSettingPrinter();
-    //     ref.read(printerConnectProvider.notifier).update(
-    //           connected && settingCompleted
-    //               ? PrinterConnectState.connected
-    //               : settingCompleted
-    //                   ? PrinterConnectState.connected
-    //                   : PrinterConnectState.setupInComplete,
-    //         );
-    //   } else {
-    //     ref.read(printerConnectProvider.notifier).update(PrinterConnectState.disconnected);
-    //   }
-    // });
+    _timer = Timer.periodic(Duration(seconds: 2), (timer) async {
+      final connected = await ref.read(printerServiceProvider.notifier).connectedPrinter();
+      if (connected) {
+        final settingCompleted = await ref.read(printerServiceProvider.notifier).checkSettingPrinter();
+        ref.read(printerConnectProvider.notifier).update(
+              connected && settingCompleted
+                  ? PrinterConnectState.connected
+                  : settingCompleted
+                      ? PrinterConnectState.connected
+                      : PrinterConnectState.setupInComplete,
+            );
+      } else {
+        ref.read(printerConnectProvider.notifier).update(PrinterConnectState.disconnected);
+      }
+    });
   }
 
   @override
