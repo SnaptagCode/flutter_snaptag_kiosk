@@ -18,7 +18,7 @@ class PhotoCardUploadScreen extends ConsumerWidget {
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       int machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
-      final connected = await ref.read(printerServiceProvider.notifier).checkSettingPrinter();
+      final connected = await ref.read(printerServiceProvider.notifier).connectedPrinter();
       if (!connected) {
         SlackLogService()
             .sendErrorLogToSlack('*[MachineId: $machineId]*\nPrinter ${PrinterConnectState.disconnected.name}');

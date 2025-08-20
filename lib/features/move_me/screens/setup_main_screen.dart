@@ -29,7 +29,7 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
       ref.read(alertDefinitionProvider.notifier).load();
     });
     _timer = Timer.periodic(Duration(seconds: 2), (timer) async {
-      final connected = await ref.read(printerServiceProvider.notifier).checkSettingPrinter();
+      final connected = await ref.read(printerServiceProvider.notifier).connectedPrinter();
       if (connected) {
         final settingCompleted = await ref.read(printerServiceProvider.notifier).checkSettingPrinter();
         ref.read(printerConnectProvider.notifier).update(
