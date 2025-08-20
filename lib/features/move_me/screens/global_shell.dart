@@ -22,7 +22,7 @@ class GlobalShell extends ConsumerWidget {
           Align(
             alignment: Alignment.bottomCenter,
             child: BannerMarquee(
-              height: 90, // 배너 높이
+              height: 45, // 배너 높이
               speedPxPerSec: 120.0, // 이동 속도 (px/s)
               backgroundColor: const Color(0xFF111111),
               image: const AssetImage('assets/images/banner.webp'),

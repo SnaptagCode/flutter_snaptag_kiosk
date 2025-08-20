@@ -7,7 +7,7 @@ class BannerMarquee extends StatefulWidget {
   const BannerMarquee({
     super.key,
     required this.image,
-    this.height = 40,
+    this.height = 30,
     this.speedPxPerSec = 100.0,
     this.backgroundColor = Colors.black,
     this.gap = 0.0,
@@ -30,132 +30,122 @@ class BannerMarquee extends StatefulWidget {
 }
 
 class _BannerMarqueeState extends State<BannerMarquee> with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
-  late final Ticker _ticker;
+  late final AnimationController _ctrl;
+  late final Animation<double> _anim; // 0..1 구간 반복
 
-  // 현재 오프셋(px)
-  double _offset = 0;
-  double? _prevElapsedSec;
+  // 성능: 30fps로 제한(필요시 24까지도 OK)
+  static const _targetFps = 30;
 
   @override
   void initState() {
     super.initState();
-
-    // ✅ 여기서 런타임 체크
-    assert(!widget.height.isNaN && widget.height.isFinite && widget.height >= 0);
-    assert(!widget.speedPxPerSec.isNaN && widget.speedPxPerSec.isFinite);
-    assert(!widget.gap.isNaN && widget.gap.isFinite);
-
-    _ticker = createTicker(_onTick)..start();
+    _ctrl = AnimationController.unbounded(vsync: this);
+    _anim = _ctrl.drive(Tween<double>(begin: 0, end: 1));
+    _start();
   }
 
-  void _onTick(Duration elapsed) {
-    final nowSec = elapsed.inMicroseconds / 1e6;
-    var dt = (_prevElapsedSec == null) ? 0.0 : (nowSec - _prevElapsedSec!);
-    _prevElapsedSec = nowSec;
+  void _start() {
+    // 프레임 스로틀: 30fps 간격으로 수동 tick
+    Duration last = Duration.zero;
+    _ctrl.addListener(() {});
+    _tick(last);
+  }
 
-    // dt 안전 가드
-    if (!dt.isFinite || dt < 0) dt = 0.0;
-
-    final move = widget.speedPxPerSec * dt;
-    if (!move.isFinite) return;
-
-    setState(() {
-      _offset += move;
-      // 수치 안정화: 너무 커지면 주기적으로 감산
-      if (!_offset.isFinite) {
-        _offset = 0.0;
-      } else if (_offset > 1e9) {
-        _offset -= 1e9;
-      } else if (_offset < -1e9) {
-        _offset += 1e9;
-      }
-    });
+  void _tick(Duration last) async {
+    final frame = Duration(milliseconds: (1000 / _targetFps).round());
+    while (mounted) {
+      _ctrl.notifyListeners(); // 리스너 호출(AnimatedBuilder 갱신용)
+      await Future.delayed(frame);
+    }
   }
 
   @override
   void dispose() {
-    _ticker.dispose();
+    _ctrl.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    // 높이/불투명도도 안전 가드
-    final safeHeight = (widget.height.isFinite && widget.height >= 0) ? widget.height : 80.0;
-    final bgColor = widget.backgroundColor.withOpacity(
-      (widget.opacity.isFinite && widget.opacity >= 0 && widget.opacity <= 1) ? widget.opacity : 1.0,
-    );
+    final height = widget.height.clamp(1, double.infinity).toDouble();
+    return SizedBox(
+      height: height,
+      width: double.infinity,
+      child: LayoutBuilder(
+        builder: (context, c) {
+          final width = (c.hasBoundedWidth ? c.maxWidth : MediaQuery.of(context).size.width).isFinite
+              ? (c.hasBoundedWidth ? c.maxWidth : MediaQuery.of(context).size.width)
+              : 1.0;
+          final tileW = (width + widget.gap).clamp(1, double.infinity);
 
-    return RepaintBoundary(
-      child: SizedBox(
-        height: safeHeight,
-        width: double.infinity,
-        child: ClipRRect(
-          borderRadius: widget.borderRadius,
-          child: ColoredBox(
-            color: bgColor,
-            child: Padding(
-              padding: widget.padding,
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  // 폭 계산 (무한대/음수 가드)
-                  double width = constraints.hasBoundedWidth ? constraints.maxWidth : MediaQuery.of(context).size.width;
-                  if (!width.isFinite || width <= 0) {
-                    width = MediaQuery.of(context).size.width;
-                    if (!width.isFinite || width <= 0) width = 1.0; // 최종 안전값
-                  }
+          // ① 정적 child: 이미지 타일 2장 (RepaintBoundary로 래스터 캐시 유도)
+          final tiles = RepaintBoundary(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _BannerTile(image: widget.image, w: width, h: height),
+                if (widget.gap > 0) SizedBox(width: widget.gap),
+                _BannerTile(image: widget.image, w: width, h: height),
+              ],
+            ),
+          );
 
-                  // 타일 폭 (gap 포함) 가드
-                  final rawTileW = width + (widget.gap.isFinite ? widget.gap : 0.0);
-                  final tileW = (rawTileW.isFinite && rawTileW > 0) ? rawTileW : math.max(1.0, width);
+          // ② dx만 애니메이션: modulo로 무한 스크롤
+          return ClipRRect(
+            borderRadius: widget.borderRadius,
+            child: ColoredBox(
+              color: widget.backgroundColor.withOpacity(widget.opacity),
+              child: AnimatedBuilder(
+                animation: _anim,
+                child: tiles,
+                builder: (context, child) {
+                  // 속도(px/s) × 프레임 간격(1/_targetFps)
+                  final step = widget.speedPxPerSec / _targetFps;
+                  // 누적 이동량을 타일 폭으로 모듈러
+                  _dx = (_dx + step) % tileW;
+                  final dx = -_dx;
 
-                  // dx 계산 가드
-                  double dx = 0.0;
-                  if (tileW.isFinite && tileW > 0) {
-                    final mod = _offset % tileW;
-                    dx = (mod.isFinite ? -mod : 0.0);
-                  }
-
-                  // 최종 안전 보정
-                  if (!dx.isFinite) dx = 0.0;
-
-                  Widget tile() => SizedBox(
-                        width: width,
-                        height: safeHeight,
-                        child: Image(
-                          image: widget.image,
-                          fit: BoxFit.cover,
-                          filterQuality: FilterQuality.low,
-                        ),
-                      );
-
-                  final twoTileX = dx + tileW;
-                  final threeTileX = dx + 2 * tileW;
-
-                  return Stack(
-                    clipBehavior: Clip.none,
-                    children: [
-                      Transform.translate(
-                        offset: Offset(dx.isFinite ? dx : 0.0, 0),
-                        child: tile(),
-                      ),
-                      Transform.translate(
-                        offset: Offset(twoTileX.isFinite ? twoTileX : (dx + width), 0),
-                        child: tile(),
-                      ),
-                      if (threeTileX.isFinite && threeTileX < width + 1)
-                        Transform.translate(
-                          offset: Offset(threeTileX, 0),
-                          child: tile(),
-                        ),
-                    ],
+                  return Transform.translate(
+                    offset: Offset(dx, 0),
+                    child: child,
                   );
                 },
               ),
             ),
-          ),
-        ),
+          );
+        },
+      ),
+    );
+  }
+
+  double _dx = 0;
+}
+
+class _BannerTile extends StatelessWidget {
+  const _BannerTile({required this.image, required this.w, required this.h});
+  final ImageProvider image;
+  final double w;
+  final double h;
+
+  @override
+  Widget build(BuildContext context) {
+    // 성능 포인트
+    // - FilterQuality.none : 샘플링 비용 최소화
+    // - ResizeImage로 디코딩 사이즈를 배너 높이에 맞춤(Windows에서도 적용됨)
+    final dpr = MediaQuery.of(context).devicePixelRatio;
+    final targetH = (h * dpr).round().clamp(1, 4096); // 과도한 디코딩 방지
+    final targetW = (w * dpr).round().clamp(1, 8192);
+
+    final sized = ResizeImage(image, width: targetW, height: targetH);
+
+    return SizedBox(
+      width: w,
+      height: h,
+      child: Image(
+        image: sized,
+        fit: BoxFit.cover,
+        filterQuality: FilterQuality.none, // 🔧 성능 우선
+        isAntiAlias: false,
       ),
     );
   }
