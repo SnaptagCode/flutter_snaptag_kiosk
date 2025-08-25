@@ -348,7 +348,7 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
 
   String getAdVideoDir(bool isSinglePrintType) {
     final exeDir = File(Platform.resolvedExecutable).parent.path;
-    final asseetDir = 'assets\\adVideos\\${isSinglePrintType ? 'short' : 'double'}';
+    final asseetDir = 'assets\\adVideos\\${isSinglePrintType ? 'short' : 'long'}';
     return '$exeDir\\$asseetDir';
   }
 
