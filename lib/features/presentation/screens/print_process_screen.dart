@@ -30,7 +30,8 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
   }
 
   Future<void> _initVideo() async {
-    _adVideoPath = _randomAssetVideo();
+    final isSinglePageType = ref.watch(pagePrintProvider) == PagePrintType.single;
+    _adVideoPath = _randomAssetVideo(isSinglePageType);
     if (_adVideoPath != null) {
       _videoController = VideoPlayerController.file(File(_adVideoPath))..setLooping(true);
       await _videoController!.initialize();
@@ -258,9 +259,10 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
     return 'assets/adImages/$fileName';
   }
 
-  String getAdVideoDir() {
+  String getAdVideoDir(bool isSinglePageType) {
     final exeDir = File(Platform.resolvedExecutable).parent.path;
-    return '$exeDir\\assets\\adVideos';
+    final assetDir = 'assets\\adVideos\\${isSinglePageType ? 'short' : 'long'}';
+    return '$exeDir\\$assetDir';
   }
 
   String? getRandomAdImageFilePath() {
@@ -297,8 +299,8 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
     return randomFile.path; // ⬅️ 여기서 전체 파일 경로 반환
   }
 
-  String? _randomAssetVideo() {
-    final adVideoDir = getAdVideoDir();
+  String? _randomAssetVideo(bool isSinglePageType) {
+    final adVideoDir = getAdVideoDir(isSinglePageType);
     final adVideoFolder = Directory(adVideoDir);
 
     if (!adVideoFolder.existsSync()) {
@@ -320,6 +322,6 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
     final randomFile = videoFiles[Random().nextInt(videoFiles.length)];
     final fileName = randomFile.uri.pathSegments.last;
 
-    return 'assets/adVideos/$fileName';
+    return 'assets/adVideos/${isSinglePageType ? 'short' : 'long'}/$fileName';
   }
 }
