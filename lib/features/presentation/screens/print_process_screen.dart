@@ -17,24 +17,56 @@ class PrintProcessScreen extends ConsumerStatefulWidget {
 }
 
 class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
-  late final String? _adVideoPath;
-
   VideoPlayerController? _videoController;
 
   @override
   void initState() {
     super.initState();
-    _initVideo();
+
+    // 초기 1회 세팅
+    final initialType = ref.read(pagePrintProvider);
+    _updateVideoFor(initialType);
+
+    // 이후 변경 시마다 갱신
+    ref.listen<PagePrintType>(pagePrintProvider, (prev, next) {
+      if (prev != next) {
+        _updateVideoFor(next);
+      }
+    });
   }
 
-  Future<void> _initVideo() async {
-    final isSinglePrintType = ref.watch(pagePrintProvider) == PagePrintType.single;
-    _adVideoPath = _randomAssetVideo(isSinglePrintType);
-    if (_adVideoPath != null) {
-      _videoController = VideoPlayerController.file(File(_adVideoPath))..setLooping(true);
-      await _videoController!.initialize();
-      if (mounted) setState(() {});
+  Future<void> _updateVideoFor(PagePrintType type) async {
+    final isSingle = type == PagePrintType.single;
+
+    // 이전 컨트롤러 정리
+    final old = _videoController;
+    _videoController = null;
+    if (mounted) setState(() {}); // UI에서 이전 영상 숨김
+    await old?.pause();
+    await old?.dispose();
+
+    // 새 경로 계산
+    final newPath = _randomAssetVideo(isSingle); // 파일 경로 문자열 반환(아래 주의사항 참조)
+
+    if (!mounted) return;
+
+    if (newPath == null) {
+      // 경로 없음: 그냥 표시 안 함
+      return;
+    }
+
+    final controller = VideoPlayerController.file(File(newPath))..setLooping(true);
+    try {
+      await controller.initialize();
+      if (!mounted) {
+        await controller.dispose();
+        return;
+      }
+      _videoController = controller;
+      setState(() {});
       _videoController!.play();
+    } catch (e) {
+      await controller.dispose();
     }
   }
 
