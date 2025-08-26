@@ -13,12 +13,10 @@ class PhotoCardPreviewScreen extends ConsumerStatefulWidget {
     super.key,
   });
   @override
-  ConsumerState<PhotoCardPreviewScreen> createState() =>
-      _PhotoCardPreviewScreenState();
+  ConsumerState<PhotoCardPreviewScreen> createState() => _PhotoCardPreviewScreenState();
 }
 
-class _PhotoCardPreviewScreenState
-    extends ConsumerState<PhotoCardPreviewScreen> {
+class _PhotoCardPreviewScreenState extends ConsumerState<PhotoCardPreviewScreen> {
   Future<void> _handlePaymentError(Object error, StackTrace stack) async {
     logger.e('Payment error occurred', error: error, stackTrace: stack);
     await DialogHelper.showPurchaseFailedDialog(
@@ -68,78 +66,86 @@ class _PhotoCardPreviewScreenState
     final kiosk = ref.watch(kioskInfoServiceProvider);
 
     return DefaultTextStyle(
-        style: TextStyle(
-        fontFamily: context.locale.languageCode == 'ja'?
-        'MPLUSRounded' : 'Cafe24Ssurround2',
-    ),
-    child: Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Text(
-            LocaleKeys.sub02_txt_01.tr(),
-            textAlign: TextAlign.center,
-            style: context.typography.kioskBody1B,
-          ),
-          SizedBox(height: 30.h),
-          GradientContainer(
-            content: ClipRRect(
-              borderRadius: BorderRadius.circular(10.r),
-              child: ref.watch(verifyPhotoCardProvider).when(
-                data: (data) {
-                  return Image.network(
-                    data?.formattedBackPhotoCardUrl ?? '',
-                  );
-                },
-                loading: () {
-                  return const CircularProgressIndicator();
-                },
-                error: (error, stack) {
-                  return GeneralErrorWidget(
-                    exception: error as Exception,
-                    onRetry: () => ref.refresh(verifyPhotoCardProvider),
-                  );
-                },
+      style: TextStyle(
+        fontFamily: context.locale.languageCode == 'ja' ? 'MPLUSRounded' : 'Cafe24Ssurround2',
+      ),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Text(
+              LocaleKeys.sub02_txt_01.tr(),
+              textAlign: TextAlign.center,
+              style: context.typography.kioskBody1B,
+            ),
+            SizedBox(height: 30.h),
+            GradientContainer(
+              content: ClipRRect(
+                borderRadius: BorderRadius.circular(10.r),
+                child: ref.watch(verifyPhotoCardProvider).when(
+                  data: (data) {
+                    return Image.network(
+                      data?.formattedBackPhotoCardUrl ?? '',
+                    );
+                  },
+                  loading: () {
+                    return const CircularProgressIndicator();
+                  },
+                  error: (error, stack) {
+                    return GeneralErrorWidget(
+                      exception: error as Exception,
+                      onRetry: () => ref.refresh(verifyPhotoCardProvider),
+                    );
+                  },
+                ),
               ),
             ),
-          ),
-          SizedBox(height: 30.h),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const PriceBox(),
-              SizedBox(width: 20.w),
-              ElevatedButton(
-                style: context.paymentButtonStyle,
-                onPressed: () async {
-                  await SoundManager().playSound();
-                  await ref
-                      .read(photoCardPreviewScreenProviderProvider.notifier)
-                      .payment();
-                  final isPaymentFailed = ref.read(paymentFailureProvider);
-                  if (isPaymentFailed) {
-                    ref.read(paymentFailureProvider.notifier).reset();
-                    DialogHelper.showPaymentCardFailedDialog(
-                      context,
-                    );
-                    PhotoCardUploadRouteData().go(context);
-                  }
-                },
-                child: Text(LocaleKeys.sub02_btn_pay.tr()),
-              ),
-            ],
-          ),
-          SizedBox(height: 30.h),
-          Text(
+            SizedBox(height: 30.h),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                const PriceBox(),
+                SizedBox(width: 20.w),
+                ElevatedButton(
+                  style: context.paymentButtonStyle,
+                  onPressed: () async {
+                    await SoundManager().playSound();
+
+                    if (context.mounted) {
+                      final result = await DialogHelper.showPaymentDiscriptionDialog(context);
+
+                      if (result) {
+                        await ref.read(photoCardPreviewScreenProviderProvider.notifier).payment();
+                        final isPaymentFailed = ref.read(paymentFailureProvider);
+                        if (isPaymentFailed) {
+                          ref.read(paymentFailureProvider.notifier).reset();
+                          if (context.mounted) {
+                            DialogHelper.showPaymentCardFailedDialog(
+                              context,
+                            );
+                            PhotoCardUploadRouteData().go(context);
+                          }
+                        }
+                      }
+                    }
+                  },
+                  child: Text(LocaleKeys.sub02_btn_pay.tr()),
+                ),
+              ],
+            ),
+            SizedBox(height: 30.h),
+            Text(
               LocaleKeys.sub03_txt_03.tr(),
-              style: context.typography.kioskBody2B.copyWith(color: Color(int.parse(kiosk?.couponTextColor.replaceFirst('#', '0xff') ?? '0xffffff')),
+              style: context.typography.kioskBody2B.copyWith(
+                color: Color(int.parse(kiosk?.couponTextColor.replaceFirst('#', '0xff') ?? '0xffffff')),
                 //fontFamily: 'Pretendard',
               ),
-          ),
-        ],
+            ),
+          ],
+        ),
       ),
-    ),);
+    );
   }
 }

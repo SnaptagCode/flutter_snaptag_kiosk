@@ -163,6 +163,60 @@ class DialogHelper {
     );
   }
 
+  static Future<bool> _showKioskInfoDiaolg(
+    BuildContext context, {
+    required String title,
+    required String message,
+  }) async {
+    Future.delayed(const Duration(seconds: 3), () {
+      if (context.mounted) {
+        if (Navigator.of(context, rootNavigator: true).canPop()) {
+          Navigator.of(context, rootNavigator: true).pop(true);
+        }
+      }
+    });
+
+    final result = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return DefaultTextStyle(
+          style: TextStyle(
+            fontFamily: context.locale.languageCode == 'ja' ? 'MPLUSRounded' : 'Cafe24Ssurround2',
+          ),
+          child: AlertDialog(
+            backgroundColor: Colors.white,
+            insetPadding: EdgeInsets.symmetric(horizontal: 100.w),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20.r),
+            ),
+            title: Center(
+              child: Text(
+                title,
+                textAlign: TextAlign.center,
+                style: context.typography.kioskAlert1B.copyWith(
+                  color: Colors.black,
+                  fontFamily: context.locale.languageCode == 'ja' ? 'MPLUSRounded' : 'Cafe24Ssurround2',
+                ),
+              ),
+            ),
+            content: message.isNotEmpty
+                ? Text(
+                    message,
+                    style: context.typography.kioskAlert2M.copyWith(
+                      color: Colors.black,
+                      fontFamily: 'Pretendard',
+                    ),
+                    textAlign: TextAlign.center,
+                  )
+                : null,
+          ),
+        );
+      },
+    );
+    return result ?? false;
+  }
+
   static Future<bool> _showOneButtonKioskDialog(
     BuildContext context, {
     required String title,
@@ -448,6 +502,10 @@ class DialogHelper {
     );
   }
   */
+
+  static Future<bool> showPaymentDiscriptionDialog(BuildContext context) async {
+    return await _showKioskInfoDiaolg(context, title: "결제 진행 중..", message: "결제가 완료될 때까지 취소 버튼을 누르지 마세요.");
+  }
 
   static Future<void> showPrintWaitingDialog(BuildContext context) async {
     await _showOneButtonKioskDialog(
