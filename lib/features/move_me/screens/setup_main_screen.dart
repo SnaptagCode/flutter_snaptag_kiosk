@@ -140,7 +140,7 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
                       activeAssetName: SnaptagSvg.printDoubleActive,
                       inactiveAssetName: SnaptagSvg.printDoubleInactive,
                       onTap: () async {
-                        if (cardCountState < 1) {
+                        if (cardCountState.currentCount < 1) {
                           await SoundManager().playSound();
                           ref.read(pagePrintProvider.notifier).set(PagePrintType.double);
                           if (machineId != 0) {
@@ -223,7 +223,7 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
                       child: Align(
                         alignment: Alignment.center,
                         child: Text(
-                          (cardCountState).toString(),
+                          (cardCountState.currentCount).toString(),
                           textAlign: TextAlign.center,
                           style: ref.watch(pagePrintProvider) != PagePrintType.single
                               ? context.typography.kioskBody2B.copyWith(color: Color(0xFFECEDEF))
@@ -257,7 +257,7 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
                         onTap: () async {
                           if (ref.read(pagePrintProvider) != PagePrintType.none) {
                             await SoundManager().playSound();
-                            if (cardCountState < 1) {
+                            if (cardCountState.currentCount < 1) {
                               ref.read(pagePrintProvider.notifier).set(PagePrintType.double);
                             }
                             KioskInfoRouteData().go(context);
@@ -312,7 +312,7 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
                             await ref.read(printerServiceProvider.notifier).startPrintLog();
                             SlackLogService().sendLogToSlack(
                                 'machineId:$machineId, currentVersion:$currentVersion, latestVersion:$latestVersion');
-                            if (cardCountState < 1) {
+                            if (cardCountState.currentCount < 1) {
                               ref.read(pagePrintProvider.notifier).set(PagePrintType.double);
                               SlackLogService().sendLogToSlack(
                                   'machineId: $machineId, singleCard: $cardCountState, set pagePrintType double');

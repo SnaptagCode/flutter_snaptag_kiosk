@@ -78,7 +78,8 @@ class SlackLogService {
           '''
 ${def.description}
 
-- 단면 카드 입력 수량 : $cardCount
+- 단면 카드 세팅 수량 : ${cardCount.initialCount}개
+- 현재 단면 카드 수량 : ${cardCount.currentCount}개
 - 불러온 이벤트 : $eventName
 - 프린터 연결 상태 : 정상
 - 결제 단말기 연결 상태 : ${isPaymentOn == true ? '정상' : '미연결'}
@@ -107,7 +108,7 @@ ${def.description}
         description: description,
         guideText: def.guideText,
         guideUrl: def.guideUrl,
-        cardCount: cardCount,
+        cardCount: cardCount.currentCount,
       );
 
       await sendLog(slackWebhookBroadcastUrl, message);
