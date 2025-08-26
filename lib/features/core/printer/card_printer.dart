@@ -2,6 +2,7 @@ import 'dart:ffi' as ffi; // ffi 임포트 확인
 import 'dart:io';
 
 import 'package:ffi/ffi.dart'; // Utf8 사용을 위한 임포트
+import 'package:flutter_snaptag_kiosk/features/core/printer/print_state_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'package:flutter_snaptag_kiosk/features/core/printer/printer_log.dart';
@@ -62,8 +63,7 @@ class PrinterService extends _$PrinterService {
       final printerLog = getPrinterLogData(_bindings);
       if (printerLog != null) {
         ref.read(printerLogProvider.notifier).update(printerLog);
-      }
-      else {
+      } else {
         SlackLogService().sendLogToSlack("CheckConnected Print - PrinterLog is null");
       }
       final isReady = printerLog?.printerMainStatusCode == "1004";
@@ -212,6 +212,7 @@ class PrinterService extends _$PrinterService {
       final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
       final log = printerLog.copyWith(kioskMachineId: machineId);
       if (machineId != 0) {
+        ref.read(printerLogProvider.notifier).update(printerLog);
         await ref.read(kioskRepositoryProvider).updatePrintLog(request: log);
         SlackLogService().sendLogToSlack('Machine ID: $machineId , PrintState : $log');
       }
