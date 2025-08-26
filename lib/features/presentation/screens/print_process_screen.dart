@@ -171,7 +171,7 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
   void checkCardSingleCardCount() {
     final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
 
-    if (ref.read(cardCountProvider) < 1) {
+    if (ref.read(cardCountProvider).currentCount < 1) {
       ref.read(pagePrintProvider.notifier).set(PagePrintType.double);
       SlackLogService().sendLogToSlack('*[MachineId : $machineId]*, change pagePrintType double');
     } else {
