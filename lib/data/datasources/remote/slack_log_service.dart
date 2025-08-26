@@ -99,8 +99,7 @@ class SlackLogService {
       description = '''
 ${slackLogTemplate.description}
 
-- 단면 카드 세팅 수량 : ${cardCount.initialCount}개
-- 현재 단면 카드 수량 : ${cardCount.currentCount}개
+- 단면 카드 수량 : ${cardCount.currentCount} / ${cardCount.initialCount}
 - 불러온 이벤트 : $eventName
 - 프린터 연결 상태 : 정상
 - 결제 단말기 연결 상태 : ${isPaymentOn == true ? '정상' : '미연결'}
@@ -216,7 +215,7 @@ ${cardCount == 0 ? "- 단면 -> 양면 모드" : "- 단면 모드 설정\n- 단�
     final emoji = emojiMap[slackLogTemplate.category.toLowerCase()] ?? 'ℹ️';
 
     final formattedTitle = (slackLogTemplate.title == "점검 완료" || slackLogTemplate.title == "점검 시작")
-        ? '*[${slackLogTemplate.title}]*'
+        ? '🔵  *${slackLogTemplate.title}*'
         : '$emoji  *${slackLogTemplate.title}*';
 
     final guidePart = slackLogTemplate.guideText != null
