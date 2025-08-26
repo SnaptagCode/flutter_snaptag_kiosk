@@ -17,6 +17,7 @@ class UpdateOrderRequest with _$UpdateOrderRequest {
     String? uniqueNumber,
     required String authSeqNumber,
     required String approvalNumber,
+    String? description,
     @Default('{}') String detail,
   }) = _UpdateOrderRequest;
 
