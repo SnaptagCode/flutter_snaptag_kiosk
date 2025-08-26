@@ -61,13 +61,15 @@ class SetupRefundProcess extends _$SetupRefundProcess {
       // 이미 취소된 거래
       await ref.read(kioskRepositoryProvider).updateOrderStatus(
             order.orderId.toInt(),
-            request.copyWith(status: OrderStatus.refunded),
+            request.copyWith(status: OrderStatus.refunded_failed, description: "기취소된 거래"),
           );
       SlackLogService().sendPaymentBroadcastLogToSlak(InfoKey.paymentRefundFail.key,
           paymentDescription:
               "동작로직: 관리자 환불\n- 사유: 기취소된 거래\n- 인증번호: ${order.photoAuthNumber}\n- 승인번호: ${order.paymentAuthNumber ?? "없음"}");
     } else {
-      await ref.read(kioskRepositoryProvider).updateOrderStatus(
+      switch(payment?.res) {
+        case '0000':
+          await ref.read(kioskRepositoryProvider).updateOrderStatus(
             order.orderId.toInt(),
             request,
           );
