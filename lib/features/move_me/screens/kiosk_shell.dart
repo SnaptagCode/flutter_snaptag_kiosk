@@ -22,10 +22,8 @@ class _KioskShellState extends ConsumerState<KioskShell> {
   void initState() {
     super.initState();
 
-    Future.delayed(const Duration(minutes: 30), () {
-      _periodicTimer = Timer.periodic(const Duration(minutes: 30), (timer) {
-        SlackLogService().sendPeriodicLogBroadcastLogToSlack();
-      });
+    _periodicTimer = Timer.periodic(const Duration(minutes: 30), (timer) {
+      SlackLogService().sendPeriodicLogBroadcastLogToSlack();
     });
   }
 
