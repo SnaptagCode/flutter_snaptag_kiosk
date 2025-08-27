@@ -225,7 +225,7 @@ ${cardCount == 0 ? "- 단면 -> 양면 모드" : "- 단면 모드 설정\n- 단�
     return '''
 $formattedTitle
 ───────────────────
-Kiosk: ${slackLogTemplate.kioskMachineInfo?.kioskEventId ?? 0}  /  ${slackLogTemplate.appVersion}
+Kiosk: ${slackLogTemplate.kioskMachineInfo?.kioskMachineId ?? 0}  /  ${slackLogTemplate.appVersion}
 업체(구단): ${slackLogTemplate.serviceName}
 ───────────────────
 ${slackLogTemplate.description}
