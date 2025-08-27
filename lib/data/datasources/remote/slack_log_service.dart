@@ -146,7 +146,7 @@ ${slackLogTemplate.description}
       description = '''
 - 리본 잔량 : ${printerLog?.rbnRemainingRatio != null ? "${printerLog?.rbnRemainingRatio}%" : "알 수 없음"}
 - 필름 잔량 : ${printerLog?.filmRemainingRatio != null ? "${printerLog?.filmRemainingRatio}%" : "알 수 없음"}
-- 단면 카드 장수 : ${cardCount.currentCount}개
+- 단면 카드 수량 : ${cardCount.currentCount} / ${cardCount.initialCount}
 ''';
 
       final message = buildSlackAlertMessage(
