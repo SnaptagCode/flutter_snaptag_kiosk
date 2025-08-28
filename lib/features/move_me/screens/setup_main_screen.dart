@@ -10,6 +10,7 @@ import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_snaptag_kiosk/core/providers/version_notifier.dart';
 import 'package:flutter_snaptag_kiosk/core/utils/launcher_service.dart';
+import 'package:flutter_snaptag_kiosk/data/datasources/local/id_writer.dart';
 
 class SetupMainScreen extends ConsumerStatefulWidget {
   const SetupMainScreen({super.key});
@@ -303,6 +304,9 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
                             await DialogHelper.showCheckPrintStateDialog(context);
                             return;
                           }
+                          final eventId = ref.read(kioskInfoServiceProvider)?.kioskEventId ?? 0;
+                          final cardCountInfo = "${cardCountState.initialCount} / ${cardCountState.currentCount}";
+                          await writePhotocodeId(machineId.toString(), eventId.toString(), cardCountInfo);
                           final result = await DialogHelper.showSetupDialog(
                             context,
                             title: '이벤트를 실행합니다.',

@@ -1,8 +1,8 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:flutter_snaptag_kiosk/data/datasources/local/id_writer.dart';
 
 part 'card_count_provider.g.dart';
 
-/// 카드 수량 상태 모델
 class CardCountState {
   final int initialCount; // 처음 설정(기준) 수량
   final int currentCount; // 현재 수량
@@ -43,12 +43,24 @@ class CardCount extends _$CardCount {
     state = state.copyWith(initialCount: value, currentCount: value);
   }
 
-  void increase([int step = 1]) {
-    state = state.copyWith(currentCount: state.currentCount + step);
+  Future<void> increase([int step = 1]) async {
+    final next = state.currentCount + step;
+    state = state.copyWith(currentCount: next);
+    try {
+      await writeSingleCardCount("${next.toString()} / ${state.initialCount}");
+    } catch (e) {
+      // print('writeSingleCardCount failed: $e');
+    }
   }
 
-  void decrease([int step = 1]) {
+  Future<void> decrease([int step = 1]) async {
     final next = state.currentCount - step;
-    state = state.copyWith(currentCount: next < 0 ? 0 : next);
+    final clamped = next < 0 ? 0 : next;
+    state = state.copyWith(currentCount: clamped);
+    try {
+      await writeSingleCardCount("${clamped.toString()} / ${state.initialCount}");
+    } catch (e) {
+      // print('writeSingleCardCount failed: $e');
+    }
   }
 }
