@@ -215,7 +215,7 @@ ${cardCount == 0 ? "- 단면 -> 양면 모드" : "- 단면 모드 설정\n- 단�
     final emoji = emojiMap[slackLogTemplate.category.toLowerCase()] ?? 'ℹ️';
 
     final formattedTitle = (slackLogTemplate.title == "점검 완료" || slackLogTemplate.title == "점검 시작")
-        ? '🔵  *${slackLogTemplate.title}*'
+        ? '🟢  *${slackLogTemplate.title}*'
         : '$emoji  *${slackLogTemplate.title}*';
 
     final guidePart = slackLogTemplate.guideText != null
