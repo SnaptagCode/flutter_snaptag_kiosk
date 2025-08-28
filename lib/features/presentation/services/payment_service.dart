@@ -56,7 +56,7 @@ class PaymentService extends _$PaymentService {
         if (paymentResponse.res == '0000') {
           final response = await _updateOrder(isRefund: false); //정상 결제
           ref.read(updateOrderInfoProvider.notifier).update(response);
-          ref.read(cardCountProvider.notifier).decrease();
+          await ref.read(cardCountProvider.notifier).decrease();
         } else if (paymentResponse.res == '1004') {
           SlackLogService().sendPaymentBroadcastLogToSlak(InfoKey.paymentFail.key,
               paymentDescription:

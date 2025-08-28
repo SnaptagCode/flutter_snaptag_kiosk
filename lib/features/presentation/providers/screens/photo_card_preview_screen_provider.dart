@@ -18,7 +18,7 @@ class PhotoCardPreviewScreenProvider extends _$PhotoCardPreviewScreenProvider {
       if (e is! OrderCreationException && e is! PreconditionFailedException) {
         try {
           await ref.read(paymentServiceProvider.notifier).refund();
-          if (ref.read(pagePrintProvider) == PagePrintType.single) ref.read(cardCountProvider.notifier).increase();
+          if (ref.read(pagePrintProvider) == PagePrintType.single) await ref.read(cardCountProvider.notifier).increase();
         } catch (refundError) {
           logger.e('Payment and refund failed', error: refundError);
         }
