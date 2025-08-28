@@ -24,13 +24,15 @@ class SetupRefundProcess extends _$SetupRefundProcess {
       final response = await ref.read(paymentRepositoryProvider).cancel(
             totalAmount: invoice.total,
             originalApprovalNo: order.paymentAuthNumber ?? '',
-            originalApprovalDate: DateFormat('yyMMdd').format(order.completedAt!),
+            originalApprovalDate:
+                DateFormat('yyMMdd').format(order.completedAt!),
           );
 
       state = AsyncValue.data(response);
       await _updateOrderStatus(order);
       // 현재 페이지 정보를 가져와서 동일한 페이지로 새로고침
-      final currentPage = ref.read(ordersPageProvider()).requireValue.paging.currentPage;
+      final currentPage =
+          ref.read(ordersPageProvider()).requireValue.paging.currentPage;
       ref.read(ordersPageProvider().notifier).goToPage(currentPage);
     } catch (e) {
       state = AsyncValue.error(e, StackTrace.current);
@@ -61,9 +63,11 @@ class SetupRefundProcess extends _$SetupRefundProcess {
       // 이미 취소된 거래
       await ref.read(kioskRepositoryProvider).updateOrderStatus(
             order.orderId.toInt(),
-            request.copyWith(status: OrderStatus.refunded_failed, description: "기취소된 거래"),
+            request.copyWith(
+                status: OrderStatus.refunded_failed, description: "기취소된 거래"),
           );
-      SlackLogService().sendPaymentBroadcastLogToSlak(InfoKey.paymentRefundFail.key,
+      SlackLogService().sendPaymentBroadcastLogToSlak(
+          InfoKey.paymentRefundFail.key,
           paymentDescription:
               "동작로직: 관리자 환불\n- 사유: 기취소된 거래\n- 인증번호: ${order.photoAuthNumber}\n- 승인번호: ${order.paymentAuthNumber ?? "없음"}");
     } else {
@@ -73,27 +77,35 @@ class SetupRefundProcess extends _$SetupRefundProcess {
                 order.orderId.toInt(),
                 request,
               );
-          switch (payment?.res) {
-            case '0000':
-              SlackLogService().sendPaymentBroadcastLogToSlak(InfoKey.paymentRefund.key,
-                  paymentDescription:
-                      "동작로직: 관리자 환불\n- 인증번호: ${order.photoAuthNumber}\n- 승인번호: ${order.paymentAuthNumber ?? "없음"}");
-              break;
-            case '1000':
-              SlackLogService().sendPaymentBroadcastLogToSlak(InfoKey.paymentRefundFail.key,
-                  paymentDescription:
-                      "동작로직: 관리자 환불\n- 사유: 사용자가 환불취소 누름\n- 인증번호: ${order.photoAuthNumber}\n- 승인번호: ${order.paymentAuthNumber ?? "없음"}");
-              break;
-            case '1004':
-              SlackLogService().sendPaymentBroadcastLogToSlak(InfoKey.paymentRefundFail.key,
-                  paymentDescription:
-                      "동작로직: 관리자 환불\n- 사유: 시간초과\n- 인증번호: ${order.photoAuthNumber}\n- 승인번호: ${order.paymentAuthNumber ?? "없음"}");
-              break;
-            default:
-              SlackLogService().sendPaymentBroadcastLogToSlak(InfoKey.paymentRefundFail.key,
-                  paymentDescription:
-                      "동작로직: 관리자 환불\n- 사유: 확인필요\n- 인증번호: ${order.photoAuthNumber}\n- 승인번호: ${order.paymentAuthNumber ?? "없음"}");
-          }
+        case '1000':
+          await ref.read(kioskRepositoryProvider).updateOrderStatus(
+                order.orderId.toInt(),
+                request.copyWith(description: "고객취소"),
+              );
+          SlackLogService().sendPaymentBroadcastLogToSlak(
+              InfoKey.paymentRefundFail.key,
+              paymentDescription:
+                  "동작로직: 관리자 환불\n- 사유: 사용자가 환불취소 누름\n- 인증번호: ${order.photoAuthNumber}\n- 승인번호: ${order.paymentAuthNumber ?? "없음"}");
+          break;
+        case '1004':
+          await ref.read(kioskRepositoryProvider).updateOrderStatus(
+                order.orderId.toInt(),
+                request.copyWith(description: "시간초과"),
+              );
+          SlackLogService().sendPaymentBroadcastLogToSlak(
+              InfoKey.paymentRefundFail.key,
+              paymentDescription:
+                  "동작로직: 관리자 환불\n- 사유: 시간초과\n- 인증번호: ${order.photoAuthNumber}\n- 승인번호: ${order.paymentAuthNumber ?? "없음"}");
+          break;
+        default:
+          await ref.read(kioskRepositoryProvider).updateOrderStatus(
+                order.orderId.toInt(),
+                request.copyWith(description: "확인필요"),
+              );
+          SlackLogService().sendPaymentBroadcastLogToSlak(
+              InfoKey.paymentRefundFail.key,
+              paymentDescription:
+                  "동작로직: 관리자 환불\n- 사유: 확인필요\n- 인증번호: ${order.photoAuthNumber}\n- 승인번호: ${order.paymentAuthNumber ?? "없음"}");
       }
     }
   }

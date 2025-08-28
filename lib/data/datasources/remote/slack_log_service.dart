@@ -60,6 +60,7 @@ class SlackLogService {
     final version = _container.read(versionStateProvider).currentVersion;
     final eventType = kioskInfo?.eventType ?? "-";
 
+
     final serviceNameMap = {"SUF": "수원FC", "SEF": "서울 이랜드 FC", "KEEFO": "성수 B'Day", "AGFC": "안산그리너스FC"};
 
     final serviceName = serviceNameMap[eventType] ?? '-';
@@ -71,6 +72,8 @@ class SlackLogService {
             title: def.title,
             serviceName: serviceName,
             appVersion: version,
+            guideText: def.guideText,
+            guideUrl: def.guideUrl,
             description: def.description,
             kioskMachineInfo: kioskInfo)
         : SlackLogTemplate(
