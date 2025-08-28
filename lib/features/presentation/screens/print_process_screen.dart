@@ -171,7 +171,7 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
   void checkCardSingleCardCount() {
     final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
 
-    if (ref.read(cardCountProvider) < 1) {
+    if (ref.read(cardCountProvider).currentCount < 1) {
       ref.read(pagePrintProvider.notifier).set(PagePrintType.double);
       SlackLogService().sendLogToSlack('*[MachineId : $machineId]*, change pagePrintType double');
     } else {
@@ -190,7 +190,7 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
     final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
     try {
       await ref.read(paymentServiceProvider.notifier).refund();
-      if (ref.read(pagePrintProvider) == PagePrintType.single) ref.read(cardCountProvider.notifier).increase();
+      if (ref.read(pagePrintProvider) == PagePrintType.single) await ref.read(cardCountProvider.notifier).increase();
     } catch (e) {
       SlackLogService().sendErrorLogToSlack('*[MachineId : $machineId]*, 환불 처리 중 오류 발생: $e');
       logger.e('환불 처리 중 오류 발생', error: e);

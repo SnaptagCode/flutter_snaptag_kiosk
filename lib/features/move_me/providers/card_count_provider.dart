@@ -1,19 +1,66 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:flutter_snaptag_kiosk/data/datasources/local/id_writer.dart';
 
 part 'card_count_provider.g.dart';
+
+class CardCountState {
+  final int initialCount; // 처음 설정(기준) 수량
+  final int currentCount; // 현재 수량
+
+  const CardCountState({
+    required this.initialCount,
+    required this.currentCount,
+  });
+
+  int get usedCount => (initialCount - currentCount).clamp(0, initialCount);
+  int get remaining => currentCount;
+
+  CardCountState copyWith({int? initialCount, int? currentCount}) {
+    return CardCountState(
+      initialCount: initialCount ?? this.initialCount,
+      currentCount: currentCount ?? this.currentCount,
+    );
+  }
+
+  factory CardCountState.initial([int n = 0]) =>
+      CardCountState(initialCount: n, currentCount: n);
+}
 
 @Riverpod(keepAlive: true)
 class CardCount extends _$CardCount {
   @override
-  int build() => 0; // 초기 카드 수
+  CardCountState build() => CardCountState.initial(0);
 
-  void increase() => state++;
-
-  void decrease() {
-    if (state > 0) state--;
+  void setInitial(int value) {
+    state = state.copyWith(initialCount: value);
   }
 
-  void update(int newCount) {
-    state = newCount;
+  void updateCurrent(int newCount) {
+    state = state.copyWith(currentCount: newCount);
+  }
+
+  void update(int value) {
+    state = state.copyWith(initialCount: value, currentCount: value);
+  }
+
+  Future<void> increase([int step = 1]) async {
+    final next = state.currentCount + step;
+    state = state.copyWith(currentCount: next);
+    try {
+      await writeSingleCardCount("${next.toString()} / ${state.initialCount}");
+    } catch (e) {
+      // print('writeSingleCardCount failed: $e');
+    }
+  }
+
+  Future<void> decrease([int step = 1]) async {
+    final next = state.currentCount - step;
+    final clamped = next < 0 ? 0 : next;
+    state = state.copyWith(currentCount: clamped);
+    try {
+      await writeSingleCardCount("${clamped.toString()} / ${state.initialCount}");
+    } catch (e) {
+      // print('writeSingleCardCount failed: $e');
+    }
   }
 }

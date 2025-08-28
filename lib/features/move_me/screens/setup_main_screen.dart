@@ -10,6 +10,7 @@ import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_snaptag_kiosk/core/providers/version_notifier.dart';
 import 'package:flutter_snaptag_kiosk/core/utils/launcher_service.dart';
+import 'package:flutter_snaptag_kiosk/data/datasources/local/id_writer.dart';
 
 class SetupMainScreen extends ConsumerStatefulWidget {
   const SetupMainScreen({super.key});
@@ -140,7 +141,7 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
                       activeAssetName: SnaptagSvg.printDoubleActive,
                       inactiveAssetName: SnaptagSvg.printDoubleInactive,
                       onTap: () async {
-                        if (cardCountState < 1) {
+                        if (cardCountState.currentCount < 1) {
                           await SoundManager().playSound();
                           ref.read(pagePrintProvider.notifier).set(PagePrintType.double);
                           if (machineId != 0) {
@@ -223,7 +224,7 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
                       child: Align(
                         alignment: Alignment.center,
                         child: Text(
-                          (cardCountState).toString(),
+                          (cardCountState.currentCount).toString(),
                           textAlign: TextAlign.center,
                           style: ref.watch(pagePrintProvider) != PagePrintType.single
                               ? context.typography.kioskBody2B.copyWith(color: Color(0xFFECEDEF))
@@ -257,7 +258,7 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
                         onTap: () async {
                           if (ref.read(pagePrintProvider) != PagePrintType.none) {
                             await SoundManager().playSound();
-                            if (cardCountState < 1) {
+                            if (cardCountState.currentCount < 1) {
                               ref.read(pagePrintProvider.notifier).set(PagePrintType.double);
                             }
                             KioskInfoRouteData().go(context);
@@ -303,6 +304,9 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
                             await DialogHelper.showCheckPrintStateDialog(context);
                             return;
                           }
+                          final eventId = ref.read(kioskInfoServiceProvider)?.kioskEventId ?? 0;
+                          final cardCountInfo = "${cardCountState.initialCount} / ${cardCountState.currentCount}";
+                          await writePhotocodeId(machineId.toString(), eventId.toString(), cardCountInfo);
                           final result = await DialogHelper.showSetupDialog(
                             context,
                             title: '이벤트를 실행합니다.',
@@ -312,7 +316,7 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
                             await ref.read(printerServiceProvider.notifier).startPrintLog();
                             SlackLogService().sendLogToSlack(
                                 'machineId:$machineId, currentVersion:$currentVersion, latestVersion:$latestVersion');
-                            if (cardCountState < 1) {
+                            if (cardCountState.currentCount < 1) {
                               ref.read(pagePrintProvider.notifier).set(PagePrintType.double);
                               SlackLogService().sendLogToSlack(
                                   'machineId: $machineId, singleCard: $cardCountState, set pagePrintType double');
@@ -324,10 +328,12 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
                             PhotoCardUploadRouteData().go(context);
                             try {
                               final response = await ref.read(paymentRepositoryProvider).check();
-                              SlackLogService().sendBroadcastLogToSlack(InfoKey.inspectionEnd.key, isPaymentOn: true);
+                              SlackLogService()
+                                  .sendInspectionEndBroadcastLogToSlack(InfoKey.inspectionEnd.key, isPaymentOn: true);
                               SlackLogService().sendLogToSlack("Payment Device check: $response");
                             } catch (e) {
-                              SlackLogService().sendBroadcastLogToSlack(InfoKey.inspectionEnd.key, isPaymentOn: false);
+                              SlackLogService()
+                                  .sendInspectionEndBroadcastLogToSlack(InfoKey.inspectionEnd.key, isPaymentOn: false);
                               SlackLogService().sendErrorLogToSlack("Payment Device check: $e");
                             }
                           }
@@ -394,7 +400,7 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
                       child: SetupUpdateCard(
                         title: '현재 버전',
                         //version: currentVersion,
-                        version: "v2.9.0",
+                        version: "v2.10.0",
                         buttonName: '업데이트',
                         isActive: isUpdateAvailable,
                         onUpdatePressed: () async {

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:developer';
 
+import 'package:flutter_snaptag_kiosk/data/models/entities/slack_log_template.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
@@ -46,68 +47,126 @@ class SlackLogService {
     await sendLog(slackWebhookWarningUrl, message);
   }
 
-  Future<void> sendBroadcastLogToSlack(String errorKey, {String? authNum, String? paymentDescription, String? approvalNum, bool? isPaymentOn}) async {
+  // 1) 객체 만드는 함수 LogState
+  // 2) 분기 처리 하는 함수 key, LogState. 결제 sendBraas
+  // 3) buildSlackAlertMessage 실행 LogState
+
+  Future<SlackLogTemplate> createSlackLogTemplate(
+    String? errorKey,
+  ) async {
     final definitions = _container.read(alertDefinitionProvider);
     final def = definitions.firstWhereOrNull((e) => e.key == errorKey);
     final kioskInfo = _container.read(kioskInfoServiceProvider);
-    final machineId = kioskInfo?.kioskMachineId ?? 0;
-    final version =  _container.read(versionStateProvider).currentVersion;
-    final cardCount = _container.read(cardCountProvider);
-    final printLog = _container.read(printerLogProvider);
-    final printerheadTemp = printLog?.heaterTemperature ?? 0;
-    final printerheadTempString = printerheadTemp != 0? "${(printerheadTemp/100).toStringAsFixed(2)}" : "알 수 없음";
+    final version = _container.read(versionStateProvider).currentVersion;
     final eventType = kioskInfo?.eventType ?? "-";
-    final eventName = kioskInfo?.printedEventName ?? "-";
-    final serviceNameMap = {
-      "SUF": "수원FC",
-      "SEF": "서울 이랜드 FC",
-      "KEEFO": "성수 B'Day",
-      "AGFC": "안산그리너스FC"
-    };
 
-    final paymentKey = [
-      InfoKey.paymentFail.key,
-      InfoKey.paymentRefund.key,
-      InfoKey.paymentRefundFail.key,
-    ];
+
+    final serviceNameMap = {"SUF": "수원FC", "SEF": "서울 이랜드 FC", "KEEFO": "성수 B'Day", "AGFC": "안산그리너스FC"};
+
     final serviceName = serviceNameMap[eventType] ?? '-';
-    String description;
-    if (def != null) {
-      if (def.key == "Inspection_End"){
-          description =
-          '''
-${def.description}
 
-- 단면 카드 입력 수량 : $cardCount
+    return def != null && errorKey != null
+        ? SlackLogTemplate(
+            key: errorKey,
+            category: def.category,
+            title: def.title,
+            serviceName: serviceName,
+            appVersion: version,
+            guideText: def.guideText,
+            guideUrl: def.guideUrl,
+            description: def.description,
+            kioskMachineInfo: kioskInfo)
+        : SlackLogTemplate(
+            key: '',
+            category: '',
+            title: '',
+            serviceName: serviceName,
+            appVersion: version,
+            description: '',
+            kioskMachineInfo: kioskInfo);
+  }
+
+  Future<void> sendInspectionEndBroadcastLogToSlack(String errorKey, {required bool isPaymentOn}) async {
+    final slackLogTemplate = await createSlackLogTemplate(errorKey);
+    final cardCount = _container.read(cardCountProvider);
+
+    if (slackLogTemplate.category.isNotEmpty) {
+      final kioskInfo = slackLogTemplate.kioskMachineInfo;
+      final eventName = kioskInfo?.printedEventName ?? "-";
+      final printLog = _container.read(printerLogProvider);
+      final printerheadTemp = printLog?.heaterTemperature ?? 0;
+      final printerheadTempString = printerheadTemp != 0 ? (printerheadTemp / 100).toStringAsFixed(2) : "알 수 없음";
+
+      String description;
+
+      description = '''
+${slackLogTemplate.description}
+
+- 단면 카드 수량 : ${cardCount.currentCount} / ${cardCount.initialCount}
 - 불러온 이벤트 : $eventName
 - 프린터 연결 상태 : 정상
 - 결제 단말기 연결 상태 : ${isPaymentOn == true ? '정상' : '미연결'}
 - 프린터 온도 : $printerheadTempString°C
 - 리본 잔량 : ${printLog?.rbnRemainingRatio != null ? "${printLog?.rbnRemainingRatio}%" : "알 수 없음"}
-- 필름 잔량 : ${printLog?.filmRemainingRatio != null ? "${printLog?.filmRemainingRatio}%": "알 수 없음"}
-'''
-          ;
-      } else if (paymentKey.contains(def.key)){
-        description =
-            '''
-${def.description}
-            
-- $paymentDescription''';
-      } else {
-        description = def.description;
-      }
-
+- 필름 잔량 : ${printLog?.filmRemainingRatio != null ? "${printLog?.filmRemainingRatio}%" : "알 수 없음"}
+''';
 
       final message = buildSlackAlertMessage(
-        category: def.category,
-        title: def.title,
-        serviceName: serviceName,
-        kioskId: machineId.toString(),
-        appVersion: version,
-        description: description,
-        guideText: def.guideText,
-        guideUrl: def.guideUrl,
-        cardCount: cardCount,
+        slackLogTemplate: slackLogTemplate.copyWith(description: description),
+        cardCount: cardCount.currentCount,
+      );
+
+      await sendLog(slackWebhookBroadcastUrl, message);
+    }
+  }
+
+  Future<void> sendPaymentBroadcastLogToSlak(String errorKey, {required String paymentDescription}) async {
+    final slackLogTemplate = await createSlackLogTemplate(errorKey);
+
+    if (slackLogTemplate.category.isNotEmpty) {
+      String description;
+
+      description = '''
+${slackLogTemplate.description}
+            
+- $paymentDescription''';
+
+      final message = buildSlackAlertMessage(slackLogTemplate: slackLogTemplate.copyWith(description: description));
+
+      await sendLog(slackWebhookBroadcastUrl, message);
+    }
+  }
+
+  Future<void> sendPeriodicLogBroadcastLogToSlack() async {
+    final slackLogTemplate = await createSlackLogTemplate(null);
+    final machineId = slackLogTemplate.kioskMachineInfo?.kioskMachineId ?? 0;
+
+    if (machineId != 0) {
+      final printerLog = _container.read(printerLogProvider);
+      final cardCount = _container.read(cardCountProvider);
+      String description;
+
+      description = '''
+- 리본 잔량 : ${printerLog?.rbnRemainingRatio != null ? "${printerLog?.rbnRemainingRatio}%" : "알 수 없음"}
+- 필름 잔량 : ${printerLog?.filmRemainingRatio != null ? "${printerLog?.filmRemainingRatio}%" : "알 수 없음"}
+- 단면 카드 수량 : ${cardCount.currentCount} / ${cardCount.initialCount}
+''';
+
+      final message = buildSlackAlertMessage(
+          slackLogTemplate: slackLogTemplate.copyWith(title: '프린트 상태', category: 'info', description: description));
+
+      await sendLog(slackWebhookBroadcastUrl, message);
+    }
+  }
+
+  Future<void> sendBroadcastLogToSlack(String errorKey) async {
+    final slackLogTemplate = await createSlackLogTemplate(errorKey);
+    final cardCount = _container.read(cardCountProvider);
+
+    if (slackLogTemplate.category.isNotEmpty) {
+      final message = buildSlackAlertMessage(
+        slackLogTemplate: slackLogTemplate,
+        cardCount: cardCount.currentCount,
       );
 
       await sendLog(slackWebhookBroadcastUrl, message);
@@ -144,46 +203,36 @@ ${def.description}
   }
 
   String buildSlackAlertMessage({
-    required String category,
-    required String title,
-    required String serviceName,
-    required String kioskId,
-    required String appVersion,
-    required String description,
-    String? guideText,
-    String? guideUrl,
+    required SlackLogTemplate slackLogTemplate,
     int? cardCount,
   }) {
-    final cardInfo =
-      '''
+    final cardInfo = '''
 ${cardCount == 0 ? "- 단면 -> 양면 모드" : "- 단면 모드 설정\n- 단면 설정 개수 : $cardCount개"}
-      '''
-    ;
+      ''';
 
     final emojiMap = {
       'error': '🔴',
       'warning': '🟡',
       'info': '🟢',
     };
-    final emoji = emojiMap[category.toLowerCase()] ?? 'ℹ️';
+    final emoji = emojiMap[slackLogTemplate.category.toLowerCase()] ?? 'ℹ️';
 
-    final formattedTitle =
-    (title == "점검 완료" || title == "점검 시작")
-        ? '*[$title]*'
-        : '$emoji  *$title*';
+    final formattedTitle = (slackLogTemplate.title == "점검 완료" || slackLogTemplate.title == "점검 시작")
+        ? '🟢  *${slackLogTemplate.title}*'
+        : '$emoji  *${slackLogTemplate.title}*';
 
-    final guidePart = guideText != null
-        ? "[${guideUrl != null ? '<$guideUrl|$guideText>' : guideText}]"
+    final guidePart = slackLogTemplate.guideText != null
+        ? "[${slackLogTemplate.guideUrl != null ? '<${slackLogTemplate.guideUrl}|${slackLogTemplate.guideText}>' : slackLogTemplate.guideText}]"
         : '';
 
     return '''
 $formattedTitle
 ───────────────────
-Kiosk: $kioskId  /  ${appVersion}
-업체(구단): $serviceName
+Kiosk: ${slackLogTemplate.kioskMachineInfo?.kioskMachineId ?? 0}  /  ${slackLogTemplate.appVersion}
+업체(구단): ${slackLogTemplate.serviceName}
 ───────────────────
-$description
-${ title == "카드 인쇄 모드 변경" ? cardInfo : ""}
+${slackLogTemplate.description}
+${slackLogTemplate.title == "카드 인쇄 모드 변경" ? cardInfo : ""}
 $guidePart
 ''';
   }
