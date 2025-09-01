@@ -63,6 +63,12 @@ dev_dependencies:
   json_serializable: ^6.9.0
   retrofit_generator: ^9.1.5
   mockito: ^5.4.5
+  flutter_launcher_icons: ^0.13.1
+
+flutter_icons:
+  windows:
+    generate: true
+    image_path: "assets/icons/photocode_icon.png"
 
 flutter:
   uses-material-design: true
@@ -76,7 +82,8 @@ flutter:
     - assets/lang/
     - assets/luca/
     - assets/sounds/
-    - assets/adImages/
+    - assets/adImages/eland/
+    - assets/adImages/suwon/
     - assets/.env.version
 
   fonts:

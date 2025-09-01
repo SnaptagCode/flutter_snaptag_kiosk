@@ -10,6 +10,9 @@
   "alert_title_authNum_error": "Verification Code Error",
   "alert_txt_authNum_error": "There is no matched verification code.\r\nPlease check again.",
   "alert_btn_authNum_error": "Back",
+  "alert_title_verification_code_expried": "Verification Code Expired",
+  "alert_txt_verification_code_expried": "Your verification code has expired.\nPlease request a new verification code and try again.",
+  "alert_btn_verification_code_expried": "OK",
   "sub02_txt_01": "Please check the photo CARD image.",
   "sub02_btn_pay": "Pay Now",
   "sub03_txt_01": "The photo card is being printed. Please wait a moment.",
@@ -31,5 +34,17 @@
   "alert_txt_card_refill": "The card balance is insufficient.\r\n For smooth use, please contact the administrator\r\n and proceed with replacement.",
   "alert_btn_print_failure": "OK",
   "alert_title_need_ribbon_film": "Please contact administrator.",
-  "alert_txt_need_ribbon_film": "Please check the printer status."
+  "alert_txt_need_ribbon_film": "Please check the printer status.",
+  "alert_title_authNum_reissue_complete": "Refund Completed,\r\nVerification Code\r\nReissue Required",
+  "alert_txt_authNum_reissue_complete": "The refund has been successfully\r\ncompleted.\r\nPlease request a new verification code\r\nand try again.",
+  "alert_btn_authNum_reissue_complete": "OK",
+  "alert_title_authNum_reissue_failure": "Refund Failed",
+  "alert_txt_authNum_reissue_failure": "The refund could not be processed\r\nsuccessfully.\r\nPlease check the card information\r\nand try again.",
+  "alert_btn_authNum_reissue_failure": "OK",
+  "alert_title_refund_info": "Refund Notice",
+  "alert_txt_refund_info": "There are transactions that haven’t\r\nbeen refunded.\r\nPlease insert the previously used card\r\ninto the terminal and proceed with the refund.",
+  "alert_title_auto_refund_alert": "Refund Notice",
+  "alert_txt_auto_refund_alert": "The printer is not working properly.\r\nA refund will be processed.",
+  "alert_btn_cancel": "Cancel",
+  "alert_btn_ok": "OK"
 }

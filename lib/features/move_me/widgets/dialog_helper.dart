@@ -6,6 +6,7 @@ import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_snaptag_kiosk/features/move_me/widgets/code_keypad.dart';
+import 'package:flutter_snaptag_kiosk/core/theme/theme.dart';
 
 ///
 /// [Figma](https://www.figma.com/design/8IDM2KJtqAYWm2IsmytU5W/%ED%82%A4%EC%98%A4%EC%8A%A4%ED%81%AC_%EB%94%94%EC%9E%90%EC%9D%B8_%EA%B3%B5%EC%9C%A0%EC%9A%A9?node-id=943-15366&m=dev)
@@ -186,6 +187,7 @@ class DialogHelper {
             title: Center(
               child: Text(
                 title,
+                textAlign: TextAlign.center,
                 style: context.typography.kioskAlert1B.copyWith(
                   color: Colors.black,
                   fontFamily: context.locale.languageCode == 'ja' ? 'MPLUSRounded' : 'Cafe24Ssurround2',
@@ -229,12 +231,12 @@ class DialogHelper {
     return true;
   }
 
-  static Future<bool> showSetupTwoDialog(
+  static Future<bool> showTwoButtonKioskDialog(
     BuildContext context, {
     required String title,
     required String contentText,
-    String cancelButtonText = '취소',
-    String confirmButtonText = '확인',
+    required String cancelButtonText,
+    required String confirmButtonText,
   }) async {
     return await showDialog(
       context: context,
@@ -277,8 +279,8 @@ class DialogHelper {
                         await SoundManager().playSound();
                         Navigator.of(context).pop(false);
                       },
-                      style: context.setupDialogCancelButtonStyle,
-                      child: Text(cancelButtonText),
+                      style: context.refundDialogCancelButtonStyle,
+                      child: Text(cancelButtonText, style: TextStyle(color: Color(0xFF999999))),
                     ),
                   ),
                   SizedBox(width: 12.w),
@@ -288,8 +290,8 @@ class DialogHelper {
                         await SoundManager().playSound();
                         Navigator.of(context).pop(true);
                       },
-                      style: context.setupDialogConfirmButtonStyle,
-                      child: Text(confirmButtonText),
+                      style: context.refundDialogConfirmButtonStyle,
+                      child: Text(confirmButtonText, style: TextStyle(color: Color(0xFFFFFFFF))),
                     ),
                   ),
                 ],
@@ -466,6 +468,24 @@ class DialogHelper {
     );
   }
 
+  static Future<void> showAuthNumReissueCompleteDialog(BuildContext context) async {
+    await _showOneButtonKioskDialog(
+      context,
+      title: LocaleKeys.alert_title_authNum_reissue_complete.tr(),
+      message: LocaleKeys.alert_txt_authNum_reissue_complete.tr(),
+      buttonText: LocaleKeys.alert_btn_authNum_reissue_complete.tr(),
+    );
+  }
+
+  static Future<void> showAuthNumReissueFailureDialog(BuildContext context) async {
+    await _showOneButtonKioskDialog(
+      context,
+      title: LocaleKeys.alert_title_authNum_reissue_failure.tr(),
+      message: LocaleKeys.alert_txt_authNum_reissue_failure.tr(),
+      buttonText: LocaleKeys.alert_btn_authNum_reissue_failure.tr(),
+    );
+  }
+
   static Future<void> showCheckPrintStateDialog(BuildContext context) async {
     await _showOneButtonKioskDialog(
       context,
@@ -484,6 +504,15 @@ class DialogHelper {
     );
   }
 
+  static Future<void> showVerificationCodeExpriedDialog(BuildContext context) async {
+    await _showOneButtonKioskDialog(
+      context,
+      title: LocaleKeys.alert_title_verification_code_expried.tr(),
+      message: LocaleKeys.alert_txt_verification_code_expried.tr(),
+      buttonText: LocaleKeys.alert_btn_verification_code_expried.tr(),
+    );
+  }
+
   static Future<void> showPurchaseFailedDialog(BuildContext context) async {
     await _showOneButtonKioskDialog(
       context,
@@ -499,6 +528,19 @@ class DialogHelper {
       title: LocaleKeys.alert_title_paymentcard_failure.tr(),
       message: LocaleKeys.alert_txt_paymentcard_failure.tr(),
       buttonText: LocaleKeys.alert_btn_paymentcard_failure.tr(),
+    );
+  }
+
+  static Future<void> showAutoRefundDescriptionDialog(
+    BuildContext context, {
+    VoidCallback? onButtonPressed,
+  }) async {
+    await _showOneButtonKioskDialog(
+      context,
+      title: LocaleKeys.alert_title_auto_refund_alert.tr(),
+      message: LocaleKeys.alert_txt_auto_refund_alert.tr(),
+      buttonText: LocaleKeys.alert_btn_paymentcard_failure.tr(),
+      onButtonPressed: onButtonPressed,
     );
   }
 

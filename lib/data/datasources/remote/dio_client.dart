@@ -47,7 +47,7 @@ final dioProvider = Provider.family<Dio, String>((ref, baseUrl) {
     onError: (DioException err, handler) async {
       final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
       final statusCode = err.response?.statusCode ?? 0;
-      
+
       // DioLogger를 사용해서 예쁘게 가공된 로그 메시지를 받아서 상태 코드별로 분기
       final errorLogger = DioLogger(
         sendHook: (log) {
@@ -56,11 +56,12 @@ final dioProvider = Provider.family<Dio, String>((ref, baseUrl) {
             SlackLogService().sendWarningLogToSlack(formattedMessage);
           } else if (statusCode >= 500) {
             SlackLogService().sendErrorLogToSlack(formattedMessage);
-          } 
+            SlackLogService().sendBroadcastLogToSlack(ErrorKey.severError.key);
+          }
         },
         request: false,
       );
-      
+
       // DioLogger를 실제로 실행시켜서 sendHook이 호출되도록 함
       errorLogger.onError(err, handler);
 
@@ -69,7 +70,7 @@ final dioProvider = Provider.family<Dio, String>((ref, baseUrl) {
           // ServerException으로 wrapping
           return handler.reject(ServerException.fromDioError(err));
         } catch (e) {
-          logger.i('ServerError 파싱 실패: $e');
+          logger.i('SeverError 파싱 실패: $e');
         }
       }
       return handler.next(err); // 원래 에러 전달

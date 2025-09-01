@@ -10,6 +10,9 @@
   "alert_title_authNum_error": "验证码错误",
   "alert_txt_authNum_error": "没有匹配的验证码。\r\n请再检查一次。",
   "alert_btn_authNum_error": "返回",
+  "alert_title_verification_code_expried": "验证码已过期",
+  "alert_txt_verification_code_expried": "您的验证码已过期。\n请重新获取验证码后再试一次。",
+  "alert_btn_verification_code_expried": "确认",
   "sub02_txt_01": "请检查照片卡图像。",
   "sub02_btn_pay": "立即支付",
   "sub03_txt_01": "照片卡正在打印中。请稍候。",
@@ -30,5 +33,17 @@
   "alert_txt_card_refill": "您的卡余额不足。\r\n为了顺利使用，请联系管理员。\r\n请继续进行替换。",
   "alert_btn_print_failure": "确定",
   "alert_title_need_ribbon_film": "请联系管理员。",
-  "alert_txt_need_ribbon_film": "请检查打印机状态。"
+  "alert_txt_need_ribbon_film": "请检查打印机状态。",
+  "alert_title_authNum_reissue_complete": "退款已完成\r\n需要重新签发验证码",
+  "alert_txt_authNum_reissue_complete": "有交易尚未退款。\r\n请立即办理退款。",
+  "alert_btn_authNum_reissue_complete": "确定",
+  "alert_title_authNum_reissue_failure": "退款失败",
+  "alert_txt_authNum_reissue_failure": "退款未正确处理\r\n请检查银行卡信息以处理退款\r\n然后重试。",
+  "alert_btn_authNum_reissue_failure": "确定",
+  "alert_title_refund_info": "退款信息",
+  "alert_txt_refund_info": "有未退款的商品。\r\n请将之前使用的卡插入终端并进行退款。",
+  "alert_title_auto_refund_alert": "退款信息",
+  "alert_txt_auto_refund_alert": "由于打印机无法正常工作，\\r\\n将进行退款。",
+  "alert_btn_cancel": "返回",
+  "alert_btn_ok": "确定"
 }
