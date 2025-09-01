@@ -12,6 +12,7 @@ class GlobalShell extends ConsumerStatefulWidget {
 }
 
 class _GlobalShellState extends ConsumerState<GlobalShell> {
+  static bool _initialized = false;
   @override
   void initState() {
     super.initState();
@@ -19,6 +20,8 @@ class _GlobalShellState extends ConsumerState<GlobalShell> {
   }
 
   Future<void> _initOnce() async {
+    if (_initialized) return;
+    _initialized = true;
     await ref.read(kioskIntroProvider.notifier).load();
   }
 
