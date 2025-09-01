@@ -1,3 +1,5 @@
+import 'package:flutter_snaptag_kiosk/data/models/response/event_video.dart';
+
 import 'kiosk_machine_info.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
@@ -22,6 +24,7 @@ class InfoResponse with _$InfoResponse {
     @Default('#000000') String couponTextColor,
     @Default('#000000') String mainTextColor,
     @Default('#000000') String popupButtonColor,
+    @Default([]) List<EventVideo> eventVideos,
   }) = _InfoResponse;
 
   factory InfoResponse.fromJson(Map<String, dynamic> json) => _$InfoResponseFromJson(json);
