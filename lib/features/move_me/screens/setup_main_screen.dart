@@ -28,7 +28,6 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
     super.initState();
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await ref.read(kioskIntroProvider.notifier).load();
       ref.read(alertDefinitionProvider.notifier).load();
     });
 
