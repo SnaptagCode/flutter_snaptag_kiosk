@@ -27,6 +27,11 @@ class PhotoCardUploadScreen extends ConsumerWidget {
       }
       if (connected) {
         final settingCompleted = ref.read(printerServiceProvider.notifier).settingPrinter();
+
+        final macAddress = ref.read(macAddressProvider).value;
+        final uuid = ref.read(deviceUuidProvider).value;
+        SlackLogService().sendLogToSlack('macAddress: $macAddress uuid: $uuid');
+
         if (!settingCompleted) {
           SlackLogService()
               .sendErrorLogToSlack('*[MachineId: $machineId]*\nPrinter ${PrinterConnectState.setupInComplete.name}');
