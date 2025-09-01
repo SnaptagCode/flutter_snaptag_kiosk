@@ -1,3 +1,4 @@
+import 'package:flutter_snaptag_kiosk/data/models/response/info_response.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -33,6 +34,10 @@ class KioskInfoService extends _$KioskInfoService {
       ref.invalidateSelf();
       rethrow;
     }
+  }
+
+  void updateMachineInfo(InfoResponse info) {
+    state = info.toKioskMachineInfo();
   }
 
   /// 새로운 머신 ID로 업데이트 후 새로고침

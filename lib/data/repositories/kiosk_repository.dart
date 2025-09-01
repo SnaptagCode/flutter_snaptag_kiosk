@@ -1,6 +1,8 @@
 import 'package:flutter_snaptag_kiosk/data/datasources/remote/remote.dart';
 import 'package:flutter_snaptag_kiosk/data/models/models.dart';
+import 'package:flutter_snaptag_kiosk/data/models/request/info_request.dart';
 import 'package:flutter_snaptag_kiosk/data/models/request/update_back_photo_request.dart';
+import 'package:flutter_snaptag_kiosk/data/models/response/info_response.dart';
 import 'package:flutter_snaptag_kiosk/features/core/printer/printer_log.dart';
 import 'package:flutter_snaptag_kiosk/flavors.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -21,6 +23,15 @@ class _KioskRepository {
   final KioskApiClient _apiClient;
 
   _KioskRepository(this._apiClient);
+
+  Future<InfoResponse> getInfo(InfoRequest infoRequest) async {
+    try {
+      return await _apiClient.getInfo(uniqueKey: infoRequest.uniqueKey);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<String> healthCheck() async {
     try {
       return await _apiClient.healthCheck();

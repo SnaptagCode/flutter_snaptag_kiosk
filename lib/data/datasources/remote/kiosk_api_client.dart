@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:flutter_snaptag_kiosk/data/models/response/info_response.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:retrofit/retrofit.dart';
 
@@ -9,6 +10,11 @@ part 'kiosk_api_client.g.dart';
 @RestApi()
 abstract class KioskApiClient {
   factory KioskApiClient(Dio dio, {String baseUrl}) = _KioskApiClient;
+
+  @GET('/v1/machine/info/by-key')
+  Future<InfoResponse> getInfo({
+    @Query('uniqueKey') required String uniqueKey,
+  });
 
   // Health Check
   @GET('/v1/health-check')

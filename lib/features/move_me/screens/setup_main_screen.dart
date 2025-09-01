@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_snaptag_kiosk/core/utils/sound_manager.dart';
 import 'package:flutter_snaptag_kiosk/features/core/printer/printer_connect_state.dart';
+import 'package:flutter_snaptag_kiosk/features/move_me/providers/kiosk_intro_provider.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_snaptag_kiosk/core/providers/version_notifier.dart';
@@ -26,11 +27,13 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
   void initState() {
     super.initState();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await ref.read(kioskIntroProvider.notifier).load();
       ref.read(alertDefinitionProvider.notifier).load();
     });
+
     _timer = Timer.periodic(Duration(seconds: 2), (timer) async {
-      final connected = await ref.read(printerServiceProvider.notifier).checkConnectedPrint();
+      final connected = ref.read(printerServiceProvider.notifier).checkConnectedPrint();
       if (mounted) {
         setState(() {
           if (connected) {
