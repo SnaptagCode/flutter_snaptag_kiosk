@@ -23,8 +23,6 @@ class PrinterService extends _$PrinterService {
 
   @override
   FutureOr<void> build() async {
-    blackImg = await copyAssetPngToFile('assets/images/black.png');
-
     logger.i('Printer initialization..');
     _bindings = PrinterBindings();
     await _initializePrinter();
@@ -135,7 +133,15 @@ class PrinterService extends _$PrinterService {
         throw Exception('Card feeder is empty');
       }
 
-      settingPrinter();
+      blackImg = await copyAssetPngToFile('assets/images/black_small.png');
+
+      SlackLogService().sendLogToSlack('blackImage: $blackImg');
+      // 3. 리본 설정
+      // 레거시 코드와 동일하게 setRibbonOpt 호출
+      _bindings.setRibbonOpt(1, 0, "2", 2);
+      // _bindings.setRibbonOpt(1, 1, "255", 4);
+
+      _bindings.drawWaterMark(blackImg);
 
       // compute(, 'message');
 
