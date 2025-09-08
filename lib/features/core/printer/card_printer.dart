@@ -133,16 +133,6 @@ class PrinterService extends _$PrinterService {
         throw Exception('Card feeder is empty');
       }
 
-      blackImg = await copyAssetPngToFile('assets/images/black_small.png');
-
-      SlackLogService().sendLogToSlack('blackImage: $blackImg');
-      // 3. 리본 설정
-      // 레거시 코드와 동일하게 setRibbonOpt 호출
-      _bindings.setRibbonOpt(1, 0, "2", 2);
-      // _bindings.setRibbonOpt(1, 1, "255", 4);
-
-      _bindings.drawWaterMark(blackImg);
-
       // compute(, 'message');
 
       logger.i('1. Checking card position...');
@@ -193,6 +183,16 @@ class PrinterService extends _$PrinterService {
           });
         }
       }
+
+      blackImg = await copyAssetPngToFile('assets/images/black_small.png');
+
+      SlackLogService().sendLogToSlack('blackImage: $blackImg');
+      // 3. 리본 설정
+      // 레거시 코드와 동일하게 setRibbonOpt 호출
+      _bindings.setRibbonOpt(1, 0, "2", 2);
+      // _bindings.setRibbonOpt(1, 1, "255", 4);
+
+      _bindings.drawWaterMark(blackImg);
 
       logger.i('5. Injecting card...');
       _bindings.injectCard();
