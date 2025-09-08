@@ -102,8 +102,6 @@ class PrinterService extends _$PrinterService {
       _bindings.setRibbonOpt(1, 0, "2", 2);
       // _bindings.setRibbonOpt(1, 1, "255", 4);
 
-      _bindings.drawWaterMark(blackImg);
-
       // 4. 프린터 준비 상태 확인
       final ready = _bindings.ensurePrinterReady();
       if (!ready) {
@@ -184,16 +182,6 @@ class PrinterService extends _$PrinterService {
         }
       }
 
-      blackImg = await copyAssetPngToFile('assets/images/black_small.png');
-
-      SlackLogService().sendLogToSlack('blackImage: $blackImg');
-      // 3. 리본 설정
-      // 레거시 코드와 동일하게 setRibbonOpt 호출
-      _bindings.setRibbonOpt(1, 0, "2", 2);
-      // _bindings.setRibbonOpt(1, 1, "255", 4);
-
-      _bindings.drawWaterMark(blackImg);
-
       logger.i('5. Injecting card...');
       _bindings.injectCard();
 
@@ -242,6 +230,8 @@ class PrinterService extends _$PrinterService {
     _bindings.setCanvasOrientation(true);
     _bindings.prepareCanvas(isColor: true);
 
+    _bindings.setCoatingRegion(x: -1, y: -1, width: 56.0, height: 88.0, isFront: false, isErase: false);
+
     logger.i('Drawing image...');
     _bindings.drawImage(
       imagePath: imagePath,
@@ -251,6 +241,19 @@ class PrinterService extends _$PrinterService {
       height: 88.0,
       noAbsoluteBlack: true,
     );
+
+    blackImg = await copyAssetPngToFile('assets/images/black_small.png');
+
+    SlackLogService().sendLogToSlack('blackImage: $blackImg');
+
+    _bindings.setImageParameters(transparency: 1, rotation: 0, scale: 0);
+    // 3. 리본 설정
+    // 레거시 코드와 동일하게 setRibbonOpt 호출
+    _bindings.setRibbonOpt(1, 0, "2", 2);
+    // _bindings.setRibbonOpt(1, 1, "255", 4);
+
+    _bindings.drawWaterMark(blackImg);
+
     logger.i('Drawing empty text...');
     // 제거 시 이미지 출력이 안됨
     _bindings.drawText(
