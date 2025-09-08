@@ -1,8 +1,11 @@
 import 'dart:ffi' as ffi; // ffi 임포트 확인
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:ffi/ffi.dart'; // Utf8 사용을 위한 임포트
+import 'package:flutter/services.dart';
 import 'package:flutter_snaptag_kiosk/features/core/printer/print_state_provider.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'package:flutter_snaptag_kiosk/features/core/printer/printer_log.dart';
@@ -16,6 +19,7 @@ part 'card_printer.g.dart';
 @Riverpod(keepAlive: true)
 class PrinterService extends _$PrinterService {
   late final PrinterBindings _bindings;
+  var blackImg = '';
 
   @override
   FutureOr<void> build() async {
@@ -30,6 +34,8 @@ class PrinterService extends _$PrinterService {
       _bindings.clearLibrary();
 
       _bindings.initLibrary();
+
+      blackImg = await copyAssetPngToFile('assets/images/black');
 
       // 2. 프린터 밝기 설정 변경
       try {
@@ -96,7 +102,9 @@ class PrinterService extends _$PrinterService {
       // 3. 리본 설정
       // 레거시 코드와 동일하게 setRibbonOpt 호출
       _bindings.setRibbonOpt(1, 0, "2", 2);
-      _bindings.setRibbonOpt(1, 1, "255", 4);
+      // _bindings.setRibbonOpt(1, 1, "255", 4);
+
+      _bindings.drawWaterMark(blackImg);
 
       // 4. 프린터 준비 상태 확인
       final ready = _bindings.ensurePrinterReady();
@@ -126,6 +134,8 @@ class PrinterService extends _$PrinterService {
       if (!hasCard) {
         throw Exception('Card feeder is empty');
       }
+
+      settingPrinter();
 
       // compute(, 'message');
 
@@ -308,5 +318,24 @@ class PrinterService extends _$PrinterService {
       logger.i(e);
       return null;
     }
+  }
+
+  Future<String> copyAssetPngToFile(String assetPath, {String? outFileName}) async {
+    // 1) 에셋 로드
+    final ByteData data = await rootBundle.load(assetPath);
+    final Uint8List bytes = data.buffer.asUint8List();
+
+    // 2) 저장 위치 (임시 또는 앱 전용 디렉터리)
+    final dir = await getTemporaryDirectory();
+    final fileName = outFileName ?? assetPath.split('/').last;
+    final file = File('${dir.path}/$fileName');
+
+    // 3) 이미 있으면 덮어쓸지 여부 선택
+    if (!await file.exists()) {
+      await file.create(recursive: true);
+    }
+    await file.writeAsBytes(bytes, flush: true);
+
+    return file.path; // 네이티브 API에 줄 수 있는 실제 경로
   }
 }

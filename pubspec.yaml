@@ -50,6 +50,8 @@ dependencies:
   #create uuid
   cryptography: ^2.7.0
 
+  path_provider: ^2.1.5
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
