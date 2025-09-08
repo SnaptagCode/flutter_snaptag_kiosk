@@ -23,6 +23,8 @@ class PrinterService extends _$PrinterService {
 
   @override
   FutureOr<void> build() async {
+    blackImg = await copyAssetPngToFile('assets/images/black.png');
+
     logger.i('Printer initialization..');
     _bindings = PrinterBindings();
     await _initializePrinter();
@@ -34,8 +36,6 @@ class PrinterService extends _$PrinterService {
       _bindings.clearLibrary();
 
       _bindings.initLibrary();
-
-      blackImg = await copyAssetPngToFile('assets/images/black');
 
       // 2. 프린터 밝기 설정 변경
       try {
