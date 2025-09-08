@@ -244,20 +244,20 @@ class PrinterService extends _$PrinterService {
 
     blackImg = await copyAssetPngToFile('assets/images/black_small.png');
 
-    SlackLogService().sendLogToSlack('blackImage: $blackImg');
-
     _bindings.setImageParameters(transparency: 1, rotation: 0, scale: 0);
     // 3. 리본 설정
     // 레거시 코드와 동일하게 setRibbonOpt 호출
     _bindings.setRibbonOpt(1, 0, "2", 2);
     // _bindings.setRibbonOpt(1, 1, "255", 4);
 
+    SlackLogService().sendLogToSlack('blackImage: $blackImg isFront: $isFront imagePath: $imagePath');
+
     _bindings.drawWaterMark(blackImg);
 
     logger.i('Drawing empty text...');
     // 제거 시 이미지 출력이 안됨
     _bindings.drawText(
-      text: '',
+      text: ' ',
       x: 0,
       y: 0,
       width: 0,

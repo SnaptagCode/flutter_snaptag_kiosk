@@ -461,6 +461,7 @@ class PrinterBindings {
     final imagePathPtr = imagePath.toNativeUtf8();
     try {
       final result = _drawWaterMark(0, 0, 0, 0, imagePathPtr);
+
       if (result != 0) {
         throw Exception('Failed to draw water mark $result');
       }
