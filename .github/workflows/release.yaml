@@ -39,6 +39,9 @@ jobs:
             "SLACK_WEBHOOK_BROADCAST_URL=${{ secrets.SLACK_WEBHOOK_BROADCAST_URL }}" | Add-Content -Path $envFilePath
           }
 
+      - name: Generate Windows Icon
+        run: dart run flutter_launcher_icons
+
       - name: Upgrade Flutter Packages
         run: flutter pub upgrade
 
