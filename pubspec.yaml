@@ -84,6 +84,7 @@ flutter:
     - assets/sounds/
     - assets/adImages/eland/
     - assets/adImages/suwon/
+    - assets/adImages/ansan/
     - assets/.env.version
 
   fonts:
