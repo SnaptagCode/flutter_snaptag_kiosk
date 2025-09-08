@@ -306,7 +306,12 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
                           }
                           final eventId = ref.read(kioskInfoServiceProvider)?.kioskEventId ?? 0;
                           final cardCountInfo = "${cardCountState.initialCount} / ${cardCountState.currentCount}";
-                          await writePhotocodeId(machineId.toString(), eventId.toString(), cardCountInfo);
+                          final serviceNameMap = {"SUF": "수원FC", "SEF": "서울 이랜드 FC", "KEEFO": "성수 B'Day", "AGFC": "안산그리너스FC"};
+                          final companynameTmp = ref.read(kioskInfoServiceProvider)?.eventType ?? '-';
+                          final serviceName = serviceNameMap[companynameTmp] ?? '-';
+                          final version = '$currentVersion';
+
+                          await writePhotocodeId(machineId.toString(), eventId.toString(), cardCountInfo.toString(), serviceName.toString(), version.toString());
                           final result = await DialogHelper.showSetupDialog(
                             context,
                             title: '이벤트를 실행합니다.',
@@ -400,7 +405,7 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
                       child: SetupUpdateCard(
                         title: '현재 버전',
                         //version: currentVersion,
-                        version: "v2.10.0",
+                        version: "v3.0.0",
                         buttonName: '업데이트',
                         isActive: isUpdateAvailable,
                         onUpdatePressed: () async {

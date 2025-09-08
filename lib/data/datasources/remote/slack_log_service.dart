@@ -144,9 +144,11 @@ ${slackLogTemplate.description}
     if (machineId != 0) {
       final printerLog = _container.read(printerLogProvider);
       final cardCount = _container.read(cardCountProvider);
+      final printerheadTemp = printerLog?.heaterTemperature ?? 0;
+      final printerheadTempString = printerheadTemp != 0 ? (printerheadTemp / 100).toStringAsFixed(2) : "알 수 없음";
       String description;
-
       description = '''
+- 프린터 온도 : $printerheadTempString°C
 - 리본 잔량 : ${printerLog?.rbnRemainingRatio != null ? "${printerLog?.rbnRemainingRatio}%" : "알 수 없음"}
 - 필름 잔량 : ${printerLog?.filmRemainingRatio != null ? "${printerLog?.filmRemainingRatio}%" : "알 수 없음"}
 - 단면 카드 수량 : ${cardCount.currentCount} / ${cardCount.initialCount}

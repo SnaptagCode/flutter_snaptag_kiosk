@@ -7,5 +7,6 @@ export 'triple_tap_state.dart';
 export 'verify_photo_card_provider.dart';
 export 'page_print_provider.dart';
 export 'card_count_provider.dart';
+export 'uuid_provider.dart';
 export 'alert_definition_provider.dart';
 export 'printer_log_provider.dart';

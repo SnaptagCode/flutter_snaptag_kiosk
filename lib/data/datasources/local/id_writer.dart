@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:path/path.dart' as p;
 
-Future<File> writePhotocodeId(String id, String eventId, String singleCardCount) async {
+Future<File> writePhotocodeId(String id, String eventId, String singleCardCount, String companyname, String version) async {
   final home = Platform.environment['USERPROFILE']!;
   final dir = Directory(p.join(home, 'Snaptag', 'runtime'));
   if (!dir.existsSync()) dir.createSync(recursive: true);
@@ -14,6 +14,8 @@ Future<File> writePhotocodeId(String id, String eventId, String singleCardCount)
     'id': id,
     'eventId' : eventId,
     'singleCardCount' : singleCardCount,
+    'companyname' : companyname,
+    'version' : version
   };
 
   await tmp.writeAsString(jsonEncode(payload), flush: true);
@@ -47,6 +49,8 @@ Future<File> writeSingleCardCount(String singleCardCount) async {
   meta['id'] = (meta['id'] ?? '').toString();
   meta['eventId'] = (meta['eventId'] ?? '').toString();
   meta['singleCardCount'] = singleCardCount.toString();
+  meta['companyname'] = (meta['companyname'] ?? '').toString();
+  meta['version'] = (meta['version'] ?? '').toString();
 
   await tmp.writeAsString(jsonEncode(meta), flush: true);
   if (await file.exists()) await file.delete();

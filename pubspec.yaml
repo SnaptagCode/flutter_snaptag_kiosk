@@ -47,6 +47,9 @@ dependencies:
 
   package_info_plus: ^8.3.0
 
+  #create uuid
+  cryptography: ^2.7.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -81,6 +84,7 @@ flutter:
     - assets/sounds/
     - assets/adImages/eland/
     - assets/adImages/suwon/
+    - assets/adImages/ansan/
     - assets/.env.version
 
   fonts:
