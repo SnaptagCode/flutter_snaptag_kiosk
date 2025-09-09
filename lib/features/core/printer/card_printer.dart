@@ -143,7 +143,7 @@ class PrinterService extends _$PrinterService {
       if (frontFile != null) {
         frontBuffer = StringBuffer();
         try {
-          await _prepareAndDrawImage(buffer: frontBuffer, imagePath: frontFile.path, isFront: true, isMetal: isSuwon);
+          await _prepareAndDrawImage(buffer: frontBuffer, imagePath: frontFile.path, isFront: true);
         } catch (e, stack) {
           logger.i('Error in front canvas preparation: $e\nStack: $stack');
           throw Exception('Failed to prepare front canvas: $e');
@@ -166,8 +166,7 @@ class PrinterService extends _$PrinterService {
           rearBuffer = StringBuffer();
 
           try {
-            await _prepareAndDrawImage(
-                buffer: rearBuffer, imagePath: rotatedRearPath, isFront: false, isMetal: isSuwon);
+            await _prepareAndDrawImage(buffer: rearBuffer, imagePath: rotatedRearPath, isFront: false);
           } catch (e, stack) {
             logger.i('Error in rear canvas preparation: $e\nStack: $stack');
             throw Exception('Failed to prepare rear canvas: $e');
@@ -225,12 +224,15 @@ class PrinterService extends _$PrinterService {
   }
 
   Future<void> _prepareAndDrawImage(
-      {required StringBuffer buffer, required String imagePath, required bool isFront, required bool isMetal}) async {
+      {required StringBuffer buffer, required String imagePath, required bool isFront}) async {
     _bindings.setCanvasOrientation(true);
     _bindings.prepareCanvas(isColor: true);
 
+    final pRibbonType = _bindings.ribbonSettingsSW();
+    var isYMCSK = pRibbonType == 25; // Metal
+
     // Metal Settings..
-    if (isMetal) {
+    if (isYMCSK) {
       _bindings.setCoatingRegion(x: -1, y: -1, width: 56.0, height: 88.0, isFront: false, isErase: false);
     }
 
@@ -245,7 +247,7 @@ class PrinterService extends _$PrinterService {
     );
 
     // Metal Settings..
-    if (isMetal) {
+    if (isYMCSK) {
       blackImg = await copyAssetPngToFile('assets/images/black_small.png');
       _bindings.setImageParameters(transparency: 1, rotation: 0, scale: 0);
       _bindings.setRibbonOpt(1, 0, "2", 2);
