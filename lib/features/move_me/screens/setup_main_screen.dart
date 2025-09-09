@@ -145,7 +145,7 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
                           await SoundManager().playSound();
                           ref.read(pagePrintProvider.notifier).set(PagePrintType.double);
                           if (machineId != 0) {
-                            SlackLogService().sendBroadcastLogToSlack(InfoKey.cardPrintModeSwitchSingle.key);
+                            SlackLogService().sendBroadcastLogToSlack(InfoKey.cardPrintModeSwitchDuplex.key);
                           }
                         }
                       },
