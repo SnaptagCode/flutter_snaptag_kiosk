@@ -1,18 +1,14 @@
 import 'dart:ffi' as ffi; // ffi 임포트 확인
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:ffi/ffi.dart'; // Utf8 사용을 위한 임포트
 import 'package:flutter/services.dart';
-import 'package:flutter_snaptag_kiosk/features/core/printer/print_state_provider.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'package:flutter_snaptag_kiosk/features/core/printer/printer_log.dart';
 import 'package:flutter_snaptag_kiosk/features/core/printer/ribbon_status.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
-
-import 'printer_bindings.dart';
 
 part 'card_printer.g.dart';
 
@@ -122,6 +118,7 @@ class PrinterService extends _$PrinterService {
       /*if (frontFile == null && embeddedFile == null) {
         throw Exception('There is nothing to print');
       }*/
+      final isSuwon = ref.read(kioskInfoServiceProvider)?.isSuwon == true ? true : false;
       final isSingleMode = (ref.read(pagePrintProvider) == PagePrintType.single);
       state = const AsyncValue.loading();
       // 피더 상태 체크 추가
@@ -146,7 +143,7 @@ class PrinterService extends _$PrinterService {
       if (frontFile != null) {
         frontBuffer = StringBuffer();
         try {
-          await _prepareAndDrawImage(frontBuffer, frontFile.path, true);
+          await _prepareAndDrawImage(buffer: frontBuffer, imagePath: frontFile.path, isFront: true, isMetal: isSuwon);
         } catch (e, stack) {
           logger.i('Error in front canvas preparation: $e\nStack: $stack');
           throw Exception('Failed to prepare front canvas: $e');
@@ -169,7 +166,8 @@ class PrinterService extends _$PrinterService {
           rearBuffer = StringBuffer();
 
           try {
-            await _prepareAndDrawImage(rearBuffer, rotatedRearPath, false);
+            await _prepareAndDrawImage(
+                buffer: rearBuffer, imagePath: rotatedRearPath, isFront: false, isMetal: isSuwon);
           } catch (e, stack) {
             logger.i('Error in rear canvas preparation: $e\nStack: $stack');
             throw Exception('Failed to prepare rear canvas: $e');
@@ -226,11 +224,15 @@ class PrinterService extends _$PrinterService {
     return null;
   }
 
-  Future<void> _prepareAndDrawImage(StringBuffer buffer, String imagePath, bool isFront) async {
+  Future<void> _prepareAndDrawImage(
+      {required StringBuffer buffer, required String imagePath, required bool isFront, required bool isMetal}) async {
     _bindings.setCanvasOrientation(true);
     _bindings.prepareCanvas(isColor: true);
 
-    _bindings.setCoatingRegion(x: -1, y: -1, width: 56.0, height: 88.0, isFront: false, isErase: false);
+    // Metal Settings..
+    if (isMetal) {
+      _bindings.setCoatingRegion(x: -1, y: -1, width: 56.0, height: 88.0, isFront: false, isErase: false);
+    }
 
     logger.i('Drawing image...');
     _bindings.drawImage(
@@ -242,17 +244,13 @@ class PrinterService extends _$PrinterService {
       noAbsoluteBlack: true,
     );
 
-    blackImg = await copyAssetPngToFile('assets/images/black_small.png');
-
-    _bindings.setImageParameters(transparency: 1, rotation: 0, scale: 0);
-    // 3. 리본 설정
-    // 레거시 코드와 동일하게 setRibbonOpt 호출
-    _bindings.setRibbonOpt(1, 0, "2", 2);
-    // _bindings.setRibbonOpt(1, 1, "255", 4);
-
-    SlackLogService().sendLogToSlack('blackImage: $blackImg isFront: $isFront imagePath: $imagePath');
-
-    _bindings.drawWaterMark(blackImg);
+    // Metal Settings..
+    if (isMetal) {
+      blackImg = await copyAssetPngToFile('assets/images/black_small.png');
+      _bindings.setImageParameters(transparency: 1, rotation: 0, scale: 0);
+      _bindings.setRibbonOpt(1, 0, "2", 2);
+      _bindings.drawWaterMark(blackImg);
+    }
 
     logger.i('Drawing empty text...');
     // 제거 시 이미지 출력이 안됨
@@ -346,5 +344,14 @@ class PrinterService extends _$PrinterService {
     await file.writeAsBytes(bytes, flush: true);
 
     return file.path; // 네이티브 API에 줄 수 있는 실제 경로
+  }
+
+  void getRibbonType() async {
+    try {
+      final pRibbonType = _bindings.ribbonSettingsSW();
+      SlackLogService().sendLogToSlack('RIBBONTYPE: $pRibbonType');
+    } catch (e) {
+      SlackLogService().sendLogToSlack('RIBBONTYPE Error: $e');
+    }
   }
 }

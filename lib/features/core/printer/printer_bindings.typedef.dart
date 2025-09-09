@@ -118,3 +118,19 @@ typedef R600GetRbnAndFilmRemaining = int Function(Pointer<Short> pRbnRemaining, 
 // 밝기, 대비, 채도 조절 함수
 typedef R600SetImgVisualParamNative = Uint32 Function(Int32 nBrightness, Int32 nContrast, Int32 nSaturation);
 typedef R600SetImgVisualParam = int Function(int nBrightness, int nContrast, int nSaturation);
+
+typedef R600RibbonSettingsRWNative = Uint32 Function(
+  Int32 nMode,
+  Pointer<Uint8> pRibbonType,
+  Pointer<Uint8> pFilmType,
+  Pointer<Uint8> pRibbonNearEnd,
+  Pointer<Uint8> pFilmNearEnd,
+);
+
+typedef R600RibbonSettingsRW = int Function(
+  int nMode,
+  Pointer<Uint8> pRibbonType,
+  Pointer<Uint8> pFilmType,
+  Pointer<Uint8> pRibbonNearEnd,
+  Pointer<Uint8> pFilmNearEnd,
+);

@@ -38,6 +38,7 @@ class PrinterBindings {
   late final R600IsFeederNoEmpty _isFeederNoEmpty;
   late final R600GetRbnAndFilmRemaining _getRbnAndFilmRemaining;
   late final R600SetImgVisualParam _setImgVisualParam; // 밝기 조절 함수
+  late final R600RibbonSettingsRW _ribbonSettingsSW;
 
   PrinterBindings() {
     // DLL 로드
@@ -71,6 +72,7 @@ class PrinterBindings {
         _dll.lookupFunction<R600GetRbnAndFilmRemainingNative, R600GetRbnAndFilmRemaining>('R600GetRbnAndFilmRemaining');
     _setImgVisualParam =
         _dll.lookupFunction<R600SetImgVisualParamNative, R600SetImgVisualParam>('R600SetImgVisualParam');
+    _ribbonSettingsSW = _dll.lookupFunction<R600RibbonSettingsRWNative, R600RibbonSettingsRW>('R600RibbonSettingsRW');
   }
 
   int initLibrary() {
@@ -524,6 +526,36 @@ class PrinterBindings {
     if (result != 0) {
       final error = getErrorInfo(result);
       throw Exception('Failed to set image visual parameters: $error (code: $result)');
+    }
+  }
+
+  int ribbonSettingsSW() {
+    // nMode = 0 (read)
+    final pRibbonType = calloc<Uint8>();
+    final pFilmType = calloc<Uint8>();
+    final pRibbonNearEnd = calloc<Uint8>();
+    final pFilmNearEnd = calloc<Uint8>();
+
+    try {
+      final result = _ribbonSettingsSW(
+        0,
+        pRibbonType,
+        pFilmType,
+        pRibbonNearEnd,
+        pFilmNearEnd,
+      );
+
+      if (result != 0) {
+        final error = getErrorInfo(result);
+        throw Exception('R600RibbonSettingsRW failed: $error (code: $result)');
+      }
+
+      return pRibbonType.value;
+    } finally {
+      calloc.free(pRibbonType);
+      calloc.free(pFilmType);
+      calloc.free(pRibbonNearEnd);
+      calloc.free(pFilmNearEnd);
     }
   }
 }
