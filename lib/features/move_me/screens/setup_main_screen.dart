@@ -43,8 +43,6 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
                           ? PrinterConnectState.connected
                           : PrinterConnectState.setupInComplete,
                 );
-
-            ref.read(printerServiceProvider.notifier).getRibbonType();
           } else {
             ref.read(printerConnectProvider.notifier).update(PrinterConnectState.disconnected);
           }

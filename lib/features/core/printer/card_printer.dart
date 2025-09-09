@@ -228,7 +228,12 @@ class PrinterService extends _$PrinterService {
     _bindings.setCanvasOrientation(true);
     _bindings.prepareCanvas(isColor: true);
 
-    final pRibbonType = _bindings.ribbonSettingsSW();
+    var pRibbonType = 0;
+    try {
+      pRibbonType = _bindings.ribbonSettingsSW();
+    } catch (e) {
+      SlackLogService().sendLogToSlack('RibbonSettingSW ERROR: $e');
+    }
     var isYMCSK = pRibbonType == 25; // Metal
 
     // Metal Settings..
