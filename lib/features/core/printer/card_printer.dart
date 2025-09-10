@@ -118,7 +118,6 @@ class PrinterService extends _$PrinterService {
       /*if (frontFile == null && embeddedFile == null) {
         throw Exception('There is nothing to print');
       }*/
-      final isSuwon = ref.read(kioskInfoServiceProvider)?.isSuwon == true ? true : false;
       final isSingleMode = (ref.read(pagePrintProvider) == PagePrintType.single);
       state = const AsyncValue.loading();
       // 피더 상태 체크 추가
@@ -225,6 +224,8 @@ class PrinterService extends _$PrinterService {
 
   Future<void> _prepareAndDrawImage(
       {required StringBuffer buffer, required String imagePath, required bool isFront}) async {
+    SlackLogService().sendLogToSlack('_prepareAndDrawImage isFront: $isFront');
+
     _bindings.setCanvasOrientation(true);
     _bindings.prepareCanvas(isColor: true);
 
@@ -235,6 +236,8 @@ class PrinterService extends _$PrinterService {
       SlackLogService().sendLogToSlack('RibbonSettingSW ERROR: $e');
     }
     var isYMCSK = pRibbonType == 25; // Metal
+
+    SlackLogService().sendLogToSlack('RibbonSettingSW pRibbonType: $pRibbonType');
 
     // Metal Settings..
     if (isYMCSK) {
