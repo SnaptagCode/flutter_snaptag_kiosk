@@ -224,7 +224,7 @@ class PrinterService extends _$PrinterService {
 
   Future<void> _prepareAndDrawImage(
       {required StringBuffer buffer, required String imagePath, required bool isFront}) async {
-    SlackLogService().sendLogToSlack('_prepareAndDrawImage isFront: $isFront');
+    SlackLogService().sendErrorLogToSlack('_prepareAndDrawImage isFront: $isFront');
 
     _bindings.setCanvasOrientation(true);
     _bindings.prepareCanvas(isColor: true);
@@ -260,6 +260,8 @@ class PrinterService extends _$PrinterService {
       _bindings.setImageParameters(transparency: 1, rotation: 0, scale: 0);
       _bindings.setRibbonOpt(1, 0, "2", 2);
       _bindings.drawWaterMark(blackImg);
+    } else {
+      _bindings.setRibbonOpt(1, 0, "2", 2);
     }
 
     logger.i('Drawing empty text...');
