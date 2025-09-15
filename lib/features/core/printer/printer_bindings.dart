@@ -100,7 +100,7 @@ class PrinterBindings {
     try {
       final result = _isPrtHaveCard(flag);
       if (result != 0) {
-        throw Exception('Failed to check card position (code: $result)');
+        throw Exception('[R600IsPrtHaveCard] Failed to check card position (code: $result)');
       }
       return flag.value != 0;
     } finally {
@@ -118,7 +118,7 @@ class PrinterBindings {
 
     if (result != 0) {
       final error = getErrorInfo(result);
-      throw Exception('Failed to prepare canvas: $error (code: $result)');
+      throw Exception('[R600PrepareCanvas] Failed to prepare canvas: $error (code: $result)');
     }
   }
 
@@ -140,7 +140,7 @@ class PrinterBindings {
       logger.i('DrawImage result: $result'); // 결과 코드 확인
       if (result != 0) {
         final error = getErrorInfo(result);
-        throw Exception('Failed to draw image: $error (code: $result)');
+        throw Exception('[R600DrawImage] Failed to draw image: $error (code: $result)');
       }
     } finally {
       calloc.free(pathPointer);
@@ -160,7 +160,7 @@ class PrinterBindings {
     try {
       final result = _drawText(x, y, width, height, textPointer.cast(), noAbsoluteBlack ? 1 : 0);
       if (result != 0) {
-        throw Exception('Failed to draw text (code: $result)');
+        throw Exception('[R600DrawText] Failed to draw text (code: $result)');
       }
     } finally {
       calloc.free(textPointer);
@@ -171,7 +171,7 @@ class PrinterBindings {
   void injectCard() {
     final result = _cardInject(0); // 0: 기본 위치
     if (result != 0) {
-      throw Exception('Failed to inject card (code: $result)');
+      throw Exception('[R600CardInject] Failed to inject card (code: $result)');
     }
   }
 
@@ -185,7 +185,7 @@ class PrinterBindings {
     try {
       final result = _printDraw(frontPointer, backPointer);
       if (result != 0) {
-        throw Exception('Failed to print card (code: $result)');
+        throw Exception('[R600PrintDraw] Failed to print card (code: $result)');
       }
     } finally {
       calloc.free(frontPointer);
@@ -199,14 +199,14 @@ class PrinterBindings {
   void ejectCard() {
     final result = _cardEject(0); // 0: 왼쪽으로 배출
     if (result != 0) {
-      throw Exception('Failed to eject card (code: $result)');
+      throw Exception('[R600CardEject] Failed to eject card (code: $result)');
     }
   }
 
   void setCanvasOrientation(bool isPortrait) {
     final result = _setCanvasPortrait(isPortrait ? 1 : 0);
     if (result != 0) {
-      throw Exception('Failed to set canvas orientation (code: $result)');
+      throw Exception('[R600SetCanvasPortrait] Failed to set canvas orientation (code: $result)');
     }
   }
 
@@ -220,7 +220,7 @@ class PrinterBindings {
   }) {
     final result = _setCoatRgn(x, y, width, height, isFront ? 1 : 0, isErase ? 1 : 0);
     if (result != 0) {
-      throw Exception('Failed to set coating region');
+      throw Exception('[R600SetCoatRgn] Failed to set coating region');
     }
   }
 
@@ -231,7 +231,7 @@ class PrinterBindings {
   }) {
     final result = _setImagePara(transparency, rotation, scale);
     if (result != 0) {
-      throw Exception('Failed to set image parameters');
+      throw Exception('[R600SetImagePara] Failed to set image parameters');
     }
   }
 
@@ -306,7 +306,7 @@ class PrinterBindings {
     try {
       final result = _getRbnAndFilmRemaining(rbnRemaining, filmRemaining);
       if (result != 0) {
-        throw Exception('Failed to get ribbon and film remaining (code: $result)');
+        throw Exception('[R600GetRbnAndFilmRemaining] Failed to get ribbon and film remaining (code: $result)');
       }
       logger.i('Ribbon remaining: ${rbnRemaining.value}');
       logger.i('Film remaining: ${filmRemaining.value}');
@@ -334,19 +334,19 @@ class PrinterBindings {
       // USB 프린터 열거
       final enumResult = _enumUsbPrt(enumListPtr.cast(), listLenPtr, numPtr);
       if (enumResult != 0) {
-        throw Exception('Failed to enumerate USB printer (code: $enumResult)');
+        throw Exception('[R600EnumUsbPrt] Failed to enumerate USB printer (code: $enumResult)');
       }
 
       // USB 시간 초과 설정
       final timeoutResult = _usbSetTimeout(3000, 3000);
       if (timeoutResult != 0) {
-        throw Exception('Failed to set USB timeout (code: $timeoutResult)');
+        throw Exception('[R600UsbSetTimeout] Failed to set USB timeout (code: $timeoutResult)');
       }
 
       // 프린터 선택
       final selectResult = _selectPrinter(enumListPtr.cast());
       if (selectResult != 0) {
-        throw Exception('Failed to select printer (code: $selectResult)');
+        throw Exception('[R600SelectPrt] Failed to select printer (code: $selectResult)');
       }
     } finally {
       calloc.free(enumListPtr);
@@ -424,7 +424,7 @@ class PrinterBindings {
           logger.i('Card is in the printer, ejecting...');
           result = _cardEject(0); // 왼쪽으로 배출
           if (result != 0) {
-            logger.i('Failed to eject card');
+            logger.i('[R600CardEject] Failed to eject card');
             return false;
           }
         }
@@ -452,7 +452,7 @@ class PrinterBindings {
     try {
       final result = _setRibbonOpt(isWrite, key, valuePtr, valueLen);
       if (result != 0) {
-        throw Exception('Failed to set ribbon opt (code: $result)');
+        throw Exception('[R600SetRibbonOpt] Failed to set ribbon opt (code: $result)');
       }
     } finally {
       calloc.free(valuePtr);
@@ -465,7 +465,7 @@ class PrinterBindings {
       final result = _drawWaterMark(0, 0, 0, 0, imagePathPtr);
 
       if (result != 0) {
-        throw Exception('Failed to draw water mark $result');
+        throw Exception('[R600DrawWaterMark] Failed to draw water mark $result');
       }
     } finally {
       calloc.free(imagePathPtr);
@@ -477,7 +477,7 @@ class PrinterBindings {
     try {
       final result = _setFont(fontNamePtr, fontSize);
       if (result != 0) {
-        throw Exception('Failed to set font');
+        throw Exception('[R600SetFont] Failed to set font');
       }
     } finally {
       calloc.free(fontNamePtr);
@@ -487,7 +487,7 @@ class PrinterBindings {
   void setTextIsStrong(int isStrong) {
     final result = _setTextIsStrong(isStrong);
     if (result != 0) {
-      throw Exception('Failed to set text strength');
+      throw Exception('[R600SetTextIsStrong] Failed to set text strength');
     }
   }
 
@@ -497,7 +497,7 @@ class PrinterBindings {
       final result = _isFeederNoEmpty(feederStatusPtr);
       if (result != 0) {
         final error = getErrorInfo(result);
-        throw Exception('Failed to check feeder status : $error (code: $result)');
+        throw Exception('[R600IsFeederNoEmpty] Failed to check feeder status : $error (code: $result)');
       }
       return feederStatusPtr.value != 0;
     } finally {
@@ -525,7 +525,7 @@ class PrinterBindings {
     final result = _setImgVisualParam(brightness, contrast, saturation);
     if (result != 0) {
       final error = getErrorInfo(result);
-      throw Exception('Failed to set image visual parameters: $error (code: $result)');
+      throw Exception('[R600SetImgVisualParam] Failed to set image visual parameters: $error (code: $result)');
     }
   }
 
@@ -547,7 +547,7 @@ class PrinterBindings {
 
       if (result != 0) {
         final error = getErrorInfo(result);
-        throw Exception('R600RibbonSettingsRW failed: $error (code: $result)');
+        throw Exception('[R600RibbonSettingsRW] failed: $error (code: $result)');
       }
 
       return pRibbonType.value;
