@@ -25,3 +25,7 @@ class KioskMachineInfo with _$KioskMachineInfo {
 
   factory KioskMachineInfo.fromJson(Map<String, dynamic> json) => _$KioskMachineInfoFromJson(json);
 }
+
+extension KioskMachineInfoX on KioskMachineInfo {
+  bool get isSuwon => kioskMachineId == 2 || kioskMachineId == 3;
+}

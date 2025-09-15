@@ -29,6 +29,7 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(alertDefinitionProvider.notifier).load();
     });
+
     _timer = Timer.periodic(Duration(seconds: 2), (timer) async {
       final connected = await ref.read(printerServiceProvider.notifier).checkConnectedPrint();
       if (mounted) {
@@ -306,12 +307,18 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
                           }
                           final eventId = ref.read(kioskInfoServiceProvider)?.kioskEventId ?? 0;
                           final cardCountInfo = "${cardCountState.initialCount} / ${cardCountState.currentCount}";
-                          final serviceNameMap = {"SUF": "수원FC", "SEF": "서울 이랜드 FC", "KEEFO": "성수 B'Day", "AGFC": "안산그리너스FC"};
+                          final serviceNameMap = {
+                            "SUF": "수원FC",
+                            "SEF": "서울 이랜드 FC",
+                            "KEEFO": "성수 B'Day",
+                            "AGFC": "안산그리너스FC"
+                          };
                           final companynameTmp = ref.read(kioskInfoServiceProvider)?.eventType ?? '-';
                           final serviceName = serviceNameMap[companynameTmp] ?? '-';
                           final version = '$currentVersion';
 
-                          await writePhotocodeId(machineId.toString(), eventId.toString(), cardCountInfo.toString(), serviceName.toString(), version.toString());
+                          await writePhotocodeId(machineId.toString(), eventId.toString(), cardCountInfo.toString(),
+                              serviceName.toString(), version.toString());
                           final result = await DialogHelper.showSetupDialog(
                             context,
                             title: '이벤트를 실행합니다.',

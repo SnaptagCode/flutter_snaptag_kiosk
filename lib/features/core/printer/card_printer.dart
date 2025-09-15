@@ -2,20 +2,20 @@ import 'dart:ffi' as ffi; // ffi 임포트 확인
 import 'dart:io';
 
 import 'package:ffi/ffi.dart'; // Utf8 사용을 위한 임포트
-import 'package:flutter_snaptag_kiosk/features/core/printer/print_state_provider.dart';
+import 'package:flutter/services.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'package:flutter_snaptag_kiosk/features/core/printer/printer_log.dart';
 import 'package:flutter_snaptag_kiosk/features/core/printer/ribbon_status.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 
-import 'printer_bindings.dart';
-
 part 'card_printer.g.dart';
 
 @Riverpod(keepAlive: true)
 class PrinterService extends _$PrinterService {
   late final PrinterBindings _bindings;
+  var blackImg = '';
 
   @override
   FutureOr<void> build() async {
@@ -96,7 +96,7 @@ class PrinterService extends _$PrinterService {
       // 3. 리본 설정
       // 레거시 코드와 동일하게 setRibbonOpt 호출
       _bindings.setRibbonOpt(1, 0, "2", 2);
-      _bindings.setRibbonOpt(1, 1, "255", 4);
+      // _bindings.setRibbonOpt(1, 1, "255", 4);
 
       // 4. 프린터 준비 상태 확인
       final ready = _bindings.ensurePrinterReady();
@@ -142,7 +142,7 @@ class PrinterService extends _$PrinterService {
       if (frontFile != null) {
         frontBuffer = StringBuffer();
         try {
-          await _prepareAndDrawImage(frontBuffer, frontFile.path, true);
+          await _prepareAndDrawImage(buffer: frontBuffer, imagePath: frontFile.path, isFront: true);
         } catch (e, stack) {
           logger.i('Error in front canvas preparation: $e\nStack: $stack');
           throw Exception('Failed to prepare front canvas: $e');
@@ -165,7 +165,7 @@ class PrinterService extends _$PrinterService {
           rearBuffer = StringBuffer();
 
           try {
-            await _prepareAndDrawImage(rearBuffer, rotatedRearPath, false);
+            await _prepareAndDrawImage(buffer: rearBuffer, imagePath: rotatedRearPath, isFront: false);
           } catch (e, stack) {
             logger.i('Error in rear canvas preparation: $e\nStack: $stack');
             throw Exception('Failed to prepare rear canvas: $e');
@@ -222,9 +222,27 @@ class PrinterService extends _$PrinterService {
     return null;
   }
 
-  Future<void> _prepareAndDrawImage(StringBuffer buffer, String imagePath, bool isFront) async {
+  Future<void> _prepareAndDrawImage(
+      {required StringBuffer buffer, required String imagePath, required bool isFront}) async {
+    SlackLogService().sendErrorLogToSlack('_prepareAndDrawImage isFront: $isFront');
+
     _bindings.setCanvasOrientation(true);
     _bindings.prepareCanvas(isColor: true);
+
+    var pRibbonType = 0;
+    try {
+      pRibbonType = _bindings.ribbonSettingsSW();
+    } catch (e) {
+      SlackLogService().sendLogToSlack('RibbonSettingSW ERROR: $e');
+    }
+    var isYMCSK = pRibbonType == 25; // Metal
+
+    SlackLogService().sendLogToSlack('RibbonSettingSW pRibbonType: $pRibbonType');
+
+    // Metal Settings..
+    if (isYMCSK) {
+      _bindings.setCoatingRegion(x: -1, y: -1, width: 56.0, height: 88.0, isFront: false, isErase: false);
+    }
 
     logger.i('Drawing image...');
     _bindings.drawImage(
@@ -235,10 +253,21 @@ class PrinterService extends _$PrinterService {
       height: 88.0,
       noAbsoluteBlack: true,
     );
+
+    // Metal Settings..
+    if (isYMCSK) {
+      blackImg = await copyAssetPngToFile('assets/images/black_small.png');
+      _bindings.setImageParameters(transparency: 1, rotation: 0, scale: 0);
+      _bindings.setRibbonOpt(1, 0, "2", 2);
+      _bindings.drawWaterMark(blackImg);
+    } else {
+      _bindings.setRibbonOpt(1, 0, "2", 2);
+    }
+
     logger.i('Drawing empty text...');
     // 제거 시 이미지 출력이 안됨
     _bindings.drawText(
-      text: '',
+      text: ' ',
       x: 0,
       y: 0,
       width: 0,
@@ -307,6 +336,34 @@ class PrinterService extends _$PrinterService {
     } catch (e) {
       logger.i(e);
       return null;
+    }
+  }
+
+  Future<String> copyAssetPngToFile(String assetPath, {String? outFileName}) async {
+    // 1) 에셋 로드
+    final ByteData data = await rootBundle.load(assetPath);
+    final Uint8List bytes = data.buffer.asUint8List();
+
+    // 2) 저장 위치 (임시 또는 앱 전용 디렉터리)
+    final dir = await getTemporaryDirectory();
+    final fileName = outFileName ?? assetPath.split('/').last;
+    final file = File('${dir.path}/$fileName');
+
+    // 3) 이미 있으면 덮어쓸지 여부 선택
+    if (!await file.exists()) {
+      await file.create(recursive: true);
+    }
+    await file.writeAsBytes(bytes, flush: true);
+
+    return file.path; // 네이티브 API에 줄 수 있는 실제 경로
+  }
+
+  void getRibbonType() async {
+    try {
+      final pRibbonType = _bindings.ribbonSettingsSW();
+      SlackLogService().sendLogToSlack('RIBBONTYPE: $pRibbonType');
+    } catch (e) {
+      SlackLogService().sendLogToSlack('RIBBONTYPE Error: $e');
     }
   }
 }
