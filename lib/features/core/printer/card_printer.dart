@@ -119,6 +119,7 @@ class PrinterService extends _$PrinterService {
         throw Exception('There is nothing to print');
       }*/
       final isSingleMode = (ref.read(pagePrintProvider) == PagePrintType.single);
+      final isMetal = ref.read(kioskInfoServiceProvider)?.isMetal == true ? true : false;
       state = const AsyncValue.loading();
       // 피더 상태 체크 추가
       logger.i('Checking feeder status...');
@@ -142,7 +143,7 @@ class PrinterService extends _$PrinterService {
       if (frontFile != null) {
         frontBuffer = StringBuffer();
         try {
-          await _prepareAndDrawImage(buffer: frontBuffer, imagePath: frontFile.path, isFront: true);
+          await _prepareAndDrawImage(buffer: frontBuffer, imagePath: frontFile.path, isFront: true, isMetal: isMetal);
         } catch (e, stack) {
           logger.i('Error in front canvas preparation: $e\nStack: $stack');
           throw Exception('Failed to prepare front canvas: $e');
@@ -165,7 +166,8 @@ class PrinterService extends _$PrinterService {
           rearBuffer = StringBuffer();
 
           try {
-            await _prepareAndDrawImage(buffer: rearBuffer, imagePath: rotatedRearPath, isFront: false);
+            await _prepareAndDrawImage(
+                buffer: rearBuffer, imagePath: rotatedRearPath, isFront: false, isMetal: isMetal);
           } catch (e, stack) {
             logger.i('Error in rear canvas preparation: $e\nStack: $stack');
             throw Exception('Failed to prepare rear canvas: $e');
@@ -223,7 +225,7 @@ class PrinterService extends _$PrinterService {
   }
 
   Future<void> _prepareAndDrawImage(
-      {required StringBuffer buffer, required String imagePath, required bool isFront}) async {
+      {required StringBuffer buffer, required String imagePath, required bool isFront, required bool isMetal}) async {
     SlackLogService().sendErrorLogToSlack('_prepareAndDrawImage isFront: $isFront');
 
     _bindings.setCanvasOrientation(true);
@@ -236,11 +238,12 @@ class PrinterService extends _$PrinterService {
       SlackLogService().sendLogToSlack('RibbonSettingSW ERROR: $e');
     }
     var isYMCSK = pRibbonType == 25; // Metal
+    final shouldPrintMetal = isYMCSK && isMetal;
 
     SlackLogService().sendLogToSlack('RibbonSettingSW pRibbonType: $pRibbonType');
 
     // Metal Settings..
-    if (isYMCSK) {
+    if (shouldPrintMetal) {
       _bindings.setCoatingRegion(x: -1, y: -1, width: 56.0, height: 88.0, isFront: false, isErase: false);
     }
 
@@ -255,7 +258,7 @@ class PrinterService extends _$PrinterService {
     );
 
     // Metal Settings..
-    if (isYMCSK) {
+    if (shouldPrintMetal) {
       blackImg = await copyAssetPngToFile('assets/images/black_small.png');
       _bindings.setImageParameters(transparency: 1, rotation: 0, scale: 0);
       _bindings.setRibbonOpt(1, 0, "2", 2);
