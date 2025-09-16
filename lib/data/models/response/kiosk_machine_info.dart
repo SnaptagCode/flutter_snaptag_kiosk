@@ -21,7 +21,12 @@ class KioskMachineInfo with _$KioskMachineInfo {
     @Default('#000000') String couponTextColor,
     @Default('#000000') String mainTextColor,
     @Default('#000000') String popupButtonColor,
+    @Default(false) bool isMetal,
   }) = _KioskMachineInfo;
 
   factory KioskMachineInfo.fromJson(Map<String, dynamic> json) => _$KioskMachineInfoFromJson(json);
+}
+
+extension KioskMachineInfoX on KioskMachineInfo {
+  bool get isSuwon => kioskMachineId == 2 || kioskMachineId == 3;
 }
