@@ -171,6 +171,7 @@ class PrinterBindings {
   void injectCard() {
     final result = _cardInject(0); // 0: 기본 위치
     if (result != 0) {
+      SlackLogService().sendBroadcastLogToSlack(ErrorKey.printerInjectFail.key);
       throw Exception('[R600CardInject] Failed to inject card (code: $result)');
     }
   }
