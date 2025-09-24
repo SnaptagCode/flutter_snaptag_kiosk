@@ -26,7 +26,10 @@ void main() async {
     logger.d("================================================\n");
     logger.d("Window Closed");
     await slackCall.sendLogToSlack("Window Closed");
-    return true;
+
+    // 3) 이제 스스로 닫기
+    FlutterWindowClose.closeWindow();
+    return false; // 여기선 false로 돌려 종료를 우리가 관리
   });
   // Zone으로 감싸서 모든 비동기 에러도 캐치
   runZonedGuarded(
