@@ -91,6 +91,12 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
                   title: '프로그램을 종료합니다.',
                 );
                 if (result) {
+                  await ref.read(kioskRepositoryProvider).endKioskApplication(
+                        kioskEventId: ref.read(kioskInfoServiceProvider)?.kioskEventId ?? 0,
+                        machineId: ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0,
+                        remainingSingleSidedCount: cardCountState.currentCount,
+                      );
+
                   // 종료
                   exit(0);
                 }
