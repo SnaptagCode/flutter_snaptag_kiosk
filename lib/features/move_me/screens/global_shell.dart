@@ -20,13 +20,6 @@ class _GlobalShellState extends ConsumerState<GlobalShell> {
   @override
   void initState() {
     super.initState();
-
-    FlutterWindowClose.setWindowShouldCloseHandler(() async {
-      logger.d("================================================\n");
-      logger.d("Window Closed");
-      SlackLogService().sendErrorLogToSlack("Window Closed");
-      return true;
-    });
   }
 
   @override

@@ -8,6 +8,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
+import 'package:flutter_window_close/flutter_window_close.dart';
 import 'package:window_manager/window_manager.dart';
 
 void main() async {
@@ -21,6 +22,12 @@ void main() async {
   await dotenv.load(fileName: "assets/.env");
   final slackCall = SlackLogService();
 
+  FlutterWindowClose.setWindowShouldCloseHandler(() async {
+    logger.d("================================================\n");
+    logger.d("Window Closed");
+    await slackCall.sendLogToSlack("Window Closed");
+    return true;
+  });
   // Zone으로 감싸서 모든 비동기 에러도 캐치
   runZonedGuarded(
     () async {
@@ -53,7 +60,6 @@ void main() async {
                   minTextAdapt: true,
                   splitScreenMode: true,
                   child: App(),
-
                 );
               },
             ),
