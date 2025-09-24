@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_snaptag_kiosk/core/core.dart';
-import 'package:flutter_snaptag_kiosk/data/datasources/remote/slack_log_service.dart';
-import 'package:flutter_window_close/flutter_window_close.dart';
 
 class GlobalShell extends ConsumerStatefulWidget {
   final Widget child;
