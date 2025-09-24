@@ -76,4 +76,10 @@ abstract class KioskApiClient {
       {@Path('kioskEventId') required int kioskEventId,
       @Path('machineId') required int machineId,
       @Path('remainingSingleSidedCount') required int remainingSingleSidedCount});
+
+  @DELETE('/v1/internal/event/{kioskEventId}/machine/{machineId}/end')
+  Future<void> deleteEndMark(
+      {@Path('kioskEventId') required int kioskEventId,
+      @Path('machineId') required int machineId,
+      @Path('remainingSingleSidedCount') required int remainingSingleSidedCount});
 }

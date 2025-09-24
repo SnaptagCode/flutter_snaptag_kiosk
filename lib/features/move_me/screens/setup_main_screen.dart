@@ -57,6 +57,103 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
     super.dispose();
   }
 
+  Future<void> _onRunEventTap(BuildContext context) async {
+    await SoundManager().playSound();
+
+    final isReady = await _validatePrinterReadyAndShowDialogs(context);
+    if (!isReady) return;
+
+    await _writePhotocodeMeta();
+
+    final confirmed = await DialogHelper.showSetupDialog(
+      context,
+      title: '이벤트를 실행합니다.',
+    );
+    if (!confirmed) return;
+
+    await _startEventFlow(context);
+  }
+
+  Future<bool> _validatePrinterReadyAndShowDialogs(BuildContext context) async {
+    final connected = await ref.read(printerServiceProvider.notifier).checkConnectedPrint();
+    final settingPrinter = ref.read(printerServiceProvider.notifier).settingPrinter();
+    if (!connected) {
+      await DialogHelper.showPrintWaitingDialog(context);
+      return false;
+    }
+    if (!settingPrinter) {
+      await DialogHelper.showCheckPrintStateDialog(context);
+      return false;
+    }
+    return true;
+  }
+
+  Future<void> _writePhotocodeMeta() async {
+    final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
+    final eventId = ref.read(kioskInfoServiceProvider)?.kioskEventId ?? 0;
+    final cardCountState = ref.read(cardCountProvider);
+    final cardCountInfo = "${cardCountState.initialCount} / ${cardCountState.currentCount}";
+
+    final serviceNameMap = {
+      "SUF": "수원FC",
+      "SEF": "서울 이랜드 FC",
+      "KEEFO": "성수 B'Day",
+      "AGFC": "안산그리너스FC",
+    };
+    final eventType = ref.read(kioskInfoServiceProvider)?.eventType ?? '-';
+    final serviceName = serviceNameMap[eventType] ?? '-';
+
+    final versionState = ref.read(versionStateProvider);
+    final currentVersion = versionState.currentVersion;
+
+    await writePhotocodeId(
+      machineId.toString(),
+      eventId.toString(),
+      cardCountInfo.toString(),
+      serviceName.toString(),
+      '$currentVersion',
+    );
+  }
+
+  Future<void> _startEventFlow(BuildContext context) async {
+    final versionState = ref.read(versionStateProvider);
+    final currentVersion = versionState.currentVersion;
+    final latestVersion = versionState.latestVersion;
+    final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
+    final kioskEventId = ref.read(kioskInfoServiceProvider)?.kioskEventId ?? 0;
+    final cardCountState = ref.read(cardCountProvider);
+
+    await ref.read(printerServiceProvider.notifier).startPrintLog();
+
+    await ref.read(kioskRepositoryProvider).deleteEndMark(
+          kioskEventId: kioskEventId,
+          machineId: machineId,
+          remainingSingleSidedCount: cardCountState.currentCount,
+        );
+
+    SlackLogService()
+        .sendLogToSlack('machineId:$machineId, currentVersion:$currentVersion, latestVersion:$latestVersion');
+
+    if (cardCountState.currentCount < 1) {
+      ref.read(pagePrintProvider.notifier).set(PagePrintType.double);
+      SlackLogService().sendLogToSlack('machineId: $machineId, singleCard: $cardCountState, set pagePrintType double');
+    } else {
+      ref.read(pagePrintProvider.notifier).set(PagePrintType.single);
+      SlackLogService().sendLogToSlack('machineId: $machineId, singleCard: $cardCountState, set pagePrintType single');
+    }
+
+    PhotoCardUploadRouteData().go(context);
+
+    try {
+      final response = await ref.read(paymentRepositoryProvider).check();
+      SlackLogService().sendInspectionEndBroadcastLogToSlack(InfoKey.inspectionEnd.key, isPaymentOn: true);
+      SlackLogService().sendLogToSlack("Payment Device check: $response");
+    } catch (e) {
+      SlackLogService().sendInspectionEndBroadcastLogToSlack(InfoKey.inspectionEnd.key, isPaymentOn: false);
+      SlackLogService().sendErrorLogToSlack("Payment Device check: $e");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     ref.read(alertDefinitionProvider);
@@ -300,61 +397,7 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
                         label: '이벤트\n실행',
                         assetName: SnaptagSvg.eventRun,
                         onTap: () async {
-                          await SoundManager().playSound();
-                          final connected = await ref.read(printerServiceProvider.notifier).checkConnectedPrint();
-                          final settingPrinter = ref.read(printerServiceProvider.notifier).settingPrinter();
-                          if (!connected) {
-                            await DialogHelper.showPrintWaitingDialog(context);
-                            return;
-                          }
-                          if (!settingPrinter) {
-                            await DialogHelper.showCheckPrintStateDialog(context);
-                            return;
-                          }
-                          final eventId = ref.read(kioskInfoServiceProvider)?.kioskEventId ?? 0;
-                          final cardCountInfo = "${cardCountState.initialCount} / ${cardCountState.currentCount}";
-                          final serviceNameMap = {
-                            "SUF": "수원FC",
-                            "SEF": "서울 이랜드 FC",
-                            "KEEFO": "성수 B'Day",
-                            "AGFC": "안산그리너스FC"
-                          };
-                          final companynameTmp = ref.read(kioskInfoServiceProvider)?.eventType ?? '-';
-                          final serviceName = serviceNameMap[companynameTmp] ?? '-';
-                          final version = '$currentVersion';
-
-                          await writePhotocodeId(machineId.toString(), eventId.toString(), cardCountInfo.toString(),
-                              serviceName.toString(), version.toString());
-                          final result = await DialogHelper.showSetupDialog(
-                            context,
-                            title: '이벤트를 실행합니다.',
-                          );
-                          if (result) {
-                            final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
-                            await ref.read(printerServiceProvider.notifier).startPrintLog();
-                            SlackLogService().sendLogToSlack(
-                                'machineId:$machineId, currentVersion:$currentVersion, latestVersion:$latestVersion');
-                            if (cardCountState.currentCount < 1) {
-                              ref.read(pagePrintProvider.notifier).set(PagePrintType.double);
-                              SlackLogService().sendLogToSlack(
-                                  'machineId: $machineId, singleCard: $cardCountState, set pagePrintType double');
-                            } else {
-                              ref.read(pagePrintProvider.notifier).set(PagePrintType.single);
-                              SlackLogService().sendLogToSlack(
-                                  'machineId: $machineId, singleCard: $cardCountState, set pagePrintType single');
-                            }
-                            PhotoCardUploadRouteData().go(context);
-                            try {
-                              final response = await ref.read(paymentRepositoryProvider).check();
-                              SlackLogService()
-                                  .sendInspectionEndBroadcastLogToSlack(InfoKey.inspectionEnd.key, isPaymentOn: true);
-                              SlackLogService().sendLogToSlack("Payment Device check: $response");
-                            } catch (e) {
-                              SlackLogService()
-                                  .sendInspectionEndBroadcastLogToSlack(InfoKey.inspectionEnd.key, isPaymentOn: false);
-                              SlackLogService().sendErrorLogToSlack("Payment Device check: $e");
-                            }
-                          }
+                          await _onRunEventTap(context);
                         },
                       ),
                     ),
