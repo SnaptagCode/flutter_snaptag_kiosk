@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_snaptag_kiosk/core/core.dart';
 import 'package:flutter_snaptag_kiosk/data/datasources/remote/slack_log_service.dart';
 import 'package:flutter_window_close/flutter_window_close.dart';
 
@@ -21,6 +22,8 @@ class _GlobalShellState extends ConsumerState<GlobalShell> {
     super.initState();
 
     FlutterWindowClose.setWindowShouldCloseHandler(() async {
+      logger.d("================================================\n");
+      logger.d("Window Closed");
       SlackLogService().sendErrorLogToSlack("Window Closed");
       return true;
     });
