@@ -71,7 +71,7 @@ abstract class KioskApiClient {
   @GET('/v1/error-code')
   Future<List<AlertDefinitionResponse>> getAlertDefinitions();
 
-  @GET('/v1/internal/event/{kioskEventId}/machine/{machineId}/{remainingSingleSidedCount}/end')
+  @POST('/v1/internal/event/{kioskEventId}/machine/{machineId}/{remainingSingleSidedCount}/end')
   Future<void> endKioskApplication(
       {@Path('kioskEventId') required int kioskEventId,
       @Path('machineId') required int machineId,
