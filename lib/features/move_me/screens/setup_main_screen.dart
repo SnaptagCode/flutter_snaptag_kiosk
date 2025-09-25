@@ -418,7 +418,7 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
                       child: SetupUpdateCard(
                         title: '현재 버전',
                         //version: currentVersion,
-                        version: "v3.1.0",
+                        version: "v3.1.1",
                         buttonName: '업데이트',
                         isActive: isUpdateAvailable,
                         onUpdatePressed: () async {
