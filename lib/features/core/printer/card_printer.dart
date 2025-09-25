@@ -226,8 +226,6 @@ class PrinterService extends _$PrinterService {
 
   Future<void> _prepareAndDrawImage(
       {required StringBuffer buffer, required String imagePath, required bool isFront, required bool isMetal}) async {
-    SlackLogService().sendErrorLogToSlack('_prepareAndDrawImage isFront: $isFront');
-
     _bindings.setCanvasOrientation(true);
     _bindings.prepareCanvas(isColor: true);
 
