@@ -20,7 +20,6 @@ void main() async {
   }
   await dotenv.load(fileName: "assets/.env");
   final slackCall = SlackLogService();
-
   // Zone으로 감싸서 모든 비동기 에러도 캐치
   runZonedGuarded(
     () async {
@@ -53,7 +52,6 @@ void main() async {
                   minTextAdapt: true,
                   splitScreenMode: true,
                   child: App(),
-
                 );
               },
             ),

@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:dio/dio.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:retrofit/retrofit.dart';
@@ -72,4 +70,16 @@ abstract class KioskApiClient {
 
   @GET('/v1/error-code')
   Future<List<AlertDefinitionResponse>> getAlertDefinitions();
+
+  @POST('/v1/internal/event/{kioskEventId}/machine/{machineId}/{remainingSingleSidedCount}/end')
+  Future<void> endKioskApplication(
+      {@Path('kioskEventId') required int kioskEventId,
+      @Path('machineId') required int machineId,
+      @Path('remainingSingleSidedCount') required int remainingSingleSidedCount});
+
+  @DELETE('/v1/internal/event/{kioskEventId}/machine/{machineId}/end')
+  Future<void> deleteEndMark(
+      {@Path('kioskEventId') required int kioskEventId,
+      @Path('machineId') required int machineId,
+      @Path('remainingSingleSidedCount') required int remainingSingleSidedCount});
 }

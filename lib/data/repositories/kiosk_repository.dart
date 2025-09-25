@@ -145,4 +145,30 @@ class _KioskRepository {
       rethrow;
     }
   }
+
+  Future<void> endKioskApplication({
+    required int kioskEventId,
+    required int machineId,
+    required int remainingSingleSidedCount,
+  }) async {
+    try {
+      await _apiClient.endKioskApplication(
+          kioskEventId: kioskEventId, machineId: machineId, remainingSingleSidedCount: remainingSingleSidedCount);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> deleteEndMark({
+    required int kioskEventId,
+    required int machineId,
+    required int remainingSingleSidedCount,
+  }) async {
+    try {
+      await _apiClient.deleteEndMark(
+          kioskEventId: kioskEventId, machineId: machineId, remainingSingleSidedCount: remainingSingleSidedCount);
+    } catch (e) {
+      rethrow;
+    }
+  }
 }
