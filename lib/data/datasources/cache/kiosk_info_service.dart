@@ -58,7 +58,7 @@ class KioskInfoService extends _$KioskInfoService {
 
     // 10분마다 실행되는 새로운 타이머 시작
     _periodicTimer = Timer.periodic(
-      const Duration(minutes: 10),
+      const Duration(seconds: 10),
       (timer) async {
         try {
           final kioskEventId = ref.read(kioskInfoServiceProvider)?.kioskEventId ?? 0;
