@@ -64,7 +64,7 @@ class PrinterService extends _$PrinterService {
       if (printerLog != null) {
         ref.read(printerLogProvider.notifier).update(printerLog);
       } else {
-        SlackLogService().sendLogToSlack("CheckConnected Print - PrinterLog is null");
+        // SlackLogService().sendLogToSlack("CheckConnected Print - PrinterLog is null");
       }
       final isReady = printerLog?.printerMainStatusCode == "1004";
 

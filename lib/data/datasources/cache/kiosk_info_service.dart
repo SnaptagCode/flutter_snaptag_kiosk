@@ -56,6 +56,8 @@ class KioskInfoService extends _$KioskInfoService {
     // 기존 타이머가 있다면 취소
     _periodicTimer?.cancel();
 
+    SlackLogService().sendLogToSlack("Periodic _startPeriodicTimer");
+
     // 10분마다 실행되는 새로운 타이머 시작
     _periodicTimer = Timer.periodic(
       const Duration(seconds: 10),
@@ -72,10 +74,11 @@ class KioskInfoService extends _$KioskInfoService {
                   remainingSingleSidedCount: cardCountState.currentCount,
                 );
           }
-          SlackLogService().sendLogToSlack("Periodic timer: $kioskEventId, $machineId, $cardCountState");
+          SlackLogService().sendLogToSlack("Periodic timer: $kioskEventId, $machineId, ${cardCountState.currentCount}");
         } catch (e) {
           // 에러가 발생해도 타이머는 계속 실행
           print('Periodic timer error: $e');
+          SlackLogService().sendLogToSlack("Periodic timer error: $e");
         }
       },
     );
