@@ -78,7 +78,8 @@ class PaymentService extends _$PaymentService {
 
     ref.read(paymentFailureProvider.notifier).triggerFailure();
 
-    final failResponse = await _updateFailOrder();
+    final failResponse =
+        await _updateFailOrder(description: "${paymentResponse.message1}, ${paymentResponse.message2}");
     ref.read(updateOrderInfoProvider.notifier).update(failResponse);
 
     SlackLogService().sendPaymentBroadcastLogToSlak(InfoKey.paymentFail.key,
@@ -330,7 +331,7 @@ class PaymentService extends _$PaymentService {
     }
   }
 
-  Future<UpdateOrderResponse> _updateFailOrder() async {
+  Future<UpdateOrderResponse> _updateFailOrder({required String description}) async {
     try {
       final settings = ref.read(kioskInfoServiceProvider);
       final backPhoto = ref.watch(verifyPhotoCardProvider).value;
@@ -351,7 +352,7 @@ class PaymentService extends _$PaymentService {
           purchaseAuthNumber: '-',
           authSeqNumber: '-',
           detail: approval?.KSNET ?? '{}',
-          description: "승인번호 없음");
+          description: description);
 
       return await ref.read(kioskRepositoryProvider).updateOrderStatus(orderId.toInt(), request);
     } catch (e) {
