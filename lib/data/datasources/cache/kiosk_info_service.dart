@@ -7,6 +7,8 @@ part 'kiosk_info_service.g.dart';
 @Riverpod(keepAlive: true)
 class KioskInfoService extends _$KioskInfoService {
   Timer? _periodicTimer;
+  int? _cachedMachineId;
+  int? _cachedKioskEventId;
 
   @override
   KioskMachineInfo? build() {
@@ -36,8 +38,12 @@ class KioskInfoService extends _$KioskInfoService {
 
       ref.read(frontPhotoListProvider.notifier).fetch();
 
+      // 캐시된 값들 업데이트
+      _cachedMachineId = machineId;
+      _cachedKioskEventId = response.kioskEventId;
+
       // 응답을 받은 후 10분마다 실행되는 타이머 시작
-      _startPeriodicTimer(machineId);
+      _startPeriodicTimer();
 
       return response;
     } catch (e) {
@@ -52,7 +58,7 @@ class KioskInfoService extends _$KioskInfoService {
   }
 
   /// 10분마다 실행되는 주기적 타이머 시작
-  void _startPeriodicTimer(int machineId) {
+  void _startPeriodicTimer() {
     // 기존 타이머가 있다면 취소
     _periodicTimer?.cancel();
 
@@ -63,14 +69,15 @@ class KioskInfoService extends _$KioskInfoService {
       const Duration(seconds: 10),
       (timer) async {
         try {
-          final kioskEventId = ref.read(kioskInfoServiceProvider)?.kioskEventId ?? 0;
-          final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
+          // 캐시된 값들 사용 (순환 의존성 방지)
+          final kioskEventId = _cachedKioskEventId ?? 0;
+          final machineId = _cachedMachineId ?? 0;
           final cardCountState = ref.read(cardCountProvider);
 
           if (kioskEventId != 0 && machineId != 0 && cardCountState.currentCount > 0) {
             await ref.read(kioskRepositoryProvider).endKioskApplication(
-                  kioskEventId: ref.read(kioskInfoServiceProvider)?.kioskEventId ?? 0,
-                  machineId: ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0,
+                  kioskEventId: kioskEventId,
+                  machineId: machineId,
                   remainingSingleSidedCount: cardCountState.currentCount,
                 );
           }
