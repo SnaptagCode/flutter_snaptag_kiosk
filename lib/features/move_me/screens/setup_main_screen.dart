@@ -128,7 +128,7 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
     await ref.read(kioskRepositoryProvider).deleteEndMark(
           kioskEventId: kioskEventId,
           machineId: machineId,
-          remainingSingleSidedCount: cardCountState.currentCount,
+          remainingSingleSidedCount: cardCountState.remainingSingleSidedCount,
         );
 
     SlackLogService()

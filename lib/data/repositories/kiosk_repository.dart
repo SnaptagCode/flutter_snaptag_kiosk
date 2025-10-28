@@ -170,7 +170,7 @@ class _KioskRepository {
   Future<void> deleteEndMark({
     required int kioskEventId,
     required int machineId,
-    required int remainingSingleSidedCount,
+    required String remainingSingleSidedCount,
   }) async {
     try {
       await _apiClient.deleteEndMark(

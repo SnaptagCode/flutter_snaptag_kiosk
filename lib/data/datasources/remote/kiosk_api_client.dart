@@ -81,7 +81,7 @@ abstract class KioskApiClient {
   Future<void> deleteEndMark(
       {@Path('kioskEventId') required int kioskEventId,
       @Path('machineId') required int machineId,
-      @Path('remainingSingleSidedCount') required int remainingSingleSidedCount});
+      @Path('remainingSingleSidedCount') required String remainingSingleSidedCount});
 
   @POST('/v1/internal/event/check/{kioskEventId}/{machineId}/{remainingSingleSidedCount}')
   Future<void> checkKioskAlive(
