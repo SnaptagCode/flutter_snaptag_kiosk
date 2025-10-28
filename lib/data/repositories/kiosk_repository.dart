@@ -180,4 +180,17 @@ class _KioskRepository {
       rethrow;
     }
   }
+
+  Future<void> checkKioskAlive({
+    required int kioskEventId,
+    required int machineId,
+    required int remainingSingleSidedCount,
+  }) async {
+    try {
+      await _apiClient.checkKioskAlive(
+          kioskEventId: kioskEventId, machineId: machineId, remainingSingleSidedCount: remainingSingleSidedCount);
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

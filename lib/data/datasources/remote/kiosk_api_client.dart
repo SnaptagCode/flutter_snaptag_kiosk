@@ -82,4 +82,10 @@ abstract class KioskApiClient {
       {@Path('kioskEventId') required int kioskEventId,
       @Path('machineId') required int machineId,
       @Path('remainingSingleSidedCount') required int remainingSingleSidedCount});
+
+  @POST('event/check/{kioskEventId}/{machineId}/{remainingSingleSidedCount|}')
+  Future<void> checkKioskAlive(
+      {@Path('kioskEventId') required int kioskEventId,
+      @Path('machineId') required int machineId,
+      @Path('remainingSingleSidedCount') required int remainingSingleSidedCount});
 }

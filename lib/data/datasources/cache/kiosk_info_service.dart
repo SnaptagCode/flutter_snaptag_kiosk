@@ -75,7 +75,7 @@ class KioskInfoService extends _$KioskInfoService {
           final cardCountState = ref.read(cardCountProvider);
 
           if (kioskEventId != 0 && machineId != 0 && cardCountState.currentCount > 0) {
-            await ref.read(kioskRepositoryProvider).endKioskApplication(
+            await ref.read(kioskRepositoryProvider).checkKioskAlive(
                   kioskEventId: kioskEventId,
                   machineId: machineId,
                   remainingSingleSidedCount: cardCountState.currentCount,
