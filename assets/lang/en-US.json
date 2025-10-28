@@ -1,6 +1,6 @@
 {
-  "main_txt_01_01": "Please select or upload the image",
-  "main_txt_01_02": "on the back through the QR code.",
+  "main_txt_01_01": "Scan the QR code and Select the back-side image.",
+  "main_txt_01_02": "Then receive the verification code.",
   "main_txt_01_03": "*The front is randomly printed.",
   "main_txt_02": "Did you upload the image?",
   "main_btn_txt": "Enter Verification Code",
