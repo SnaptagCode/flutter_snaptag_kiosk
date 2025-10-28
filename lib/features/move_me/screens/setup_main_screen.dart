@@ -191,7 +191,7 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
                   await ref.read(kioskRepositoryProvider).endKioskApplication(
                         kioskEventId: ref.read(kioskInfoServiceProvider)?.kioskEventId ?? 0,
                         machineId: ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0,
-                        remainingSingleSidedCount: cardCountState.currentCount,
+                        remainingSingleSidedCount: cardCountState.remainingSingleSidedCount,
                       );
 
                   // 종료

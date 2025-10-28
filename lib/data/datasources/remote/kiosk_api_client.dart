@@ -75,7 +75,7 @@ abstract class KioskApiClient {
   Future<void> endKioskApplication(
       {@Path('kioskEventId') required int kioskEventId,
       @Path('machineId') required int machineId,
-      @Path('remainingSingleSidedCount') required int remainingSingleSidedCount});
+      @Path('remainingSingleSidedCount') required String remainingSingleSidedCount});
 
   @DELETE('/v1/internal/event/{kioskEventId}/machine/{machineId}/end')
   Future<void> deleteEndMark(
@@ -87,5 +87,5 @@ abstract class KioskApiClient {
   Future<void> checkKioskAlive(
       {@Path('kioskEventId') required int kioskEventId,
       @Path('machineId') required int machineId,
-      @Path('remainingSingleSidedCount') required int remainingSingleSidedCount});
+      @Path('remainingSingleSidedCount') required String remainingSingleSidedCount});
 }

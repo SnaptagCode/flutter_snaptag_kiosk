@@ -142,12 +142,11 @@ class _KioskRepository {
   }) async {
     try {
       final cardCount = _ref.read(cardCountProvider);
-      final remainingSingleSidedCount = '${cardCount.currentCount} / ${cardCount.initialCount}';
 
       await _apiClient.updatePrintLog(
         body: {
           ...request.toJson(),
-          'remainingSingleSidedCount': remainingSingleSidedCount,
+          'remainingSingleSidedCount': cardCount.remainingSingleSidedCount,
         },
       );
     } catch (e) {
@@ -158,7 +157,7 @@ class _KioskRepository {
   Future<void> endKioskApplication({
     required int kioskEventId,
     required int machineId,
-    required int remainingSingleSidedCount,
+    required String remainingSingleSidedCount,
   }) async {
     try {
       await _apiClient.endKioskApplication(
@@ -184,7 +183,7 @@ class _KioskRepository {
   Future<void> checkKioskAlive({
     required int kioskEventId,
     required int machineId,
-    required int remainingSingleSidedCount,
+    required String remainingSingleSidedCount,
   }) async {
     try {
       await _apiClient.checkKioskAlive(

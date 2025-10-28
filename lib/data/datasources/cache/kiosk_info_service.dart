@@ -64,29 +64,38 @@ class KioskInfoService extends _$KioskInfoService {
 
     SlackLogService().sendLogToSlack("Periodic _startPeriodicTimer");
 
+    // 즉시 실행되는 비동기 함수
+    Future<void> executePeriodicLogic() async {
+      try {
+        // 캐시된 값들 사용 (순환 의존성 방지)
+        final kioskEventId = _cachedKioskEventId ?? 0;
+        final machineId = _cachedMachineId ?? 0;
+        final cardCountState = ref.watch(cardCountProvider);
+
+        if (kioskEventId != 0 && machineId != 0) {
+          await ref.read(kioskRepositoryProvider).checkKioskAlive(
+                kioskEventId: kioskEventId,
+                machineId: machineId,
+                remainingSingleSidedCount: cardCountState.remainingSingleSidedCount,
+              );
+        }
+        SlackLogService()
+            .sendLogToSlack("Periodic timer: $kioskEventId, $machineId, ${cardCountState.remainingSingleSidedCount}");
+      } catch (e) {
+        // 에러가 발생해도 타이머는 계속 실행
+        print('Periodic timer error: $e');
+        SlackLogService().sendLogToSlack("Periodic timer error: $e");
+      }
+    }
+
+    // 즉시 실행
+    executePeriodicLogic();
+
     // 10분마다 실행되는 새로운 타이머 시작
     _periodicTimer = Timer.periodic(
-      const Duration(seconds: 10),
+      const Duration(minutes: 10),
       (timer) async {
-        try {
-          // 캐시된 값들 사용 (순환 의존성 방지)
-          final kioskEventId = _cachedKioskEventId ?? 0;
-          final machineId = _cachedMachineId ?? 0;
-          final cardCountState = ref.read(cardCountProvider);
-
-          if (kioskEventId != 0 && machineId != 0 && cardCountState.currentCount > 0) {
-            await ref.read(kioskRepositoryProvider).checkKioskAlive(
-                  kioskEventId: kioskEventId,
-                  machineId: machineId,
-                  remainingSingleSidedCount: cardCountState.currentCount,
-                );
-          }
-          SlackLogService().sendLogToSlack("Periodic timer: $kioskEventId, $machineId, ${cardCountState.currentCount}");
-        } catch (e) {
-          // 에러가 발생해도 타이머는 계속 실행
-          print('Periodic timer error: $e');
-          SlackLogService().sendLogToSlack("Periodic timer error: $e");
-        }
+        await executePeriodicLogic();
       },
     );
   }
