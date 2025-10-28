@@ -43,7 +43,7 @@ class KioskInfoService extends _$KioskInfoService {
       _cachedKioskEventId = response.kioskEventId;
 
       // 응답을 받은 후 10분마다 실행되는 타이머 시작
-      _startPeriodicTimer();
+      await _startPeriodicTimer();
 
       return response;
     } catch (e) {
@@ -58,7 +58,7 @@ class KioskInfoService extends _$KioskInfoService {
   }
 
   /// 10분마다 실행되는 주기적 타이머 시작
-  void _startPeriodicTimer() {
+  Future<void> _startPeriodicTimer() async {
     // 기존 타이머가 있다면 취소
     _periodicTimer?.cancel();
 
@@ -70,7 +70,7 @@ class KioskInfoService extends _$KioskInfoService {
         // 캐시된 값들 사용 (순환 의존성 방지)
         final kioskEventId = _cachedKioskEventId ?? 0;
         final machineId = _cachedMachineId ?? 0;
-        final cardCountState = ref.watch(cardCountProvider);
+        final cardCountState = ref.read(cardCountProvider);
 
         if (kioskEventId != 0 && machineId != 0) {
           await ref.read(kioskRepositoryProvider).checkKioskAlive(
@@ -89,7 +89,7 @@ class KioskInfoService extends _$KioskInfoService {
     }
 
     // 즉시 실행
-    executePeriodicLogic();
+    await executePeriodicLogic();
 
     // 10분마다 실행되는 새로운 타이머 시작
     _periodicTimer = Timer.periodic(
