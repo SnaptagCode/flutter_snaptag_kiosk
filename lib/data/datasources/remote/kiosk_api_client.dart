@@ -71,15 +71,21 @@ abstract class KioskApiClient {
   @GET('/v1/error-code')
   Future<List<AlertDefinitionResponse>> getAlertDefinitions();
 
-  @POST('/v1/internal/event/{kioskEventId}/machine/{machineId}/{remainingSingleSidedCount}/end')
+  @POST('/v1/internal/event/{kioskEventId}/machine/{machineId}/end')
   Future<void> endKioskApplication(
       {@Path('kioskEventId') required int kioskEventId,
       @Path('machineId') required int machineId,
-      @Path('remainingSingleSidedCount') required int remainingSingleSidedCount});
+      @Query('remainingSingleSidedCount') required String remainingSingleSidedCount});
 
   @DELETE('/v1/internal/event/{kioskEventId}/machine/{machineId}/end')
   Future<void> deleteEndMark(
       {@Path('kioskEventId') required int kioskEventId,
       @Path('machineId') required int machineId,
-      @Path('remainingSingleSidedCount') required int remainingSingleSidedCount});
+      @Path('remainingSingleSidedCount') required String remainingSingleSidedCount});
+
+  @POST('/v1/internal/event/check/{kioskEventId}/{machineId}')
+  Future<void> checkKioskAlive(
+      {@Path('kioskEventId') required int kioskEventId,
+      @Path('machineId') required int machineId,
+      @Query('remainingSingleSidedCount') required String remainingSingleSidedCount});
 }

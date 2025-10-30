@@ -128,7 +128,7 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
     await ref.read(kioskRepositoryProvider).deleteEndMark(
           kioskEventId: kioskEventId,
           machineId: machineId,
-          remainingSingleSidedCount: cardCountState.currentCount,
+          remainingSingleSidedCount: cardCountState.remainingSingleSidedCount,
         );
 
     SlackLogService()
@@ -191,7 +191,7 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
                   await ref.read(kioskRepositoryProvider).endKioskApplication(
                         kioskEventId: ref.read(kioskInfoServiceProvider)?.kioskEventId ?? 0,
                         machineId: ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0,
-                        remainingSingleSidedCount: cardCountState.currentCount,
+                        remainingSingleSidedCount: cardCountState.remainingSingleSidedCount,
                       );
 
                   // 종료
@@ -461,7 +461,7 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
                       child: SetupUpdateCard(
                         title: '현재 버전',
                         //version: currentVersion,
-                        version: "v3.1.1",
+                        version: "v3.2.2",
                         buttonName: '업데이트',
                         isActive: isUpdateAvailable,
                         onUpdatePressed: () async {

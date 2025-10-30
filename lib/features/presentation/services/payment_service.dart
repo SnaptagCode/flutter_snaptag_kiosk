@@ -53,6 +53,30 @@ class PaymentService extends _$PaymentService {
     return paymentResponse;
   }
 
+  /// message1과 message2를 포맷팅하는 헬퍼 함수
+  String _formatPaymentMessages(PaymentResponse paymentResponse) {
+    final message1 = paymentResponse.message1?.trim();
+    final message2 = paymentResponse.message2?.trim();
+
+    // 둘 다 없는 경우
+    if ((message1 == null || message1.isEmpty) && (message2 == null || message2.isEmpty)) {
+      return "확인필요";
+    }
+
+    // message1만 있는 경우
+    if (message1 != null && message1.isNotEmpty && (message2 == null || message2.isEmpty)) {
+      return message1;
+    }
+
+    // message2만 있는 경우
+    if ((message1 == null || message1.isEmpty) && message2 != null && message2.isNotEmpty) {
+      return message2;
+    }
+
+    // 둘 다 있는 경우
+    return "$message1($message2)";
+  }
+
   /// 결제 결과 처리
   Future<void> _handlePaymentResult(PaymentResponse paymentResponse) async {
     final approvalNo = paymentResponse.approvalNo ?? '';
@@ -78,12 +102,12 @@ class PaymentService extends _$PaymentService {
 
     ref.read(paymentFailureProvider.notifier).triggerFailure();
 
-    final failResponse = await _updateFailOrder();
+    final failResponse = await _updateFailOrder(description: _formatPaymentMessages(paymentResponse));
     ref.read(updateOrderInfoProvider.notifier).update(failResponse);
 
     SlackLogService().sendPaymentBroadcastLogToSlak(InfoKey.paymentFail.key,
         paymentDescription:
-            "사유: ${paymentResponse.message1}, ${paymentResponse.message2}\n- 인증번호: ${backPhoto.photoAuthNumber}\n- 승인번호: ${paymentResponse.approvalNo ?? "없음"}");
+            "사유: ${_formatPaymentMessages(paymentResponse)}\n- 인증번호: ${backPhoto.photoAuthNumber}\n- 승인번호: ${paymentResponse.approvalNo ?? "없음"}");
   }
 
   /// 결제 응답 처리
@@ -330,7 +354,7 @@ class PaymentService extends _$PaymentService {
     }
   }
 
-  Future<UpdateOrderResponse> _updateFailOrder() async {
+  Future<UpdateOrderResponse> _updateFailOrder({required String description}) async {
     try {
       final settings = ref.read(kioskInfoServiceProvider);
       final backPhoto = ref.watch(verifyPhotoCardProvider).value;
@@ -351,7 +375,7 @@ class PaymentService extends _$PaymentService {
           purchaseAuthNumber: '-',
           authSeqNumber: '-',
           detail: approval?.KSNET ?? '{}',
-          description: "승인번호 없음");
+          description: description);
 
       return await ref.read(kioskRepositoryProvider).updateOrderStatus(orderId.toInt(), request);
     } catch (e) {
