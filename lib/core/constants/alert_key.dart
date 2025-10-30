@@ -5,6 +5,7 @@ enum ErrorKey {
   printerEjectFail("Printer_Eject_Fail"),
   printerReadyFail("Printer_Ready_Fail"),
   printerPrintFail("Printer_Print_Fail"),
+  printerInjectFail("Printer_Inject_Fail"),
   severError("Sever_Error");
 
   final String key;
