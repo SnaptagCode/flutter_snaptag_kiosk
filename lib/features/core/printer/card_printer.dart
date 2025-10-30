@@ -64,7 +64,7 @@ class PrinterService extends _$PrinterService {
       if (printerLog != null) {
         ref.read(printerLogProvider.notifier).update(printerLog);
       } else {
-        SlackLogService().sendLogToSlack("CheckConnected Print - PrinterLog is null");
+        // SlackLogService().sendLogToSlack("CheckConnected Print - PrinterLog is null");
       }
       final isReady = printerLog?.printerMainStatusCode == "1004";
 
@@ -214,8 +214,17 @@ class PrinterService extends _$PrinterService {
       final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
       final log = printerLog.copyWith(kioskMachineId: machineId);
       if (machineId != 0) {
+        final kioskEventId = ref.read(kioskInfoServiceProvider)?.kioskEventId ?? 0;
+        final cardCountState = ref.read(cardCountProvider);
         ref.read(printerLogProvider.notifier).update(printerLog);
         await ref.read(kioskRepositoryProvider).updatePrintLog(request: log);
+        if (kioskEventId != 0) {
+          await ref.read(kioskRepositoryProvider).checkKioskAlive(
+                kioskEventId: kioskEventId,
+                machineId: machineId,
+                remainingSingleSidedCount: cardCountState.remainingSingleSidedCount,
+              );
+        }
         SlackLogService().sendLogToSlack('Machine ID: $machineId , PrintState : $log');
       }
       return printerLog;

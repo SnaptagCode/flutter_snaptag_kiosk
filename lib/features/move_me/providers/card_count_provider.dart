@@ -22,8 +22,9 @@ class CardCountState {
     );
   }
 
-  factory CardCountState.initial([int n = 0]) =>
-      CardCountState(initialCount: n, currentCount: n);
+  String get remainingSingleSidedCount => '$currentCount / $initialCount';
+
+  factory CardCountState.initial([int n = 0]) => CardCountState(initialCount: n, currentCount: n);
 }
 
 @Riverpod(keepAlive: true)

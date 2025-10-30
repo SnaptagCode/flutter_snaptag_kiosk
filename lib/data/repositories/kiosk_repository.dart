@@ -3,7 +3,9 @@ import 'package:flutter_snaptag_kiosk/data/models/models.dart';
 import 'package:flutter_snaptag_kiosk/data/models/request/update_back_photo_request.dart';
 import 'package:flutter_snaptag_kiosk/features/core/printer/printer_log.dart';
 import 'package:flutter_snaptag_kiosk/flavors.dart';
+import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 part 'kiosk_repository.g.dart';
 
@@ -13,14 +15,15 @@ class KioskRepository extends _$KioskRepository {
   _KioskRepository build() {
     final dio = ref.watch(dioProvider(F.kioskBaseUrl));
 
-    return _KioskRepository(KioskApiClient(dio));
+    return _KioskRepository(KioskApiClient(dio), ref);
   }
 }
 
 class _KioskRepository {
   final KioskApiClient _apiClient;
+  final Ref _ref;
 
-  _KioskRepository(this._apiClient);
+  _KioskRepository(this._apiClient, this._ref);
   Future<String> healthCheck() async {
     try {
       return await _apiClient.healthCheck();
@@ -138,8 +141,13 @@ class _KioskRepository {
     required PrinterLog request,
   }) async {
     try {
+      final cardCount = _ref.read(cardCountProvider);
+
       await _apiClient.updatePrintLog(
-        body: request.toJson(),
+        body: {
+          ...request.toJson(),
+          'remainingSingleSidedCount': cardCount.remainingSingleSidedCount,
+        },
       );
     } catch (e) {
       rethrow;
@@ -149,7 +157,7 @@ class _KioskRepository {
   Future<void> endKioskApplication({
     required int kioskEventId,
     required int machineId,
-    required int remainingSingleSidedCount,
+    required String remainingSingleSidedCount,
   }) async {
     try {
       await _apiClient.endKioskApplication(
@@ -162,10 +170,23 @@ class _KioskRepository {
   Future<void> deleteEndMark({
     required int kioskEventId,
     required int machineId,
-    required int remainingSingleSidedCount,
+    required String remainingSingleSidedCount,
   }) async {
     try {
       await _apiClient.deleteEndMark(
+          kioskEventId: kioskEventId, machineId: machineId, remainingSingleSidedCount: remainingSingleSidedCount);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> checkKioskAlive({
+    required int kioskEventId,
+    required int machineId,
+    required String remainingSingleSidedCount,
+  }) async {
+    try {
+      await _apiClient.checkKioskAlive(
           kioskEventId: kioskEventId, machineId: machineId, remainingSingleSidedCount: remainingSingleSidedCount);
     } catch (e) {
       rethrow;
