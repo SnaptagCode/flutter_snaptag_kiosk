@@ -9,6 +9,9 @@ class KioskInfoService extends _$KioskInfoService {
   Timer? _periodicTimer;
   int? _cachedMachineId;
   int? _cachedKioskEventId;
+  bool _getInfoByKey = false;
+
+  bool get getInfoByKey => _getInfoByKey;
 
   @override
   KioskMachineInfo? build() {
@@ -18,6 +21,31 @@ class KioskInfoService extends _$KioskInfoService {
     });
 
     return null;
+  }
+
+  Future<KioskMachineInfo?> getKioskMachineInfo() async {
+    try {
+      final kioskRepo = ref.read(kioskRepositoryProvider);
+      final deviceUUID = await ref.watch(deviceUuidProvider.future);
+      final response = await kioskRepo.getKioskMachineInfoByKey(deviceUUID);
+
+      state = response;
+
+      ref.read(frontPhotoListProvider.notifier).fetch();
+
+      // 캐시된 값들 업데이트
+      _cachedMachineId = response.kioskMachineId;
+      _cachedKioskEventId = response.kioskEventId;
+
+      // 응답을 받은 후 10분마다 실행되는 타이머 시작
+      await _startPeriodicTimer();
+
+      _getInfoByKey = true;
+
+      return response;
+    } catch (e) {
+      return null;
+    }
   }
 
   Future<KioskMachineInfo> _fetchAndUpdateKioskInfo({int? machineId}) async {

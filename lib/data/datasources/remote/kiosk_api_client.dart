@@ -23,6 +23,11 @@ abstract class KioskApiClient {
     @Query('kioskEventId') required int kioskEventId,
   });
 
+  @GET('/v1/machine/info/by-key')
+  Future<KioskMachineInfo> getKioskMachineInfoByKey({
+    @Query('uniqueKey') required String uniqueKey,
+  });
+
   @GET('/v1/kiosk-event/back-photo')
   Future<BackPhotoCardResponse> getBackPhotoCard({
     @Query('kioskEventId') required int kioskEventId,
@@ -88,4 +93,9 @@ abstract class KioskApiClient {
       {@Path('kioskEventId') required int kioskEventId,
       @Path('machineId') required int machineId,
       @Query('remainingSingleSidedCount') required String remainingSingleSidedCount});
+
+  @POST('/v1/machine/unique-key/history')
+  Future<void> createUniqueKeyHistory({
+    @Body() required Map<String, dynamic> body,
+  });
 }

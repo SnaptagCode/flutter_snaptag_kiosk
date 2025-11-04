@@ -1,8 +1,6 @@
-import 'package:flutter_snaptag_kiosk/data/datasources/remote/remote.dart';
-import 'package:flutter_snaptag_kiosk/data/models/models.dart';
+import 'package:flutter_snaptag_kiosk/data/models/request/unique_key_request.dart';
 import 'package:flutter_snaptag_kiosk/data/models/request/update_back_photo_request.dart';
 import 'package:flutter_snaptag_kiosk/features/core/printer/printer_log.dart';
-import 'package:flutter_snaptag_kiosk/flavors.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -45,6 +43,14 @@ class _KioskRepository {
   Future<KioskMachineInfo> getKioskMachineInfo(int machineId) async {
     try {
       return await _apiClient.getKioskMachineInfo(kioskMachineId: machineId);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<KioskMachineInfo> getKioskMachineInfoByKey(String uniqueKey) async {
+    try {
+      return await _apiClient.getKioskMachineInfoByKey(uniqueKey: uniqueKey);
     } catch (e) {
       rethrow;
     }
@@ -188,6 +194,14 @@ class _KioskRepository {
     try {
       await _apiClient.checkKioskAlive(
           kioskEventId: kioskEventId, machineId: machineId, remainingSingleSidedCount: remainingSingleSidedCount);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> createUniqueKeyHistory({required UniqueKeyRequest request}) async {
+    try {
+      await _apiClient.createUniqueKeyHistory(body: request.toJson());
     } catch (e) {
       rethrow;
     }
