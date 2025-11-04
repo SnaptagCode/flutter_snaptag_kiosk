@@ -22,16 +22,26 @@ class SetupMainScreen extends ConsumerStatefulWidget {
 
 class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
   Timer? _timer;
+  bool _hasInitialized = false;
 
   @override
   void initState() {
     super.initState();
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      // 이미 초기화되었거나 위젯이 dispose된 경우 중복 호출 방지
+      if (_hasInitialized || !mounted) return;
+      _hasInitialized = true;
+
       ref.read(alertDefinitionProvider.notifier).load();
-      final kioskInfo = await ref.read(kioskInfoServiceProvider.notifier).getKioskMachineInfo();
-      if (kioskInfo == null) {
-        SlackLogService().sendErrorLogToSlack('Kiosk info not found');
+
+      // 이미 데이터가 있으면 API 호출하지 않음
+      final currentInfo = ref.read(kioskInfoServiceProvider);
+      if (currentInfo == null) {
+        final kioskInfo = await ref.read(kioskInfoServiceProvider.notifier).getKioskMachineInfo();
+        if (kioskInfo == null) {
+          SlackLogService().sendErrorLogToSlack('Kiosk info not found');
+        }
       }
     });
 

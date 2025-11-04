@@ -10,6 +10,7 @@ class KioskInfoService extends _$KioskInfoService {
   int? _cachedMachineId;
   int? _cachedKioskEventId;
   bool _getInfoByKey = false;
+  bool _isLoading = false;
 
   bool get getInfoByKey => _getInfoByKey;
 
@@ -24,7 +25,18 @@ class KioskInfoService extends _$KioskInfoService {
   }
 
   Future<KioskMachineInfo?> getKioskMachineInfo() async {
+    // 이미 로딩 중이면 기다리거나 현재 상태 반환
+    if (_isLoading) {
+      return state;
+    }
+
+    // 이미 데이터가 있으면 바로 반환 (중복 호출 방지)
+    if (state != null && _getInfoByKey) {
+      return state;
+    }
+
     try {
+      _isLoading = true;
       final kioskRepo = ref.read(kioskRepositoryProvider);
       final deviceUUID = await ref.read(deviceUuidProvider.future);
       final response = await kioskRepo.getKioskMachineInfoByKey(deviceUUID);
@@ -40,8 +52,12 @@ class KioskInfoService extends _$KioskInfoService {
       // 응답을 받은 후 10분마다 실행되는 타이머 시작
       await _startPeriodicTimer();
 
+      _getInfoByKey = true;
+      _isLoading = false;
+
       return response;
     } catch (e) {
+      _isLoading = false;
       return null;
     }
   }
