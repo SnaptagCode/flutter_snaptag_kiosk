@@ -32,7 +32,6 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
       final kioskInfo = await ref.read(kioskInfoServiceProvider.notifier).getKioskMachineInfo();
       if (kioskInfo == null) {
         SlackLogService().sendErrorLogToSlack('Kiosk info not found');
-        return;
       }
     });
 

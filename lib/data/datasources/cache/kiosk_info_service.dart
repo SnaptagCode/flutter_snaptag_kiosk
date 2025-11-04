@@ -26,7 +26,7 @@ class KioskInfoService extends _$KioskInfoService {
   Future<KioskMachineInfo?> getKioskMachineInfo() async {
     try {
       final kioskRepo = ref.read(kioskRepositoryProvider);
-      final deviceUUID = await ref.watch(deviceUuidProvider.future);
+      final deviceUUID = await ref.read(deviceUuidProvider.future);
       final response = await kioskRepo.getKioskMachineInfoByKey(deviceUUID);
 
       state = response;
@@ -39,8 +39,6 @@ class KioskInfoService extends _$KioskInfoService {
 
       // 응답을 받은 후 10분마다 실행되는 타이머 시작
       await _startPeriodicTimer();
-
-      _getInfoByKey = true;
 
       return response;
     } catch (e) {
