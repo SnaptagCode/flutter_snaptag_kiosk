@@ -57,6 +57,7 @@ class KioskInfoService extends _$KioskInfoService {
 
       return response;
     } catch (e) {
+      _getInfoByKey = false;
       _isLoading = false;
       return null;
     }
