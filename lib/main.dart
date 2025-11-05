@@ -9,6 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:window_manager/window_manager.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 void main() async {
   // 인증서 유효성 무시
@@ -24,6 +25,13 @@ void main() async {
   runZonedGuarded(
     () async {
       WidgetsFlutterBinding.ensureInitialized();
+      
+      // Hive 초기화
+      await Hive.initFlutter();
+
+      final path = await IntroCommonDataHiveCache.getHiveFilePath();
+print('Hive 파일 위치: $path');
+      
       await windowManagerSetting();
       // ✅ FlutterError 로그 자동 감지
       FlutterError.onError = (FlutterErrorDetails details) {
@@ -70,13 +78,13 @@ Future<void> windowManagerSetting() async {
   if (Platform.isWindows) {
     await windowManager.ensureInitialized();
     WindowOptions windowOptions = WindowOptions(
-      fullScreen: true,
+      // fullScreen: true,
       backgroundColor: Colors.transparent,
       skipTaskbar: false,
       titleBarStyle: TitleBarStyle.hidden,
     );
     windowManager.waitUntilReadyToShow(windowOptions, () async {
-      await windowManager.setFullScreen(true);
+      // await windowManager.setFullScreen(true);
       await windowManager.show();
       await windowManager.focus();
     });

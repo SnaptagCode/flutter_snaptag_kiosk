@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:developer';
 
+import 'package:flutter_snaptag_kiosk/data/datasources/cache/intro_common_data_service.dart';
 import 'package:flutter_snaptag_kiosk/data/models/entities/slack_log_template.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -16,15 +17,82 @@ class SlackLogService {
 
   late ProviderContainer _container;
 
-  final slackWebhookUrl = dotenv.env['SLACK_WEBHOOK_URL'];
+  // 초기값 (dotenv에서 가져옴)
+  final String? _initialSlackWebhookUrl = '';
+  final String? _initialSlackWebhookErrorUrl = dotenv.env['SLACK_WEBHOOK_ERROR_LOG_URL'];
+  final String? _initialSlackWebhookRibbonFilmWarnUrl = dotenv.env['SLACK_WEBHOOK_RIBBON_FILM_WARN_URL'];
+  final String? _initialSlackWebhookWarningUrl = dotenv.env['SLACK_WEBHOOK_WARNING_URL'];
+  final String? _initialSlackWebhookBroadcastUrl = '';
 
-  final slackWebhookErrorUrl = dotenv.env['SLACK_WEBHOOK_ERROR_LOG_URL'];
+  /// Slack Webhook URL 가져오기 (Hive → Service → env 순서)
+  Future<String?> get slackWebhookUrl async => await _getUrlWithPriority(
+        () => IntroCommonDataHiveCache.getValueByCode('SLACK_WEBHOOK_URL'),
+        () => _container.read(introCommonDataServiceProvider.notifier).getSlackWebhookUrl(),
+        _initialSlackWebhookUrl,
+      );
 
-  final slackWebhookRibbonFilmWarnUrl = dotenv.env['SLACK_WEBHOOK_RIBBON_FILM_WARN_URL'];
+  /// Slack Webhook Error URL 가져오기 (Hive → Service → env 순서)
+  Future<String?> get slackWebhookErrorUrl async => await _getUrlWithPriority(
+        () => IntroCommonDataHiveCache.getValueByCode('SLACK_WEBHOOK_ERROR_LOG_URL'),
+        () => _container.read(introCommonDataServiceProvider.notifier).getSlackWebhookErrorUrl(),
+        _initialSlackWebhookErrorUrl,
+      );
 
-  final slackWebhookWarningUrl = dotenv.env['SLACK_WEBHOOK_WARNING_URL'];
+  /// Slack Webhook Ribbon Film Warning URL 가져오기 (Hive → Service → env 순서)
+  Future<String?> get slackWebhookRibbonFilmWarnUrl async => await _getUrlWithPriority(
+        () => IntroCommonDataHiveCache.getValueByCode('SLACK_WEBHOOK_RIBBON_FILM_WARN_URL'),
+        () => _container.read(introCommonDataServiceProvider.notifier).getSlackWebhookRibbonFilmWarnUrl(),
+        _initialSlackWebhookRibbonFilmWarnUrl,
+      );
 
-  final slackWebhookBroadcastUrl = dotenv.env['SLACK_WEBHOOK_BROADCAST_URL'];
+  /// Slack Webhook Warning URL 가져오기 (Hive → Service → env 순서)
+  Future<String?> get slackWebhookWarningUrl async => await _getUrlWithPriority(
+        () => IntroCommonDataHiveCache.getValueByCode('SLACK_WEBHOOK_WARNING_URL'),
+        () => _container.read(introCommonDataServiceProvider.notifier).getSlackWebhookWarningUrl(),
+        _initialSlackWebhookWarningUrl,
+      );
+
+  /// Slack Webhook Broadcast URL 가져오기 (Hive → Service → env 순서)
+  Future<String?> get slackWebhookBroadcastUrl async => await _getUrlWithPriority(
+        () => IntroCommonDataHiveCache.getValueByCode('DEV_WEBHOOK_URL'),
+        () => _container.read(introCommonDataServiceProvider.notifier).getSlackWebhookBroadcastUrl(),
+        _initialSlackWebhookBroadcastUrl,
+      );
+
+  /// 우선순위에 따라 URL 가져오기: Hive → Service → env
+  Future<String?> _getUrlWithPriority(
+    Future<String?> Function()? getHiveUrl,
+    Future<String?> Function() getServiceUrl,
+    String? initialUrl,
+  ) async {
+    try {
+
+      // 1. introCommonDataService에서 확인
+      final introCommonData = _container.read(introCommonDataServiceProvider);
+      if (introCommonData != null && introCommonData.isNotEmpty) {
+        print('getValueByCode _getUrlWithPriority introCommonData: $introCommonData');
+        final serviceUrl = await getServiceUrl();
+        if (serviceUrl != null && serviceUrl.isNotEmpty) {
+          print('getValueByCode _getUrlWithPriority serviceUrl: $serviceUrl');
+          return serviceUrl;
+        }
+      }
+
+      // 2. Hive 캐시에서 확인 (첫 번째 코드)
+      if (getHiveUrl != null) {
+        final hiveUrl1 = await getHiveUrl();
+        if (hiveUrl1 != null && hiveUrl1.isNotEmpty) {
+          print('getValueByCode _getUrlWithPriority hiveUrl1: $hiveUrl1');
+          return hiveUrl1;
+        }
+      }
+    } catch (e) {
+      // 에러 발생 시 초기값으로 fallback
+    }
+    
+    // 4. env 파일에서 가져온 초기값 반환
+    return initialUrl;
+  }
 
   void init(ProviderContainer container) {
     _container = container;
@@ -32,19 +100,23 @@ class SlackLogService {
   }
 
   Future<void> sendErrorLogToSlack(String message) async {
-    await sendLog(slackWebhookErrorUrl, message);
+    final url = await slackWebhookErrorUrl;
+    await sendLog(url, message);
   }
 
   Future<void> sendLogToSlack(String message) async {
-    await sendLog(slackWebhookUrl, message);
+    final url = await slackWebhookUrl;
+    await sendLog(url, message);
   }
 
   Future<void> sendRibbonFilmWarningLog(String message) async {
-    await sendLog(slackWebhookRibbonFilmWarnUrl, message);
+    final url = await slackWebhookRibbonFilmWarnUrl;
+    await sendLog(url, message);
   }
 
   Future<void> sendWarningLogToSlack(String message) async {
-    await sendLog(slackWebhookWarningUrl, message);
+    final url = await slackWebhookWarningUrl;
+    await sendLog(url, message);
   }
 
   // 1) 객체 만드는 함수 LogState
@@ -116,7 +188,8 @@ ${slackLogTemplate.description}
         cardCount: cardCount.currentCount,
       );
 
-      await sendLog(slackWebhookBroadcastUrl, message);
+      final url = await slackWebhookBroadcastUrl;
+      await sendLog(url, message);
     }
   }
 
@@ -133,7 +206,8 @@ ${slackLogTemplate.description}
 
       final message = buildSlackAlertMessage(slackLogTemplate: slackLogTemplate.copyWith(description: description));
 
-      await sendLog(slackWebhookBroadcastUrl, message);
+      final url = await slackWebhookBroadcastUrl;
+      await sendLog(url, message);
     }
   }
 
@@ -157,7 +231,8 @@ ${slackLogTemplate.description}
       final message = buildSlackAlertMessage(
           slackLogTemplate: slackLogTemplate.copyWith(title: '프린트 상태', category: 'info', description: description));
 
-      await sendLog(slackWebhookBroadcastUrl, message);
+      final url = await slackWebhookBroadcastUrl;
+      await sendLog(url, message);
     }
   }
 
@@ -171,7 +246,8 @@ ${slackLogTemplate.description}
         cardCount: cardCount.currentCount,
       );
 
-      await sendLog(slackWebhookBroadcastUrl, message);
+      final url = await slackWebhookBroadcastUrl;
+      await sendLog(url, message);
     }
   }
 

@@ -4,13 +4,14 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_snaptag_kiosk/core/providers/version_notifier.dart';
+import 'package:flutter_snaptag_kiosk/core/utils/launcher_service.dart';
 import 'package:flutter_snaptag_kiosk/core/utils/sound_manager.dart';
+import 'package:flutter_snaptag_kiosk/data/datasources/cache/intro_common_data_service.dart';
+import 'package:flutter_snaptag_kiosk/data/datasources/local/id_writer.dart';
 import 'package:flutter_snaptag_kiosk/features/core/printer/printer_connect_state.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:flutter_snaptag_kiosk/core/providers/version_notifier.dart';
-import 'package:flutter_snaptag_kiosk/core/utils/launcher_service.dart';
-import 'package:flutter_snaptag_kiosk/data/datasources/local/id_writer.dart';
 
 class SetupMainScreen extends ConsumerStatefulWidget {
   const SetupMainScreen({super.key});
@@ -21,13 +22,17 @@ class SetupMainScreen extends ConsumerStatefulWidget {
 
 class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
   Timer? _timer;
+  bool _isIntroCommonDataLoaded = false;
 
   @override
   void initState() {
     super.initState();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(alertDefinitionProvider.notifier).load();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (_isIntroCommonDataLoaded) return;
+      await ref.read(introCommonDataServiceProvider.notifier).fetchAndUpdate();
+      await ref.read(alertDefinitionProvider.notifier).load();
+      _isIntroCommonDataLoaded = true;
     });
 
     _timer = Timer.periodic(Duration(seconds: 2), (timer) async {
