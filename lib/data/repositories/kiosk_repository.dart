@@ -192,4 +192,12 @@ class _KioskRepository {
       rethrow;
     }
   }
+
+  Future<List<IntroCommonData>> getIntroCommonData() async {
+    try {
+      return await _apiClient.getIntroCommonData();
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

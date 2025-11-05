@@ -1,4 +1,5 @@
 export 'back_photo_card_response.dart';
+export 'intro_common_data.dart';
 export 'kiosk_machine_info.dart';
 export 'nominated_photo.dart';
 export 'nominated_photo_list.dart';

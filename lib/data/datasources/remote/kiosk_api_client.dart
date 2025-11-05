@@ -88,4 +88,7 @@ abstract class KioskApiClient {
       {@Path('kioskEventId') required int kioskEventId,
       @Path('machineId') required int machineId,
       @Query('remainingSingleSidedCount') required String remainingSingleSidedCount});
+
+  @GET('/v1/intro/common-data')
+  Future<List<IntroCommonData>> getIntroCommonData();
 }
