@@ -85,7 +85,7 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
       if (kioskInfo?.kioskEventId == 0 || kioskInfo?.kioskMachineId == 0) {
         await DialogHelper.showSetupDialog(
           context,
-          title: '이벤트를 선택해주세요.',
+          title: '이벤트를 실행하려면 \n키오스크 기기번호를 입력해 주세요.',
         );
         return;
       }
@@ -151,6 +151,7 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
     final kioskEventId = ref.read(kioskInfoServiceProvider)?.kioskEventId ?? 0;
     final cardCountState = ref.read(cardCountProvider);
     final deviceUUID = await ref.read(deviceUuidProvider.future);
+    final getInfoByKey = ref.read(kioskInfoServiceProvider.notifier).getInfoByKey;
 
     await ref.read(printerServiceProvider.notifier).startPrintLog();
 
@@ -160,12 +161,14 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
           remainingSingleSidedCount: cardCountState.remainingSingleSidedCount,
         );
 
-    await ref.read(kioskRepositoryProvider).createUniqueKeyHistory(
-          request: UniqueKeyRequest(
-            kioskMachineId: machineId.toString(),
-            uniqueKey: deviceUUID,
-          ),
-        );
+    if (!getInfoByKey) {
+      await ref.read(kioskRepositoryProvider).createUniqueKeyHistory(
+            request: UniqueKeyRequest(
+              kioskMachineId: machineId.toString(),
+              uniqueKey: deviceUUID,
+            ),
+          );
+    }
 
     SlackLogService()
         .sendLogToSlack('machineId:$machineId, currentVersion:$currentVersion, latestVersion:$latestVersion');
