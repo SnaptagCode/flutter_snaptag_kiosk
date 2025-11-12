@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -81,11 +82,12 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
 
     final kioskInfo = ref.read(kioskInfoServiceProvider);
 
+    print('kioskInfo: $kioskInfo kioskEventId: ${kioskInfo?.kioskEventId} kioskMachineId: ${kioskInfo?.kioskMachineId}');
     if (kioskInfo == null) {
-      if (kioskInfo?.kioskEventId == 0 || kioskInfo?.kioskMachineId == 0) {
+      if (kioskInfo?.kioskEventId == 0 || kioskInfo?.kioskEventId == null || kioskInfo?.kioskMachineId == 0 || kioskInfo?.kioskMachineId == null) {
         await DialogHelper.showSetupDialog(
           context,
-          title: LocaleKeys.alert_title_empty_event,
+          title: LocaleKeys.alert_title_empty_event.tr(),
         );
         return;
       }

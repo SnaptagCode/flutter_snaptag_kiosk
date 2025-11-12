@@ -120,6 +120,7 @@ class DialogHelper {
             title: Center(
               child: Text(
                 title,
+                textAlign: TextAlign.center,
                 style: context.typography.kioskAlert1B.copyWith(
                   fontFamily: 'Pretendard',
                   color: Colors.black,
@@ -474,6 +475,15 @@ class DialogHelper {
       title: LocaleKeys.alert_title_authNum_reissue_complete.tr(),
       message: LocaleKeys.alert_txt_authNum_reissue_complete.tr(),
       buttonText: LocaleKeys.alert_btn_authNum_reissue_complete.tr(),
+    );
+  }
+
+  static Future<void> showEmptyEventDialog(BuildContext context) async {
+    await _showOneButtonKioskDialog(
+      context,
+      title: LocaleKeys.alert_title_empty_event.tr(),
+      message: "",
+      buttonText: LocaleKeys.alert_btn_ok.tr(),
     );
   }
 
