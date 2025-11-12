@@ -117,6 +117,11 @@ class DialogHelper {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20.r),
             ),
+            contentPadding: EdgeInsets.only(
+              left: 40.w,
+              right: 40.w,
+            ),
+            titlePadding: EdgeInsets.only(top: 60.h, bottom: 36.h),
             title: Center(
               child: Text(
                 title,
