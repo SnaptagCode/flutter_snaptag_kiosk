@@ -48,6 +48,7 @@ abstract class LocaleKeys {
   static const alert_txt_refund_info = 'alert_txt_refund_info';
   static const alert_btn_cancel = 'alert_btn_cancel';
   static const alert_btn_ok = 'alert_btn_ok';
+  static const alert_title_empty_event = 'Enter the kiosk devic\nnumber to run the event.';
 
   static const alert_title_auto_refund_alert = 'alert_title_auto_refund_alert';
   static const alert_txt_auto_refund_alert = 'alert_txt_auto_refund_alert';

@@ -46,5 +46,6 @@
   "alert_title_auto_refund_alert": "返金のお知らせ",
   "alert_txt_auto_refund_alert": "プリンターが正常に動作しないため\r\n返金を進めます。",
   "alert_btn_cancel": "キャンセル",
-  "alert_btn_ok": "確認"
+  "alert_btn_ok": "確認",
+  "alert_title_empty_event": "イベントを実行するには、\nキオスクの機器番号を入力してください。"
 }

@@ -46,5 +46,6 @@
   "alert_title_auto_refund_alert": "Refund Notice",
   "alert_txt_auto_refund_alert": "The printer is not working properly.\r\nA refund will be processed.",
   "alert_btn_cancel": "Cancel",
-  "alert_btn_ok": "OK"
+  "alert_btn_ok": "OK",
+  "alert_title_empty_event": "Enter the kiosk devic\nnumber to run the event."
 }

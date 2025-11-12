@@ -85,7 +85,7 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
       if (kioskInfo?.kioskEventId == 0 || kioskInfo?.kioskMachineId == 0) {
         await DialogHelper.showSetupDialog(
           context,
-          title: '이벤트를 실행하려면 \n키오스크 기기번호를 입력해 주세요.',
+          title: LocaleKeys.alert_title_empty_event,
         );
         return;
       }
