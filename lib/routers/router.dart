@@ -53,7 +53,7 @@ class ImageShellRouteData extends ShellRouteData {
   }
 }
 
-class SetupMainRouteData extends GoRouteData {
+class SetupMainRouteData extends GoRouteData with _$SetupMainRouteData {
   const SetupMainRouteData();
 
   @override
@@ -64,7 +64,7 @@ class SetupMainRouteData extends GoRouteData {
   }
 }
 
-class PaymentHistoryRouteData extends GoRouteData {
+class PaymentHistoryRouteData extends GoRouteData with _$PaymentHistoryRouteData {
   const PaymentHistoryRouteData();
 
   @override
@@ -75,7 +75,7 @@ class PaymentHistoryRouteData extends GoRouteData {
   }
 }
 
-class UnitTestRouteData extends GoRouteData {
+class UnitTestRouteData extends GoRouteData with _$UnitTestRouteData {
   const UnitTestRouteData();
 
   @override
@@ -86,7 +86,7 @@ class UnitTestRouteData extends GoRouteData {
   }
 }
 
-class KioskComponentsRouteData extends GoRouteData {
+class KioskComponentsRouteData extends GoRouteData with _$KioskComponentsRouteData {
   const KioskComponentsRouteData();
 
   @override
@@ -97,7 +97,7 @@ class KioskComponentsRouteData extends GoRouteData {
   }
 }
 
-class KioskInfoRouteData extends GoRouteData {
+class KioskInfoRouteData extends GoRouteData with _$KioskInfoRouteData {
   const KioskInfoRouteData();
 
   @override
@@ -108,7 +108,7 @@ class KioskInfoRouteData extends GoRouteData {
   }
 }
 
-class KioskRouteData extends GoRouteData {
+class KioskRouteData extends GoRouteData with _$KioskRouteData {
   const KioskRouteData();
 
   @override
@@ -119,7 +119,7 @@ class KioskRouteData extends GoRouteData {
   }
 }
 
-class PhotoCardUploadRouteData extends GoRouteData {
+class PhotoCardUploadRouteData extends GoRouteData with _$PhotoCardUploadRouteData {
   const PhotoCardUploadRouteData();
 
   @override
@@ -130,7 +130,7 @@ class PhotoCardUploadRouteData extends GoRouteData {
   }
 }
 
-class CodeVerificationRouteData extends GoRouteData {
+class CodeVerificationRouteData extends GoRouteData with _$CodeVerificationRouteData {
   const CodeVerificationRouteData();
 
   @override
@@ -141,7 +141,7 @@ class CodeVerificationRouteData extends GoRouteData {
   }
 }
 
-class PhotoCardPreviewRouteData extends GoRouteData {
+class PhotoCardPreviewRouteData extends GoRouteData with _$PhotoCardPreviewRouteData {
   const PhotoCardPreviewRouteData();
 
   @override
@@ -152,7 +152,7 @@ class PhotoCardPreviewRouteData extends GoRouteData {
   }
 }
 
-class PrintProcessRouteData extends GoRouteData {
+class PrintProcessRouteData extends GoRouteData with _$PrintProcessRouteData {
   const PrintProcessRouteData();
 
   @override
