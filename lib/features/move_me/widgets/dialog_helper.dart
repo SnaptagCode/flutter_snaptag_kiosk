@@ -117,50 +117,53 @@ class DialogHelper {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20.r),
             ),
-            contentPadding: EdgeInsets.only(
-              left: 40.w,
-              right: 40.w,
-            ),
-            titlePadding: EdgeInsets.only(top: 60.h, bottom: 36.h),
+            titlePadding: EdgeInsets.zero,
+            actionsPadding: EdgeInsets.zero,
             title: Center(
-              child: Text(
-                title,
-                textAlign: TextAlign.center,
-                style: context.typography.kioskAlert1B.copyWith(
-                  fontFamily: 'Pretendard',
-                  color: Colors.black,
+              child: Padding(
+                padding: EdgeInsets.only(top: 60.h, bottom: 36.h),
+                child: Text(
+                  title,
+                  textAlign: TextAlign.center,
+                  style: context.typography.kioskAlert1B.copyWith(
+                    fontFamily: 'Pretendard',
+                    color: Colors.black,
+                  ),
                 ),
               ),
             ),
             actions: [
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () async {
-                        await SoundManager().playSound();
-                        Navigator.of(context).pop(false);
-                      },
-                      style: context.setupDialogCancelButtonStyle,
-                      child: Text(
-                        cancelButtonText,
+              Padding(
+                padding: EdgeInsets.only(bottom: 40.h, left: 40.w, right: 40.w),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () async {
+                          await SoundManager().playSound();
+                          Navigator.of(context).pop(false);
+                        },
+                        style: context.setupDialogCancelButtonStyle,
+                        child: Text(
+                          cancelButtonText,
+                        ),
                       ),
                     ),
-                  ),
-                  SizedBox(width: 12.w),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () async {
-                        await SoundManager().playSound();
-                        Navigator.of(context).pop(true);
-                      },
-                      style: context.setupDialogConfirmButtonStyle,
-                      child: Text(
-                        confirmButtonText,
+                    SizedBox(width: 12.w),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          await SoundManager().playSound();
+                          Navigator.of(context).pop(true);
+                        },
+                        style: context.setupDialogConfirmButtonStyle,
+                        child: Text(
+                          confirmButtonText,
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               )
             ],
           ),
