@@ -97,6 +97,67 @@ class DialogHelper {
     );
   }
 
+  static Future<bool> showSetupOneButtonDialog(
+    BuildContext context, {
+    required String title,
+    String confirmButtonText = '확인',
+  }) async {
+    return await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return DefaultTextStyle(
+          style: TextStyle(
+            fontFamily: context.locale.languageCode == 'ja' ? 'MPLUSRounded' : 'Cafe24Ssurround2',
+          ),
+          child: AlertDialog(
+            backgroundColor: Colors.white,
+            insetPadding: EdgeInsets.symmetric(horizontal: 100.w),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20.r),
+            ),
+            titlePadding: EdgeInsets.zero,
+            actionsPadding: EdgeInsets.zero,
+            title: Center(
+              child: Padding(
+                padding: EdgeInsets.only(top: 60.h, bottom: 36.h),
+                child: Text(
+                  title,
+                  textAlign: TextAlign.center,
+                  style: context.typography.kioskAlert1B.copyWith(
+                    fontFamily: 'Pretendard',
+                    color: Colors.black,
+                  ),
+                ),
+              ),
+            ),
+            actions: [
+              Padding(
+                padding: EdgeInsets.only(bottom: 40.h, left: 40.w, right: 40.w),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          await SoundManager().playSound();
+                          Navigator.of(context).pop(true);
+                        },
+                        style: context.setupDialogConfirmButtonStyle,
+                        child: Text(
+                          confirmButtonText,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   static Future<bool> showSetupDialog(
     BuildContext context, {
     required String title,

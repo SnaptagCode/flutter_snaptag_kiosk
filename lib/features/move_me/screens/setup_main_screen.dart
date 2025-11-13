@@ -89,7 +89,7 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
           kioskInfo?.kioskEventId == null ||
           kioskInfo?.kioskMachineId == 0 ||
           kioskInfo?.kioskMachineId == null) {
-        await DialogHelper.showSetupDialog(
+        await DialogHelper.showSetupOneButtonDialog(
           context,
           title: LocaleKeys.alert_title_empty_event.tr(),
         );
@@ -112,14 +112,14 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
     final connected = await ref.read(printerServiceProvider.notifier).checkConnectedPrint();
     final settingPrinter = ref.read(printerServiceProvider.notifier).settingPrinter();
     if (!connected) {
-      await DialogHelper.showSetupDialog(
+      await DialogHelper.showSetupOneButtonDialog(
         context,
         title: '프린트가 준비중입니다.',
       );
       return false;
     }
     if (!settingPrinter) {
-      await DialogHelper.showSetupDialog(
+      await DialogHelper.showSetupOneButtonDialog(
         context,
         title: '프린트 기기 상태를 확인해주세요.',
       );
