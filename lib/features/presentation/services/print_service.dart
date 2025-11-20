@@ -33,7 +33,7 @@ class PrintService extends _$PrintService {
 
     // 4. 프린트 진행 및 상태 업데이트
     await _executePrintJob(
-      frontPhotoInfo.id,
+      printJobInfo.printedPhotoCardId,
       frontPhotoInfo.safeEmbedImage,
       printJobInfo.backPhotoFile,
     );
@@ -72,11 +72,11 @@ class PrintService extends _$PrintService {
 
   void _validatePrintRequirements() {
     final backPhotoCardResponseInfo = ref.watch(verifyPhotoCardProvider).value;
-    final approvalInfo = ref.read(paymentResponseStateProvider);
+    // final approvalInfo = ref.read(paymentResponseStateProvider);
     final printerState = ref.read(printerServiceProvider);
 
     if (backPhotoCardResponseInfo == null) throw Exception('No back photo card response info available');
-    if (approvalInfo == null) throw Exception('No payment approval info available');
+    // if (approvalInfo == null) throw Exception('No payment approval info available');
     if (printerState.hasError) throw Exception('Printer is not ready');
   }
 
