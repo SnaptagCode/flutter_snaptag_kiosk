@@ -33,7 +33,7 @@ class PrintService extends _$PrintService {
 
     // 4. 프린트 진행 및 상태 업데이트
     await _executePrintJob(
-      printJobInfo.printedPhotoCardId,
+      frontPhotoInfo.id,
       frontPhotoInfo.safeEmbedImage,
       printJobInfo.backPhotoFile,
     );
@@ -98,9 +98,33 @@ class PrintService extends _$PrintService {
 
       final response = await ref.read(kioskRepositoryProvider).createPrintStatus(request: request);
 
-      final backPhotoFile = await ImageHelper().convertImageUrlToFile(response.formattedImageUrl);
+      final backPhotoFile = await ImageHelper().convertImageUrlToFile(response.nominatedBackphotoUrl);
 
       return (printedPhotoCardId: response.printedPhotoCardId, backPhotoFile: backPhotoFile);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<File> _prepareBackImage() async {
+    final backPhoto = ref.watch(verifyPhotoCardProvider).value;
+    if (backPhoto == null) {
+      throw Exception('No back photo available');
+    }
+
+    try {
+      final response = await ImageHelper().getImageBytes(backPhoto.formattedBackPhotoCardUrl);
+
+      final File processedImage = await ref.read(labcurityServiceProvider).embedImage(
+            response.data,
+            LabcurityImageConfig(
+              size: 3,
+              strength: 16,
+              //foxtrotCode: config?.productCode ?? 1,
+            ),
+          );
+
+      return processedImage;
     } catch (e) {
       rethrow;
     }

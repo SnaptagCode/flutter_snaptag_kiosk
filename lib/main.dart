@@ -69,17 +69,42 @@ Future<void> windowManagerSetting() async {
   //platform이 windows인 경우에만 실행
   if (Platform.isWindows) {
     await windowManager.ensureInitialized();
+
     WindowOptions windowOptions = WindowOptions(
       fullScreen: true,
       backgroundColor: Colors.transparent,
       skipTaskbar: false,
       titleBarStyle: TitleBarStyle.hidden,
     );
-    windowManager.waitUntilReadyToShow(windowOptions, () async {
+
+    // waitUntilReadyToShow를 await으로 기다림 (저사양 PC 대응)
+    await windowManager.waitUntilReadyToShow(windowOptions, () async {
       await windowManager.setFullScreen(true);
       await windowManager.show();
       await windowManager.focus();
     });
+
+    // 저사양 PC에서 화면 크기 인식 문제 해결을 위한 재설정
+    // 전체화면 설정 후 약간의 지연을 두고 크기를 다시 확인
+    await Future.delayed(Duration(milliseconds: 150));
+
+    // 화면 크기를 다시 확인하고 필요시 재설정
+    final currentSize = await windowManager.getSize();
+    final bounds = await windowManager.getBounds();
+
+    // 화면이 제대로 설정되지 않았거나 크기가 비정상적이면 다시 설정
+    // 저사양 PC에서는 화면 크기 인식이 늦을 수 있음
+    if (currentSize.width == 0 || currentSize.height == 0 || bounds.width == 0 || bounds.height == 0) {
+      // 전체화면 해제 후 다시 설정
+      await windowManager.setFullScreen(false);
+      await Future.delayed(Duration(milliseconds: 100));
+      await windowManager.setFullScreen(true);
+      await Future.delayed(Duration(milliseconds: 50));
+    }
+
+    // 최종적으로 전체화면 재확인 및 포커스
+    await windowManager.setFullScreen(true);
+    await windowManager.focus();
   }
 }
 
