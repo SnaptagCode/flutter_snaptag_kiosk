@@ -208,14 +208,14 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
   @override
   Widget build(BuildContext context) {
     ref.read(alertDefinitionProvider);
-    final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
+    final machineId = ref.watch(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
     final versionState = ref.watch(versionStateProvider);
     final cardCountState = ref.watch(cardCountProvider);
     final currentVersion = versionState.currentVersion;
     final latestVersion = versionState.latestVersion;
     final isUpdateAvailable = currentVersion != latestVersion;
     final isConnectedPrinter = ref.watch(printerConnectProvider) == PrinterConnectState.connected;
-    final getInfoByKey = ref.read(kioskInfoServiceProvider.notifier).getInfoByKey;
+    final getInfoByKey = ref.watch(kioskInfoServiceProvider.notifier).getInfoByKey;
     //final isUpdateAvailable = false;
 
     return Theme(
