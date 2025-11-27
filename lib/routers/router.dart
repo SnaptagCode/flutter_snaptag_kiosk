@@ -27,6 +27,7 @@ final GlobalKey<NavigatorState> globalNavigatorKey = GlobalKey<NavigatorState>(d
       routes: [
         TypedShellRoute<ImageShellRouteData>(
           routes: <TypedRoute<RouteData>>[
+            TypedGoRoute<ChoiceRouteData>(path: 'choise'),
             TypedGoRoute<PhotoCardUploadRouteData>(path: 'qr'),
             TypedGoRoute<CodeVerificationRouteData>(path: 'code-verification'),
             TypedGoRoute<PhotoCardPreviewRouteData>(path: 'preview'),
@@ -117,6 +118,17 @@ class KioskRouteData extends GoRouteData with _$KioskRouteData {
   Page<void> buildPage(BuildContext context, GoRouterState state) {
     return NoTransitionPage(
       child: SizedBox(),
+    );
+  }
+}
+
+class ChoiceRouteData extends GoRouteData with _$ChoiceRouteData {
+  const ChoiceRouteData();
+
+  @override
+  Page<void> buildPage(BuildContext context, GoRouterState state) {
+    return NoTransitionPage(
+      child: ChoiceScreen(),
     );
   }
 }
