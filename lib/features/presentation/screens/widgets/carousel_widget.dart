@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class CarouselWidget extends StatefulWidget {
   final int itemCount; // 회전목마 아이템 개수
@@ -52,7 +53,7 @@ class _CarouselWidgetState extends State<CarouselWidget> with SingleTickerProvid
     return GestureDetector(
       onTap: _rotateCarousel,
       child: SizedBox(
-        height: 400,
+        height: 800.h,
         child: AnimatedBuilder(
           animation: _animation,
           builder: (context, child) {
@@ -86,37 +87,37 @@ class _CarouselWidgetState extends State<CarouselWidget> with SingleTickerProvid
     final normalizedDistance = distanceFromCenter > itemCount / 2 ? itemCount - distanceFromCenter : distanceFromCenter;
 
     // Scale 계산 (중심: 1.0, 나머지: 0.7)
-    final scale = 0.7 + (0.3 * (1 - (normalizedDistance / (itemCount / 2)).clamp(0.0, 1.0)));
+    final scale = 0.4 + (0.3 * (1 - (normalizedDistance / (itemCount / 2)).clamp(0.0, 1.0)));
 
     // 투명도 계산 (중심: 1.0, 나머지: 0.5)
-    final opacity = normalizedDistance < 0.5 ? 1.0 : 0.5;
+    final opacity = normalizedDistance < 0.3 ? 1.0 : 0.3;
 
     // 원형 배치를 위한 X, Y 오프셋 계산
-    final radius = 150.0; // 회전목마 반지름
+    final radius = 300.w; // 회전목마 반지름
     final xOffset = math.sin(angle) * radius;
-    final yOffset = (math.cos(angle) - 1) * 50; // 약간의 Y축 변화로 깊이감 표현
+    final yOffset = (math.cos(angle) - 1) * 100.h; // 약간의 Y축 변화로 깊이감 표현
 
     return Positioned(
-      left: MediaQuery.of(context).size.width / 2 - 100 + xOffset,
-      top: 100 + yOffset,
+      left: MediaQuery.of(context).size.width / 2 - 200.w + xOffset,
+      top: 200.h + yOffset,
       child: Transform.scale(
         scale: scale,
         child: Opacity(
           opacity: opacity,
           child: Container(
-            width: 200,
-            height: 280,
+            width: 400.w,
+            height: 560.h,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
-              boxShadow: normalizedDistance < 0.5
-                  ? [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.3),
-                        blurRadius: 10,
-                        spreadRadius: 2,
-                      ),
-                    ]
-                  : [],
+              borderRadius: BorderRadius.circular(20.r),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(
+                    (0.1 * (1 - (normalizedDistance / (itemCount / 2)).clamp(0.0, 1.0))).clamp(0.0, 0.3),
+                  ),
+                  blurRadius: (20.w * (1 - (normalizedDistance / (itemCount / 2)).clamp(0.0, 1.0))).clamp(0.0, 20.w),
+                  spreadRadius: (4.w * (1 - (normalizedDistance / (itemCount / 2)).clamp(0.0, 1.0))).clamp(0.0, 4.w),
+                ),
+              ],
             ),
             child: _buildItemContent(),
           ),
@@ -127,9 +128,9 @@ class _CarouselWidgetState extends State<CarouselWidget> with SingleTickerProvid
 
   Widget _buildItemContent() {
     return ClipRRect(
-      borderRadius: BorderRadius.circular(10),
+      borderRadius: BorderRadius.circular(20.r),
       child: Image.asset(
-        'assets/print_loading.png',
+        'assets/images/print_loading.png',
         fit: BoxFit.cover,
       ),
     );

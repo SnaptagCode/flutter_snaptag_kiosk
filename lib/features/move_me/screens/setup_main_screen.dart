@@ -60,8 +60,8 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
   Future<void> _onRunEventTap(BuildContext context) async {
     await SoundManager().playSound();
 
-    final isReady = await _validatePrinterReadyAndShowDialogs(context);
-    if (!isReady) return;
+    // final isReady = await _validatePrinterReadyAndShowDialogs(context);
+    // if (!isReady) return;
 
     await _writePhotocodeMeta();
 
@@ -71,7 +71,9 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
     );
     if (!confirmed) return;
 
-    await _startEventFlow(context);
+    // await _startEventFlow(context);
+
+    ChoiceRouteData().go(context);
   }
 
   Future<bool> _validatePrinterReadyAndShowDialogs(BuildContext context) async {

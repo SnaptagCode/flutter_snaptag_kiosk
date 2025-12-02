@@ -1,2 +1,10 @@
+export 'carousel_widget.dart';
+export 'flip_card_widget.dart';
 export 'payment_test_widget.dart';
 export 'print_test_widget.dart';
+export 'card_flip_choice_widget.dart';
+export 'side_by_side_choice_widget.dart';
+export 'tab_switch_choice_widget.dart';
+export 'card_stack_choice_widget.dart';
+export 'rotate_3d_choice_widget.dart';
+export 'carousel_choice_widget.dart';

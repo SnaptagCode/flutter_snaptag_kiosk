@@ -90,7 +90,7 @@ class _KioskShellState extends ConsumerState<KioskShell> {
                             ],
                           ),
                         ),
-                        SizedBox(height: 230.h),
+                        // SizedBox(height: 100.h),
                         Expanded(child: widget.child),
                       ],
                     ),
