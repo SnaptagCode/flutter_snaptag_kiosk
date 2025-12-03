@@ -9,7 +9,7 @@ class KioskInfoService extends _$KioskInfoService {
   Timer? _periodicTimer;
   int? _cachedMachineId;
   int? _cachedKioskEventId;
-  bool _getInfoByKey = false;
+  bool _getInfoByKey = true;
   bool _isLoading = false;
 
   bool get getInfoByKey => _getInfoByKey;
