@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_snaptag_kiosk/features/move_me/screens/global_shell.dart';
 import 'package:flutter_snaptag_kiosk/features/move_me/screens/maintenance_screen.dart';
+import 'package:flutter_snaptag_kiosk/features/move_me/screens/choice_screen.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:go_router/go_router.dart';
 
@@ -27,6 +28,7 @@ final GlobalKey<NavigatorState> globalNavigatorKey = GlobalKey<NavigatorState>(d
       routes: [
         TypedShellRoute<ImageShellRouteData>(
           routes: <TypedRoute<RouteData>>[
+            TypedGoRoute<ChoiceRouteData>(path: 'choice'),
             TypedGoRoute<PhotoCardUploadRouteData>(path: 'qr'),
             TypedGoRoute<CodeVerificationRouteData>(path: 'code-verification'),
             TypedGoRoute<PhotoCardPreviewRouteData>(path: 'preview'),
@@ -117,6 +119,17 @@ class KioskRouteData extends GoRouteData with _$KioskRouteData {
   Page<void> buildPage(BuildContext context, GoRouterState state) {
     return NoTransitionPage(
       child: SizedBox(),
+    );
+  }
+}
+
+class ChoiceRouteData extends GoRouteData with _$ChoiceRouteData {
+  const ChoiceRouteData();
+
+  @override
+  Page<void> buildPage(BuildContext context, GoRouterState state) {
+    return NoTransitionPage(
+      child: ChoiceScreen(),
     );
   }
 }

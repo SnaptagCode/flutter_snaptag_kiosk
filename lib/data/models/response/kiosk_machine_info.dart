@@ -26,6 +26,7 @@ class KioskMachineInfo with _$KioskMachineInfo {
     @Default('#000000') String popupButtonColor,
     @Default(false) bool isMetal,
     @Default([]) List<EventVideo> eventVideos,
+    @Default([]) List<String> nominatedBackPhotoCardList,
   }) = _KioskMachineInfo;
 
   factory KioskMachineInfo.fromJson(Map<String, dynamic> json) => _$KioskMachineInfoFromJson(json);
