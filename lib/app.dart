@@ -1,15 +1,50 @@
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
+import 'package:window_manager/window_manager.dart';
 
-class App extends ConsumerWidget {
+class App extends ConsumerStatefulWidget {
   const App({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<App> createState() => _AppState();
+}
+
+class _AppState extends ConsumerState<App> with WindowListener {
+
+  @override
+  void initState() {
+    super.initState();
+    if (Platform.isWindows) {
+      windowManager.addListener(this);
+      _initializeWindow();
+    }
+  }
+
+  @override
+  void dispose() {
+    if (Platform.isWindows) {
+      windowManager.removeListener(this);
+    }
+    super.dispose();
+  }
+
+  Future<void> _initializeWindow() async {
+    await windowManager.setFullScreen(true);
+  }
+
+  @override
+  void onWindowFocus() {
+    // 포커스를 받을 때마다 fullscreen 보장
+    windowManager.setFullScreen(true);
+  }
+  
+  @override
+  Widget build(BuildContext context) {
     final router = ref.watch(routerProvider);
     final theme = ref.watch(themeNotifierProvider);
     return theme.when(

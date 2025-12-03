@@ -24,7 +24,12 @@ void main() async {
   runZonedGuarded(
     () async {
       WidgetsFlutterBinding.ensureInitialized();
-      await windowManagerSetting();
+      
+      // WindowManager 초기화만 수행 (설정은 App에서)
+      if (Platform.isWindows) {
+        await windowManager.ensureInitialized();
+      }
+      
       // ✅ FlutterError 로그 자동 감지
       FlutterError.onError = (FlutterErrorDetails details) {
         slackCall.sendLogToSlack("[FLUTTER ERROR] ${details.exceptionAsString()}");
@@ -65,10 +70,9 @@ void main() async {
   );
 }
 
-Future<void> windowManagerSetting() async {
+void windowManagerSetting() {
   //platform이 windows인 경우에만 실행
   if (Platform.isWindows) {
-    await windowManager.ensureInitialized();
     WindowOptions windowOptions = WindowOptions(
       fullScreen: true,
       backgroundColor: Colors.transparent,
@@ -76,7 +80,7 @@ Future<void> windowManagerSetting() async {
       titleBarStyle: TitleBarStyle.hidden,
     );
     windowManager.waitUntilReadyToShow(windowOptions, () async {
-      await windowManager.setFullScreen(true);
+      windowManager.setFullScreen(true);
       await windowManager.show();
       await windowManager.focus();
     });
