@@ -98,4 +98,10 @@ abstract class KioskApiClient {
   Future<void> createUniqueKeyHistory({
     @Body() required Map<String, dynamic> body,
   });
+
+  @GET('/v1/qr/back-photo')
+  Future<BackPhotoCardResponse> getBackPhotoCardByQr({
+    @Query('kioskEventId') required int kioskEventId,
+    @Query('backPhotoCardId') required int backPhotoCardId,
+  });
 }

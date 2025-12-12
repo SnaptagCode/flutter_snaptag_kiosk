@@ -18,43 +18,49 @@ class ChoiceScreen extends ConsumerWidget {
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
             '추천 이미지를 선택하거나\n내 사진첩에 있는 이미지를 업로드하세요.',
             style: context.typography.kioskBody1B,
+            textAlign: TextAlign.center,
           ),
-          SizedBox(height: 5.h),
+          SizedBox(height: 15.h),
           Text(
             '1EA | 5,000원',
             style: TextStyle(
-              fontSize: 8.sp,
+              fontSize: 20.sp,
               color: Color(0xFFE6BA6B),
             ),
           ),
-          SizedBox(height: 5.h),
+          SizedBox(height: 15.h),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              _buildChoiceButton(
-                context,
-                ref,
-                kiosk?.nominatedBackPhotoCardList[0] ?? '',
-                label: '선택 1', // TODO: Localize
-                onTap: () async {
-                  await SoundManager().playSound();
-                  // PhotoCardUploadRouteData().go(context);
-                  PhotoCardPreviewRouteData().go(context);
-                },
-              ),
+              // 첫 번째 고정 뒷면 이미지 (인덱스 0번만 사용)
+              if (kiosk?.nominatedBackPhotoCardList.isNotEmpty == true)
+                _buildChoiceButton(
+                  context,
+                  ref,
+                  kiosk!.nominatedBackPhotoCardList[0].originUrl,
+                  label: '선택 1', // TODO: Localize
+                  onTap: () async {
+                    await SoundManager().playSound();
+                    // 첫 번째 고정 뒷면 이미지 선택 (인덱스 0)
+                    ref.read(backPhotoTypeProvider.notifier).selectFixed(0);
+                    PhotoCardPreviewRouteData().go(context);
+                  },
+                ),
               SizedBox(width: 20.w),
+              // 커스텀 이미지 버튼
               _buildChoiceButton(
                 context,
                 ref,
-                kiosk?.nominatedBackPhotoCardList[1] ?? '',
+                kiosk?.defaultCustomBackPhotoCard ?? '',
                 label: '선택 2', // TODO: Localize
                 onTap: () async {
                   await SoundManager().playSound();
+                  // 커스텀 뒷면 이미지 선택
+                  ref.read(backPhotoTypeProvider.notifier).selectCustom();
                   PhotoCardUploadRouteData().go(context);
                 },
               ),
@@ -67,12 +73,39 @@ class ChoiceScreen extends ConsumerWidget {
 
   Widget _buildChoiceButton(BuildContext context, WidgetRef ref, String url,
       {required String label, required VoidCallback onTap}) {
-    return GradientContainer(
-      content: ClipRRect(
-        borderRadius: BorderRadius.circular(10.r),
-        child: Image.network(
-          url,
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 360.h,
+        clipBehavior: Clip.antiAlias,
+        decoration: ShapeDecoration(
+          color: Colors.transparent,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10.r),
+          ),
         ),
+        margin: EdgeInsets.symmetric(vertical: 22.h),
+        alignment: Alignment.center,
+        child: url.isNotEmpty
+            ? Image.network(
+                url,
+                fit: BoxFit.contain,
+                alignment: Alignment.center,
+                errorBuilder: (context, error, stackTrace) {
+                  return Container(
+                    color: Colors.grey[200],
+                    child: Center(
+                      child: Icon(Icons.image, size: 60.sp, color: Colors.grey[400]),
+                    ),
+                  );
+                },
+              )
+            : Container(
+                color: Colors.grey[200],
+                child: Center(
+                  child: Icon(Icons.image, size: 60.sp, color: Colors.grey[400]),
+                ),
+              ),
       ),
     );
   }

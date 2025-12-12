@@ -206,4 +206,15 @@ class _KioskRepository {
       rethrow;
     }
   }
+
+  Future<BackPhotoCardResponse> getBackPhotoCardByQr(int kioskEventId, int backPhotoCardId) async {
+    try {
+      return await _apiClient.getBackPhotoCardByQr(
+        kioskEventId: kioskEventId,
+        backPhotoCardId: backPhotoCardId,
+      );
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

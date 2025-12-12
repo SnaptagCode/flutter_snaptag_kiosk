@@ -1,3 +1,4 @@
+import 'package:flutter_snaptag_kiosk/data/models/response/nominated_back_photo_card.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import 'event_video.dart';
@@ -26,7 +27,8 @@ class KioskMachineInfo with _$KioskMachineInfo {
     @Default('#000000') String popupButtonColor,
     @Default(false) bool isMetal,
     @Default([]) List<EventVideo> eventVideos,
-    @Default([]) List<String> nominatedBackPhotoCardList,
+    @Default([]) List<NominatedBackPhotoCard> nominatedBackPhotoCardList,
+    @Default('') String defaultCustomBackPhotoCard,
   }) = _KioskMachineInfo;
 
   factory KioskMachineInfo.fromJson(Map<String, dynamic> json) => _$KioskMachineInfoFromJson(json);
