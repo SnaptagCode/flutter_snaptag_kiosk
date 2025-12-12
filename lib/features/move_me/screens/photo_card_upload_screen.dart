@@ -18,26 +18,26 @@ class PhotoCardUploadScreen extends ConsumerWidget {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       int machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
-      final connected = ref.read(printerServiceProvider.notifier).checkConnectedPrint();
-      if (!connected) {
-        SlackLogService()
-            .sendErrorLogToSlack('*[MachineId: $machineId]*\nPrinter ${PrinterConnectState.disconnected.name}');
-        showNeedRibbonFilmDialog(context, ref);
-        return;
-      }
-      if (connected) {
-        final settingCompleted = ref.read(printerServiceProvider.notifier).settingPrinter();
-        if (!settingCompleted) {
-          SlackLogService()
-              .sendErrorLogToSlack('*[MachineId: $machineId]*\nPrinter ${PrinterConnectState.setupInComplete.name}');
-          showNeedRibbonFilmDialog(context, ref);
-          return;
-        }
-      }
+      // final connected = ref.read(printerServiceProvider.notifier).checkConnectedPrint();
+      // if (!connected) {
+      //   SlackLogService()
+      //       .sendErrorLogToSlack('*[MachineId: $machineId]*\nPrinter ${PrinterConnectState.disconnected.name}');
+      //   showNeedRibbonFilmDialog(context, ref);
+      //   return;
+      // }
+      // if (connected) {
+      //   final settingCompleted = ref.read(printerServiceProvider.notifier).settingPrinter();
+      //   if (!settingCompleted) {
+      //     SlackLogService()
+      //         .sendErrorLogToSlack('*[MachineId: $machineId]*\nPrinter ${PrinterConnectState.setupInComplete.name}');
+      //     showNeedRibbonFilmDialog(context, ref);
+      //     return;
+      //   }
+      // }
 
-      RibbonStatus ribbonStatus = ref.read(printerServiceProvider.notifier).getRibbonStatus();
-      ref.read(ribbonWarningProvider.notifier).checkAndSendWarnings(machineId, ribbonStatus);
-      showNeedRibbonFilmDialog(context, ref);
+      // RibbonStatus ribbonStatus = ref.read(printerServiceProvider.notifier).getRibbonStatus();
+      // ref.read(ribbonWarningProvider.notifier).checkAndSendWarnings(machineId, ribbonStatus);
+      // showNeedRibbonFilmDialog(context, ref);
     });
 
     return DefaultTextStyle(

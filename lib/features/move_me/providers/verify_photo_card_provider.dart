@@ -35,4 +35,9 @@ class VerifyPhotoCard extends _$VerifyPhotoCard {
   void reset() {
     state = const AsyncValue.data(null);
   }
+
+  /// 상태를 직접 업데이트하는 함수
+  void updateState(BackPhotoCardResponse? response) {
+    state = AsyncValue.data(response);
+  }
 }
