@@ -235,11 +235,10 @@ class _NumericPad extends ConsumerWidget {
         style: context.keypadCompleteStyle,
         onPressed: () async {
           await SoundManager().playSound();
-          // final code = ref.read(authCodeProvider);
-          // if (ref.read(authCodeProvider.notifier).isValid()) {
-          //   ref.read(verifyPhotoCardProvider.notifier).verify(code);
-          // }
-          PhotoCardPreviewRouteData().go(context);
+          final code = ref.read(authCodeProvider);
+          if (ref.read(authCodeProvider.notifier).isValid()) {
+            ref.read(verifyPhotoCardProvider.notifier).verify(code);
+          }
         },
         child: Text(LocaleKeys.sub01_btn_done.tr()),
       );

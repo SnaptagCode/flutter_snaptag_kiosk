@@ -17,14 +17,6 @@ class PhotoCardPreviewScreen extends ConsumerStatefulWidget {
 }
 
 class _PhotoCardPreviewScreenState extends ConsumerState<PhotoCardPreviewScreen> {
-  Future<void> _handlePaymentError(Object error, StackTrace stack) async {
-    logger.e('Payment error occurred', error: error, stackTrace: stack);
-    await DialogHelper.showPurchaseFailedDialog(
-      context,
-    );
-    return;
-  }
-
   @override
   Widget build(BuildContext context) {
     ref.listen<AsyncValue<void>>(
@@ -99,9 +91,57 @@ class _PhotoCardPreviewScreenState extends ConsumerState<PhotoCardPreviewScreen>
                       },
                       child: Opacity(
                         opacity: selectedIndex == null ? 1.0 : (selectedIndex == 0 ? 1.0 : 0.5),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(10.r),
-                          child: Image.network(kiosk?.nominatedBackPhotoCardList[0].originUrl ?? ''),
+                        child: Container(
+                          width: 250.w,
+                          height: 355.h,
+                          clipBehavior: Clip.antiAlias,
+                          decoration: ShapeDecoration(
+                            color: Colors.grey[200],
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10.r),
+                            ),
+                          ),
+                          child: kiosk?.nominatedBackPhotoCardList.isNotEmpty == true &&
+                                  (kiosk!.nominatedBackPhotoCardList.length > 0)
+                              ? Image.network(
+                                  kiosk.nominatedBackPhotoCardList[0].originUrl,
+                                  fit: BoxFit.fitHeight,
+                                  alignment: Alignment.center,
+                                  frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
+                                    if (wasSynchronouslyLoaded) return child;
+                                    return AnimatedOpacity(
+                                      opacity: frame == null ? 0 : 1,
+                                      duration: const Duration(milliseconds: 300),
+                                      curve: Curves.easeOut,
+                                      child: child,
+                                    );
+                                  },
+                                  loadingBuilder: (context, child, loadingProgress) {
+                                    if (loadingProgress == null) return child;
+                                    return Center(
+                                      child: CircularProgressIndicator(
+                                        value: loadingProgress.expectedTotalBytes != null
+                                            ? loadingProgress.cumulativeBytesLoaded /
+                                                loadingProgress.expectedTotalBytes!
+                                            : null,
+                                      ),
+                                    );
+                                  },
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return Container(
+                                      color: Colors.grey[200],
+                                      child: Center(
+                                        child: Icon(Icons.image, size: 60.sp, color: Colors.grey[400]),
+                                      ),
+                                    );
+                                  },
+                                )
+                              : Container(
+                                  color: Colors.grey[200],
+                                  child: Center(
+                                    child: Icon(Icons.image, size: 60.sp, color: Colors.grey[400]),
+                                  ),
+                                ),
                         ),
                       ),
                     ),
@@ -113,9 +153,57 @@ class _PhotoCardPreviewScreenState extends ConsumerState<PhotoCardPreviewScreen>
                       },
                       child: Opacity(
                         opacity: selectedIndex == null ? 1.0 : (selectedIndex == 1 ? 1.0 : 0.5),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(10.r),
-                          child: Image.network(kiosk?.nominatedBackPhotoCardList[1].originUrl ?? ''),
+                        child: Container(
+                          width: 250.w,
+                          height: 355.h,
+                          clipBehavior: Clip.antiAlias,
+                          decoration: ShapeDecoration(
+                            color: Colors.grey[200],
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10.r),
+                            ),
+                          ),
+                          child: kiosk?.nominatedBackPhotoCardList.isNotEmpty == true &&
+                                  (kiosk!.nominatedBackPhotoCardList.length > 1)
+                              ? Image.network(
+                                  kiosk.nominatedBackPhotoCardList[1].originUrl,
+                                  fit: BoxFit.fitHeight,
+                                  alignment: Alignment.center,
+                                  frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
+                                    if (wasSynchronouslyLoaded) return child;
+                                    return AnimatedOpacity(
+                                      opacity: frame == null ? 0 : 1,
+                                      duration: const Duration(milliseconds: 300),
+                                      curve: Curves.easeOut,
+                                      child: child,
+                                    );
+                                  },
+                                  loadingBuilder: (context, child, loadingProgress) {
+                                    if (loadingProgress == null) return child;
+                                    return Center(
+                                      child: CircularProgressIndicator(
+                                        value: loadingProgress.expectedTotalBytes != null
+                                            ? loadingProgress.cumulativeBytesLoaded /
+                                                loadingProgress.expectedTotalBytes!
+                                            : null,
+                                      ),
+                                    );
+                                  },
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return Container(
+                                      color: Colors.grey[200],
+                                      child: Center(
+                                        child: Icon(Icons.image, size: 60.sp, color: Colors.grey[400]),
+                                      ),
+                                    );
+                                  },
+                                )
+                              : Container(
+                                  color: Colors.grey[200],
+                                  child: Center(
+                                    child: Icon(Icons.image, size: 60.sp, color: Colors.grey[400]),
+                                  ),
+                                ),
                         ),
                       ),
                     ),
@@ -130,6 +218,15 @@ class _PhotoCardPreviewScreenState extends ConsumerState<PhotoCardPreviewScreen>
                     data: (data) {
                       return Image.network(
                         data?.formattedBackPhotoCardUrl ?? '',
+                        frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
+                          if (wasSynchronouslyLoaded) return child;
+                          return AnimatedOpacity(
+                            opacity: frame == null ? 0 : 1,
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.easeOut,
+                            child: child,
+                          );
+                        },
                       );
                     },
                     loading: () {
@@ -166,14 +263,17 @@ class _PhotoCardPreviewScreenState extends ConsumerState<PhotoCardPreviewScreen>
 
                       if (kiosk != null && selectedIndex < kiosk.nominatedBackPhotoCardList.length) {
                         final selectedCard = kiosk.nominatedBackPhotoCardList[selectedIndex];
+
                         final response = await ref.read(kioskRepositoryProvider).getBackPhotoCardByQr(
-                              kiosk.kioskEventId,
-                              selectedCard.id,
+                              GetBackPhotoByQrRequest(
+                                kioskEventId: kiosk.kioskEventId,
+                                nominatedBackPhotoCardId: selectedCard.id,
+                              ),
                             );
 
                         ref.read(verifyPhotoCardProvider.notifier).updateState(BackPhotoCardResponse(
                             kioskEventId: kiosk.kioskEventId,
-                            backPhotoCardId: selectedCard.id,
+                            backPhotoCardId: response.backPhotoCardId,
                             backPhotoCardOriginUrl: selectedCard.originUrl,
                             photoAuthNumber: response.photoAuthNumber,
                             formattedBackPhotoCardUrl: response.formattedBackPhotoCardUrl));
@@ -187,7 +287,7 @@ class _PhotoCardPreviewScreenState extends ConsumerState<PhotoCardPreviewScreen>
                       DialogHelper.showPaymentCardFailedDialog(
                         context,
                       );
-                      PhotoCardUploadRouteData().go(context);
+                      ChoiceRouteData().go(context);
                     }
                   },
                   child: Text(LocaleKeys.sub02_btn_pay.tr()),
