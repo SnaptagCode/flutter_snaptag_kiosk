@@ -48,22 +48,22 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
 
     _timer = Timer.periodic(Duration(seconds: 2), (timer) async {
       final connected = ref.read(printerServiceProvider.notifier).checkConnectedPrint();
-      // if (mounted) {
-      //   setState(() {
-      //     if (connected) {
-      //       final settingCompleted = ref.read(printerServiceProvider.notifier).settingPrinter();
-      //       ref.read(printerConnectProvider.notifier).update(
-      //             connected && settingCompleted
-      //                 ? PrinterConnectState.connected
-      //                 : settingCompleted
-      //                     ? PrinterConnectState.connected
-      //                     : PrinterConnectState.setupInComplete,
-      //           );
-      //     } else {
-      //       ref.read(printerConnectProvider.notifier).update(PrinterConnectState.disconnected);
-      //     }
-      //   });
-      // }
+      if (mounted) {
+        setState(() {
+          if (connected) {
+            final settingCompleted = ref.read(printerServiceProvider.notifier).settingPrinter();
+            ref.read(printerConnectProvider.notifier).update(
+                  connected && settingCompleted
+                      ? PrinterConnectState.connected
+                      : settingCompleted
+                          ? PrinterConnectState.connected
+                          : PrinterConnectState.setupInComplete,
+                );
+          } else {
+            ref.read(printerConnectProvider.notifier).update(PrinterConnectState.disconnected);
+          }
+        });
+      }
     });
   }
 
@@ -76,34 +76,34 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
   Future<void> _onRunEventTap(BuildContext context) async {
     await SoundManager().playSound();
 
-    // final isReady = await _validatePrinterReadyAndShowDialogs(context);
+    final isReady = await _validatePrinterReadyAndShowDialogs(context);
 
-    // if (!isReady) return;
+    if (!isReady) return;
 
-    // final kioskInfo = ref.read(kioskInfoServiceProvider);
+    final kioskInfo = ref.read(kioskInfoServiceProvider);
 
-    // print(
-    //     'kioskInfo: $kioskInfo kioskEventId: ${kioskInfo?.kioskEventId} kioskMachineId: ${kioskInfo?.kioskMachineId}');
-    // if (kioskInfo == null) {
-    //   if (kioskInfo?.kioskEventId == 0 ||
-    //       kioskInfo?.kioskEventId == null ||
-    //       kioskInfo?.kioskMachineId == 0 ||
-    //       kioskInfo?.kioskMachineId == null) {
-    //     await DialogHelper.showSetupOneButtonDialog(
-    //       context,
-    //       title: LocaleKeys.alert_title_empty_event.tr(),
-    //     );
-    //     return;
-    //   }
-    // }
+    print(
+        'kioskInfo: $kioskInfo kioskEventId: ${kioskInfo?.kioskEventId} kioskMachineId: ${kioskInfo?.kioskMachineId}');
+    if (kioskInfo == null) {
+      if (kioskInfo?.kioskEventId == 0 ||
+          kioskInfo?.kioskEventId == null ||
+          kioskInfo?.kioskMachineId == 0 ||
+          kioskInfo?.kioskMachineId == null) {
+        await DialogHelper.showSetupOneButtonDialog(
+          context,
+          title: LocaleKeys.alert_title_empty_event.tr(),
+        );
+        return;
+      }
+    }
 
-    // await _writePhotocodeMeta();
+    await _writePhotocodeMeta();
 
-    // final confirmed = await DialogHelper.showSetupDialog(
-    //   context,
-    //   title: '이벤트를 실행합니다.',
-    // );
-    // if (!confirmed) return;
+    final confirmed = await DialogHelper.showSetupDialog(
+      context,
+      title: '이벤트를 실행합니다.',
+    );
+    if (!confirmed) return;
 
     await _startEventFlow(context);
   }
@@ -165,33 +165,33 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
     final deviceUUID = await ref.read(deviceUuidProvider.future);
     final getInfoByKey = ref.read(kioskInfoServiceProvider.notifier).getInfoByKey;
 
-    // await ref.read(printerServiceProvider.notifier).startPrintLog();
+    await ref.read(printerServiceProvider.notifier).startPrintLog();
 
-    // await ref.read(kioskRepositoryProvider).deleteEndMark(
-    //       kioskEventId: kioskEventId,
-    //       machineId: machineId,
-    //       remainingSingleSidedCount: cardCountState.remainingSingleSidedCount,
-    //     );
+    await ref.read(kioskRepositoryProvider).deleteEndMark(
+          kioskEventId: kioskEventId,
+          machineId: machineId,
+          remainingSingleSidedCount: cardCountState.remainingSingleSidedCount,
+        );
 
-    // if (!getInfoByKey) {
-    //   await ref.read(kioskRepositoryProvider).createUniqueKeyHistory(
-    //         request: UniqueKeyRequest(
-    //           kioskMachineId: machineId.toString(),
-    //           uniqueKey: deviceUUID,
-    //         ),
-    //       );
-    // }
+    if (!getInfoByKey) {
+      await ref.read(kioskRepositoryProvider).createUniqueKeyHistory(
+            request: UniqueKeyRequest(
+              kioskMachineId: machineId.toString(),
+              uniqueKey: deviceUUID,
+            ),
+          );
+    }
 
-    // SlackLogService()
-    //     .sendLogToSlack('machineId:$machineId, currentVersion:$currentVersion, latestVersion:$latestVersion');
+    SlackLogService()
+        .sendLogToSlack('machineId:$machineId, currentVersion:$currentVersion, latestVersion:$latestVersion');
 
-    // if (cardCountState.currentCount < 1) {
-    //   ref.read(pagePrintProvider.notifier).set(PagePrintType.double);
-    //   SlackLogService().sendLogToSlack('machineId: $machineId, singleCard: $cardCountState, set pagePrintType double');
-    // } else {
-    //   ref.read(pagePrintProvider.notifier).set(PagePrintType.single);
-    //   SlackLogService().sendLogToSlack('machineId: $machineId, singleCard: $cardCountState, set pagePrintType single');
-    // }
+    if (cardCountState.currentCount < 1) {
+      ref.read(pagePrintProvider.notifier).set(PagePrintType.double);
+      SlackLogService().sendLogToSlack('machineId: $machineId, singleCard: $cardCountState, set pagePrintType double');
+    } else {
+      ref.read(pagePrintProvider.notifier).set(PagePrintType.single);
+      SlackLogService().sendLogToSlack('machineId: $machineId, singleCard: $cardCountState, set pagePrintType single');
+    }
 
     ChoiceRouteData().go(context);
 

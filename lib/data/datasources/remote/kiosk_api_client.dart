@@ -99,9 +99,8 @@ abstract class KioskApiClient {
     @Body() required Map<String, dynamic> body,
   });
 
-  @GET('/v1/qr/back-photo')
+  @POST('/v1/qr/back-photo')
   Future<BackPhotoCardResponse> getBackPhotoCardByQr({
-    @Query('kioskEventId') required int kioskEventId,
-    @Query('backPhotoCardId') required int backPhotoCardId,
+    @Body() required Map<String, dynamic> body,
   });
 }

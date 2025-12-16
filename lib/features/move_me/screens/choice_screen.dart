@@ -76,7 +76,9 @@ class ChoiceScreen extends ConsumerWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        height: 360.h,
+        width: 307.w,
+        height: 485.h,
+        margin: EdgeInsets.symmetric(vertical: 22.h),
         clipBehavior: Clip.antiAlias,
         decoration: ShapeDecoration(
           color: Colors.transparent,
@@ -84,12 +86,11 @@ class ChoiceScreen extends ConsumerWidget {
             borderRadius: BorderRadius.circular(10.r),
           ),
         ),
-        margin: EdgeInsets.symmetric(vertical: 22.h),
         alignment: Alignment.center,
         child: url.isNotEmpty
             ? Image.network(
                 url,
-                fit: BoxFit.contain,
+                fit: BoxFit.fitHeight,
                 alignment: Alignment.center,
                 errorBuilder: (context, error, stackTrace) {
                   return Container(

@@ -396,7 +396,7 @@ class DialogHelper {
   }) async {
     Future.delayed(const Duration(seconds: 5), () {
       if (Navigator.of(context, rootNavigator: true).canPop()) {
-        PhotoCardUploadRouteData().go(context);
+        ChoiceRouteData().go(context);
         Navigator.of(context, rootNavigator: true).pop();
       }
     });
