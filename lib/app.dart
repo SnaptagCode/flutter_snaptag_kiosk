@@ -15,13 +15,13 @@ class App extends ConsumerStatefulWidget {
 }
 
 class _AppState extends ConsumerState<App> with WindowListener {
-
+  bool _initializedFullScreen = false;
   @override
   void initState() {
     super.initState();
     if (Platform.isWindows) {
       windowManager.addListener(this);
-      _initializeWindow();
+      _ensureFullScreenOnce();
     }
   }
 
@@ -33,16 +33,21 @@ class _AppState extends ConsumerState<App> with WindowListener {
     super.dispose();
   }
 
-  Future<void> _initializeWindow() async {
-    await windowManager.setFullScreen(true);
+  Future<void> _ensureFullScreenOnce() async {
+    if (_initializedFullScreen) return;
+    _initializedFullScreen = true;
+
+    if (Platform.isWindows) {
+      await windowManager.setFullScreen(true);
+    }
   }
 
   @override
   void onWindowFocus() {
     // 포커스를 받을 때마다 fullscreen 보장
-    windowManager.setFullScreen(true);
+    // windowManager.setFullScreen(true);
   }
-  
+
   @override
   Widget build(BuildContext context) {
     final router = ref.watch(routerProvider);
