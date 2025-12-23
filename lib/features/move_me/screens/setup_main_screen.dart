@@ -278,7 +278,7 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
               SizedBox(height: 50.h),
               Center(
                 child: Text(
-                  getInfoByKey ? '*인쇄 모드를 선택 후 이벤트를 실행 해주세요.' : '*인쇄 모드를 선택 후 미리보기를 해주세요.',
+                  getInfoByKey ? '*인쇄 모드 선택 후 이벤트를 실행 해주세요.' : '*인쇄 모드 선택 후 미리보기를 해주세요.',
                   style: context.typography.kioskBody1B.copyWith(color: Colors.red),
                 ),
               ),
