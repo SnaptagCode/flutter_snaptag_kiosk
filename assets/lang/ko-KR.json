@@ -46,5 +46,6 @@
   "alert_title_auto_refund_alert": "환불 안내",
   "alert_txt_auto_refund_alert": "프린터가 정상 작동하지 않아\r\n환불을 진행합니다.",
   "alert_btn_cancel": "취소",
-  "alert_btn_ok": "확인"
+  "alert_btn_ok": "확인",
+  "alert_title_empty_event": "이벤트를 실행하려면\n키오스크 기기번호를 입력해 주세요."
 }

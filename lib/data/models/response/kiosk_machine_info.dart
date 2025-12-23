@@ -1,5 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import 'event_video.dart';
+
 part 'kiosk_machine_info.freezed.dart';
 part 'kiosk_machine_info.g.dart';
 
@@ -11,6 +13,7 @@ class KioskMachineInfo with _$KioskMachineInfo {
     @Default('') String kioskMachineName,
     @Default('') String kioskMachineDescription,
     @Default(0) int photoCardPrice,
+    @Default('') String cardMetalType,
     @Default('') String eventType,
     @Default('') String printedEventName,
     @Default('') String topBannerUrl,
@@ -22,6 +25,7 @@ class KioskMachineInfo with _$KioskMachineInfo {
     @Default('#000000') String mainTextColor,
     @Default('#000000') String popupButtonColor,
     @Default(false) bool isMetal,
+    @Default([]) List<EventVideo> eventVideos,
   }) = _KioskMachineInfo;
 
   factory KioskMachineInfo.fromJson(Map<String, dynamic> json) => _$KioskMachineInfoFromJson(json);

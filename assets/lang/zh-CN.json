@@ -45,5 +45,6 @@
   "alert_title_auto_refund_alert": "退款信息",
   "alert_txt_auto_refund_alert": "由于打印机无法正常工作，\\r\\n将进行退款。",
   "alert_btn_cancel": "返回",
-  "alert_btn_ok": "确定"
+  "alert_btn_ok": "确定",
+  "alert_title_empty_event": "请输入设备编号以运行事件。"
 }

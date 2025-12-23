@@ -1,7 +1,6 @@
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:flutter_snaptag_kiosk/core/utils/uuid/mac_util.dart";
 import "package:flutter_snaptag_kiosk/core/utils/uuid/crypto_util.dart";
-import "dart:convert";
 
 final macAddressProvider = FutureProvider<String>((ref) async {
   return await getWindowsMacAddress();

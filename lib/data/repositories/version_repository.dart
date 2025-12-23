@@ -31,7 +31,7 @@ class VersionRepository {
   Future<String> getCurrentVersion() async {
     final envFile = File('assets/.env.version');
     final version = await envFile.readAsString();
-    return version ?? 'v3.2.2';
+    return version ?? 'v3.3.0';
   }
 
   Future<String> getLatestVersionFromGitHub() async {

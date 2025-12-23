@@ -1,10 +1,12 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_snaptag_kiosk/core/utils/sound_manager.dart';
+import 'package:flutter_snaptag_kiosk/data/models/request/unique_key_request.dart';
 import 'package:flutter_snaptag_kiosk/features/core/printer/printer_connect_state.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -21,17 +23,31 @@ class SetupMainScreen extends ConsumerStatefulWidget {
 
 class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
   Timer? _timer;
+  bool _hasInitialized = false;
 
   @override
   void initState() {
     super.initState();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      // 이미 초기화되었거나 위젯이 dispose된 경우 중복 호출 방지
+      if (_hasInitialized || !mounted) return;
+      _hasInitialized = true;
+
       ref.read(alertDefinitionProvider.notifier).load();
+
+      // 이미 데이터가 있으면 API 호출하지 않음
+      final currentInfo = ref.read(kioskInfoServiceProvider);
+      if (currentInfo == null) {
+        final kioskInfo = await ref.read(kioskInfoServiceProvider.notifier).getKioskMachineInfo();
+        if (kioskInfo == null) {
+          SlackLogService().sendErrorLogToSlack('Kiosk info not found');
+        }
+      }
     });
 
     _timer = Timer.periodic(Duration(seconds: 2), (timer) async {
-      final connected = await ref.read(printerServiceProvider.notifier).checkConnectedPrint();
+      final connected = ref.read(printerServiceProvider.notifier).checkConnectedPrint();
       if (mounted) {
         setState(() {
           if (connected) {
@@ -61,7 +77,25 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
     await SoundManager().playSound();
 
     final isReady = await _validatePrinterReadyAndShowDialogs(context);
+
     if (!isReady) return;
+
+    final kioskInfo = ref.read(kioskInfoServiceProvider);
+
+    print(
+        'kioskInfo: $kioskInfo kioskEventId: ${kioskInfo?.kioskEventId} kioskMachineId: ${kioskInfo?.kioskMachineId}');
+    if (kioskInfo == null) {
+      if (kioskInfo?.kioskEventId == 0 ||
+          kioskInfo?.kioskEventId == null ||
+          kioskInfo?.kioskMachineId == 0 ||
+          kioskInfo?.kioskMachineId == null) {
+        await DialogHelper.showSetupOneButtonDialog(
+          context,
+          title: LocaleKeys.alert_title_empty_event.tr(),
+        );
+        return;
+      }
+    }
 
     await _writePhotocodeMeta();
 
@@ -78,11 +112,17 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
     final connected = await ref.read(printerServiceProvider.notifier).checkConnectedPrint();
     final settingPrinter = ref.read(printerServiceProvider.notifier).settingPrinter();
     if (!connected) {
-      await DialogHelper.showPrintWaitingDialog(context);
+      await DialogHelper.showSetupOneButtonDialog(
+        context,
+        title: '프린트가 준비중입니다.',
+      );
       return false;
     }
     if (!settingPrinter) {
-      await DialogHelper.showCheckPrintStateDialog(context);
+      await DialogHelper.showSetupOneButtonDialog(
+        context,
+        title: '프린트 기기 상태를 확인해주세요.',
+      );
       return false;
     }
     return true;
@@ -122,6 +162,8 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
     final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
     final kioskEventId = ref.read(kioskInfoServiceProvider)?.kioskEventId ?? 0;
     final cardCountState = ref.read(cardCountProvider);
+    final deviceUUID = await ref.read(deviceUuidProvider.future);
+    final getInfoByKey = ref.read(kioskInfoServiceProvider.notifier).getInfoByKey;
 
     await ref.read(printerServiceProvider.notifier).startPrintLog();
 
@@ -130,6 +172,15 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
           machineId: machineId,
           remainingSingleSidedCount: cardCountState.remainingSingleSidedCount,
         );
+
+    if (!getInfoByKey) {
+      await ref.read(kioskRepositoryProvider).createUniqueKeyHistory(
+            request: UniqueKeyRequest(
+              kioskMachineId: machineId.toString(),
+              uniqueKey: deviceUUID,
+            ),
+          );
+    }
 
     SlackLogService()
         .sendLogToSlack('machineId:$machineId, currentVersion:$currentVersion, latestVersion:$latestVersion');
@@ -157,13 +208,14 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
   @override
   Widget build(BuildContext context) {
     ref.read(alertDefinitionProvider);
-    final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
+    final machineId = ref.watch(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
     final versionState = ref.watch(versionStateProvider);
     final cardCountState = ref.watch(cardCountProvider);
     final currentVersion = versionState.currentVersion;
     final latestVersion = versionState.latestVersion;
     final isUpdateAvailable = currentVersion != latestVersion;
     final isConnectedPrinter = ref.watch(printerConnectProvider) == PrinterConnectState.connected;
+    final getInfoByKey = ref.watch(kioskInfoServiceProvider.notifier).getInfoByKey;
     //final isUpdateAvailable = false;
 
     return Theme(
@@ -226,7 +278,7 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
               SizedBox(height: 50.h),
               Center(
                 child: Text(
-                  '*인쇄 모드를 선택 후 미리보기를 해주세요.',
+                  getInfoByKey ? '*인쇄 모드 선택 후 이벤트를 실행 해주세요.' : '*인쇄 모드 선택 후 미리보기를 해주세요.',
                   style: context.typography.kioskBody1B.copyWith(color: Colors.red),
                 ),
               ),
@@ -351,57 +403,93 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Padding(
-                    padding: EdgeInsets.all(10.w),
-                    child: SizedBox(
-                      width: 260.w,
-                      height: 314.h,
-                      child: SetupMainCard(
-                        label: '이벤트\n미리보기',
-                        assetName: SnaptagSvg.eventPreview,
-                        onTap: () async {
-                          if (ref.read(pagePrintProvider) != PagePrintType.none) {
-                            await SoundManager().playSound();
-                            if (cardCountState.currentCount < 1) {
-                              ref.read(pagePrintProvider.notifier).set(PagePrintType.double);
+                  // getInfoByKey가 true면: 이벤트 미리보기 숨김, 이벤트 실행 -> 출력 내역
+                  // getInfoByKey가 false면: 이벤트 미리보기 -> 출력 내역 -> 이벤트 실행
+                  if (!getInfoByKey) ...[
+                    Padding(
+                      padding: EdgeInsets.all(10.w),
+                      child: SizedBox(
+                        width: 260.w,
+                        height: 314.h,
+                        child: SetupMainCard(
+                          label: '이벤트\n미리보기',
+                          assetName: SnaptagSvg.eventPreview,
+                          onTap: () async {
+                            if (ref.read(pagePrintProvider) != PagePrintType.none) {
+                              await SoundManager().playSound();
+                              if (cardCountState.currentCount < 1) {
+                                ref.read(pagePrintProvider.notifier).set(PagePrintType.double);
+                              }
+                              KioskInfoRouteData().go(context);
+                            } else {
+                              print('이벤트를 선택해주세요');
                             }
-                            KioskInfoRouteData().go(context);
-                          } else {
-                            print('이벤트를 선택해주세요');
-                          }
-                        },
+                          },
+                        ),
                       ),
                     ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.all(10.w),
-                    child: SizedBox(
-                      width: 260.w,
-                      height: 314.h,
-                      child: SetupMainCard(
-                        label: '출력 내역',
-                        assetName: SnaptagSvg.payment,
-                        onTap: () async {
-                          await SoundManager().playSound();
-                          PaymentHistoryRouteData().go(context);
-                        },
+                  ],
+                  if (getInfoByKey) ...[
+                    Padding(
+                      padding: EdgeInsets.all(10.w),
+                      child: SizedBox(
+                        width: 260.w,
+                        height: 314.h,
+                        child: SetupMainCard(
+                          label: '이벤트\n실행',
+                          assetName: SnaptagSvg.eventRun,
+                          onTap: () async {
+                            await _onRunEventTap(context);
+                          },
+                        ),
                       ),
                     ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.all(10.w),
-                    child: SizedBox(
-                      width: 260.w,
-                      height: 314.h,
-                      child: SetupMainCard(
-                        label: '이벤트\n실행',
-                        assetName: SnaptagSvg.eventRun,
-                        onTap: () async {
-                          await _onRunEventTap(context);
-                        },
+                    Padding(
+                      padding: EdgeInsets.all(10.w),
+                      child: SizedBox(
+                        width: 260.w,
+                        height: 314.h,
+                        child: SetupMainCard(
+                          label: '출력 내역',
+                          assetName: SnaptagSvg.payment,
+                          onTap: () async {
+                            await SoundManager().playSound();
+                            PaymentHistoryRouteData().go(context);
+                          },
+                        ),
                       ),
                     ),
-                  ),
+                  ] else ...[
+                    Padding(
+                      padding: EdgeInsets.all(10.w),
+                      child: SizedBox(
+                        width: 260.w,
+                        height: 314.h,
+                        child: SetupMainCard(
+                          label: '출력 내역',
+                          assetName: SnaptagSvg.payment,
+                          onTap: () async {
+                            await SoundManager().playSound();
+                            PaymentHistoryRouteData().go(context);
+                          },
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.all(10.w),
+                      child: SizedBox(
+                        width: 260.w,
+                        height: 314.h,
+                        child: SetupMainCard(
+                          label: '이벤트\n실행',
+                          assetName: SnaptagSvg.eventRun,
+                          onTap: () async {
+                            await _onRunEventTap(context);
+                          },
+                        ),
+                      ),
+                    ),
+                  ],
                 ],
               ),
               if (F.appFlavor == Flavor.dev)
@@ -461,7 +549,7 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
                       child: SetupUpdateCard(
                         title: '현재 버전',
                         //version: currentVersion,
-                        version: "v3.2.2",
+                        version: "v3.3.0",
                         buttonName: '업데이트',
                         isActive: isUpdateAvailable,
                         onUpdatePressed: () async {
