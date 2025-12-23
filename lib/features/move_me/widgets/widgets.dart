@@ -6,6 +6,7 @@ export 'front_images_action.dart';
 export 'general_error_widget.dart';
 export 'gradient_container.dart';
 export 'home_button.dart';
+export 'image_selection_card.dart';
 export 'kiosk_colors_widget.dart';
 export 'kiosk_info_widget.dart';
 export 'kiosk_navigator_button.dart';

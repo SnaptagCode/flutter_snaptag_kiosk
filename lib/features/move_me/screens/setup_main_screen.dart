@@ -89,7 +89,7 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
           kioskInfo?.kioskEventId == null ||
           kioskInfo?.kioskMachineId == 0 ||
           kioskInfo?.kioskMachineId == null) {
-        await DialogHelper.showSetupOneButtonDialog(
+        await DialogHelper.showSetupDialog(
           context,
           title: LocaleKeys.alert_title_empty_event.tr(),
         );

@@ -19,18 +19,25 @@ class ChoiceScreen extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 34.w, vertical: 7.h),
+            decoration: BoxDecoration(
+              color: Color(0xFFFFFF00),
+              borderRadius: BorderRadius.circular(30.r),
+            ),
+            child: Text(
+              '1EA | 5,000원',
+              style: TextStyle(
+                fontSize: 30.sp,
+                color: Colors.black,
+              ),
+            ),
+          ),
+          SizedBox(height: 20.h),
           Text(
-            '추천 이미지를 선택하거나\n내 사진첩에 있는 이미지를 업로드하세요.',
+            '뒷면 이미지 선택하기기',
             style: context.typography.kioskBody1B,
             textAlign: TextAlign.center,
-          ),
-          SizedBox(height: 15.h),
-          Text(
-            '1EA | 5,000원',
-            style: TextStyle(
-              fontSize: 20.sp,
-              color: Color(0xFFE6BA6B),
-            ),
           ),
           SizedBox(height: 15.h),
           Row(
