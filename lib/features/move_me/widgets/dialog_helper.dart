@@ -120,7 +120,7 @@ class DialogHelper {
             actionsPadding: EdgeInsets.zero,
             title: Center(
               child: Padding(
-                padding: EdgeInsets.only(top: 60.h, bottom: 36.h),
+                padding: EdgeInsets.only(top: 60.h, bottom: 36.h, left: 40.w, right: 40.w),
                 child: Text(
                   title,
                   textAlign: TextAlign.center,
@@ -182,7 +182,7 @@ class DialogHelper {
             actionsPadding: EdgeInsets.zero,
             title: Center(
               child: Padding(
-                padding: EdgeInsets.only(top: 60.h, bottom: 36.h),
+                padding: EdgeInsets.only(top: 60.h, bottom: 36.h, left: 40.w, right: 40.w),
                 child: Text(
                   title,
                   textAlign: TextAlign.center,
