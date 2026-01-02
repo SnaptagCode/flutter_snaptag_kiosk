@@ -130,8 +130,8 @@ class ChoiceScreen extends ConsumerWidget {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(23.r),
             side: BorderSide(
-              color: Colors.white.withValues(alpha: 0.32),
-              width: 1,
+              color: Colors.white,
+              width: 1.w,
             ),
           ),
         ),
