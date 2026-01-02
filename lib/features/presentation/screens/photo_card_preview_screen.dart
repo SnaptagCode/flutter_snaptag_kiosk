@@ -17,6 +17,72 @@ class PhotoCardPreviewScreen extends ConsumerStatefulWidget {
 }
 
 class _PhotoCardPreviewScreenState extends ConsumerState<PhotoCardPreviewScreen> {
+  /// 고정 뒷면 이미지 카드 위젯 빌더
+  Widget _buildFixedBackPhotoCard({
+    required int index,
+    required int? selectedIndex,
+    required String? imageUrl,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Opacity(
+        opacity: selectedIndex == null ? 1.0 : (selectedIndex == index ? 1.0 : 0.5),
+        child: Container(
+          width: 226.w,
+          height: 355.h,
+          clipBehavior: Clip.antiAlias,
+          decoration: ShapeDecoration(
+            color: Colors.grey[200],
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10.r),
+            ),
+          ),
+          child: imageUrl != null ? _buildNetworkImage(imageUrl) : _buildEmptyImagePlaceholder(),
+        ),
+      ),
+    );
+  }
+
+  /// 네트워크 이미지 위젯 빌더 (공통 빌더 포함)
+  Widget _buildNetworkImage(String imageUrl) {
+    return Image.network(
+      imageUrl,
+      fit: BoxFit.fitHeight,
+      alignment: Alignment.center,
+      frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
+        if (wasSynchronouslyLoaded) return child;
+        return AnimatedOpacity(
+          opacity: frame == null ? 0 : 1,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+          child: child,
+        );
+      },
+      loadingBuilder: (context, child, loadingProgress) {
+        if (loadingProgress == null) return child;
+        return Center(
+          child: CircularProgressIndicator(
+            value: loadingProgress.expectedTotalBytes != null
+                ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                : null,
+          ),
+        );
+      },
+      errorBuilder: (context, error, stackTrace) => _buildEmptyImagePlaceholder(),
+    );
+  }
+
+  /// 빈 이미지 플레이스홀더
+  Widget _buildEmptyImagePlaceholder() {
+    return Container(
+      color: Colors.grey[200],
+      child: Center(
+        child: Icon(Icons.image, size: 60.sp, color: Colors.grey[400]),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     ref.listen<AsyncValue<void>>(
@@ -76,136 +142,32 @@ class _PhotoCardPreviewScreenState extends ConsumerState<PhotoCardPreviewScreen>
             ),
             SizedBox(height: 30.h),
             if (isFixed)
-              Container(
-                width: 1080.w,
-                height: 360.h,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(border: Border.all(color: Colors.transparent, width: 0.w)),
-                child: Row(
+              GradientContainer(
+                content: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    GestureDetector(
+                    _buildFixedBackPhotoCard(
+                      index: 0,
+                      selectedIndex: selectedIndex,
+                      imageUrl: kiosk?.nominatedBackPhotoCardList.isNotEmpty == true &&
+                              (kiosk!.nominatedBackPhotoCardList.length > 0)
+                          ? kiosk.nominatedBackPhotoCardList[0].originUrl
+                          : null,
                       onTap: () {
-                        // 첫 번째 고정 뒷면 이미지 선택 (인덱스 0)
                         ref.read(backPhotoTypeProvider.notifier).selectFixed(0);
                       },
-                      child: Opacity(
-                        opacity: selectedIndex == null ? 1.0 : (selectedIndex == 0 ? 1.0 : 0.5),
-                        child: Container(
-                          width: 250.w,
-                          height: 355.h,
-                          clipBehavior: Clip.antiAlias,
-                          decoration: ShapeDecoration(
-                            color: Colors.grey[200],
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10.r),
-                            ),
-                          ),
-                          child: kiosk?.nominatedBackPhotoCardList.isNotEmpty == true &&
-                                  (kiosk!.nominatedBackPhotoCardList.length > 0)
-                              ? Image.network(
-                                  kiosk.nominatedBackPhotoCardList[0].originUrl,
-                                  fit: BoxFit.fitHeight,
-                                  alignment: Alignment.center,
-                                  frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
-                                    if (wasSynchronouslyLoaded) return child;
-                                    return AnimatedOpacity(
-                                      opacity: frame == null ? 0 : 1,
-                                      duration: const Duration(milliseconds: 300),
-                                      curve: Curves.easeOut,
-                                      child: child,
-                                    );
-                                  },
-                                  loadingBuilder: (context, child, loadingProgress) {
-                                    if (loadingProgress == null) return child;
-                                    return Center(
-                                      child: CircularProgressIndicator(
-                                        value: loadingProgress.expectedTotalBytes != null
-                                            ? loadingProgress.cumulativeBytesLoaded /
-                                                loadingProgress.expectedTotalBytes!
-                                            : null,
-                                      ),
-                                    );
-                                  },
-                                  errorBuilder: (context, error, stackTrace) {
-                                    return Container(
-                                      color: Colors.grey[200],
-                                      child: Center(
-                                        child: Icon(Icons.image, size: 60.sp, color: Colors.grey[400]),
-                                      ),
-                                    );
-                                  },
-                                )
-                              : Container(
-                                  color: Colors.grey[200],
-                                  child: Center(
-                                    child: Icon(Icons.image, size: 60.sp, color: Colors.grey[400]),
-                                  ),
-                                ),
-                        ),
-                      ),
                     ),
                     SizedBox(width: 150.w),
-                    GestureDetector(
+                    _buildFixedBackPhotoCard(
+                      index: 1,
+                      selectedIndex: selectedIndex,
+                      imageUrl: kiosk?.nominatedBackPhotoCardList.isNotEmpty == true &&
+                              (kiosk!.nominatedBackPhotoCardList.length > 1)
+                          ? kiosk.nominatedBackPhotoCardList[1].originUrl
+                          : null,
                       onTap: () {
-                        // 두 번째 고정 뒷면 이미지 선택 (인덱스 1)
                         ref.read(backPhotoTypeProvider.notifier).selectFixed(1);
                       },
-                      child: Opacity(
-                        opacity: selectedIndex == null ? 1.0 : (selectedIndex == 1 ? 1.0 : 0.5),
-                        child: Container(
-                          width: 250.w,
-                          height: 355.h,
-                          clipBehavior: Clip.antiAlias,
-                          decoration: ShapeDecoration(
-                            color: Colors.grey[200],
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10.r),
-                            ),
-                          ),
-                          child: kiosk?.nominatedBackPhotoCardList.isNotEmpty == true &&
-                                  (kiosk!.nominatedBackPhotoCardList.length > 1)
-                              ? Image.network(
-                                  kiosk.nominatedBackPhotoCardList[1].originUrl,
-                                  fit: BoxFit.fitHeight,
-                                  alignment: Alignment.center,
-                                  frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
-                                    if (wasSynchronouslyLoaded) return child;
-                                    return AnimatedOpacity(
-                                      opacity: frame == null ? 0 : 1,
-                                      duration: const Duration(milliseconds: 300),
-                                      curve: Curves.easeOut,
-                                      child: child,
-                                    );
-                                  },
-                                  loadingBuilder: (context, child, loadingProgress) {
-                                    if (loadingProgress == null) return child;
-                                    return Center(
-                                      child: CircularProgressIndicator(
-                                        value: loadingProgress.expectedTotalBytes != null
-                                            ? loadingProgress.cumulativeBytesLoaded /
-                                                loadingProgress.expectedTotalBytes!
-                                            : null,
-                                      ),
-                                    );
-                                  },
-                                  errorBuilder: (context, error, stackTrace) {
-                                    return Container(
-                                      color: Colors.grey[200],
-                                      child: Center(
-                                        child: Icon(Icons.image, size: 60.sp, color: Colors.grey[400]),
-                                      ),
-                                    );
-                                  },
-                                )
-                              : Container(
-                                  color: Colors.grey[200],
-                                  child: Center(
-                                    child: Icon(Icons.image, size: 60.sp, color: Colors.grey[400]),
-                                  ),
-                                ),
-                        ),
-                      ),
                     ),
                   ],
                 ),
@@ -215,30 +177,16 @@ class _PhotoCardPreviewScreenState extends ConsumerState<PhotoCardPreviewScreen>
                 content: ClipRRect(
                   borderRadius: BorderRadius.circular(10.r),
                   child: ref.watch(verifyPhotoCardProvider).when(
-                    data: (data) {
-                      return Image.network(
-                        data?.formattedBackPhotoCardUrl ?? '',
-                        frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
-                          if (wasSynchronouslyLoaded) return child;
-                          return AnimatedOpacity(
-                            opacity: frame == null ? 0 : 1,
-                            duration: const Duration(milliseconds: 300),
-                            curve: Curves.easeOut,
-                            child: child,
-                          );
+                        data: (data) {
+                          final imageUrl = data?.formattedBackPhotoCardUrl ?? '';
+                          return imageUrl.isNotEmpty ? _buildNetworkImage(imageUrl) : _buildEmptyImagePlaceholder();
                         },
-                      );
-                    },
-                    loading: () {
-                      return const CircularProgressIndicator();
-                    },
-                    error: (error, stack) {
-                      return GeneralErrorWidget(
-                        exception: error as Exception,
-                        onRetry: () => ref.refresh(verifyPhotoCardProvider),
-                      );
-                    },
-                  ),
+                        loading: () => const CircularProgressIndicator(),
+                        error: (error, stack) => GeneralErrorWidget(
+                          exception: error as Exception,
+                          onRetry: () => ref.refresh(verifyPhotoCardProvider),
+                        ),
+                      ),
                 ),
               ),
             SizedBox(height: 30.h),

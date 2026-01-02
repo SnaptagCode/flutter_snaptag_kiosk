@@ -28,7 +28,7 @@ class KioskMachineInfo with _$KioskMachineInfo {
     @Default(false) bool isMetal,
     @Default([]) List<EventVideo> eventVideos,
     @Default([]) List<NominatedBackPhotoCard> nominatedBackPhotoCardList,
-    @Default('') String defaultCustomBackPhotoCard,
+    @Default('') String emblemImageUrl,
   }) = _KioskMachineInfo;
 
   factory KioskMachineInfo.fromJson(Map<String, dynamic> json) => _$KioskMachineInfoFromJson(json);
