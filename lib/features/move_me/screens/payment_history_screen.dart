@@ -76,7 +76,7 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
                 padding: EdgeInsets.only(left: 30.w),
                 icon: SvgPicture.asset(SnaptagSvg.home),
                 onPressed: () async {
-                  ChoiceRouteData().go(context);
+                  HomeRouteData().go(context);
                 },
               ),
             ],

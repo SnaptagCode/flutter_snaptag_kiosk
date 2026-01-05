@@ -80,14 +80,14 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
                 await DialogHelper.showPrintCardRefillDialog(
                   context,
                   onButtonPressed: () {
-                    ChoiceRouteData().go(context);
+                    HomeRouteData().go(context);
                   },
                 );
               } else {
                 await DialogHelper.showPrintErrorDialog(
                   context,
                   onButtonPressed: () {
-                    ChoiceRouteData().go(context);
+                    HomeRouteData().go(context);
                   },
                 );
               }
@@ -102,7 +102,7 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
             await DialogHelper.showPrintCompleteDialog(
               context,
               onButtonPressed: () {
-                ChoiceRouteData().go(context);
+                HomeRouteData().go(context);
               },
             );
           },

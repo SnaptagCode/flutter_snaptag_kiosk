@@ -26,7 +26,7 @@ class DialogTestWidget extends StatelessWidget {
           onPressed: () => DialogHelper.showPrintErrorDialog(
             context,
             onButtonPressed: () {
-              ChoiceRouteData().go(context);
+              HomeRouteData().go(context);
             },
           ),
           style: context.dialogButtonStyle,
@@ -37,7 +37,7 @@ class DialogTestWidget extends StatelessWidget {
           onPressed: () => DialogHelper.showPrintCompleteDialog(
             context,
             onButtonPressed: () {
-              ChoiceRouteData().go(context);
+              HomeRouteData().go(context);
             },
           ),
           style: context.dialogButtonStyle,

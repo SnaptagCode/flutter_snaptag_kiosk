@@ -23,7 +23,7 @@ class HomeButton extends ConsumerWidget {
         onTap: isPrinting
             ? null
             : () {
-                const ChoiceRouteData().go(context);
+                const HomeRouteData().go(context);
               },
         child: Container(
           decoration: BoxDecoration(

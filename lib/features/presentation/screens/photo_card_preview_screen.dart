@@ -235,7 +235,7 @@ class _PhotoCardPreviewScreenState extends ConsumerState<PhotoCardPreviewScreen>
                       DialogHelper.showPaymentCardFailedDialog(
                         context,
                       );
-                      ChoiceRouteData().go(context);
+                      HomeRouteData().go(context);
                     }
                   },
                   child: Text(LocaleKeys.sub02_btn_pay.tr()),

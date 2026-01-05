@@ -101,10 +101,10 @@ class NetworkStatusNotifier extends _$NetworkStatusNotifier {
       },
     );
 
-    // 주기적으로 상태 확인 (5초마다)
-    _checkTimer = Timer.periodic(const Duration(seconds: 5), (_) {
-      _checkNetworkStatus();
-    });
+    // // 주기적으로 상태 확인 (5초마다)
+    // _checkTimer = Timer.periodic(const Duration(seconds: 5), (_) {
+    //   _checkNetworkStatus();
+    // });
   }
 
   /// 네트워크 상태 확인

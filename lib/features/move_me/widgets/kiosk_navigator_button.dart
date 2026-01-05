@@ -12,7 +12,7 @@ class KioskNavigatorButton extends ConsumerWidget {
     if (currentPath == PrintProcessRouteData().location) {
       return SizedBox.shrink();
     }
-    if (currentPath != ChoiceRouteData().location) {
+    if (currentPath != HomeRouteData().location) {
       return const HomeButton();
     } else {
       return const LanguageSwitcher();
