@@ -123,7 +123,7 @@ class KioskRouteData extends GoRouteData with _$KioskRouteData {
   }
 }
 
-class HomeRouteData extends GoRouteData with _$ChoiceRouteData {
+class HomeRouteData extends GoRouteData with _$HomeRouteData {
   const HomeRouteData();
 
   @override
