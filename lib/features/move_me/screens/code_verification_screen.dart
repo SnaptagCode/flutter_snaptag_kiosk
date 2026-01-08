@@ -54,7 +54,7 @@ class CodeVerificationScreen extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Text(
-            "인증번호 입력하기",
+            LocaleKeys.choice_enter_verification_code.tr(),
             style: context.typography.kioksNum1SB.copyWith(color: Colors.white),
           ),
           SizedBox(

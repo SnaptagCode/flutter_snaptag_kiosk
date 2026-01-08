@@ -136,7 +136,7 @@ class _PhotoCardPreviewScreenState extends ConsumerState<PhotoCardPreviewScreen>
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Text(
-              LocaleKeys.sub02_txt_01.tr(),
+              isFixed ? LocaleKeys.choice_select_recommended_image.tr() : LocaleKeys.sub02_txt_01.tr(),
               textAlign: TextAlign.center,
               style: context.typography.kioskBody1B,
             ),
@@ -150,7 +150,7 @@ class _PhotoCardPreviewScreenState extends ConsumerState<PhotoCardPreviewScreen>
                       index: 0,
                       selectedIndex: selectedIndex,
                       imageUrl: kiosk?.nominatedBackPhotoCardList.isNotEmpty == true &&
-                              (kiosk!.nominatedBackPhotoCardList.length > 0)
+                              (kiosk!.nominatedBackPhotoCardList.isNotEmpty)
                           ? kiosk.nominatedBackPhotoCardList[0].originUrl
                           : null,
                       onTap: () {

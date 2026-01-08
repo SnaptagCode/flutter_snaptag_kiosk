@@ -34,7 +34,7 @@ class HomeScreen extends ConsumerWidget {
               borderRadius: BorderRadius.circular(30.r),
             ),
             child: Text(
-              '1EA | 5,000원',
+              '1EA | ${kiosk?.photoCardPrice}${LocaleKeys.currency_won.tr()}',
               style: TextStyle(
                 fontSize: 30.sp,
                 color: buttonTextColor,
@@ -43,7 +43,7 @@ class HomeScreen extends ConsumerWidget {
           ),
           SizedBox(height: 20.h),
           Text(
-            '뒷면 이미지 선택하기기',
+            LocaleKeys.choice_select_back_image.tr(),
             style: context.typography.kioskBtn1B.copyWith(fontSize: 52.sp, color: mainTextColor),
             textAlign: TextAlign.center,
           ),
@@ -53,8 +53,8 @@ class HomeScreen extends ConsumerWidget {
             children: [
               _buildRecommendedImageCard(
                 context,
-                title: '추천 이미지 선택',
-                subtitle1: '이미지 선택 후 바로 출력',
+                title: LocaleKeys.choice_recommended_images.tr(),
+                subtitle1: LocaleKeys.choice_select_and_print.tr(),
                 subtitle2: null,
                 subtitleSize: 25.sp,
                 imageUrl: kiosk?.emblemImageUrl ?? '',
@@ -73,9 +73,9 @@ class HomeScreen extends ConsumerWidget {
               SizedBox(width: 40.w),
               _buildRecommendedImageCard(
                 context,
-                title: '내 사진 업로드',
-                subtitle1: 'STEP 1. QR 코드 스캔 후 이미지 업로드',
-                subtitle2: 'STEP 2. 발급 받은 인증번호 입력 후 출력',
+                title: LocaleKeys.choice_upload_my_photo.tr(),
+                subtitle1: LocaleKeys.choice_step1_qr_upload.tr(),
+                subtitle2: LocaleKeys.choice_step2_enter_code_print.tr(),
                 subtitleSize: 20.sp,
                 imageUrl: null,
                 mainButtonColor: buttonColor,
@@ -156,7 +156,10 @@ class HomeScreen extends ConsumerWidget {
                       SizedBox(height: 27.h),
                       Text(
                         title,
-                        style: context.typography.kioskBtn1B.copyWith(fontSize: 45.sp, color: mainButtonColor),
+                        style: context.typography.kioskBtn1B.copyWith(
+                          fontSize: context.locale.languageCode == 'en' ? 32.sp : 45.sp,
+                          color: mainButtonColor,
+                        ),
                         textAlign: TextAlign.center,
                       ),
                       SizedBox(height: 20.h),
@@ -191,8 +194,9 @@ class HomeScreen extends ConsumerWidget {
                         borderRadius: BorderRadius.circular(10.r),
                       ),
                       child: Text(
-                        imageUrl != null ? '이미지 선택하기' : '인증번호 입력하기',
-                        style: context.typography.kioskBtn1B.copyWith(fontSize: 30.sp, color: buttonTextColor),
+                        imageUrl != null ? LocaleKeys.choice_select_image.tr() : LocaleKeys.choice_enter_code.tr(),
+                        style: context.typography.kioskBtn1B.copyWith(
+                            fontSize: context.locale.languageCode == 'en' ? 25.sp : 30.sp, color: buttonTextColor),
                         textAlign: TextAlign.center,
                       ),
                     ),
