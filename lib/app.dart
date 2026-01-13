@@ -38,7 +38,16 @@ class _AppState extends ConsumerState<App> with WindowListener {
     _initializedFullScreen = true;
 
     if (Platform.isWindows) {
-      await windowManager.setFullScreen(true);
+      WindowOptions windowOptions = WindowOptions(
+        fullScreen: true,
+        backgroundColor: Colors.transparent,
+        skipTaskbar: false,
+        titleBarStyle: TitleBarStyle.hidden,
+      );
+      await windowManager.waitUntilReadyToShow(windowOptions, () async {
+        await windowManager.setFullScreen(true);
+        await windowManager.show();
+      });
     }
   }
 
