@@ -24,68 +24,10 @@ class SetupMainScreen extends ConsumerStatefulWidget {
 
 class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
   Timer? _timer;
-  bool _hasInitialized = false;
 
   @override
   void initState() {
     super.initState();
-
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      // 이미 초기화되었거나 위젯이 dispose된 경우 중복 호출 방지
-      if (_hasInitialized || !mounted) return;
-      _hasInitialized = true;
-
-      // 네트워크 에러 처리 함수
-      Future<bool> handleNetworkError(dynamic error) async {
-        // DioException 또는 네트워크 관련 에러인지 확인
-        final isNetworkError = error is DioException &&
-            (error.type == DioExceptionType.connectionTimeout ||
-                error.type == DioExceptionType.receiveTimeout ||
-                error.type == DioExceptionType.sendTimeout ||
-                error.type == DioExceptionType.connectionError ||
-                error.type == DioExceptionType.unknown);
-
-        if (isNetworkError && mounted) {
-          final result = await DialogHelper.showSetupOneButtonDialog(
-            context,
-            title: '네트워크 연결이 불안정합니다.',
-            confirmButtonText: '확인',
-          );
-          if (result && mounted) {
-            // 확인 버튼 클릭 시 앱 종료
-            exit(0);
-          }
-          return true;
-        }
-        return false;
-      }
-
-      // Alert Definition 로드
-      try {
-        await ref.read(alertDefinitionProvider.notifier).load();
-      } catch (error) {
-        final handled = await handleNetworkError(error);
-        if (handled) return;
-        // 네트워크 에러가 아니면 로그만 남김
-        SlackLogService().sendErrorLogToSlack('Alert definition load failed: $error');
-      }
-
-      // 이미 데이터가 있으면 API 호출하지 않음
-      final currentInfo = ref.read(kioskInfoServiceProvider);
-      if (currentInfo == null) {
-        try {
-          final kioskInfo = await ref.read(kioskInfoServiceProvider.notifier).getKioskMachineInfo();
-          if (kioskInfo == null) {
-            SlackLogService().sendErrorLogToSlack('Kiosk info not found');
-          }
-        } catch (error) {
-          final handled = await handleNetworkError(error);
-          if (handled) return;
-          // 네트워크 에러가 아니면 로그만 남김
-          SlackLogService().sendErrorLogToSlack('Kiosk info load failed: $error');
-        }
-      }
-    });
 
     _timer = Timer.periodic(Duration(seconds: 2), (timer) async {
       final connected = ref.read(printerServiceProvider.notifier).checkConnectedPrint();
