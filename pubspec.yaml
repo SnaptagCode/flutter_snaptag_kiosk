@@ -13,6 +13,8 @@ dependencies:
   # Network
   dio: ^5.7.0
   retrofit: ^4.4.1
+  connectivity_plus: ^6.1.0
+  internet_connection_checker: ^3.0.1
 
   # State Management
   flutter_riverpod: ^2.6.1

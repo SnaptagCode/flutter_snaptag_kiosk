@@ -6,7 +6,6 @@ import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_snaptag_kiosk/features/move_me/widgets/code_keypad.dart';
-import 'package:flutter_snaptag_kiosk/core/theme/theme.dart';
 
 ///
 /// [Figma](https://www.figma.com/design/8IDM2KJtqAYWm2IsmytU5W/%ED%82%A4%EC%98%A4%EC%8A%A4%ED%81%AC_%EB%94%94%EC%9E%90%EC%9D%B8_%EA%B3%B5%EC%9C%A0%EC%9A%A9?node-id=943-15366&m=dev)
@@ -396,7 +395,7 @@ class DialogHelper {
   }) async {
     Future.delayed(const Duration(seconds: 5), () {
       if (Navigator.of(context, rootNavigator: true).canPop()) {
-        PhotoCardUploadRouteData().go(context);
+        HomeRouteData().go(context);
         Navigator.of(context, rootNavigator: true).pop();
       }
     });

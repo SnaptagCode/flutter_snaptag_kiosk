@@ -46,5 +46,17 @@
   "alert_txt_auto_refund_alert": "由于打印机无法正常工作，\\r\\n将进行退款。",
   "alert_btn_cancel": "返回",
   "alert_btn_ok": "确定",
-  "alert_title_empty_event": "请输入设备编号以运行事件。"
+  "alert_title_empty_event": "请输入设备编号以运行事件。",
+  "choice_recommended_images": "推荐图片选择",
+  "choice_select_recommended_image": "请选择推荐图片。",
+  "choice_upload_my_photo": "上传我的照片",
+  "choice_select_and_print": "选择并打印",
+  "choice_step1_qr_upload": "步骤1. 扫描二维码并上传",
+  "choice_step2_enter_code_print": "步骤2. 输入验证码并打印",
+  "choice_select_image": "选择图片",
+  "choice_select_back_image": "选择背面图片",
+  "choice_enter_code": "输入验证码",
+  "choice_enter_verification_code": "输入验证码",
+  "print_takes_one_minute": "打印大约需要1分钟。",
+  "currency_won": "韩元"
 }

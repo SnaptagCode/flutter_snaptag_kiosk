@@ -90,8 +90,14 @@ class _KioskShellState extends ConsumerState<KioskShell> {
                             ],
                           ),
                         ),
-                        SizedBox(height: 230.h),
-                        Expanded(child: widget.child),
+                        Expanded(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              widget.child,
+                            ],
+                          ),
+                        ),
                       ],
                     ),
                   ),

@@ -206,4 +206,14 @@ class _KioskRepository {
       rethrow;
     }
   }
+
+  Future<BackPhotoCardResponse> getBackPhotoCardByQr(GetBackPhotoByQrRequest request) async {
+    try {
+      return await _apiClient.getBackPhotoCardByQr(
+        body: request.toJson(),
+      );
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

@@ -18,7 +18,6 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
   @override
   Widget build(BuildContext context) {
     ref.listen(setupRefundProcessProvider, (prev, next) {
-
       next.whenOrNull(
         error: (error, stack) async {
           context.loaderOverlay.hide();
@@ -37,160 +36,164 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
     final ordersPage = ref.watch(ordersPageProvider());
 
     return Theme(
-        data: Theme.of(context).copyWith(
-      textTheme: Theme.of(context).textTheme.apply(
-        fontFamily: 'Pretendard',
+      data: Theme.of(context).copyWith(
+        textTheme: Theme.of(context).textTheme.apply(
+              fontFamily: 'Pretendard',
+            ),
       ),
-    ),
-     child: LoaderOverlay(
-    overlayWidgetBuilder: (dynamic progress){
-      return Center(
-        child: SizedBox(
-          width: 350.h,
-          height: 350.h,
-          child: CircularProgressIndicator(
-            strokeWidth: 15.h,
-          ),
-        ),
-      );
-    },
-    child: Scaffold(
-      backgroundColor: Color(0xFFF2F2F2),
-      appBar: AppBar(
-        leading: IconButton(
-          padding: EdgeInsets.only(left: 30.w),
-          icon: SvgPicture.asset(SnaptagSvg.arrowBack),
-          onPressed: () async {
-            final result = await DialogHelper.showSetupDialog(
-              context,
-              title: '메인페이지로 이동합니다.',
-            );
-            if (result) {
-              Navigator.pop(context);
-            }
-          },
-        ),
-        title: const Text('출력 내역'),
-        actions: [ //키오스크에서 실행시켜보고 사이즈 조절 필요시 SizedBox로
-          IconButton(
-            padding: EdgeInsets.only(left: 30.w),
-            icon: SvgPicture.asset(SnaptagSvg.home),
-            onPressed: () async {
-              PhotoCardUploadRouteData().go(context);
-            },
-          ),
-        ],
-      ),
-      body: ordersPage.when(
-        data: (response) {
-          return Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              SizedBox(
-                height: 130.w,
+      child: LoaderOverlay(
+        overlayWidgetBuilder: (dynamic progress) {
+          return Center(
+            child: SizedBox(
+              width: 350.h,
+              height: 350.h,
+              child: CircularProgressIndicator(
+                strokeWidth: 15.h,
               ),
-              SizedBox(
-                width: 438.w,
-                child: DateWidget(),
-              ),
-              SizedBox(
-                height: 60.w,
-              ),
-              DataTable(
-                columnSpacing: 15.0,
-                horizontalMargin: 0,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(8.r),
-                ),
-                headingTextStyle: TextStyle(
-                  color: Color(0xFF757575),
-                  fontSize: 18.sp,
-                ),
-                headingRowColor: WidgetStateColor.resolveWith(
-                  (states) => Color(0xFFF6F7F8),
-                ),
-                dataTextStyle: TextStyle(
-                  color: Color(0xFF414448),
-                  fontSize: 16.sp,
-                ),
-                columns: columns,
-                rows: response.list
-                    .map((order) {
-                  return DataRow(
-                    color: WidgetStateColor.resolveWith((states) => Colors.white),
-                    cells: [
-                      DataCell(
-                        Center(
-                          child: Text(
-                            order.completedAt != null
-                                ? DateFormat('yyyy.MM.dd HH:mm').format(
-                                    order.completedAt!,
-                                  )
-                                : '',
-                          ),
-                        ),
-                      ),
-                      DataCell(
-                        Center(
-                          child: Text(
-                            order.eventName.length > 20 ? '${order.eventName.substring(0, 20)}...' : order.eventName,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ),
-                      DataCell(
-                        Center(child: Text(NumberFormat('#,###').format(order.amount.toInt()))),
-                      ),
-                      DataCell(
-                        Center(child: Text(_getOrderState(order.orderStatus))),
-                      ),
-                      DataCell(
-                        Center(child: _getRefundWidget(context, order)),
-                      ),
-                      DataCell(
-                        Center(child: Text(isPrinted(order.printedStatus) ? 'O' : 'X')),
-                      ),
-                      DataCell(
-                        Center(child: Text(order.photoAuthNumber)),
-                      ),
-                      DataCell(
-                        Center(child: Text(order.paymentAuthNumber ?? '')),
-                      ),
-                    ],
-                  );
-                }).toList(),
-              ),
-              PaginationControls(
-                currentPage: response.paging.currentPage,
-                totalPages: (response.paging.totalCount / response.paging.pageSize).ceil(),
-                onPageChanged: (newPage) {
-                  ref.read(ordersPageProvider().notifier).goToPage(newPage);
+            ),
+          );
+        },
+        child: Scaffold(
+          backgroundColor: Color(0xFFF2F2F2),
+          appBar: AppBar(
+            leading: IconButton(
+              padding: EdgeInsets.only(left: 30.w),
+              icon: SvgPicture.asset(SnaptagSvg.arrowBack),
+              onPressed: () async {
+                final result = await DialogHelper.showSetupDialog(
+                  context,
+                  title: '메인페이지로 이동합니다.',
+                );
+                if (result) {
+                  Navigator.pop(context);
+                }
+              },
+            ),
+            title: const Text('출력 내역'),
+            actions: [
+              //키오스크에서 실행시켜보고 사이즈 조절 필요시 SizedBox로
+              IconButton(
+                padding: EdgeInsets.only(left: 30.w),
+                icon: SvgPicture.asset(SnaptagSvg.home),
+                onPressed: () async {
+                  HomeRouteData().go(context);
                 },
               ),
             ],
-          );
-        },
-        loading: () => Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const CircularProgressIndicator(),
-              const SizedBox(height: 16),
-              Text(
-                'Loading orders...',
-                style: Theme.of(context).textTheme.bodyLarge,
+          ),
+          body: ordersPage.when(
+            data: (response) {
+              return Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  SizedBox(
+                    height: 130.w,
+                  ),
+                  SizedBox(
+                    width: 438.w,
+                    child: DateWidget(),
+                  ),
+                  SizedBox(
+                    height: 60.w,
+                  ),
+                  DataTable(
+                    columnSpacing: 15.0,
+                    horizontalMargin: 0,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8.r),
+                    ),
+                    headingTextStyle: TextStyle(
+                      color: Color(0xFF757575),
+                      fontSize: 18.sp,
+                    ),
+                    headingRowColor: WidgetStateColor.resolveWith(
+                      (states) => Color(0xFFF6F7F8),
+                    ),
+                    dataTextStyle: TextStyle(
+                      color: Color(0xFF414448),
+                      fontSize: 16.sp,
+                    ),
+                    columns: columns,
+                    rows: response.list.map((order) {
+                      return DataRow(
+                        color: WidgetStateColor.resolveWith((states) => Colors.white),
+                        cells: [
+                          DataCell(
+                            Center(
+                              child: Text(
+                                order.completedAt != null
+                                    ? DateFormat('yyyy.MM.dd HH:mm').format(
+                                        order.completedAt!,
+                                      )
+                                    : '',
+                              ),
+                            ),
+                          ),
+                          DataCell(
+                            Center(
+                              child: Text(
+                                order.eventName.length > 20
+                                    ? '${order.eventName.substring(0, 20)}...'
+                                    : order.eventName,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ),
+                          DataCell(
+                            Center(child: Text(NumberFormat('#,###').format(order.amount.toInt()))),
+                          ),
+                          DataCell(
+                            Center(child: Text(_getOrderState(order.orderStatus))),
+                          ),
+                          DataCell(
+                            Center(child: _getRefundWidget(context, order)),
+                          ),
+                          DataCell(
+                            Center(child: Text(isPrinted(order.printedStatus) ? 'O' : 'X')),
+                          ),
+                          DataCell(
+                            Center(child: Text(order.photoAuthNumber)),
+                          ),
+                          DataCell(
+                            Center(child: Text(order.paymentAuthNumber ?? '')),
+                          ),
+                        ],
+                      );
+                    }).toList(),
+                  ),
+                  PaginationControls(
+                    currentPage: response.paging.currentPage,
+                    totalPages: (response.paging.totalCount / response.paging.pageSize).ceil(),
+                    onPageChanged: (newPage) {
+                      ref.read(ordersPageProvider().notifier).goToPage(newPage);
+                    },
+                  ),
+                ],
+              );
+            },
+            loading: () => Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const CircularProgressIndicator(),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Loading orders...',
+                    style: Theme.of(context).textTheme.bodyLarge,
+                  ),
+                ],
               ),
-            ],
+            ),
+            error: (error, stack) => GeneralErrorWidget(
+              exception: error as Exception,
+              onRetry: () => ref.refresh(ordersPageProvider()),
+            ),
           ),
         ),
-        error: (error, stack) => GeneralErrorWidget(
-          exception: error as Exception,
-          onRetry: () => ref.refresh(ordersPageProvider()),
-        ),
       ),
-    ),),);
+    );
   }
 
   List<DataColumn> get columns {
@@ -325,8 +328,7 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
                 if (result2) {
                   await ref.read(setupRefundProcessProvider.notifier).startRefund(order);
                   context.loaderOverlay.hide();
-                }
-                else {
+                } else {
                   context.loaderOverlay.hide();
                 }
               },
@@ -369,8 +371,7 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
                 if (result2) {
                   await ref.read(setupRefundProcessProvider.notifier).startRefund(order);
                   context.loaderOverlay.hide();
-                }
-                else {
+                } else {
                   context.loaderOverlay.hide();
                 }
               },

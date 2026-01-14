@@ -80,14 +80,14 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
                 await DialogHelper.showPrintCardRefillDialog(
                   context,
                   onButtonPressed: () {
-                    PhotoCardUploadRouteData().go(context);
+                    HomeRouteData().go(context);
                   },
                 );
               } else {
                 await DialogHelper.showPrintErrorDialog(
                   context,
                   onButtonPressed: () {
-                    PhotoCardUploadRouteData().go(context);
+                    HomeRouteData().go(context);
                   },
                 );
               }
@@ -102,7 +102,7 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
             await DialogHelper.showPrintCompleteDialog(
               context,
               onButtonPressed: () {
-                PhotoCardUploadRouteData().go(context);
+                HomeRouteData().go(context);
               },
             );
           },
@@ -263,10 +263,10 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
     }
 
     final adImageFolder = Directory((machineId == 2 || machineId == 3)
-        ? '$userDir\\Snaptag\\$version\\assets\\adImages\\suwon':
-      (machineId == 1 || machineId == 4) ?
-    '$userDir\\Snaptag\\$version\\assets\\adImages\\eland'
-        : '$userDir\\Snaptag\\$version\\assets\\adImages\\ansan');
+        ? '$userDir\\Snaptag\\$version\\assets\\adImages\\suwon'
+        : (machineId == 1 || machineId == 4)
+            ? '$userDir\\Snaptag\\$version\\assets\\adImages\\eland'
+            : '$userDir\\Snaptag\\$version\\assets\\adImages\\ansan');
 
     if (!adImageFolder.existsSync()) {
       SlackLogService().sendLogToSlack('machineId: $machineId 배너를 불러오기 위한 이미지 폴더가 존재하지 않습니다.');
