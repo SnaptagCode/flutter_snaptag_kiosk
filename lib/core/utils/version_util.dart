@@ -20,7 +20,7 @@ class VersionUtil {
       return _cachedVersion!;
     } catch (e) {
       // 오류 발생 시 기본값 반환
-      return 'v3.3.0';
+      return 'v0.0.0';
     }
   }
 
@@ -36,4 +36,3 @@ class VersionUtil {
     _packageInfo = null;
   }
 }
-
