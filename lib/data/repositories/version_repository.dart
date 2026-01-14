@@ -38,16 +38,7 @@ class VersionRepository {
       return version.startsWith('v') ? version : 'v$version';
     } catch (e) {
       // 오류 발생 시 .env.version 파일에서 읽기 시도
-      try {
-        final envFile = File('assets/.env.version');
-        if (await envFile.exists()) {
-          final version = await envFile.readAsString();
-          return version.trim().isNotEmpty ? version.trim() : 'v3.3.0';
-        }
-      } catch (_) {
-        // 파일 읽기 실패 시 기본값 반환
-      }
-      return 'v3.3.0';
+      return 'v0.0.0';
     }
   }
 
