@@ -6,7 +6,6 @@ import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_snaptag_kiosk/features/move_me/widgets/code_keypad.dart';
-import 'package:flutter_snaptag_kiosk/core/theme/theme.dart';
 
 ///
 /// [Figma](https://www.figma.com/design/8IDM2KJtqAYWm2IsmytU5W/%ED%82%A4%EC%98%A4%EC%8A%A4%ED%81%AC_%EB%94%94%EC%9E%90%EC%9D%B8_%EA%B3%B5%EC%9C%A0%EC%9A%A9?node-id=943-15366&m=dev)
@@ -97,6 +96,67 @@ class DialogHelper {
     );
   }
 
+  static Future<bool> showSetupOneButtonDialog(
+    BuildContext context, {
+    required String title,
+    String confirmButtonText = '확인',
+  }) async {
+    return await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return DefaultTextStyle(
+          style: TextStyle(
+            fontFamily: context.locale.languageCode == 'ja' ? 'MPLUSRounded' : 'Cafe24Ssurround2',
+          ),
+          child: AlertDialog(
+            backgroundColor: Colors.white,
+            insetPadding: EdgeInsets.symmetric(horizontal: 100.w),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20.r),
+            ),
+            titlePadding: EdgeInsets.zero,
+            actionsPadding: EdgeInsets.zero,
+            title: Center(
+              child: Padding(
+                padding: EdgeInsets.only(top: 60.h, bottom: 36.h, left: 40.w, right: 40.w),
+                child: Text(
+                  title,
+                  textAlign: TextAlign.center,
+                  style: context.typography.kioskAlert1B.copyWith(
+                    fontFamily: 'Pretendard',
+                    color: Colors.black,
+                  ),
+                ),
+              ),
+            ),
+            actions: [
+              Padding(
+                padding: EdgeInsets.only(bottom: 40.h, left: 40.w, right: 40.w),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          await SoundManager().playSound();
+                          Navigator.of(context).pop(true);
+                        },
+                        style: context.setupDialogConfirmButtonStyle,
+                        child: Text(
+                          confirmButtonText,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   static Future<bool> showSetupDialog(
     BuildContext context, {
     required String title,
@@ -117,44 +177,53 @@ class DialogHelper {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20.r),
             ),
+            titlePadding: EdgeInsets.zero,
+            actionsPadding: EdgeInsets.zero,
             title: Center(
-              child: Text(
-                title,
-                style: context.typography.kioskAlert1B.copyWith(
-                  fontFamily: 'Pretendard',
-                  color: Colors.black,
+              child: Padding(
+                padding: EdgeInsets.only(top: 60.h, bottom: 36.h, left: 40.w, right: 40.w),
+                child: Text(
+                  title,
+                  textAlign: TextAlign.center,
+                  style: context.typography.kioskAlert1B.copyWith(
+                    fontFamily: 'Pretendard',
+                    color: Colors.black,
+                  ),
                 ),
               ),
             ),
             actions: [
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () async {
-                        await SoundManager().playSound();
-                        Navigator.of(context).pop(false);
-                      },
-                      style: context.setupDialogCancelButtonStyle,
-                      child: Text(
-                        cancelButtonText,
+              Padding(
+                padding: EdgeInsets.only(bottom: 40.h, left: 40.w, right: 40.w),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () async {
+                          await SoundManager().playSound();
+                          Navigator.of(context).pop(false);
+                        },
+                        style: context.setupDialogCancelButtonStyle,
+                        child: Text(
+                          cancelButtonText,
+                        ),
                       ),
                     ),
-                  ),
-                  SizedBox(width: 12.w),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () async {
-                        await SoundManager().playSound();
-                        Navigator.of(context).pop(true);
-                      },
-                      style: context.setupDialogConfirmButtonStyle,
-                      child: Text(
-                        confirmButtonText,
+                    SizedBox(width: 12.w),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          await SoundManager().playSound();
+                          Navigator.of(context).pop(true);
+                        },
+                        style: context.setupDialogConfirmButtonStyle,
+                        child: Text(
+                          confirmButtonText,
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               )
             ],
           ),
@@ -326,7 +395,7 @@ class DialogHelper {
   }) async {
     Future.delayed(const Duration(seconds: 5), () {
       if (Navigator.of(context, rootNavigator: true).canPop()) {
-        PhotoCardUploadRouteData().go(context);
+        HomeRouteData().go(context);
         Navigator.of(context, rootNavigator: true).pop();
       }
     });
@@ -474,6 +543,15 @@ class DialogHelper {
       title: LocaleKeys.alert_title_authNum_reissue_complete.tr(),
       message: LocaleKeys.alert_txt_authNum_reissue_complete.tr(),
       buttonText: LocaleKeys.alert_btn_authNum_reissue_complete.tr(),
+    );
+  }
+
+  static Future<void> showEmptyEventDialog(BuildContext context) async {
+    await _showOneButtonKioskDialog(
+      context,
+      title: LocaleKeys.alert_title_empty_event.tr(),
+      message: "",
+      buttonText: LocaleKeys.alert_btn_ok.tr(),
     );
   }
 

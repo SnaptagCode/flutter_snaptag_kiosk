@@ -53,3 +53,17 @@ app.*.map.json
 *.env
 pubspec.lock
 macos/
+
+# Img
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.bmp
+*.tiff
+*.ico
+*.webp
+*.svg
+*.png
+*.jpg
+*.jpeg

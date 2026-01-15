@@ -1,15 +1,122 @@
+import 'dart:io';
 import 'dart:ui';
 
+import 'package:dio/dio.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
+import 'package:window_manager/window_manager.dart';
 
-class App extends ConsumerWidget {
+class App extends ConsumerStatefulWidget {
   const App({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<App> createState() => _AppState();
+}
+
+class _AppState extends ConsumerState<App> with WindowListener {
+  bool _initializedFullScreen = false;
+  bool _hasInitializedKioskInfo = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (Platform.isWindows) {
+      windowManager.addListener(this);
+      _ensureFullScreenOnce();
+    }
+
+    // 앱 실행과 동시에 KioskInfo 미리 로드
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (_hasInitializedKioskInfo) return;
+      _hasInitializedKioskInfo = true;
+
+      // 네트워크 에러 처리 함수
+      Future<bool> handleNetworkError(dynamic error) async {
+        // DioException 또는 네트워크 관련 에러인지 확인
+        final isNetworkError = error is DioException &&
+            (error.type == DioExceptionType.connectionTimeout ||
+                error.type == DioExceptionType.receiveTimeout ||
+                error.type == DioExceptionType.sendTimeout ||
+                error.type == DioExceptionType.connectionError ||
+                error.type == DioExceptionType.unknown);
+
+        if (isNetworkError && mounted) {
+          final result = await DialogHelper.showSetupOneButtonDialog(
+            context,
+            title: '네트워크 연결이 불안정합니다.',
+            confirmButtonText: '확인',
+          );
+          if (result && mounted) {
+            // 확인 버튼 클릭 시 앱 종료
+            exit(0);
+          }
+          return true;
+        }
+        return false;
+      }
+
+      // Alert Definition 로드
+      try {
+        await ref.read(alertDefinitionProvider.notifier).load();
+      } catch (error) {
+        final handled = await handleNetworkError(error);
+        if (handled) return;
+        // 네트워크 에러가 아니면 로그만 남김
+        SlackLogService().sendErrorLogToSlack('Alert definition load failed: $error');
+      }
+
+      // 이미 데이터가 있으면 API 호출하지 않음
+      final currentInfo = ref.read(kioskInfoServiceProvider);
+      if (currentInfo == null) {
+        try {
+          await ref.read(kioskInfoServiceProvider.notifier).getKioskMachineInfo();
+        } catch (error) {
+          final handled = await handleNetworkError(error);
+          if (handled) return;
+          // 네트워크 에러가 아니면 로그만 남김
+          // 네트워크 에러 처리는 setup_main_screen에서 수행
+          SlackLogService().sendErrorLogToSlack('Kiosk info load failed at app startup: $error');
+        }
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    if (Platform.isWindows) {
+      windowManager.removeListener(this);
+    }
+    super.dispose();
+  }
+
+  Future<void> _ensureFullScreenOnce() async {
+    if (_initializedFullScreen) return;
+    _initializedFullScreen = true;
+
+    if (Platform.isWindows) {
+      WindowOptions windowOptions = WindowOptions(
+        fullScreen: true,
+        backgroundColor: Colors.transparent,
+        skipTaskbar: false,
+        titleBarStyle: TitleBarStyle.hidden,
+      );
+      await windowManager.waitUntilReadyToShow(windowOptions, () async {
+        await windowManager.setFullScreen(true);
+        await windowManager.show();
+      });
+    }
+  }
+
+  @override
+  void onWindowFocus() {
+    // 포커스를 받을 때마다 fullscreen 보장
+    // windowManager.setFullScreen(true);
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final router = ref.watch(routerProvider);
     final theme = ref.watch(themeNotifierProvider);
     return theme.when(

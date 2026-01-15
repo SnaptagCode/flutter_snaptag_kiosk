@@ -8,15 +8,13 @@ class KioskNavigatorButton extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-
     final currentPath = GoRouterState.of(context).fullPath;
     if (currentPath == PrintProcessRouteData().location) {
       return SizedBox.shrink();
     }
-    if (currentPath != PhotoCardUploadRouteData().location) {
+    if (currentPath != HomeRouteData().location) {
       return const HomeButton();
-    }
-    else {
+    } else {
       return const LanguageSwitcher();
     }
   }

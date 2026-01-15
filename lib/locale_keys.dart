@@ -48,7 +48,20 @@ abstract class LocaleKeys {
   static const alert_txt_refund_info = 'alert_txt_refund_info';
   static const alert_btn_cancel = 'alert_btn_cancel';
   static const alert_btn_ok = 'alert_btn_ok';
+  static const alert_title_empty_event = 'alert_title_empty_event';
 
   static const alert_title_auto_refund_alert = 'alert_title_auto_refund_alert';
   static const alert_txt_auto_refund_alert = 'alert_txt_auto_refund_alert';
+  static const choice_recommended_images = 'choice_recommended_images';
+  static const choice_select_recommended_image = 'choice_select_recommended_image';
+  static const choice_upload_my_photo = 'choice_upload_my_photo';
+  static const choice_select_and_print = 'choice_select_and_print';
+  static const choice_step1_qr_upload = 'choice_step1_qr_upload';
+  static const choice_step2_enter_code_print = 'choice_step2_enter_code_print';
+  static const choice_select_image = 'choice_select_image';
+  static const choice_select_back_image = 'choice_select_back_image';
+  static const choice_enter_code = 'choice_enter_code';
+  static const choice_enter_verification_code = 'choice_enter_verification_code';
+  static const print_takes_one_minute = 'print_takes_one_minute';
+  static const currency_won = 'currency_won';
 }

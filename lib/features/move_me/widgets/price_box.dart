@@ -36,7 +36,7 @@ class PriceBox extends ConsumerWidget {
           ),
           SizedBox(width: 12.w),
           Text(
-            currency,
+            LocaleKeys.currency_won.tr(),
             style: context.typography.kioskInput3B.copyWith(color: Colors.black),
           ),
         ],

@@ -9,6 +9,11 @@ class PhotoCardPreviewScreenProvider extends _$PhotoCardPreviewScreenProvider {
   AsyncValue<void> build() => const AsyncValue.data(null);
 
   Future<void> payment() async {
+    // 이미 로딩 중이면 중복 요청 방지
+    if (state.isLoading) {
+      return;
+    }
+
     state = const AsyncValue.loading();
 
     try {
@@ -18,7 +23,8 @@ class PhotoCardPreviewScreenProvider extends _$PhotoCardPreviewScreenProvider {
       if (e is! OrderCreationException && e is! PreconditionFailedException) {
         try {
           await ref.read(paymentServiceProvider.notifier).refund();
-          if (ref.read(pagePrintProvider) == PagePrintType.single) await ref.read(cardCountProvider.notifier).increase();
+          if (ref.read(pagePrintProvider) == PagePrintType.single)
+            await ref.read(cardCountProvider.notifier).increase();
         } catch (refundError) {
           logger.e('Payment and refund failed', error: refundError);
         }

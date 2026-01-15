@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_snaptag_kiosk/core/providers/version_notifier.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 
 import 'dart:io';
@@ -17,7 +18,7 @@ class PrintProcessScreen extends ConsumerStatefulWidget {
 class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
   @override
   Widget build(BuildContext context) {
-    final randomAdImage = getRandomAdImageFilePath();
+    final randomAdImage = getRandomAdImageFilePath(ref);
     /**
         final printProcess = ref.watch(printProcessScreenProviderProvider);
         if (printProcess.isLoading) {
@@ -80,14 +81,14 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
                 await DialogHelper.showPrintCardRefillDialog(
                   context,
                   onButtonPressed: () {
-                    PhotoCardUploadRouteData().go(context);
+                    HomeRouteData().go(context);
                   },
                 );
               } else {
                 await DialogHelper.showPrintErrorDialog(
                   context,
                   onButtonPressed: () {
-                    PhotoCardUploadRouteData().go(context);
+                    HomeRouteData().go(context);
                   },
                 );
               }
@@ -102,7 +103,7 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
             await DialogHelper.showPrintCompleteDialog(
               context,
               onButtonPressed: () {
-                PhotoCardUploadRouteData().go(context);
+                HomeRouteData().go(context);
               },
             );
           },
@@ -197,33 +198,18 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
     }
   }
 
-  /// .env.version 파일에서 버전 문자열을 동기적으로 읽어옵니다.
-  String? getAppVersionSync() {
-    try {
-      final file = File('assets/.env.version');
-      if (!file.existsSync()) {
-        print('❌ .env.version 파일이 존재하지 않습니다.');
-        return null;
-      }
-      return file.readAsStringSync().trim();
-    } catch (e) {
-      print('❌ .env.version 파일 읽기 오류: $e');
-      return null;
-    }
-  }
-
   /// 사용자 홈 디렉토리를 동기적으로 반환합니다.
   String? getUserDirectorySync() {
     return Platform.environment['USERPROFILE']; // Windows 전용
   }
 
   /// 최종: 랜덤 이미지 파일 경로 반환
-  String? getRandomAdImagePath() {
-    final version = getAppVersionSync();
+  String? getRandomAdImagePath(WidgetRef ref) {
+    final version = ref.read(versionStateProvider).currentVersion;
     final userDir = getUserDirectorySync();
 
-    if (version == null || userDir == null) {
-      print('❌ 사용자 디렉토리 또는 버전을 불러올 수 없습니다.');
+    if (userDir == null) {
+      print('❌ 사용자 디렉토리를 불러올 수 없습니다.');
       return null;
     }
 
@@ -253,20 +239,20 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
     return 'assets/adImages/$fileName';
   }
 
-  String? getRandomAdImageFilePath() {
-    final version = getAppVersionSync();
+  String? getRandomAdImageFilePath(WidgetRef ref) {
+    final version = ref.read(versionStateProvider).currentVersion;
     final userDir = getUserDirectorySync();
     final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
-    if (version == null || userDir == null) {
-      SlackLogService().sendLogToSlack('machineId: $machineId 배너를 불러오기 위한 사용자 디렉토리 또는 버전을 불러올 수 없습니다.');
+    if (userDir == null) {
+      SlackLogService().sendLogToSlack('machineId: $machineId 배너를 불러오기 위한 사용자 디렉토리를 불러올 수 없습니다.');
       return null;
     }
 
     final adImageFolder = Directory((machineId == 2 || machineId == 3)
-        ? '$userDir\\Snaptag\\$version\\assets\\adImages\\suwon':
-      (machineId == 1 || machineId == 4) ?
-    '$userDir\\Snaptag\\$version\\assets\\adImages\\eland'
-        : '$userDir\\Snaptag\\$version\\assets\\adImages\\ansan');
+        ? '$userDir\\Snaptag\\$version\\assets\\adImages\\suwon'
+        : (machineId == 1 || machineId == 4)
+            ? '$userDir\\Snaptag\\$version\\assets\\adImages\\eland'
+            : '$userDir\\Snaptag\\$version\\assets\\adImages\\ansan');
 
     if (!adImageFolder.existsSync()) {
       SlackLogService().sendLogToSlack('machineId: $machineId 배너를 불러오기 위한 이미지 폴더가 존재하지 않습니다.');

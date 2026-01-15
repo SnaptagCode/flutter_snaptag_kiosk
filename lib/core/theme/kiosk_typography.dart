@@ -33,6 +33,7 @@ class KioskTypography extends ThemeExtension<KioskTypography> {
         kioskBtn1B: TextStyle(
           fontSize: 34.sp,
           fontWeight: FontWeight.w700,
+          fontFamily: 'Cafe24Ssurround2',
           color: Colors.black,
           letterSpacing: -0.34,
           height: 1.0,
@@ -40,6 +41,7 @@ class KioskTypography extends ThemeExtension<KioskTypography> {
         kioskBody1B: TextStyle(
           fontSize: 32.sp,
           fontWeight: FontWeight.w600,
+          fontFamily: 'Cafe24Ssurround2',
           color: colors.textColor,
           letterSpacing: -0.64,
           height: 1.0,
@@ -47,6 +49,7 @@ class KioskTypography extends ThemeExtension<KioskTypography> {
         kioskBody2B: TextStyle(
           fontSize: 26.sp,
           fontWeight: FontWeight.w600,
+          fontFamily: 'Cafe24Ssurround2',
           color: colors.textColor,
           letterSpacing: -0.52,
           height: 1.0,
@@ -54,6 +57,7 @@ class KioskTypography extends ThemeExtension<KioskTypography> {
         kioksNum1SB: TextStyle(
           fontSize: 54.sp,
           fontWeight: FontWeight.w600,
+          fontFamily: 'Cafe24Ssurround2',
           color: Colors.black,
           letterSpacing: 0,
           height: 1.0,
@@ -62,6 +66,7 @@ class KioskTypography extends ThemeExtension<KioskTypography> {
           //fontSize: 42.sp,
           fontSize: 38.sp,
           fontWeight: FontWeight.w700,
+          fontFamily: 'Cafe24Ssurround2',
           color: Colors.black,
           letterSpacing: -0.42,
           height: 1.0,
@@ -69,6 +74,7 @@ class KioskTypography extends ThemeExtension<KioskTypography> {
         kioskAlert1B: TextStyle(
           fontSize: 42.sp,
           fontWeight: FontWeight.w700,
+          fontFamily: 'Cafe24Ssurround2',
           color: Colors.black,
           letterSpacing: 0.84,
           height: 1.0,
@@ -76,6 +82,7 @@ class KioskTypography extends ThemeExtension<KioskTypography> {
         kioskAlert2M: TextStyle(
           fontSize: 28.sp,
           fontWeight: FontWeight.w500,
+          fontFamily: 'Cafe24Ssurround2',
           color: Colors.black,
           letterSpacing: 0.56,
           height: 1.4,
@@ -83,6 +90,7 @@ class KioskTypography extends ThemeExtension<KioskTypography> {
         kioskAlertBtnB: TextStyle(
           fontSize: 34.sp,
           fontWeight: FontWeight.w700,
+          fontFamily: 'Cafe24Ssurround2',
           color: Colors.white,
           letterSpacing: -0.34,
           height: 1.0,
@@ -90,6 +98,7 @@ class KioskTypography extends ThemeExtension<KioskTypography> {
         kioskInput1B: TextStyle(
           fontSize: 42.sp,
           fontWeight: FontWeight.w700,
+          fontFamily: 'Cafe24Ssurround2',
           color: Colors.black,
           letterSpacing: 10,
           height: 1.0,
@@ -97,12 +106,14 @@ class KioskTypography extends ThemeExtension<KioskTypography> {
         kioskInput2B: TextStyle(
           fontSize: 40.sp,
           fontWeight: FontWeight.w700,
+          fontFamily: 'Cafe24Ssurround2',
           color: Colors.black,
           letterSpacing: -0.4,
         ),
         kioskInput3B: TextStyle(
           fontSize: 30.sp,
           fontWeight: FontWeight.w700,
+          fontFamily: 'Cafe24Ssurround2',
           color: Colors.black,
           letterSpacing: -0.3,
           height: 1.0,
