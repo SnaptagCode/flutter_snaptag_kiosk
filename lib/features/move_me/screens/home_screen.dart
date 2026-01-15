@@ -19,6 +19,7 @@ class HomeScreen extends ConsumerWidget {
         : Colors.white;
     final mainTextColor =
         kiosk?.mainTextColor != null ? Color(int.parse(kiosk!.mainTextColor.replaceFirst('#', '0xff'))) : Colors.white;
+    String priceValue = NumberFormat.currency(locale: 'ko_KR', symbol: '').format(kiosk?.photoCardPrice);
 
     return DefaultTextStyle(
       style: TextStyle(
@@ -34,7 +35,7 @@ class HomeScreen extends ConsumerWidget {
               borderRadius: BorderRadius.circular(30.r),
             ),
             child: Text(
-              '1EA | ${kiosk?.photoCardPrice}${LocaleKeys.currency_won.tr()}',
+              '1EA | $priceValue${LocaleKeys.currency_won.tr()}',
               style: TextStyle(
                 fontSize: 30.sp,
                 color: buttonTextColor,
@@ -84,13 +85,14 @@ class HomeScreen extends ConsumerWidget {
                 child: Container(
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(10.r),
+                    borderRadius: BorderRadius.circular(20.r),
                   ),
                   child: QrImageView(
                     data:
                         '${F.qrCodePrefix}/${context.locale.languageCode}/${ref.read(kioskInfoServiceProvider)?.kioskEventId} ',
                     size: 264.r,
                     version: QrVersions.auto,
+                    padding: EdgeInsets.all(20.r),
                   ),
                 ),
                 onTap: () async {
@@ -162,19 +164,32 @@ class HomeScreen extends ConsumerWidget {
                         ),
                         textAlign: TextAlign.center,
                       ),
-                      SizedBox(height: 20.h),
-                      Text(
-                        subtitle1,
-                        style: context.typography.kioskBtn1B.copyWith(fontSize: subtitleSize, color: mainTextColor),
-                        textAlign: TextAlign.center,
-                      ),
-                      if (subtitle2 != null) SizedBox(height: 10.h),
-                      if (subtitle2 != null)
-                        Text(
-                          subtitle2,
-                          style: context.typography.kioskBtn1B.copyWith(fontSize: subtitleSize, color: mainTextColor),
-                          textAlign: TextAlign.center,
+                      Expanded(
+                        child: Align(
+                          alignment: Alignment.center,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: subtitle2 == null ? MainAxisAlignment.center : MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                subtitle1,
+                                style: context.typography.kioskBtn1B
+                                    .copyWith(fontSize: subtitleSize, color: mainTextColor),
+                                textAlign: TextAlign.left,
+                              ),
+                              if (subtitle2 != null) SizedBox(height: 10.h),
+                              if (subtitle2 != null)
+                                Text(
+                                  subtitle2,
+                                  style: context.typography.kioskBtn1B
+                                      .copyWith(fontSize: subtitleSize, color: mainTextColor),
+                                  textAlign: TextAlign.left,
+                                ),
+                            ],
+                          ),
                         ),
+                      )
                     ],
                   ),
                 ),
