@@ -51,6 +51,7 @@ class ProcessedImage extends _$ProcessedImage {
         await ref.read(printerServiceProvider.notifier).printImage(
               frontFile: state.frontFile!,
               embeddedFile: null,
+              isSingleMode: type == PagePrintType.single,
             );
       } finally {}
       return;
@@ -67,6 +68,7 @@ class ProcessedImage extends _$ProcessedImage {
       await ref.read(printerServiceProvider.notifier).printImage(
             frontFile: state.frontFile!,
             embeddedFile: tempFile,
+            isSingleMode: type == PagePrintType.single,
           );
     } catch (e) {
       rethrow;

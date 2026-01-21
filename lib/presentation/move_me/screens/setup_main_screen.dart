@@ -36,11 +36,11 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
     super.initState();
 
     _timer = Timer.periodic(Duration(seconds: 2), (timer) async {
-      final connected = ref.read(printerServiceProvider.notifier).checkConnectedPrint();
-      if (mounted) {
-        setState(() {
-          if (connected) {
-            final settingCompleted = ref.read(printerServiceProvider.notifier).settingPrinter();
+      final connected = await ref.read(printerServiceProvider.notifier).connectedPrinter();
+      if (connected) {
+        final settingCompleted = await ref.read(printerServiceProvider.notifier).checkSettingPrinter();
+        if (mounted) {
+          setState(() {
             ref.read(printerConnectProvider.notifier).update(
                   connected && settingCompleted
                       ? PrinterConnectState.connected
@@ -48,10 +48,16 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
                           ? PrinterConnectState.connected
                           : PrinterConnectState.setupInComplete,
                 );
-          } else {
+          });
+        } else {
+          ref.read(printerConnectProvider.notifier).update(PrinterConnectState.disconnected);
+        }
+      } else {
+        if (mounted) {
+          setState(() {
             ref.read(printerConnectProvider.notifier).update(PrinterConnectState.disconnected);
-          }
-        });
+          });
+        }
       }
     });
   }
@@ -98,8 +104,8 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
   }
 
   Future<bool> _validatePrinterReadyAndShowDialogs(BuildContext context) async {
-    final connected = await ref.read(printerServiceProvider.notifier).checkConnectedPrint();
-    final settingPrinter = ref.read(printerServiceProvider.notifier).settingPrinter();
+    final connected = await ref.read(printerServiceProvider.notifier).connectedPrinter();
+    final settingPrinter = await ref.read(printerServiceProvider.notifier).checkSettingPrinter();
     if (!connected) {
       await DialogHelper.showSetupOneButtonDialog(
         context,
@@ -154,7 +160,7 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
     final deviceUUID = await ref.read(deviceUuidProvider.future);
     final getInfoByKey = ref.read(kioskInfoServiceProvider.notifier).getInfoByKey;
 
-    await ref.read(printerServiceProvider.notifier).startPrintLog();
+    await ref.read(printerServiceProvider.notifier).printerStateLog();
 
     await ref.read(kioskRepositoryProvider).deleteEndMark(
           kioskEventId: kioskEventId,

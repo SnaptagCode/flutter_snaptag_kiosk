@@ -216,42 +216,43 @@ class _PhotoCardPreviewScreenState extends ConsumerState<PhotoCardPreviewScreen>
                           : () async {
                               await SoundManager().playSound();
 
-                              // 선택된 뒷면 이미지 타입 확인
-                              final selection = ref.read(backPhotoTypeProvider);
+                              // // 선택된 뒷면 이미지 타입 확인
+                              // final selection = ref.read(backPhotoTypeProvider);
 
-                              if (selection?.type == BackPhotoType.fixed && selection?.fixedIndex != null) {
-                                // 고정 뒷면 이미지 결제 처리
-                                final kiosk = ref.read(kioskInfoServiceProvider);
-                                final selectedIndex = selection!.fixedIndex!;
+                              // if (selection?.type == BackPhotoType.fixed && selection?.fixedIndex != null) {
+                              //   // 고정 뒷면 이미지 결제 처리
+                              //   final kiosk = ref.read(kioskInfoServiceProvider);
+                              //   final selectedIndex = selection!.fixedIndex!;
 
-                                if (kiosk != null && selectedIndex < kiosk.nominatedBackPhotoCardList.length) {
-                                  final selectedCard = kiosk.nominatedBackPhotoCardList[selectedIndex];
+                              //   if (kiosk != null && selectedIndex < kiosk.nominatedBackPhotoCardList.length) {
+                              //     final selectedCard = kiosk.nominatedBackPhotoCardList[selectedIndex];
 
-                                  final response = await ref.read(kioskRepositoryProvider).getBackPhotoCardByQr(
-                                        GetBackPhotoByQrRequest(
-                                          kioskEventId: kiosk.kioskEventId,
-                                          nominatedBackPhotoCardId: selectedCard.id,
-                                        ),
-                                      );
+                              //     final response = await ref.read(kioskRepositoryProvider).getBackPhotoCardByQr(
+                              //           GetBackPhotoByQrRequest(
+                              //             kioskEventId: kiosk.kioskEventId,
+                              //             nominatedBackPhotoCardId: selectedCard.id,
+                              //           ),
+                              //         );
 
-                                  ref.read(verifyPhotoCardProvider.notifier).updateState(BackPhotoCardResponse(
-                                      kioskEventId: kiosk.kioskEventId,
-                                      backPhotoCardId: response.backPhotoCardId,
-                                      backPhotoCardOriginUrl: selectedCard.originUrl,
-                                      photoAuthNumber: response.photoAuthNumber,
-                                      formattedBackPhotoCardUrl: response.formattedBackPhotoCardUrl));
-                                }
-                              }
+                              //     ref.read(verifyPhotoCardProvider.notifier).updateState(BackPhotoCardResponse(
+                              //         kioskEventId: kiosk.kioskEventId,
+                              //         backPhotoCardId: response.backPhotoCardId,
+                              //         backPhotoCardOriginUrl: selectedCard.originUrl,
+                              //         photoAuthNumber: response.photoAuthNumber,
+                              //         formattedBackPhotoCardUrl: response.formattedBackPhotoCardUrl));
+                              //   }
+                              // }
 
-                              await ref.read(photoCardPreviewScreenProviderProvider.notifier).payment();
-                              final isPaymentFailed = ref.read(paymentFailureProvider);
-                              if (isPaymentFailed) {
-                                ref.read(paymentFailureProvider.notifier).reset();
-                                DialogHelper.showPaymentCardFailedDialog(
-                                  context,
-                                );
-                                HomeRouteData().go(context);
-                              }
+                              // await ref.read(photoCardPreviewScreenProviderProvider.notifier).payment();
+                              // final isPaymentFailed = ref.read(paymentFailureProvider);
+                              // if (isPaymentFailed) {
+                              //   ref.read(paymentFailureProvider.notifier).reset();
+                              //   DialogHelper.showPaymentCardFailedDialog(
+                              //     context,
+                              //   );
+                              //   HomeRouteData().go(context);
+                              // }
+                              PrintProcessRouteData().go(context);
                             },
                       child: Text(LocaleKeys.sub02_btn_pay.tr()),
                     );

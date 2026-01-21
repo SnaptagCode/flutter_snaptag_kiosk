@@ -37,87 +37,87 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
      */
 
     // listen 부분에서는 로딩 오버레이 처리를 제거
-    ref.listen(printProcessScreenProviderProvider, (previous, next) async {
-      /**
-          if (next.isLoading && !context.loaderOverlay.visible) {
-          context.loaderOverlay.show();
-          return;
-          }
+    // ref.listen(printProcessScreenProviderProvider, (previous, next) async {
+    //   /**
+    //       if (next.isLoading && !context.loaderOverlay.visible) {
+    //       context.loaderOverlay.show();
+    //       return;
+    //       }
 
-          if (context.loaderOverlay.visible) {
-          context.loaderOverlay.hide();
-          }
-       */
-      if (!next.isLoading) {
-        // 로딩이 아닐 때만 처리
-        await next.when(
-          error: (error, stack) async {
-            logger.e('Print process error', error: error, stackTrace: stack);
-            final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
-            SlackLogService().sendErrorLogToSlack('*[Machine ID: $machineId]*\nPrint process error\nError: $error');
-            SlackLogService().sendErrorLogToSlack('Print process error\nError: $error');
-            switch (error.toString().replaceFirst('Exception: ', '').trim()) {
-              case "Card feeder is empty":
-                SlackLogService().sendBroadcastLogToSlack(ErrorKey.printerCardEmpty.key);
-                break;
-              case "Failed to eject card":
-                SlackLogService().sendBroadcastLogToSlack(ErrorKey.printerEjectFail.key);
-                break;
-              case "Printer is not ready":
-                SlackLogService().sendBroadcastLogToSlack(ErrorKey.printerReadyFail.key);
-                break;
-              default:
-                SlackLogService().sendBroadcastLogToSlack(ErrorKey.printerPrintFail.key);
-                break;
-            }
+    //       if (context.loaderOverlay.visible) {
+    //       context.loaderOverlay.hide();
+    //       }
+    //    */
+    //   if (!next.isLoading) {
+    //     // 로딩이 아닐 때만 처리
+    //     await next.when(
+    //       error: (error, stack) async {
+    //         logger.e('Print process error', error: error, stackTrace: stack);
+    //         final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
+    //         SlackLogService().sendErrorLogToSlack('*[Machine ID: $machineId]*\nPrint process error\nError: $error');
+    //         SlackLogService().sendErrorLogToSlack('Print process error\nError: $error');
+    //         switch (error.toString().replaceFirst('Exception: ', '').trim()) {
+    //           case "Card feeder is empty":
+    //             SlackLogService().sendBroadcastLogToSlack(ErrorKey.printerCardEmpty.key);
+    //             break;
+    //           case "Failed to eject card":
+    //             SlackLogService().sendBroadcastLogToSlack(ErrorKey.printerEjectFail.key);
+    //             break;
+    //           case "Printer is not ready":
+    //             SlackLogService().sendBroadcastLogToSlack(ErrorKey.printerReadyFail.key);
+    //             break;
+    //           default:
+    //             SlackLogService().sendBroadcastLogToSlack(ErrorKey.printerPrintFail.key);
+    //             break;
+    //         }
 
-            final errorMessage = error.toString();
+    //         final errorMessage = error.toString();
 
-            // 슬랙에 에러 로그 전송
-            errorLogging(error.toString(), stack);
+    //         // 슬랙에 에러 로그 전송
+    //         errorLogging(error.toString(), stack);
 
-            // 환불 알럿
-            await DialogHelper.showAutoRefundDescriptionDialog(context, onButtonPressed: () async {
-              // 에러 발생 시 환불 처리
-              await refund();
+    //         // 환불 알럿
+    //         await DialogHelper.showAutoRefundDescriptionDialog(context, onButtonPressed: () async {
+    //           // 에러 발생 시 환불 처리
+    //           await refund();
 
-              // 카드 단일 카드 수량 확인
-              checkCardSingleCardCount();
+    //           // 카드 단일 카드 수량 확인
+    //           checkCardSingleCardCount();
 
-              // 카드 공급기가 비어있는지 확인
-              if (checkCardFeederIsEmpty(errorMessage)) {
-                await DialogHelper.showPrintCardRefillDialog(
-                  context,
-                  onButtonPressed: () {
-                    HomeRouteData().go(context);
-                  },
-                );
-              } else {
-                await DialogHelper.showPrintErrorDialog(
-                  context,
-                  onButtonPressed: () {
-                    HomeRouteData().go(context);
-                  },
-                );
-              }
-            });
-          },
-          loading: () => null,
-          data: (_) async {
-            checkCardSingleCardCount();
+    //           // 카드 공급기가 비어있는지 확인
+    //           if (checkCardFeederIsEmpty(errorMessage)) {
+    //             await DialogHelper.showPrintCardRefillDialog(
+    //               context,
+    //               onButtonPressed: () {
+    //                 HomeRouteData().go(context);
+    //               },
+    //             );
+    //           } else {
+    //             await DialogHelper.showPrintErrorDialog(
+    //               context,
+    //               onButtonPressed: () {
+    //                 HomeRouteData().go(context);
+    //               },
+    //             );
+    //           }
+    //         });
+    //       },
+    //       loading: () => null,
+    //       data: (_) async {
+    //         checkCardSingleCardCount();
 
-            ref.read(paymentResponseStateProvider.notifier).reset();
+    //         ref.read(paymentResponseStateProvider.notifier).reset();
 
-            await DialogHelper.showPrintCompleteDialog(
-              context,
-              onButtonPressed: () {
-                HomeRouteData().go(context);
-              },
-            );
-          },
-        );
-      }
-    });
+    //         await DialogHelper.showPrintCompleteDialog(
+    //           context,
+    //           onButtonPressed: () {
+    //             HomeRouteData().go(context);
+    //           },
+    //         );
+    //       },
+    //     );
+    //   }
+    // });
     final kiosk = ref.watch(kioskInfoServiceProvider);
     return DefaultTextStyle(
       style: TextStyle(
@@ -131,41 +131,45 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> {
             Text(
               LocaleKeys.sub03_txt_01.tr(),
               textAlign: TextAlign.center,
-              style: context.typography.kioskBody1B,
+              style: context.typography.kioskBody1B.copyWith(fontSize: 40.sp),
+            ),
+            SizedBox(height: 23.h),
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.5), // 원하는 배경색
+              ),
+              child: Text(
+                '카드가 출력되기까지 약 1분 정도의 시간이 소요됩니다.',
+                textAlign: TextAlign.center,
+                style: context.typography.kioskBody1B.copyWith(fontSize: 30.sp),
+              ),
             ),
             SizedBox(height: 30.h),
             randomAdImage == null
-                ? GradientContainer(
-                    content: Padding(
-                      padding: EdgeInsets.all(8.r),
-                      child: ClipRRect(
-                          borderRadius: BorderRadius.circular(10.r),
-                          child: SizedBox(
-                            child: Image.asset(
-                              SnaptagImages.printLoading,
-                              fit: BoxFit.fill,
-                            ),
-                          )),
+                ? Container(
+                    width: 1080.w,
+                    height: 400.h,
+                    decoration: BoxDecoration(border: Border.all(color: Colors.transparent, width: 0.w)),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(10.r),
+                      child: SizedBox(
+                        child: Image.asset(
+                          SnaptagImages.printLoading,
+                        ),
+                      ),
                     ),
                   )
                 : Image.file(
                     File(randomAdImage),
                     fit: BoxFit.fill,
                   ),
-            SizedBox(height: 30.h),
+            SizedBox(height: 60.h),
+            SizedBox(height: 16.h),
             Text(
-              LocaleKeys.sub03_txt_02.tr(),
+              '출력이 완료될 때까지 카드를 뽑지 말아 주세요!',
               textAlign: TextAlign.center,
-              style: context.typography.kioskBody2B,
-            ),
-            SizedBox(height: 12.h),
-            Text(
-              LocaleKeys.sub03_txt_03.tr(),
-              textAlign: TextAlign.center,
-              style: context.typography.kioskBody2B.copyWith(
-                color: Color(int.parse(kiosk?.couponTextColor.replaceFirst('#', '0xff') ?? '0xffffff')),
-                //fontFamily: 'Pretendard',
-              ),
+              style: context.typography.kioskBody2B.copyWith(fontSize: 26.sp),
             ),
           ],
         ),

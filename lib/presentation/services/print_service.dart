@@ -135,6 +135,7 @@ class PrintService extends _$PrintService {
       await ref.read(printerServiceProvider.notifier).printImage(
             frontFile: frontPhoto,
             embeddedFile: embedded,
+            isSingleMode: ref.watch(pagePrintProvider) == PagePrintType.single,
           );
     } catch (e) {
       rethrow;

@@ -105,8 +105,8 @@ class PhotoCardUploadScreen extends ConsumerWidget {
     );
   }
 
-  void showNeedRibbonFilmDialog(BuildContext context, WidgetRef ref) {
-    RibbonStatus ribbonStatus = ref.read(printerServiceProvider.notifier).getRibbonStatus();
+  Future<void> showNeedRibbonFilmDialog(BuildContext context, WidgetRef ref) async {
+    final ribbonStatus = await ref.read(printerServiceProvider.notifier).getRibbonStatus();
     bool isRibbonShouldBeChanged = ref.read(ribbonWarningProvider.notifier).isRibbonShouldBeChanged(ribbonStatus);
     bool isFilmShouldBeChanged = ref.read(ribbonWarningProvider.notifier).isFilmShouldBeChanged(ribbonStatus);
     bool isBothRibbonAndFilmShouldBeChanged =
