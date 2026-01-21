@@ -1,8 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_snaptag_kiosk/features/move_me/screens/global_shell.dart';
-import 'package:flutter_snaptag_kiosk/features/move_me/screens/maintenance_screen.dart';
-import 'package:flutter_snaptag_kiosk/features/move_me/screens/home_screen.dart';
+import 'package:flutter_snaptag_kiosk/presentation/move_me/screens/code_verification_screen.dart';
+import 'package:flutter_snaptag_kiosk/presentation/move_me/screens/global_shell.dart';
+import 'package:flutter_snaptag_kiosk/presentation/move_me/screens/kiosk_components_screen.dart';
+import 'package:flutter_snaptag_kiosk/presentation/move_me/screens/kiosk_info_screen.dart';
+import 'package:flutter_snaptag_kiosk/presentation/move_me/screens/kiosk_shell.dart';
+import 'package:flutter_snaptag_kiosk/presentation/move_me/screens/maintenance_screen.dart';
+import 'package:flutter_snaptag_kiosk/presentation/move_me/screens/home_screen.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
+import 'package:flutter_snaptag_kiosk/presentation/move_me/screens/payment_history_screen.dart';
+import 'package:flutter_snaptag_kiosk/presentation/move_me/screens/photo_card_upload_screen.dart';
+import 'package:flutter_snaptag_kiosk/presentation/move_me/screens/setup_main_screen.dart';
+import 'package:flutter_snaptag_kiosk/presentation/move_me/screens/unit_test_screen.dart';
+import 'package:flutter_snaptag_kiosk/presentation/screens/photo_card_preview_screen.dart';
+import 'package:flutter_snaptag_kiosk/presentation/screens/print_process_screen.dart';
 import 'package:go_router/go_router.dart';
 
 part 'router.g.dart';

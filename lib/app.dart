@@ -6,6 +6,9 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
+import 'package:flutter_snaptag_kiosk/presentation/move_me/providers/alert_definition_provider.dart';
+import 'package:flutter_snaptag_kiosk/presentation/move_me/widgets/dialog_helper.dart';
+import 'package:flutter_snaptag_kiosk/presentation/move_me/widgets/general_error_widget.dart';
 import 'package:window_manager/window_manager.dart';
 
 class App extends ConsumerStatefulWidget {
