@@ -14,6 +14,8 @@ class KioskColorsNotifier extends _$KioskColorsNotifier {
       return KioskColors.basic;
     }
     return KioskColors(
+      progressBarStartColor: _parseColor(kiosk.progressBarStartColor),
+      progressBarEndColor: _parseColor(kiosk.progressBarEndColor),
       buttonColor: _parseColor(kiosk.mainButtonColor),
       buttonTextColor: _parseColor(kiosk.buttonTextColor),
       keypadButtonColor: _parseColor(kiosk.keyPadColor),
@@ -35,6 +37,8 @@ class KioskColorsNotifier extends _$KioskColorsNotifier {
 
 class KioskColors extends ThemeExtension<KioskColors> {
   const KioskColors({
+    required this.progressBarStartColor,
+    required this.progressBarEndColor,
     required this.buttonColor,
     required this.buttonTextColor,
     required this.keypadButtonColor,
@@ -43,6 +47,10 @@ class KioskColors extends ThemeExtension<KioskColors> {
     required this.popupButtonColor,
   });
 
+  // 프로그레스 바 시작 색상
+  final Color progressBarStartColor;
+  // 프로그레스 바 끝 색상
+  final Color progressBarEndColor;
   // 버튼/키컬러, 인증번호, 넘버 line
   final Color buttonColor;
   // 버튼 텍스트
@@ -57,6 +65,8 @@ class KioskColors extends ThemeExtension<KioskColors> {
   final Color popupButtonColor;
 
   static const basic = KioskColors(
+    progressBarStartColor: Color(0xFF000000), // #000000
+    progressBarEndColor: Color(0xFF000000), // #000000
     buttonColor: Color.fromARGB(255, 13, 96, 32), // #ffffff
     buttonTextColor: Color(0xFFFFFFFF), // #1C1C1C
     keypadButtonColor: Color(0xFF232323), // #797B80
@@ -75,6 +85,8 @@ class KioskColors extends ThemeExtension<KioskColors> {
     Color? popupButtonColor,
   }) {
     return KioskColors(
+      progressBarStartColor: progressBarStartColor ?? this.progressBarStartColor,
+      progressBarEndColor: progressBarEndColor ?? this.progressBarEndColor,
       buttonColor: buttonColor ?? this.buttonColor,
       buttonTextColor: buttonTextColor ?? this.buttonTextColor,
       keypadButtonColor: keypadButtonColor ?? this.keypadButtonColor,
@@ -94,6 +106,8 @@ class KioskColors extends ThemeExtension<KioskColors> {
     }
 
     return KioskColors(
+      progressBarStartColor: Color.lerp(progressBarStartColor, other.progressBarStartColor, t)!,
+      progressBarEndColor: Color.lerp(progressBarEndColor, other.progressBarEndColor, t)!,
       buttonColor: Color.lerp(buttonColor, other.buttonColor, t)!,
       buttonTextColor: Color.lerp(buttonTextColor, other.buttonTextColor, t)!,
       keypadButtonColor: Color.lerp(keypadButtonColor, other.keypadButtonColor, t)!,

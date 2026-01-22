@@ -67,3 +67,6 @@ macos/
 *.png
 *.jpg
 *.jpeg
+
+*.md
+*.py

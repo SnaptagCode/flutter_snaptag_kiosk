@@ -362,6 +362,7 @@ class _PrintProgressBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final clamped = progress.clamp(0.0, 1.0);
+    final kioskColors = context.theme.extension<KioskColors>()!;
 
     return SizedBox(
       width: 540.w,
@@ -382,14 +383,14 @@ class _PrintProgressBar extends StatelessWidget {
                   alignment: Alignment.centerLeft,
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(30.r),
-                    child: const DecoratedBox(
+                    child: DecoratedBox(
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           begin: Alignment.centerLeft,
                           end: Alignment.centerRight,
                           colors: [
-                            Color(0xFF1FBE7E),
-                            Color(0xFF044139),
+                            kioskColors.progressBarStartColor,
+                            kioskColors.progressBarEndColor,
                           ],
                         ),
                       ),

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
 
@@ -5,11 +6,11 @@ import 'package:dio/dio.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_snaptag_kiosk/core/providers/network_status_provider.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_snaptag_kiosk/presentation/move_me/providers/alert_definition_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/move_me/widgets/dialog_helper.dart';
 import 'package:flutter_snaptag_kiosk/presentation/move_me/widgets/general_error_widget.dart';
+import 'package:go_router/go_router.dart';
 import 'package:window_manager/window_manager.dart';
 
 class App extends ConsumerStatefulWidget {
@@ -150,9 +151,12 @@ class _AppState extends ConsumerState<App> with WindowListener {
         ),
         builder: (context, child) {
           return _flavorBanner(
-            child: _NetworkStatusAlertWrapper(
-              child: child!,
+            child: _TimeoutToHomeWrapper(
               ref: ref,
+              child: _NetworkStatusAlertWrapper(
+                ref: ref,
+                child: child!,
+              ),
             ),
             ref: ref,
             show: F.appFlavor == Flavor.dev,
@@ -220,6 +224,17 @@ class _ErrorApp extends ConsumerWidget {
   }
 }
 
+/// 라우트 체크 헬퍼 클래스
+class _RouteChecker {
+  static bool isPrintProcessScreen(String location) => location.contains('/print-process');
+  static bool isHomeScreen(String location) => location.contains('/home');
+  static bool isKioskRoute(String location) => location.contains('/kiosk');
+  static bool shouldListenToTouch(String location) =>
+      isKioskRoute(location) && !isHomeScreen(location) && !isPrintProcessScreen(location);
+  static bool shouldStartTimer(String location) =>
+      isKioskRoute(location) && !isHomeScreen(location) && !isPrintProcessScreen(location);
+}
+
 /// 네트워크 상태 알럿을 표시하는 위젯 (출력 화면 제외)
 class _NetworkStatusAlertWrapper extends ConsumerStatefulWidget {
   const _NetworkStatusAlertWrapper({
@@ -238,21 +253,21 @@ class _NetworkStatusAlertWrapperState extends ConsumerState<_NetworkStatusAlertW
   bool _isAlertShowing = false;
   NetworkState? _previousState;
 
+  static const _networkAlertTitle = '네트워크 연결이 불안정합니다.';
+  static const _networkAlertConfirmText = '확인';
+  static const _contextRetryDelay = Duration(milliseconds: 100);
+
   @override
   Widget build(BuildContext context) {
     final networkState = ref.watch(networkStatusNotifierProvider);
 
-    // 네트워크 상태 변경 감지 (build 메서드 내에서만 ref.listen 사용 가능)
     ref.listen<NetworkState>(networkStatusNotifierProvider, (previous, next) {
       _handleNetworkStatusChange(previous, next);
     });
 
-    // 초기 상태 체크 또는 상태 변경 시 체크
     if (_previousState == null || _previousState!.status != networkState.status) {
-      // 다음 프레임에서 체크하여 context가 완전히 준비된 후 다이얼로그 표시
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
-          // 추가로 마이크로태스크를 사용하여 다이얼로그 표시 보장
           Future.microtask(() {
             if (mounted) {
               _checkAndShowAlert(networkState);
@@ -269,156 +284,295 @@ class _NetworkStatusAlertWrapperState extends ConsumerState<_NetworkStatusAlertW
   void _checkAndShowAlert(NetworkState networkState) {
     if (!mounted) return;
 
-    // routerProvider를 통해 router 가져오기
     final router = widget.ref.read(routerProvider);
     final currentLocation = router.routerDelegate.currentConfiguration.uri.toString();
-    final isPrintProcessScreen = currentLocation.contains('/print-process');
+    final isPrintProcessScreen = _RouteChecker.isPrintProcessScreen(currentLocation);
 
-    logger.i(
-        '📡 NetworkStatusAlert: _isAlertShowing: $_isAlertShowing status=${networkState.status}, hasInternet=${networkState.hasInternet}, isPrintProcessScreen=$isPrintProcessScreen, isAlertShowing=$_isAlertShowing');
+    final shouldShowAlert = !isPrintProcessScreen &&
+        (networkState.status == NetworkStatus.unstable || networkState.status == NetworkStatus.disconnected);
 
-    // 출력 화면이 아니고 네트워크가 불안정하거나 연결 끊김 상태일 때
-    if (!isPrintProcessScreen &&
-        (networkState.status == NetworkStatus.unstable || networkState.status == NetworkStatus.disconnected)) {
-      // 알럿이 표시되지 않았을 때만 표시
-      if (!_isAlertShowing) {
-        logger.i('🚨 NetworkStatusAlert: Showing alert for status=${networkState.status}');
-        setState(() {
-          _isAlertShowing = true;
-        });
-        // 다음 마이크로태스크에서 다이얼로그 표시 (context가 완전히 준비된 후)
-        Future.microtask(() {
-          if (mounted && _isAlertShowing) {
-            logger.i('🚨 NetworkStatusAlert: Actually showing dialog now');
-            // rootNavigatorKey의 context를 사용하여 다이얼로그 표시
-            final rootContext = rootNavigatorKey.currentContext;
-            if (rootContext != null) {
-              logger.i('🚨 NetworkStatusAlert: Using rootNavigatorKey context');
-              try {
-                final result = DialogHelper.showSetupOneButtonDialog(
-                  rootContext,
-                  title: '네트워크 연결이 불안정합니다.',
-                  confirmButtonText: '확인',
-                );
-                logger.i('🚨 NetworkStatusAlert: Dialog call returned, waiting for result...');
-                result.then((_) {
-                  logger.i('🚨 NetworkStatusAlert: Dialog closed');
-                  if (mounted) {
-                    setState(() {
-                      _isAlertShowing = false;
-                    });
-                  }
-                }).catchError((error) {
-                  logger.i('⚠️ NetworkStatusAlert: Dialog error: $error');
-                  if (mounted) {
-                    setState(() {
-                      _isAlertShowing = false;
-                    });
-                  }
-                });
-              } catch (e, stack) {
-                logger.i('⚠️ NetworkStatusAlert: Failed to show dialog: $e');
-                logger.i('⚠️ NetworkStatusAlert: Stack: $stack');
-                if (mounted) {
-                  setState(() {
-                    _isAlertShowing = false;
-                  });
-                }
-              }
-            } else {
-              logger.i('⚠️ NetworkStatusAlert: rootNavigatorKey.currentContext is null, waiting for context...');
-              // rootNavigatorKey의 context가 준비될 때까지 대기
-              Future.delayed(const Duration(milliseconds: 100), () {
-                if (mounted && _isAlertShowing) {
-                  final rootContext = rootNavigatorKey.currentContext;
-                  if (rootContext != null) {
-                    try {
-                      DialogHelper.showSetupOneButtonDialog(
-                        rootContext,
-                        title: '네트워크 연결이 불안정합니다.',
-                        confirmButtonText: '확인',
-                      ).then((_) {
-                        if (mounted) {
-                          setState(() {
-                            _isAlertShowing = false;
-                          });
-                        }
-                      }).catchError((error) {
-                        logger.i('⚠️ NetworkStatusAlert: Dialog error (retry): $error');
-                        if (mounted) {
-                          setState(() {
-                            _isAlertShowing = false;
-                          });
-                        }
-                      });
-                    } catch (e) {
-                      logger.i('⚠️ NetworkStatusAlert: Failed to show dialog (retry): $e');
-                      if (mounted) {
-                        setState(() {
-                          _isAlertShowing = false;
-                        });
-                      }
-                    }
-                  } else {
-                    logger.i('⚠️ NetworkStatusAlert: rootNavigatorKey.currentContext still null after retry');
-                    if (mounted) {
-                      setState(() {
-                        _isAlertShowing = false;
-                      });
-                    }
-                  }
-                }
-              });
-            }
-          } else {
-            logger.i('⚠️ NetworkStatusAlert: Not showing dialog - mounted: $mounted, isAlertShowing: $_isAlertShowing');
-          }
-        });
+    if (shouldShowAlert && !_isAlertShowing) {
+      _showNetworkAlert();
+    } else if (networkState.status == NetworkStatus.connected && _isAlertShowing) {
+      _closeNetworkAlert();
+    }
+  }
+
+  void _showNetworkAlert() {
+    setState(() {
+      _isAlertShowing = true;
+    });
+
+    Future.microtask(() {
+      if (!mounted || !_isAlertShowing) return;
+
+      final rootContext = rootNavigatorKey.currentContext;
+      if (rootContext != null) {
+        _displayNetworkDialog(rootContext);
+      } else {
+        _retryShowNetworkAlert();
       }
-    } else if (networkState.status == NetworkStatus.connected) {
-      // 네트워크가 다시 연결되면 알럿 닫기
-      if (_isAlertShowing) {
-        logger.i('✅ NetworkStatusAlert: Closing alert - network connected');
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted) {
-            try {
-              // rootNavigatorKey를 사용하여 다이얼로그 닫기
-              final navigator = rootNavigatorKey.currentState;
-              if (navigator != null && navigator.canPop()) {
-                navigator.pop();
-                setState(() {
-                  _isAlertShowing = false;
-                });
-              } else {
-                // rootNavigatorKey가 없으면 rootNavigator 시도
-                final nav = Navigator.of(context, rootNavigator: true);
-                if (nav.canPop()) {
-                  nav.pop();
-                  setState(() {
-                    _isAlertShowing = false;
-                  });
-                } else {
-                  // Navigator를 찾을 수 없으면 플래그만 리셋
-                  setState(() {
-                    _isAlertShowing = false;
-                  });
-                }
-              }
-            } catch (e) {
-              logger.i('⚠️ NetworkStatusAlert: Failed to close dialog: $e');
-              // Navigator를 찾을 수 없으면 플래그만 리셋
-              setState(() {
-                _isAlertShowing = false;
-              });
-            }
-          }
-        });
+    });
+  }
+
+  void _displayNetworkDialog(BuildContext context) {
+    try {
+      DialogHelper.showSetupOneButtonDialog(
+        context,
+        title: _networkAlertTitle,
+        confirmButtonText: _networkAlertConfirmText,
+      ).then((_) => _resetAlertFlag()).catchError((error) {
+        logger.i('⚠️ NetworkStatusAlert: Dialog error: $error');
+        _resetAlertFlag();
+      });
+    } catch (e, stack) {
+      logger.i('⚠️ NetworkStatusAlert: Failed to show dialog: $e\n$stack');
+      _resetAlertFlag();
+    }
+  }
+
+  void _retryShowNetworkAlert() {
+    Future.delayed(_contextRetryDelay, () {
+      if (!mounted || !_isAlertShowing) {
+        _resetAlertFlag();
+        return;
       }
+
+      final rootContext = rootNavigatorKey.currentContext;
+      if (rootContext != null) {
+        _displayNetworkDialog(rootContext);
+      } else {
+        logger.i('⚠️ NetworkStatusAlert: rootNavigatorKey.currentContext still null after retry');
+        _resetAlertFlag();
+      }
+    });
+  }
+
+  void _closeNetworkAlert() {
+    logger.i('✅ NetworkStatusAlert: Closing alert - network connected');
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+
+      try {
+        final navigator = rootNavigatorKey.currentState;
+        if (navigator != null && navigator.canPop()) {
+          navigator.pop();
+        } else {
+          final nav = Navigator.of(context, rootNavigator: true);
+          if (nav.canPop()) {
+            nav.pop();
+          }
+        }
+      } catch (e) {
+        logger.i('⚠️ NetworkStatusAlert: Failed to close dialog: $e');
+      } finally {
+        _resetAlertFlag();
+      }
+    });
+  }
+
+  void _resetAlertFlag() {
+    if (mounted) {
+      setState(() {
+        _isAlertShowing = false;
+      });
     }
   }
 
   void _handleNetworkStatusChange(NetworkState? previous, NetworkState next) {
-    print('🔄 NetworkStatusAlert: Status changed from ${previous?.status} to ${next.status}');
+    logger.i('🔄 NetworkStatusAlert: Status changed from ${previous?.status} to ${next.status}');
     _checkAndShowAlert(next);
+  }
+}
+
+/// 타임아웃 후 자동 홈 복귀 위젯 (print-process 화면 제외)
+class _TimeoutToHomeWrapper extends ConsumerStatefulWidget {
+  const _TimeoutToHomeWrapper({
+    required this.child,
+    required this.ref,
+  });
+
+  final Widget child;
+  final WidgetRef ref;
+
+  @override
+  ConsumerState<_TimeoutToHomeWrapper> createState() => _TimeoutToHomeWrapperState();
+}
+
+class _TimeoutToHomeWrapperState extends ConsumerState<_TimeoutToHomeWrapper> {
+  Timer? _timeoutTimer;
+  bool _isDialogShowing = false;
+  String? _previousRoute;
+  String _currentLocation = '';
+  late final GoRouter _router;
+
+  static const Duration _timeoutDuration = Duration(seconds: 5);
+  static const Duration _contextRetryDelay = Duration(milliseconds: 100);
+  static const String _timeoutDialogTitle = '홈으로 돌아갑니다';
+  static const String _timeoutDialogConfirmText = '확인';
+
+  @override
+  void initState() {
+    super.initState();
+
+    _router = ref.read(routerProvider);
+    _currentLocation = _router.routerDelegate.currentConfiguration.uri.toString();
+    _previousRoute = _currentLocation;
+
+    // 라우트 변경을 직접 구독 (build 리빌드에 의존하지 않음)
+    _router.routerDelegate.addListener(_onRouteChanged);
+  }
+
+  void _onRouteChanged() {
+    if (!mounted) return;
+
+    final nextLocation = _router.routerDelegate.currentConfiguration.uri.toString();
+    if (_currentLocation == nextLocation) return;
+
+    // setState를 build 완료 후에 실행하도록 지연
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+
+      setState(() {
+        _currentLocation = nextLocation;
+      });
+
+      logger.i('⏱️ TimeoutToHome: route changed: $_previousRoute -> $_currentLocation');
+
+      _handleRouteChange(_currentLocation);
+      _previousRoute = _currentLocation;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_RouteChecker.shouldListenToTouch(_currentLocation)) {
+      return Listener(
+        onPointerDown: (_) => _resetTimer(),
+        onPointerMove: (_) => _resetTimer(),
+        child: widget.child,
+      );
+    }
+    return widget.child;
+  }
+
+  void _resetTimer() {
+    if (!mounted || _isDialogShowing) return;
+    if (!_RouteChecker.shouldStartTimer(_currentLocation)) return;
+
+    logger.i('⏱️ TimeoutToHome: Touch detected, resetting timer for route: $_currentLocation');
+    _cancelTimer();
+    _startTimer();
+  }
+
+  void _handleRouteChange(String currentLocation) {
+    _cancelTimer();
+
+    if (_RouteChecker.isHomeScreen(currentLocation)) {
+      _resetDialogFlag();
+      logger.i('⏱️ TimeoutToHome: Reset flags for home screen');
+      return;
+    }
+
+    if (_RouteChecker.shouldStartTimer(currentLocation)) {
+      logger.i('⏱️ TimeoutToHome: Starting timer for route: $currentLocation');
+      _resetDialogFlag();
+      _startTimer();
+    } else {
+      logger.i(
+          '⏱️ TimeoutToHome: Timer not started for route: $currentLocation (shouldStart: ${_RouteChecker.shouldStartTimer(currentLocation)})');
+    }
+  }
+
+  void _startTimer() {
+    _timeoutTimer = Timer(_timeoutDuration, () {
+      if (mounted && !_isDialogShowing) {
+        _showTimeoutDialog();
+      }
+    });
+  }
+
+  void _cancelTimer() {
+    _timeoutTimer?.cancel();
+    _timeoutTimer = null;
+  }
+
+  void _resetDialogFlag() {
+    if (mounted) {
+      setState(() {
+        _isDialogShowing = false;
+      });
+    }
+  }
+
+  void _showTimeoutDialog() {
+    if (!mounted || _isDialogShowing) return;
+
+    if (_RouteChecker.isHomeScreen(_currentLocation) || _RouteChecker.isPrintProcessScreen(_currentLocation)) {
+      logger.i('⏱️ TimeoutToHome: Skipping dialog - already on home or print-process screen');
+      _cancelTimer();
+      return;
+    }
+
+    setState(() {
+      _isDialogShowing = true;
+    });
+
+    final rootContext = rootNavigatorKey.currentContext;
+    if (rootContext != null) {
+      _displayTimeoutDialog(rootContext);
+    } else {
+      _retryShowTimeoutDialog();
+    }
+  }
+
+  void _displayTimeoutDialog(BuildContext context) {
+    logger.i('⏱️ TimeoutToHome: Showing timeout dialog');
+    DialogHelper.showSetupOneButtonDialog(
+      context,
+      title: _timeoutDialogTitle,
+      confirmButtonText: _timeoutDialogConfirmText,
+    ).then((_) {
+      if (mounted) {
+        _navigateToHome(context);
+        _resetDialogFlag();
+        _cancelTimer();
+      }
+    }).catchError((error) {
+      logger.i('⚠️ TimeoutToHome: Dialog error: $error');
+      _resetDialogFlag();
+    });
+  }
+
+  void _retryShowTimeoutDialog() {
+    Future.delayed(_contextRetryDelay, () {
+      if (!mounted) {
+        _resetDialogFlag();
+        return;
+      }
+
+      final retryContext = rootNavigatorKey.currentContext;
+      if (retryContext != null) {
+        _showTimeoutDialog();
+      } else {
+        _resetDialogFlag();
+      }
+    });
+  }
+
+  void _navigateToHome(BuildContext context) {
+    try {
+      const HomeRouteData().go(context);
+      logger.i('⏱️ TimeoutToHome: Navigated to home');
+    } catch (e) {
+      logger.i('⚠️ TimeoutToHome: Failed to navigate to home: $e');
+    }
+  }
+
+  @override
+  void dispose() {
+    _router.routerDelegate.removeListener(_onRouteChanged);
+    _timeoutTimer?.cancel();
+    super.dispose();
   }
 }

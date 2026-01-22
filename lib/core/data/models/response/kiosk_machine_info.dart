@@ -25,6 +25,8 @@ abstract class KioskMachineInfo with _$KioskMachineInfo {
     @Default('#000000') String couponTextColor,
     @Default('#000000') String mainTextColor,
     @Default('#000000') String popupButtonColor,
+    @Default('#000000') String progressBarStartColor,
+    @Default('#000000') String progressBarEndColor,
     @Default(false) bool isMetal,
     @Default([]) List<EventVideo> eventVideos,
     @Default([]) List<NominatedBackPhotoCard> nominatedBackPhotoCardList,
