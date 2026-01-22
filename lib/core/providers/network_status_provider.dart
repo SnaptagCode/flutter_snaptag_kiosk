@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:flutter_snaptag_kiosk/core/core.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -158,6 +159,8 @@ class NetworkStatusNotifier extends _$NetworkStatusNotifier {
   /// 인터넷 연결 상태 업데이트
   void _updateInternetStatus(bool hasInternet) {
     NetworkStatus newStatus;
+
+    logger.i('_updateInternetStatus: $hasInternet');
 
     if (state.type == NetworkType.none) {
       newStatus = NetworkStatus.disconnected;
