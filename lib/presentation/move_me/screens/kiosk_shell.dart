@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_snaptag_kiosk/presentation/move_me/providers/background_image_provider.dart';
+import 'package:flutter_snaptag_kiosk/presentation/move_me/widgets/back_button.dart';
 import 'package:flutter_snaptag_kiosk/presentation/move_me/widgets/kiosk_navigator_button.dart';
 import 'package:flutter_snaptag_kiosk/presentation/move_me/widgets/printer_status_badge.dart';
 import 'package:flutter_snaptag_kiosk/presentation/move_me/widgets/triple_tap_fab.dart';
@@ -88,6 +89,8 @@ class _KioskShellState extends ConsumerState<KioskShell> {
                           height: 70.h,
                           child: Row(
                             children: [
+                              SizedBox(width: 30.w),
+                              KioskBackButton(),
                               const Spacer(),
                               KioskNavigatorButton(),
                               SizedBox(width: 30.w),

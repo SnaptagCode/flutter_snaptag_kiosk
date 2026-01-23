@@ -41,6 +41,8 @@ class SnaptagSvg {
 
   static const String home = 'assets/icons/home.svg';
 
+  static const String kioskBack = 'assets/icons/kiosk_back.svg';
+
   static const String off = 'assets/icons/off.svg';
 
   static const String payment = 'assets/icons/payment_list.svg';
