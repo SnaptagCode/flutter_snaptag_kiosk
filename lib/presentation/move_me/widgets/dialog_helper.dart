@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -254,12 +256,15 @@ class DialogHelper {
               borderRadius: BorderRadius.circular(20.r),
             ),
             title: Center(
-              child: Text(
-                title,
-                textAlign: TextAlign.center,
-                style: context.typography.kioskAlert1B.copyWith(
-                  color: Colors.black,
-                  fontFamily: context.locale.languageCode == 'ja' ? 'MPLUSRounded' : 'Cafe24Ssurround2',
+              child: Padding(
+                padding: EdgeInsets.only(top: 60.h, bottom: 36.h, left: 40.w, right: 40.w),
+                child: Text(
+                  title,
+                  textAlign: TextAlign.center,
+                  style: context.typography.kioskAlert1B.copyWith(
+                    fontFamily: 'Pretendard',
+                    color: Colors.black,
+                  ),
                 ),
               ),
             ),
@@ -274,23 +279,26 @@ class DialogHelper {
                   )
                 : null,
             actions: [
-              Row(
-                children: [
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () {
-                        context.pop();
-                        if (onButtonPressed != null) {
-                          onButtonPressed();
-                        }
-                      },
-                      style: context.dialogButtonStyle,
-                      child: Text(
-                        buttonText,
+              Padding(
+                padding: EdgeInsets.only(bottom: 40.h, left: 40.w, right: 40.w),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          context.pop();
+                          if (onButtonPressed != null) {
+                            onButtonPressed();
+                          }
+                        },
+                        style: context.dialogButtonStyle,
+                        child: Text(
+                          buttonText,
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               )
             ],
           ),
@@ -301,7 +309,8 @@ class DialogHelper {
   }
 
   static Future<bool> showTwoButtonKioskDialog(
-    BuildContext context, {
+    BuildContext context,
+    ButtonStyle? confirmButtonStyle, {
     required String title,
     required String contentText,
     required String cancelButtonText,
@@ -408,115 +417,76 @@ class DialogHelper {
     );
   }
 
-  // 2.3.0 카운트 버전
-  /*
-  static Future<void> showPrintCompleteDialog(
-      BuildContext context, {
-        VoidCallback? onButtonPressed,
-      }) async {
-    int countdown = 3;
-
-    await showDialog(
+  /// 타임아웃 알럿 (실시간 카운트다운 표시)
+  static Future<bool> showTimeoutDialog(
+    BuildContext context,
+    ButtonStyle? confirmButtonStyle, {
+    required String title,
+    required String cancelButtonText,
+    required String confirmButtonText,
+    required int countdownSeconds,
+    required VoidCallback onAutoClose,
+  }) async {
+    return await showDialog(
       context: context,
-      barrierDismissible: false, // 사용자가 임의로 닫지 못하도록 설정
+      barrierDismissible: false,
       builder: (BuildContext dialogContext) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-
-            void startCountdown() {
-              Future.delayed(const Duration(seconds: 1), () {
-                if (countdown > 1) {
-                  setState(() {
-                    countdown--;
-                  });
-                  startCountdown(); // 재귀적으로 호출하여 1초마다 감소
-                } else {
-                  if (Navigator.of(dialogContext).canPop()) {
-                    PhotoCardUploadRouteData().go(dialogContext);
-                    Navigator.of(dialogContext).pop();
-                  }
-                }
-              });
-            }
-
-            if (countdown == 3) startCountdown();
-
-            return AlertDialog(
-              backgroundColor: Colors.white,
-              insetPadding: EdgeInsets.symmetric(horizontal: 100.w),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20.r),
-              ),
-              title: Center(
-                child: Text(
-                  LocaleKeys.alert_title_print_complete.tr(),
-                  style: context.typography.kioskAlert1B.copyWith(
-                    color: Colors.black,
-                  ),
-                ),
-              ),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    LocaleKeys.alert_txt_print_complete.tr(),
-                    style: context.typography.kioskAlert2M.copyWith(
-                      color: Colors.black,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 10),
-                  Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      Image.asset(
-                        'assets/images/alert_bufferring_bw.png', // ✅ 배경 이미지 경로
-                        width: 144.w, // 크기 조정
-                        height: 144.h,
-                        fit: BoxFit.cover,
-                      ),
-                      Text(
-                        '$countdown',
-                        style: const TextStyle(
-                          fontSize: 42, // 폰트 크기 키움
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black, // 글자 색상
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    LocaleKeys.alert_txt_print_complete_02.tr(),
-                    style: context.typography.kioskBody2B.copyWith(
-                    color: Color(0xFFADADAD),
-                  ),
-                  ),
-                ],
-              ),
-              actions: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.of(dialogContext).pop();
-                          onButtonPressed?.call();
-                        },
-                        style: context.dialogButtonStyle,
-                        child: Text(LocaleKeys.alert_btn_print_complete.tr()),
-                      ),
-                    ),
-                  ],
-                )
-              ],
-            );
-          },
+        return _TimeoutDialogWidget(
+          title: title,
+          cancelButtonText: cancelButtonText,
+          confirmButtonText: confirmButtonText,
+          confirmButtonStyle: confirmButtonStyle,
+          countdownSeconds: countdownSeconds,
+          onAutoClose: onAutoClose,
         );
       },
     );
   }
-  */
+
+  static Future<void> showCardLimitExceededDialog(BuildContext context) async {
+    await _showOneButtonKioskDialog(
+      context,
+      title: LocaleKeys.alert_title_purchase_failure.tr(),
+      message: "카드 한도가 초과되었습니다.",
+      buttonText: LocaleKeys.alert_btn_paymentcard_failure.tr(),
+    );
+  }
+
+  static Future<void> showInsufficientBalanceDialog(BuildContext context) async {
+    await _showOneButtonKioskDialog(
+      context,
+      title: LocaleKeys.alert_title_purchase_failure.tr(),
+      message: "카드 잔액이 부족합니다.",
+      buttonText: LocaleKeys.alert_btn_paymentcard_failure.tr(),
+    );
+  }
+
+  static Future<void> showVerificationErrorDialog(BuildContext context) async {
+    await _showOneButtonKioskDialog(
+      context,
+      title: LocaleKeys.alert_title_purchase_failure.tr(),
+      message: "카드 인증에 실패했습니다.",
+      buttonText: LocaleKeys.alert_btn_paymentcard_failure.tr(),
+    );
+  }
+
+  static Future<void> showMerchantRestrictionDialog(BuildContext context) async {
+    await _showOneButtonKioskDialog(
+      context,
+      title: LocaleKeys.alert_title_purchase_failure.tr(),
+      message: "해당 가맹점에서 사용할 수 없습니다.",
+      buttonText: LocaleKeys.alert_btn_paymentcard_failure.tr(),
+    );
+  }
+
+  static Future<void> showTimeoutPaymentDialog(BuildContext context) async {
+    await _showOneButtonKioskDialog(
+      context,
+      title: LocaleKeys.alert_title_purchase_failure.tr(),
+      message: "결제 시간이 초과되었습니다.",
+      buttonText: LocaleKeys.alert_btn_paymentcard_failure.tr(),
+    );
+  }
 
   static Future<void> showPrintWaitingDialog(BuildContext context) async {
     await _showOneButtonKioskDialog(
@@ -682,6 +652,7 @@ class DialogHelper {
       },
     );
   }
+}
 
 /* Admin 패스워드 실패시 다이얼로그
   static Future<void> showAdminFailDialog(
@@ -696,5 +667,138 @@ class DialogHelper {
       onButtonPressed: onButtonPressed,
     );
   }
- */
+*/
+
+/// 타임아웃 다이얼로그 위젯 (실시간 카운트다운)
+class _TimeoutDialogWidget extends StatefulWidget {
+  final String title;
+  final String cancelButtonText;
+  final String confirmButtonText;
+  final ButtonStyle? confirmButtonStyle;
+  final int countdownSeconds;
+  final VoidCallback onAutoClose;
+
+  const _TimeoutDialogWidget({
+    required this.title,
+    required this.cancelButtonText,
+    required this.confirmButtonText,
+    this.confirmButtonStyle,
+    required this.countdownSeconds,
+    required this.onAutoClose,
+  });
+
+  @override
+  State<_TimeoutDialogWidget> createState() => _TimeoutDialogWidgetState();
+}
+
+class _TimeoutDialogWidgetState extends State<_TimeoutDialogWidget> {
+  late int _remainingSeconds;
+  Timer? _countdownTimer;
+  Timer? _autoCloseTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _remainingSeconds = widget.countdownSeconds;
+
+    // 1초마다 카운트다운 업데이트
+    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (mounted) {
+        setState(() {
+          if (_remainingSeconds > 0) {
+            _remainingSeconds--;
+          } else {
+            timer.cancel();
+          }
+        });
+      } else {
+        timer.cancel();
+      }
+    });
+
+    // 자동으로 닫기
+    _autoCloseTimer = Timer(Duration(seconds: widget.countdownSeconds), () {
+      if (mounted) {
+        widget.onAutoClose();
+        Navigator.of(context, rootNavigator: true).pop(true);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _countdownTimer?.cancel();
+    _autoCloseTimer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // showTwoButtonKioskDialog와 동일한 구조 사용
+    return DefaultTextStyle(
+      style: TextStyle(
+        fontFamily: context.locale.languageCode == 'ja' ? 'MPLUSRounded' : 'Cafe24Ssurround2',
+      ),
+      child: AlertDialog(
+        backgroundColor: Colors.white,
+        insetPadding: EdgeInsets.symmetric(horizontal: 100.w),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20.r),
+        ),
+        titlePadding: EdgeInsets.zero,
+        actionsPadding: EdgeInsets.zero,
+        title: Center(
+          child: Padding(
+            padding: EdgeInsets.only(top: 60.h, bottom: 20.h, left: 40.w, right: 40.w),
+            child: Text(
+              widget.title,
+              textAlign: TextAlign.center,
+              style: context.typography.kioskAlert1B.copyWith(
+                fontFamily: 'Pretendard',
+                color: Colors.black,
+              ),
+            ),
+          ),
+        ),
+        content: Text(
+          '일정 시간 동안 사용이 없어\n$_remainingSeconds초 후 홈 화면으로 이동합니다',
+          textAlign: TextAlign.center,
+          style: context.typography.kioskAlert2M.copyWith(
+            fontFamily: 'Pretendard',
+            color: Color(0xFF414448),
+          ),
+        ),
+        actions: [
+          Padding(
+            padding: EdgeInsets.only(bottom: 40.h, left: 40.w, right: 40.w),
+            child: Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () async {
+                      await SoundManager().playSound();
+                      Navigator.of(context).pop(false);
+                    },
+                    style: context.refundDialogCancelButtonStyle,
+                    child: Text(widget.cancelButtonText, style: TextStyle(color: Color(0xFF999999))),
+                  ),
+                ),
+                SizedBox(width: 12.w),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      await SoundManager().playSound();
+                      Navigator.of(context).pop(true);
+                    },
+                    style: widget.confirmButtonStyle ?? context.refundDialogConfirmButtonStyle,
+                    child: Text(widget.confirmButtonText, style: TextStyle(color: Color(0xFFFFFFFF))),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }

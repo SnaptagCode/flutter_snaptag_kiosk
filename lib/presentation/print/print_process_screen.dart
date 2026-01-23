@@ -7,7 +7,7 @@ import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_snaptag_kiosk/presentation/move_me/providers/card_count_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/move_me/providers/page_print_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/move_me/widgets/dialog_helper.dart';
-import 'package:flutter_snaptag_kiosk/presentation/providers/screens/print_process_screen_provider.dart';
+import 'package:flutter_snaptag_kiosk/presentation/print/print_process_screen_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/providers/states/payment_response_state.dart';
 
 import 'dart:io';

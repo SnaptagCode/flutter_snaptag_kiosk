@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_snaptag_kiosk/core/utils/sound_manager.dart';
+import 'package:flutter_snaptag_kiosk/presentation/enum/payment_failed_type.dart';
 import 'package:flutter_snaptag_kiosk/presentation/move_me/providers/back_photo_type_provider.dart';
+import 'package:flutter_snaptag_kiosk/presentation/move_me/providers/home_timeout_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/move_me/providers/payment_failure_provider.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_snaptag_kiosk/presentation/move_me/providers/verify_photo_card_provider.dart';
@@ -12,7 +14,7 @@ import 'package:flutter_snaptag_kiosk/presentation/move_me/widgets/dialog_helper
 import 'package:flutter_snaptag_kiosk/presentation/move_me/widgets/general_error_widget.dart';
 import 'package:flutter_snaptag_kiosk/presentation/move_me/widgets/gradient_container.dart';
 import 'package:flutter_snaptag_kiosk/presentation/move_me/widgets/price_box.dart';
-import 'package:flutter_snaptag_kiosk/presentation/providers/screens/photo_card_preview_screen_provider.dart';
+import 'package:flutter_snaptag_kiosk/presentation/payment/photo_card_preview_screen_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/providers/states/update_order_info_state.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 
@@ -600,20 +602,61 @@ class _PhotoCardPreviewScreenState extends ConsumerState<PhotoCardPreviewScreen>
     ref.listen<AsyncValue<void>>(
       photoCardPreviewScreenProviderProvider,
       (previous, next) async {
+        final timeoutNotifier = ref.read(homeTimeoutNotifierProvider.notifier);
+
         // 로딩 상태 처리
         if (next.isLoading) {
-          context.loaderOverlay.show();
+          if (mounted) {
+            context.loaderOverlay.show();
+          }
           return;
         }
 
         // 로딩 오버레이 숨기기
-        if (context.loaderOverlay.visible) {
+        if (mounted && context.loaderOverlay.visible) {
           context.loaderOverlay.hide();
         }
 
         // 에러/성공 처리
         await next.when(
-          error: (_, __) async {
+          error: (error, stack) async {
+            if (mounted) {
+              timeoutNotifier.resumeTimer();
+            }
+
+            if (error is PaymentFailedException) {
+              if (error is TimeoutPaymentException) {
+                await DialogHelper.showTimeoutPaymentDialog(
+                  context,
+                );
+                return;
+              }
+              if (error.description?.contains('한도') ?? false) {
+                await DialogHelper.showCardLimitExceededDialog(
+                  context,
+                );
+                return;
+              }
+              if (error.description?.contains('잔액') ?? false) {
+                await DialogHelper.showInsufficientBalanceDialog(
+                  context,
+                );
+                return;
+              }
+              if (error.description?.contains('인증') ?? false) {
+                await DialogHelper.showVerificationErrorDialog(
+                  context,
+                );
+                return;
+              }
+              if (error.description?.contains('가맹점') ?? false) {
+                await DialogHelper.showMerchantRestrictionDialog(
+                  context,
+                );
+                return;
+              }
+            }
+
             await DialogHelper.showPurchaseFailedDialog(
               context,
             );
@@ -621,14 +664,8 @@ class _PhotoCardPreviewScreenState extends ConsumerState<PhotoCardPreviewScreen>
           },
           loading: () => null,
           data: (_) async {
-            final order = ref.watch(updateOrderInfoProvider)?.status;
-            if (order == OrderStatus.completed) {
-              PrintProcessRouteData().go(context);
-            } else {
-              await DialogHelper.showPurchaseFailedDialog(
-                context,
-              );
-            }
+            // 결제 성공 시 출력 화면으로 이동
+            PrintProcessRouteData().go(context);
           },
         );
       },
@@ -746,6 +783,9 @@ class _PhotoCardPreviewScreenState extends ConsumerState<PhotoCardPreviewScreen>
                                           formattedBackPhotoCardUrl: response.formattedBackPhotoCardUrl));
                                     }
                                   }
+
+                                  final timeoutNotifier = ref.read(homeTimeoutNotifierProvider.notifier);
+                                  timeoutNotifier.cancelTimer();
 
                                   await ref.read(photoCardPreviewScreenProviderProvider.notifier).payment();
                                   final isPaymentFailed = ref.read(paymentFailureProvider);

@@ -11,8 +11,8 @@ import 'package:flutter_snaptag_kiosk/presentation/move_me/screens/payment_histo
 import 'package:flutter_snaptag_kiosk/presentation/move_me/screens/photo_card_upload_screen.dart';
 import 'package:flutter_snaptag_kiosk/presentation/move_me/screens/setup_main_screen.dart';
 import 'package:flutter_snaptag_kiosk/presentation/move_me/screens/unit_test_screen.dart';
-import 'package:flutter_snaptag_kiosk/presentation/screens/photo_card_preview_screen.dart';
-import 'package:flutter_snaptag_kiosk/presentation/screens/print_process_screen.dart';
+import 'package:flutter_snaptag_kiosk/presentation/payment/photo_card_preview_screen.dart';
+import 'package:flutter_snaptag_kiosk/presentation/print/print_process_screen.dart';
 import 'package:go_router/go_router.dart';
 
 part 'router.g.dart';

@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_snaptag_kiosk/presentation/move_me/providers/alert_definition_provider.dart';
+import 'package:flutter_snaptag_kiosk/presentation/move_me/providers/home_timeout_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/move_me/widgets/dialog_helper.dart';
 import 'package:flutter_snaptag_kiosk/presentation/move_me/widgets/general_error_widget.dart';
 import 'package:go_router/go_router.dart';
@@ -400,13 +401,11 @@ class _TimeoutToHomeWrapper extends ConsumerStatefulWidget {
 }
 
 class _TimeoutToHomeWrapperState extends ConsumerState<_TimeoutToHomeWrapper> {
-  Timer? _timeoutTimer;
   bool _isDialogShowing = false;
   String? _previousRoute;
   String _currentLocation = '';
   late final GoRouter _router;
 
-  static const Duration _timeoutDuration = Duration(seconds: 5);
   static const Duration _contextRetryDelay = Duration(milliseconds: 100);
   static const String _timeoutDialogTitle = '홈으로 돌아갑니다';
   static const String _timeoutDialogConfirmText = '확인';
@@ -439,8 +438,11 @@ class _TimeoutToHomeWrapperState extends ConsumerState<_TimeoutToHomeWrapper> {
 
       logger.i('⏱️ TimeoutToHome: route changed: $_previousRoute -> $_currentLocation');
 
-      _handleRouteChange(_currentLocation);
-      _previousRoute = _currentLocation;
+      // mounted 체크 후 ref 사용
+      if (mounted) {
+        _handleRouteChange(_currentLocation);
+        _previousRoute = _currentLocation;
+      }
     });
   }
 
@@ -448,8 +450,16 @@ class _TimeoutToHomeWrapperState extends ConsumerState<_TimeoutToHomeWrapper> {
   Widget build(BuildContext context) {
     if (_RouteChecker.shouldListenToTouch(_currentLocation)) {
       return Listener(
-        onPointerDown: (_) => _resetTimer(),
-        onPointerMove: (_) => _resetTimer(),
+        onPointerDown: (_) {
+          if (mounted) {
+            _resetTimer();
+          }
+        },
+        onPointerMove: (_) {
+          if (mounted) {
+            _resetTimer();
+          }
+        },
         child: widget.child,
       );
     }
@@ -461,12 +471,21 @@ class _TimeoutToHomeWrapperState extends ConsumerState<_TimeoutToHomeWrapper> {
     if (!_RouteChecker.shouldStartTimer(_currentLocation)) return;
 
     logger.i('⏱️ TimeoutToHome: Touch detected, resetting timer for route: $_currentLocation');
-    _cancelTimer();
-    _startTimer();
+    final timeoutNotifier = ref.read(homeTimeoutNotifierProvider.notifier);
+    timeoutNotifier.resetTimer(
+      onTimeout: () {
+        if (mounted && !_isDialogShowing) {
+          _showTimeoutDialog();
+        }
+      },
+    );
   }
 
   void _handleRouteChange(String currentLocation) {
-    _cancelTimer();
+    if (!mounted) return;
+
+    final timeoutNotifier = ref.read(homeTimeoutNotifierProvider.notifier);
+    timeoutNotifier.cancelTimer();
 
     if (_RouteChecker.isHomeScreen(currentLocation)) {
       _resetDialogFlag();
@@ -475,26 +494,21 @@ class _TimeoutToHomeWrapperState extends ConsumerState<_TimeoutToHomeWrapper> {
     }
 
     if (_RouteChecker.shouldStartTimer(currentLocation)) {
-      logger.i('⏱️ TimeoutToHome: Starting timer for route: $currentLocation');
       _resetDialogFlag();
-      _startTimer();
+      if (mounted) {
+        timeoutNotifier.startTimer(
+          onTimeout: () {
+            logger.i('⏱️ TimeoutToHome: Timer expired for route: $currentLocation');
+            if (mounted && !_isDialogShowing) {
+              _showTimeoutDialog();
+            }
+          },
+        );
+      }
     } else {
       logger.i(
           '⏱️ TimeoutToHome: Timer not started for route: $currentLocation (shouldStart: ${_RouteChecker.shouldStartTimer(currentLocation)})');
     }
-  }
-
-  void _startTimer() {
-    _timeoutTimer = Timer(_timeoutDuration, () {
-      if (mounted && !_isDialogShowing) {
-        _showTimeoutDialog();
-      }
-    });
-  }
-
-  void _cancelTimer() {
-    _timeoutTimer?.cancel();
-    _timeoutTimer = null;
   }
 
   void _resetDialogFlag() {
@@ -510,7 +524,9 @@ class _TimeoutToHomeWrapperState extends ConsumerState<_TimeoutToHomeWrapper> {
 
     if (_RouteChecker.isHomeScreen(_currentLocation) || _RouteChecker.isPrintProcessScreen(_currentLocation)) {
       logger.i('⏱️ TimeoutToHome: Skipping dialog - already on home or print-process screen');
-      _cancelTimer();
+      if (mounted) {
+        ref.read(homeTimeoutNotifierProvider.notifier).cancelTimer();
+      }
       return;
     }
 
@@ -528,16 +544,30 @@ class _TimeoutToHomeWrapperState extends ConsumerState<_TimeoutToHomeWrapper> {
 
   void _displayTimeoutDialog(BuildContext context) {
     logger.i('⏱️ TimeoutToHome: Showing timeout dialog');
-    DialogHelper.showSetupOneButtonDialog(
+
+    DialogHelper.showTimeoutDialog(
       context,
+      context.dialogKioskStyle,
       title: _timeoutDialogTitle,
-      confirmButtonText: _timeoutDialogConfirmText,
-    ).then((_) {
-      if (mounted) {
+      cancelButtonText: LocaleKeys.alert_btn_cancel.tr(),
+      confirmButtonText: LocaleKeys.alert_btn_ok.tr(),
+      countdownSeconds: 5,
+      onAutoClose: () {
+        if (mounted) {
+          _navigateToHome(context);
+        }
+      },
+    ).then((result) {
+      if (!mounted) return;
+
+      _resetDialogFlag();
+      ref.read(homeTimeoutNotifierProvider.notifier).cancelTimer();
+
+      // 확인 버튼을 누르거나 자동으로 닫힌 경우 (result == true)
+      if (result == true) {
         _navigateToHome(context);
-        _resetDialogFlag();
-        _cancelTimer();
       }
+      // 취소 버튼을 누른 경우 (result == false)는 알럿만 사라짐
     }).catchError((error) {
       logger.i('⚠️ TimeoutToHome: Dialog error: $error');
       _resetDialogFlag();
@@ -572,7 +602,7 @@ class _TimeoutToHomeWrapperState extends ConsumerState<_TimeoutToHomeWrapper> {
   @override
   void dispose() {
     _router.routerDelegate.removeListener(_onRouteChanged);
-    _timeoutTimer?.cancel();
+    // ref는 dispose에서 사용할 수 없으므로, provider의 onDispose에서 처리됨
     super.dispose();
   }
 }

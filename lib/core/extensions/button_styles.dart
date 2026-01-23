@@ -118,6 +118,19 @@ extension ButtonStyles on BuildContext {
             : typography.kioskAlertBtnB.copyWith(fontFamily: 'Cafe24Ssurround2'),
       );
 
+  ButtonStyle get dialogKioskStyle => ElevatedButton.styleFrom(
+        fixedSize: Size(double.infinity, 82.h),
+        minimumSize: Size(283.w, 78.h),
+        backgroundColor: kioskColors.popupButtonColor,
+        foregroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
+        elevation: 10,
+        shadowColor: Colors.black.withOpacity(0.4),
+        textStyle: locale.languageCode == 'ja'
+            ? typography.kioskAlertBtnB.copyWith(fontFamily: 'MPLUSRounded')
+            : typography.kioskAlertBtnB.copyWith(fontFamily: 'Cafe24Ssurround2'),
+      );
+
   ///
   /// [Figma](https://www.figma.com/design/8IDM2KJtqAYWm2IsmytU5W/%ED%82%A4%EC%98%A4%EC%8A%A4%ED%81%AC_%EB%94%94%EC%9E%90%EC%9D%B8_%EA%B3%B5%EC%9C%A0%EC%9A%A9?node-id=931-13843&m=dev)
   /// - `backgroundColor` : kioskColors.buttonColor

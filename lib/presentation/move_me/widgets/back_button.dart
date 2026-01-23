@@ -85,7 +85,7 @@ class KioskBackButton extends ConsumerWidget {
       const HomeRouteData().go(context);
     } else if (currentPath == CodeVerificationRouteData().location) {
       // /kiosk/code-verification → /kiosk/qr
-      PhotoCardUploadRouteData().go(context);
+      HomeRouteData().go(context);
     } else if (currentPath == PhotoCardPreviewRouteData().location) {
       // /kiosk/preview → /kiosk/code-verification
       isFixed ? HomeRouteData().go(context) : CodeVerificationRouteData().go(context);
