@@ -203,7 +203,7 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> with Si
                 color: Colors.black.withOpacity(0.5), // 원하는 배경색
               ),
               child: Text(
-                '카드가 출력되기까지 약 1분 정도의 시간이 소요됩니다.',
+                LocaleKeys.sub03_txt_02.tr(),
                 textAlign: TextAlign.center,
                 style: context.typography.kioskBody1B.copyWith(fontSize: 30.sp),
               ),
@@ -242,7 +242,7 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> with Si
             ),
             SizedBox(height: 16.h),
             Text(
-              '출력이 완료될 때까지 카드를 뽑지 말아 주세요!',
+              LocaleKeys.sub03_txt_03.tr(),
               textAlign: TextAlign.center,
               style: context.typography.kioskBody2B.copyWith(fontSize: 26.sp),
             ),
