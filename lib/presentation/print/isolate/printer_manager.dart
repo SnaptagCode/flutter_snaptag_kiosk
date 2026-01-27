@@ -574,7 +574,7 @@ class PrinterManager {
     try {
       final result = bindings.commitCanvas(strPtr, lenPtr);
       if (result != 0) {
-        throw Exception('Failed to commit canvas');
+        throw Exception('Failed to commit canvas (code: $result)');
       }
       return strPtr.toDartString();
     } finally {

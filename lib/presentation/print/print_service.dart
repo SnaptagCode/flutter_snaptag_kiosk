@@ -83,7 +83,7 @@ class PrintService extends _$PrintService {
 
     if (backPhotoCardResponseInfo == null) throw Exception('No back photo card response info available');
     if (approvalInfo == null) throw Exception('No payment approval info available');
-    if (printerState.hasError) throw Exception('Printer is not ready');
+    // if (printerState.hasError) throw Exception('Printer is not ready');
   }
 
   Future<

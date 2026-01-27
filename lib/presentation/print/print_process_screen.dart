@@ -92,10 +92,6 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> with Si
               _progressController.stop();
             }
 
-            logger.e('Print process error', error: error, stackTrace: stack);
-            final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
-            SlackLogService().sendErrorLogToSlack('*[Machine ID: $machineId]*\nPrint process error\nError: $error');
-            SlackLogService().sendErrorLogToSlack('Print process error\nError: $error');
             switch (error.toString().replaceFirst('Exception: ', '').trim()) {
               case "Card feeder is empty":
                 SlackLogService().sendBroadcastLogToSlack(ErrorKey.printerCardEmpty.key);
@@ -115,6 +111,23 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> with Si
 
             // 슬랙에 에러 로그 전송
             errorLogging(error.toString(), stack);
+
+            // 네트워크 오류인지 체크
+            final isNetworkError = ref.read(networkStatusNotifierProvider.notifier).isNetworkError(error);
+
+            // 네트워크 오류라면 카드 단일 카드 수량 확인 후 완료 알럿 표시
+            if (isNetworkError) {
+              // 카드 단일 카드 수량 확인
+              checkCardSingleCardCount();
+
+              await DialogHelper.showPrintCompleteDialog(
+                context,
+                onButtonPressed: () {
+                  HomeRouteData().go(context);
+                },
+              );
+              return;
+            }
 
             // 환불 알럿
             await DialogHelper.showAutoRefundDescriptionDialog(context, onButtonPressed: () async {

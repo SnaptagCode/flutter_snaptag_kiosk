@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
 
-import 'package:dio/dio.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -37,40 +36,12 @@ class _AppState extends ConsumerState<App> with WindowListener {
     // 앱 실행과 동시에 KioskInfo 미리 로드
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (_hasInitializedKioskInfo) return;
-      // _hasInitializedKioskInfo = true;
-
-      // 네트워크 에러 처리 함수
-      Future<bool> handleNetworkError(dynamic error) async {
-        // DioException 또는 네트워크 관련 에러인지 확인
-        final isNetworkError = error is DioException &&
-            (error.type == DioExceptionType.connectionTimeout ||
-                error.type == DioExceptionType.receiveTimeout ||
-                error.type == DioExceptionType.sendTimeout ||
-                error.type == DioExceptionType.connectionError ||
-                error.type == DioExceptionType.unknown);
-
-        if (isNetworkError && mounted) {
-          final result = await DialogHelper.showSetupOneButtonDialog(
-            context,
-            title: '네트워크 연결이 불안정합니다.',
-            confirmButtonText: '확인',
-          );
-          if (result && mounted) {
-            // 확인 버튼 클릭 시 앱 종료
-            exit(0);
-          }
-          return true;
-        }
-        return false;
-      }
+      _hasInitializedKioskInfo = true;
 
       // Alert Definition 로드
       try {
         await ref.read(alertDefinitionProvider.notifier).load();
       } catch (error) {
-        final handled = await handleNetworkError(error);
-        if (handled) return;
-        // 네트워크 에러가 아니면 로그만 남김
         SlackLogService().sendErrorLogToSlack('Alert definition load failed: $error');
       }
 
@@ -80,10 +51,6 @@ class _AppState extends ConsumerState<App> with WindowListener {
         try {
           await ref.read(kioskInfoServiceProvider.notifier).getKioskMachineInfo();
         } catch (error) {
-          final handled = await handleNetworkError(error);
-          if (handled) return;
-          // 네트워크 에러가 아니면 로그만 남김
-          // 네트워크 에러 처리는 setup_main_screen에서 수행
           SlackLogService().sendErrorLogToSlack('Kiosk info load failed at app startup: $error');
         }
       }
@@ -104,13 +71,13 @@ class _AppState extends ConsumerState<App> with WindowListener {
 
     if (Platform.isWindows) {
       WindowOptions windowOptions = WindowOptions(
-        // fullScreen: true,
+        fullScreen: true,
         backgroundColor: Colors.transparent,
         skipTaskbar: false,
         titleBarStyle: TitleBarStyle.hidden,
       );
       await windowManager.waitUntilReadyToShow(windowOptions, () async {
-        // await windowManager.setFullScreen(true);
+        await windowManager.setFullScreen(true);
         await windowManager.show();
       });
     }
@@ -253,6 +220,7 @@ class _NetworkStatusAlertWrapper extends ConsumerStatefulWidget {
 
 class _NetworkStatusAlertWrapperState extends ConsumerState<_NetworkStatusAlertWrapper> {
   bool _isAlertShowing = false;
+  bool _hasKioskInfo = false;
   NetworkState? _previousState;
 
   static const _networkAlertTitle = '네트워크 연결이 불안정합니다.';
@@ -261,6 +229,7 @@ class _NetworkStatusAlertWrapperState extends ConsumerState<_NetworkStatusAlertW
 
   @override
   Widget build(BuildContext context) {
+    _hasKioskInfo = (ref.watch(kioskInfoServiceProvider)?.kioskEventId ?? 0) != 0;
     final networkState = ref.watch(networkStatusNotifierProvider);
 
     ref.listen<NetworkState>(networkStatusNotifierProvider, (previous, next) {
@@ -347,6 +316,11 @@ class _NetworkStatusAlertWrapperState extends ConsumerState<_NetworkStatusAlertW
         title: _networkAlertTitle,
         confirmButtonText: _networkAlertConfirmText,
       ).then((_) {
+        logger.i('_hasKioskInfo: $_hasKioskInfo');
+        // 이벤트를 불러오지 않은 상태면 앱 종료.
+        if (!_hasKioskInfo) {
+          exit(0);
+        }
         // 확인 버튼을 눌렀을 때 네트워크 상태를 다시 체크
         _resetAlertFlag();
         _recheckNetworkStatusAfterDialogClose();

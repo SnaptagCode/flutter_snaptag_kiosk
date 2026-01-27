@@ -221,7 +221,7 @@ class PrinterBindings {
   }) {
     final result = _setCoatRgn(x, y, width, height, isFront ? 1 : 0, isErase ? 1 : 0);
     if (result != 0) {
-      throw Exception('[R600SetCoatRgn] Failed to set coating region');
+      throw Exception('[R600SetCoatRgn] Failed to set coating region (code: $result)');
     }
   }
 
@@ -232,7 +232,7 @@ class PrinterBindings {
   }) {
     final result = _setImagePara(transparency, rotation, scale);
     if (result != 0) {
-      throw Exception('[R600SetImagePara] Failed to set image parameters');
+      throw Exception('[R600SetImagePara] Failed to set image parameters (code: $result)');
     }
   }
 
@@ -416,7 +416,7 @@ class PrinterBindings {
       try {
         int result = _isPrtHaveCard(flag);
         if (result != 0) {
-          logger.i('Failed to check card position');
+          logger.i('Failed to check card position (code: $result)');
           return false;
         }
 
@@ -425,7 +425,7 @@ class PrinterBindings {
           logger.i('Card is in the printer, ejecting...');
           result = _cardEject(0); // 왼쪽으로 배출
           if (result != 0) {
-            logger.i('[R600CardEject] Failed to eject card');
+            logger.i('[R600CardEject] Failed to eject card (code: $result)');
             return false;
           }
         }
@@ -478,7 +478,7 @@ class PrinterBindings {
     try {
       final result = _setFont(fontNamePtr, fontSize);
       if (result != 0) {
-        throw Exception('[R600SetFont] Failed to set font');
+        throw Exception('[R600SetFont] Failed to set font (code: $result)');
       }
     } finally {
       calloc.free(fontNamePtr);
@@ -488,7 +488,7 @@ class PrinterBindings {
   void setTextIsStrong(int isStrong) {
     final result = _setTextIsStrong(isStrong);
     if (result != 0) {
-      throw Exception('[R600SetTextIsStrong] Failed to set text strength');
+      throw Exception('[R600SetTextIsStrong] Failed to set text strength (code: $result)');
     }
   }
 
