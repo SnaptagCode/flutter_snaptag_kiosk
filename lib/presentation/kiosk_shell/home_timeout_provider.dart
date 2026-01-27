@@ -13,7 +13,7 @@ part 'home_timeout_provider.g.dart';
 @Riverpod(keepAlive: true)
 class HomeTimeoutNotifier extends _$HomeTimeoutNotifier {
   Timer? _timer;
-  final Duration _duration = const Duration(seconds: 10);
+  final Duration _duration = const Duration(seconds: 60);
   VoidCallback? _savedCallback;
   int _generation = 0;
 
