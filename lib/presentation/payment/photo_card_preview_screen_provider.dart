@@ -1,7 +1,7 @@
 import 'package:flutter_snaptag_kiosk/lib.dart';
-import 'package:flutter_snaptag_kiosk/presentation/move_me/providers/card_count_provider.dart';
-import 'package:flutter_snaptag_kiosk/presentation/move_me/providers/page_print_provider.dart';
-import 'package:flutter_snaptag_kiosk/presentation/services/payment_service.dart';
+import 'package:flutter_snaptag_kiosk/presentation/core/card_count_provider.dart';
+import 'package:flutter_snaptag_kiosk/presentation/setup/page_print_provider.dart';
+import 'package:flutter_snaptag_kiosk/presentation/payment/payment_service.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'photo_card_preview_screen_provider.g.dart';

@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_snaptag_kiosk/presentation/core/printer/ribbon_warning_provider.dart';
+import 'package:flutter_snaptag_kiosk/presentation/print/luca/state/ribbon_warning_provider.dart';
 import 'package:flutter_snaptag_kiosk/core/data/datasources/remote/slack_log_service.dart';
 import 'package:flutter/widgets.dart';
 

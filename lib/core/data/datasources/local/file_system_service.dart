@@ -1,8 +1,8 @@
 import 'dart:io';
 
 import 'package:flutter/services.dart';
-import 'package:flutter_snaptag_kiosk/core/constants/constants.dart';
-import 'package:flutter_snaptag_kiosk/core/errors/errors.dart';
+import 'package:flutter_snaptag_kiosk/core/common/constants/constants.dart';
+import 'package:flutter_snaptag_kiosk/core/common/errors/errors.dart';
 import 'package:path/path.dart' as path;
 import 'package:url_launcher/url_launcher.dart';
 

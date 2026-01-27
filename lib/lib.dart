@@ -5,4 +5,4 @@ export 'core/domain/domain.dart';
 export 'flavors.dart';
 export 'locale_keys.dart';
 export 'main.dart';
-export 'routers/routers.dart';
+export 'presentation/routers/routers.dart';

@@ -1,4 +1,4 @@
-import 'package:flutter_snaptag_kiosk/presentation/services/print_service.dart';
+import 'package:flutter_snaptag_kiosk/presentation/print/print_service.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'print_process_screen_provider.g.dart';

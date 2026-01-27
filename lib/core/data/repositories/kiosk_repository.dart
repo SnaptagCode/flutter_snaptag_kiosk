@@ -1,8 +1,8 @@
 import 'package:flutter_snaptag_kiosk/core/data/models/request/unique_key_request.dart';
 import 'package:flutter_snaptag_kiosk/core/data/models/request/update_back_photo_request.dart';
-import 'package:flutter_snaptag_kiosk/presentation/core/printer/printer_log.dart';
+import 'package:flutter_snaptag_kiosk/presentation/print/luca/state/printer_log.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
-import 'package:flutter_snaptag_kiosk/presentation/move_me/providers/card_count_provider.dart';
+import 'package:flutter_snaptag_kiosk/presentation/core/card_count_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

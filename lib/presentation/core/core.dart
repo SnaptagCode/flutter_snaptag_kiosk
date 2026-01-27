@@ -1,2 +1,1 @@
-export 'labcurity/labcurity.dart';
-export 'printer/printer.dart';
+export '../print/labcurity/labcurity.dart';

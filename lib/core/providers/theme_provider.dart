@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_snaptag_kiosk/presentation/move_me/providers/currentFontFamilyProvider.dart';
+import 'package:flutter_snaptag_kiosk/presentation/core/currentFontFamilyProvider.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 

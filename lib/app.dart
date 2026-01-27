@@ -7,10 +7,11 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
-import 'package:flutter_snaptag_kiosk/presentation/move_me/providers/alert_definition_provider.dart';
-import 'package:flutter_snaptag_kiosk/presentation/move_me/providers/home_timeout_provider.dart';
-import 'package:flutter_snaptag_kiosk/presentation/move_me/widgets/dialog_helper.dart';
-import 'package:flutter_snaptag_kiosk/presentation/move_me/widgets/general_error_widget.dart';
+import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
+import 'package:flutter_snaptag_kiosk/presentation/setup/alert_definition_provider.dart';
+import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/home_timeout_provider.dart';
+import 'package:flutter_snaptag_kiosk/core/ui/widget/dialog_helper.dart';
+import 'package:flutter_snaptag_kiosk/core/ui/widget/general_error_widget.dart';
 import 'package:go_router/go_router.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -407,7 +408,7 @@ class _TimeoutToHomeWrapperState extends ConsumerState<_TimeoutToHomeWrapper> {
   late final GoRouter _router;
 
   static const Duration _contextRetryDelay = Duration(milliseconds: 100);
-  static const String _timeoutDialogTitle = '홈으로 돌아갑니다';
+  static const String _timeoutDialogTitle = '홈으로 이동';
   static const String _timeoutDialogConfirmText = '확인';
 
   @override
@@ -530,11 +531,20 @@ class _TimeoutToHomeWrapperState extends ConsumerState<_TimeoutToHomeWrapper> {
       return;
     }
 
+    // 다른 다이얼로그가 이미 열려있는지 확인
+    final rootContext = rootNavigatorKey.currentContext;
+    if (rootContext != null) {
+      final navigator = Navigator.of(rootContext, rootNavigator: true);
+      if (navigator.canPop()) {
+        logger.i('⏱️ TimeoutToHome: Skipping dialog - another dialog is already showing');
+        return;
+      }
+    }
+
     setState(() {
       _isDialogShowing = true;
     });
 
-    final rootContext = rootNavigatorKey.currentContext;
     if (rootContext != null) {
       _displayTimeoutDialog(rootContext);
     } else {
@@ -568,6 +578,7 @@ class _TimeoutToHomeWrapperState extends ConsumerState<_TimeoutToHomeWrapper> {
         _navigateToHome(context);
       }
       // 취소 버튼을 누른 경우 (result == false)는 알럿만 사라짐
+      _resetTimer();
     }).catchError((error) {
       logger.i('⚠️ TimeoutToHome: Dialog error: $error');
       _resetDialogFlag();

@@ -4,16 +4,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_snaptag_kiosk/core/providers/version_notifier.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
-import 'package:flutter_snaptag_kiosk/presentation/move_me/providers/card_count_provider.dart';
-import 'package:flutter_snaptag_kiosk/presentation/move_me/providers/page_print_provider.dart';
-import 'package:flutter_snaptag_kiosk/presentation/move_me/widgets/dialog_helper.dart';
+import 'package:flutter_snaptag_kiosk/presentation/core/card_count_provider.dart';
+import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
+import 'package:flutter_snaptag_kiosk/presentation/setup/page_print_provider.dart';
+import 'package:flutter_snaptag_kiosk/core/ui/widget/dialog_helper.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/print_process_screen_provider.dart';
-import 'package:flutter_snaptag_kiosk/presentation/providers/states/payment_response_state.dart';
+import 'package:flutter_snaptag_kiosk/presentation/payment/payment_response_state.dart';
 
 import 'dart:io';
 import 'dart:math';
 
-import 'package:flutter_snaptag_kiosk/presentation/services/payment_service.dart';
+import 'package:flutter_snaptag_kiosk/presentation/payment/payment_service.dart';
 
 class PrintProcessScreen extends ConsumerStatefulWidget {
   const PrintProcessScreen({super.key});
