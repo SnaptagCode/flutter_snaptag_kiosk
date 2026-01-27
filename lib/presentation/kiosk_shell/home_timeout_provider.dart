@@ -13,7 +13,7 @@ part 'home_timeout_provider.g.dart';
 @Riverpod(keepAlive: true)
 class HomeTimeoutNotifier extends _$HomeTimeoutNotifier {
   Timer? _timer;
-  final Duration _duration = const Duration(seconds: 60);
+  final Duration _duration = const Duration(seconds: 10);
   VoidCallback? _savedCallback;
   int _generation = 0;
 
@@ -23,7 +23,7 @@ class HomeTimeoutNotifier extends _$HomeTimeoutNotifier {
     // provider가 dispose 될 때 타이머가 남지 않도록 보장
     ref.onDispose(() {
       logger.i('⏱️ TimeoutToHome: Provider disposing, canceling timer');
-      cancelTimer();
+      cancelTimerWithCallback();
     });
     return false;
   }
@@ -57,14 +57,19 @@ class HomeTimeoutNotifier extends _$HomeTimeoutNotifier {
   }
 
   /// 타이머 취소
-  void cancelTimer() {
+  void cancelTimerWithCallback() {
     // 구형 콜백 무시
+    cancelTimer();
+    _savedCallback = null;
+  }
+
+  void cancelTimer() {
+    logger.i('⏱️ TimeoutToHome: Canceling timer with callback (generation: $_generation)');
+
     _generation++;
 
-    logger.i('⏱️ TimeoutToHome: Canceling timer (generation: $_generation)');
     _timer?.cancel();
     _timer = null;
-    _savedCallback = null;
   }
 
   /// 타이머 리셋 (취소 후 다시 시작)
@@ -72,15 +77,16 @@ class HomeTimeoutNotifier extends _$HomeTimeoutNotifier {
     required VoidCallback onTimeout,
   }) {
     logger.i('⏱️ TimeoutToHome: Resetting timer for route: $_duration');
-    cancelTimer();
+    cancelTimerWithCallback();
     startTimer(onTimeout: onTimeout);
   }
 
   /// 타이머 재개 (저장된 콜백이 있을 때만)
   void resumeTimer() {
+    logger.i('⏱️ TimeoutToHome: Resuming timer');
     final cb = _savedCallback;
     if (cb == null) return;
-    logger.i('⏱️ TimeoutToHome: Resuming timer for route: $_duration');
+    cancelTimer();
     startTimer(onTimeout: cb);
   }
 }

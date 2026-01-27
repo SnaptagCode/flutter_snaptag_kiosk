@@ -104,13 +104,13 @@ class _AppState extends ConsumerState<App> with WindowListener {
 
     if (Platform.isWindows) {
       WindowOptions windowOptions = WindowOptions(
-        fullScreen: true,
+        // fullScreen: true,
         backgroundColor: Colors.transparent,
         skipTaskbar: false,
         titleBarStyle: TitleBarStyle.hidden,
       );
       await windowManager.waitUntilReadyToShow(windowOptions, () async {
-        await windowManager.setFullScreen(true);
+        // await windowManager.setFullScreen(true);
         await windowManager.show();
       });
     }
@@ -305,6 +305,12 @@ class _NetworkStatusAlertWrapperState extends ConsumerState<_NetworkStatusAlertW
       _isAlertShowing = true;
     });
 
+    // 타임아웃 타이머 종료
+    widget.ref.read(homeTimeoutNotifierProvider.notifier).cancelTimer();
+
+    // 타임아웃 알럿이 열려있다면 닫기
+    _closeTimeoutDialogIfOpen();
+
     Future.microtask(() {
       if (!mounted || !_isAlertShowing) return;
 
@@ -317,20 +323,65 @@ class _NetworkStatusAlertWrapperState extends ConsumerState<_NetworkStatusAlertW
     });
   }
 
+  void _closeTimeoutDialogIfOpen() {
+    try {
+      final rootContext = rootNavigatorKey.currentContext;
+      if (rootContext != null) {
+        final navigator = Navigator.of(rootContext, rootNavigator: true);
+        // 타임아웃 알럿이 열려있는지 확인하고 닫기
+        // Navigator에 열려있는 다이얼로그가 있으면 닫기 (타임아웃 알럿일 가능성이 높음)
+        if (navigator.canPop()) {
+          navigator.pop();
+        }
+      }
+    } catch (e) {
+      // 타임아웃 알럿이 없거나 이미 닫혔을 수 있음
+      logger.i('⚠️ NetworkStatusAlert: Failed to close timeout dialog: $e');
+    }
+  }
+
   void _displayNetworkDialog(BuildContext context) {
     try {
       DialogHelper.showSetupOneButtonDialog(
         context,
         title: _networkAlertTitle,
         confirmButtonText: _networkAlertConfirmText,
-      ).then((_) => _resetAlertFlag()).catchError((error) {
+      ).then((_) {
+        // 확인 버튼을 눌렀을 때 네트워크 상태를 다시 체크
+        _resetAlertFlag();
+        _recheckNetworkStatusAfterDialogClose();
+      }).catchError((error) {
         logger.i('⚠️ NetworkStatusAlert: Dialog error: $error');
         _resetAlertFlag();
+        _recheckNetworkStatusAfterDialogClose();
       });
     } catch (e, stack) {
       logger.i('⚠️ NetworkStatusAlert: Failed to show dialog: $e\n$stack');
       _resetAlertFlag();
     }
+  }
+
+  void _recheckNetworkStatusAfterDialogClose() {
+    // 다이얼로그가 닫힌 후 네트워크 상태를 다시 확인
+    Future.microtask(() {
+      if (!mounted) return;
+
+      // 네트워크 상태 새로고침
+      widget.ref.read(networkStatusNotifierProvider.notifier).refresh();
+
+      // 현재 네트워크 상태 확인
+      final currentNetworkState = widget.ref.read(networkStatusNotifierProvider);
+
+      // 여전히 연결이 안 되어 있으면 알럿을 다시 띄우기
+      if (currentNetworkState.status == NetworkStatus.unstable ||
+          currentNetworkState.status == NetworkStatus.disconnected) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            _checkAndShowAlert(currentNetworkState);
+          }
+        });
+      }
+    });
   }
 
   void _retryShowNetworkAlert() {
@@ -368,9 +419,16 @@ class _NetworkStatusAlertWrapperState extends ConsumerState<_NetworkStatusAlertW
       } catch (e) {
         logger.i('⚠️ NetworkStatusAlert: Failed to close dialog: $e');
       } finally {
+        logger.i('⏱️ TimeoutToHome: Resetting timeout timer');
         _resetAlertFlag();
+        // 네트워크 알럿이 닫힐 때 타임아웃 타이머 초기화
+        _resetTimeoutTimer();
       }
     });
+  }
+
+  void _resetTimeoutTimer() {
+    widget.ref.read(homeTimeoutNotifierProvider.notifier).resumeTimer();
   }
 
   void _resetAlertFlag() {
@@ -408,8 +466,6 @@ class _TimeoutToHomeWrapperState extends ConsumerState<_TimeoutToHomeWrapper> {
   late final GoRouter _router;
 
   static const Duration _contextRetryDelay = Duration(milliseconds: 100);
-  static const String _timeoutDialogTitle = '홈으로 이동';
-  static const String _timeoutDialogConfirmText = '확인';
 
   @override
   void initState() {
@@ -486,7 +542,7 @@ class _TimeoutToHomeWrapperState extends ConsumerState<_TimeoutToHomeWrapper> {
     if (!mounted) return;
 
     final timeoutNotifier = ref.read(homeTimeoutNotifierProvider.notifier);
-    timeoutNotifier.cancelTimer();
+    timeoutNotifier.cancelTimerWithCallback();
 
     if (_RouteChecker.isHomeScreen(currentLocation)) {
       _resetDialogFlag();
@@ -526,7 +582,7 @@ class _TimeoutToHomeWrapperState extends ConsumerState<_TimeoutToHomeWrapper> {
     if (_RouteChecker.isHomeScreen(_currentLocation) || _RouteChecker.isPrintProcessScreen(_currentLocation)) {
       logger.i('⏱️ TimeoutToHome: Skipping dialog - already on home or print-process screen');
       if (mounted) {
-        ref.read(homeTimeoutNotifierProvider.notifier).cancelTimer();
+        ref.read(homeTimeoutNotifierProvider.notifier).cancelTimerWithCallback();
       }
       return;
     }
@@ -558,7 +614,8 @@ class _TimeoutToHomeWrapperState extends ConsumerState<_TimeoutToHomeWrapper> {
     DialogHelper.showTimeoutDialog(
       context,
       context.dialogKioskStyle,
-      title: _timeoutDialogTitle,
+      title: LocaleKeys.alert_btn_go_to_home.tr(),
+      messageKey: LocaleKeys.alert_txt_timeout_to_home,
       cancelButtonText: LocaleKeys.alert_btn_cancel.tr(),
       confirmButtonText: LocaleKeys.alert_btn_ok.tr(),
       countdownSeconds: 5,
@@ -571,7 +628,7 @@ class _TimeoutToHomeWrapperState extends ConsumerState<_TimeoutToHomeWrapper> {
       if (!mounted) return;
 
       _resetDialogFlag();
-      ref.read(homeTimeoutNotifierProvider.notifier).cancelTimer();
+      ref.read(homeTimeoutNotifierProvider.notifier).cancelTimerWithCallback();
 
       // 확인 버튼을 누르거나 자동으로 닫힌 경우 (result == true)
       if (result == true) {

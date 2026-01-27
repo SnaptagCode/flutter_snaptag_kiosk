@@ -788,7 +788,7 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
                                   }
 
                                   final timeoutNotifier = ref.read(homeTimeoutNotifierProvider.notifier);
-                                  timeoutNotifier.cancelTimer();
+                                  timeoutNotifier.cancelTimerWithCallback();
 
                                   await ref.read(photoCardPreviewScreenProviderProvider.notifier).payment();
                                   final isPaymentFailed = ref.read(paymentFailureProvider);

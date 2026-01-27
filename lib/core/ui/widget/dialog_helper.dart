@@ -428,6 +428,8 @@ class DialogHelper {
     BuildContext context,
     ButtonStyle? confirmButtonStyle, {
     required String title,
+    String? message,
+    String? messageKey,
     required String cancelButtonText,
     required String confirmButtonText,
     required int countdownSeconds,
@@ -439,6 +441,8 @@ class DialogHelper {
       builder: (BuildContext dialogContext) {
         return _TimeoutDialogWidget(
           title: title,
+          message: message,
+          messageKey: messageKey,
           cancelButtonText: cancelButtonText,
           confirmButtonText: confirmButtonText,
           confirmButtonStyle: confirmButtonStyle,
@@ -453,7 +457,7 @@ class DialogHelper {
     await _showOneButtonKioskDialog(
       context,
       title: LocaleKeys.alert_title_purchase_failure.tr(),
-      message: "카드 한도가 초과되었습니다.",
+      message: LocaleKeys.alert_txt_card_limit_exceeded.tr(),
       buttonText: LocaleKeys.alert_btn_paymentcard_failure.tr(),
     );
   }
@@ -462,7 +466,7 @@ class DialogHelper {
     await _showOneButtonKioskDialog(
       context,
       title: LocaleKeys.alert_title_purchase_failure.tr(),
-      message: "카드 잔액이 부족합니다.",
+      message: LocaleKeys.alert_txt_insufficient_balance.tr(),
       buttonText: LocaleKeys.alert_btn_paymentcard_failure.tr(),
     );
   }
@@ -471,7 +475,7 @@ class DialogHelper {
     await _showOneButtonKioskDialog(
       context,
       title: LocaleKeys.alert_title_purchase_failure.tr(),
-      message: "카드 인증에 실패했습니다.",
+      message: LocaleKeys.alert_txt_verification_error.tr(),
       buttonText: LocaleKeys.alert_btn_paymentcard_failure.tr(),
     );
   }
@@ -480,7 +484,7 @@ class DialogHelper {
     await _showOneButtonKioskDialog(
       context,
       title: LocaleKeys.alert_title_purchase_failure.tr(),
-      message: "해당 가맹점에서 사용할 수 없습니다.",
+      message: LocaleKeys.alert_txt_merchant_restriction.tr(),
       buttonText: LocaleKeys.alert_btn_paymentcard_failure.tr(),
     );
   }
@@ -489,7 +493,7 @@ class DialogHelper {
     await _showOneButtonKioskDialog(
       context,
       title: LocaleKeys.alert_title_purchase_failure.tr(),
-      message: "결제 시간이 초과되었습니다.",
+      message: LocaleKeys.alert_txt_timeout_payment.tr(),
       buttonText: LocaleKeys.alert_btn_paymentcard_failure.tr(),
     );
   }
@@ -678,6 +682,8 @@ class DialogHelper {
 /// 타임아웃 다이얼로그 위젯 (실시간 카운트다운)
 class _TimeoutDialogWidget extends StatefulWidget {
   final String title;
+  final String? message;
+  final String? messageKey;
   final String cancelButtonText;
   final String confirmButtonText;
   final ButtonStyle? confirmButtonStyle;
@@ -686,6 +692,8 @@ class _TimeoutDialogWidget extends StatefulWidget {
 
   const _TimeoutDialogWidget({
     required this.title,
+    this.message,
+    this.messageKey,
     required this.cancelButtonText,
     required this.confirmButtonText,
     this.confirmButtonStyle,
@@ -724,10 +732,12 @@ class _TimeoutDialogWidgetState extends State<_TimeoutDialogWidget> {
 
     // 자동으로 닫기
     _autoCloseTimer = Timer(Duration(seconds: widget.countdownSeconds), () {
-      if (mounted) {
-        widget.onAutoClose();
-        Navigator.of(context, rootNavigator: true).pop(true);
-      }
+      if (!mounted) return;
+
+      final navigator = Navigator.of(context, rootNavigator: true);
+
+      widget.onAutoClose();
+      navigator.pop(true);
     });
   }
 
@@ -767,12 +777,17 @@ class _TimeoutDialogWidgetState extends State<_TimeoutDialogWidget> {
             ),
           ),
         ),
-        content: Text(
-          '일정 시간 동안 사용이 없어\n$_remainingSeconds초 후 홈 화면으로 이동합니다',
-          textAlign: TextAlign.center,
-          style: context.typography.kioskAlert2M.copyWith(
-            fontFamily: 'Pretendard',
-            color: Color(0xFF414448),
+        content: Padding(
+          padding: EdgeInsets.only(left: 40.w, right: 40.w),
+          child: Text(
+            widget.messageKey != null
+                ? widget.messageKey!.tr().replaceAll('{}', '$_remainingSeconds')
+                : (widget.message?.replaceAll('{}', '$_remainingSeconds') ?? ''),
+            textAlign: TextAlign.center,
+            style: context.typography.kioskAlert2M.copyWith(
+              fontFamily: 'Pretendard',
+              color: Color(0xFF414448),
+            ),
           ),
         ),
         actions: [
