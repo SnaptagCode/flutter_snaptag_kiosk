@@ -8,6 +8,7 @@ import 'dart:typed_data';
 import 'package:ffi/ffi.dart'; // Utf8 사용을 위한 임포트
 import 'package:flutter/services.dart';
 import 'package:flutter_snaptag_kiosk/core/common/logger/logger_service.dart';
+import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/isolate/model/check_card_position_message.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/isolate/model/check_feeder_message.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/isolate/model/connect_message.dart';
@@ -28,6 +29,7 @@ import 'package:path_provider/path_provider.dart';
 class PrinterManager {
   static PrinterManager? _instance;
   late SendPort _sendPort;
+  String? _metalWatermarkPath;
 
   PrinterManager._();
 
@@ -46,6 +48,7 @@ class PrinterManager {
   Future<void> _init() async {
     try {
       logger.i('PrinterManager Starting PrinterManager initialization...');
+      await _prepareMetalWatermarkAsset();
       await _initPrintIsolate();
     } catch (e) {
       rethrow;
@@ -57,7 +60,10 @@ class PrinterManager {
       logger.i('PrinterManager Initializing print isolate...');
       final printReceivePort = ReceivePort();
 
-      await Isolate.spawn(_printEntry, printReceivePort.sendPort);
+      await Isolate.spawn(_printEntry, {
+        'sendPort': printReceivePort.sendPort,
+        'metalWatermarkPath': _metalWatermarkPath,
+      });
 
       _sendPort = await printReceivePort.first;
     } catch (e) {
@@ -66,8 +72,12 @@ class PrinterManager {
     }
   }
 
-  void _printEntry(SendPort sendPort) async {
+  void _printEntry(Map<String, dynamic> initMessage) async {
     try {
+      logger.i('PrinterManager Print isolate entry point started');
+      final SendPort sendPort = initMessage['sendPort'] as SendPort;
+      final String? metalWatermarkPath = initMessage['metalWatermarkPath'] as String?;
+
       logger.i('PrinterManager Print isolate entry point started');
       final isolateReceivePort = ReceivePort();
       sendPort.send(isolateReceivePort.sendPort);
@@ -154,7 +164,13 @@ class PrinterManager {
               final isFront = ob.isFront;
               final isMetal = ob.isMetal;
               try {
-                final imageBuffer = await drawImage(path: path, bindings: bindings, isFront: isFront, isMetal: isMetal);
+                final imageBuffer = await drawImage(
+                  path: path,
+                  bindings: bindings,
+                  isFront: isFront,
+                  isMetal: isMetal,
+                  metalWatermarkPath: metalWatermarkPath,
+                );
                 logger.i('DrawImageMessage imageBuffer: $imageBuffer');
                 replyPort.send({'imageBuffer': imageBuffer, 'errorMsg': ''});
               } catch (e) {
@@ -415,6 +431,27 @@ class PrinterManager {
     }
   }
 
+  Future<void> _prepareMetalWatermarkAsset() async {
+    try {
+      // ✅ Method B:
+      // 메탈 워터마크용 PNG는 메인 isolate에서 1회만 파일로 풀어두고,
+      // 프린트 isolate에는 "파일 경로"만 전달합니다. (isolate에서 rootBundle/path_provider 호출 금지)
+      _metalWatermarkPath = await copyAssetPngToFile(
+        'assets/images/black.png',
+        outFileName: 'black.png',
+      );
+
+      if (_metalWatermarkPath == null) {
+        SlackLogService().sendErrorLogToSlack('Failed to prepare metal watermark asset');
+      }
+      logger.i('Metal watermark prepared: $_metalWatermarkPath');
+    } catch (e) {
+      // 워터마크 준비 실패 시에도 일반 출력은 동작하도록 fallback
+      logger.i('Failed to prepare metal watermark asset: $e');
+      _metalWatermarkPath = null;
+    }
+  }
+
   Future<PrinterLog?> startLog() async {
     final response = await _sendAndResponse(PrintStateMessage());
     final printerLog = response['printerLog'] as PrinterLog;
@@ -496,11 +533,16 @@ class PrinterManager {
     return imageBytes;
   }
 
-  Future<String> drawImage(
-      {required String path, required PrinterBindings bindings, bool isFront = true, required bool isMetal}) async {
+  Future<String> drawImage({
+    required String path,
+    required PrinterBindings bindings,
+    bool isFront = true,
+    required bool isMetal,
+    required String? metalWatermarkPath,
+  }) async {
     StringBuffer buffer = StringBuffer();
     try {
-      await _prepareAndDrawImage(path, true, bindings, isMetal);
+      await _prepareAndDrawImage(path, bindings, isMetal, metalWatermarkPath);
 
       logger.i('Committing canvas...');
       buffer.write(_commitCanvas(bindings));
@@ -519,7 +561,8 @@ class PrinterManager {
     }
   }
 
-  Future<void> _prepareAndDrawImage(String imagePath, bool isFront, PrinterBindings bindings, bool isMetal) async {
+  Future<void> _prepareAndDrawImage(
+      String imagePath, PrinterBindings bindings, bool isMetal, String? metalWatermarkPath) async {
     bindings.setCanvasOrientation(true);
     bindings.prepareCanvas(isColor: true);
 
@@ -547,10 +590,15 @@ class PrinterManager {
 
     // Metal Settings..
     if (shouldPrintMetal) {
-      final blackImg = await copyAssetPngToFile('assets/images/black_small.png');
-      bindings.setImageParameters(transparency: 1, rotation: 0, scale: 0);
-      bindings.setRibbonOpt(1, 0, "2", 2);
-      bindings.drawWaterMark(blackImg);
+      if (metalWatermarkPath == null) {
+        logger.i('Metal watermark path is null; skipping drawWaterMark');
+      } else {
+        bindings.setImageParameters(transparency: 1, rotation: 0, scale: 0);
+        bindings.setRibbonOpt(1, 0, "2", 2);
+        bindings.drawWaterMark(metalWatermarkPath);
+
+        logger.i('Metal watermark drawn $metalWatermarkPath');
+      }
     } else {
       bindings.setRibbonOpt(1, 0, "2", 2);
     }
