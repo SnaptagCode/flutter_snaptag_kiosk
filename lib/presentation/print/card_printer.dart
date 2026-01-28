@@ -2,6 +2,8 @@
 import 'dart:io';
 
 // Utf8 사용을 위한 임포트
+import 'package:flutter_snaptag_kiosk/presentation/core/card_count_provider.dart';
+import 'package:flutter_snaptag_kiosk/presentation/core/printer_log_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
 import 'package:flutter_snaptag_kiosk/core/data/datasources/remote/slack_log_service.dart';
 import 'package:flutter_snaptag_kiosk/core/data/repositories/kiosk_repository.dart';
@@ -87,9 +89,24 @@ class PrinterService extends _$PrinterService {
       final printerManager = await PrinterManager.getInstance();
       final isMetal = ref.read(kioskInfoServiceProvider)?.isMetal == true ? true : false;
 
-      await printerManager.startPrint(
+      final printerLog = await printerManager.startPrint(
           isSingleMode: isSingleMode, frontFile: frontFile, embeddedFile: embeddedFile, isMetal: isMetal);
+      final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
 
+      if (machineId != 0 && printerLog != null) {
+        final kioskEventId = ref.read(kioskInfoServiceProvider)?.kioskEventId ?? 0;
+        final cardCountState = ref.read(cardCountProvider);
+        final log = printerLog.copyWith(kioskMachineId: machineId);
+        ref.read(printerLogProvider.notifier).update(log);
+        await ref.read(kioskRepositoryProvider).updatePrintLog(request: log);
+        if (kioskEventId != 0) {
+          await ref.read(kioskRepositoryProvider).checkKioskAlive(
+                kioskEventId: kioskEventId,
+                machineId: machineId,
+                remainingSingleSidedCount: cardCountState.remainingSingleSidedCount,
+              );
+        }
+      }
       // 프린트 성공 시 상태를 완료로 변경
       state = const AsyncValue.data(null);
     } catch (e, stackTrace) {
