@@ -48,6 +48,13 @@ abstract class LocaleKeys {
   static const alert_txt_refund_info = 'alert_txt_refund_info';
   static const alert_btn_cancel = 'alert_btn_cancel';
   static const alert_btn_ok = 'alert_btn_ok';
+  static const alert_btn_go_to_home = 'alert_btn_go_to_home';
+  static const alert_txt_card_limit_exceeded = 'alert_txt_card_limit_exceeded';
+  static const alert_txt_insufficient_balance = 'alert_txt_insufficient_balance';
+  static const alert_txt_verification_error = 'alert_txt_verification_error';
+  static const alert_txt_timeout_payment = 'alert_txt_timeout_payment';
+  static const alert_txt_merchant_restriction = 'alert_txt_merchant_restriction';
+  static const alert_txt_timeout_to_home = 'alert_txt_timeout_to_home';
   static const alert_title_empty_event = 'alert_title_empty_event';
 
   static const alert_title_auto_refund_alert = 'alert_title_auto_refund_alert';

@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:flutter_snaptag_kiosk/core/utils/random/random_photo_util.dart';
+import 'package:flutter_snaptag_kiosk/core/common/random/random_photo_util.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_test/flutter_test.dart';
 

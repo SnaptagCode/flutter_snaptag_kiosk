@@ -1,6 +1,6 @@
-export 'constants/constants.dart';
-export 'errors/errors.dart';
-export 'extensions/extensions.dart';
+export 'common/constants/constants.dart';
+export 'common/errors/errors.dart';
+export 'common/extensions/extensions.dart';
 export 'providers/providers.dart';
-export 'theme/theme.dart';
-export 'utils/utils.dart';
+export 'ui/theme/theme.dart';
+export 'common/utils.dart';

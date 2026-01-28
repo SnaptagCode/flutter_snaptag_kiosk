@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:dio/dio.dart';
+import 'package:flutter_snaptag_kiosk/core/core.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -159,6 +161,8 @@ class NetworkStatusNotifier extends _$NetworkStatusNotifier {
   void _updateInternetStatus(bool hasInternet) {
     NetworkStatus newStatus;
 
+    logger.i('_updateInternetStatus: $hasInternet');
+
     if (state.type == NetworkType.none) {
       newStatus = NetworkStatus.disconnected;
       _consecutiveFailures = 0;
@@ -183,6 +187,15 @@ class NetworkStatusNotifier extends _$NetworkStatusNotifier {
       hasInternet: hasInternet,
       lastChecked: DateTime.now(),
     );
+  }
+
+  bool isNetworkError(dynamic error) {
+    return error is DioException &&
+        (error.type == DioExceptionType.connectionTimeout ||
+            error.type == DioExceptionType.receiveTimeout ||
+            error.type == DioExceptionType.sendTimeout ||
+            error.type == DioExceptionType.connectionError ||
+            error.type == DioExceptionType.unknown);
   }
 
   /// 수동으로 네트워크 상태 새로고침
