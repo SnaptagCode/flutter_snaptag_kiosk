@@ -66,5 +66,6 @@
   "choice_enter_code": "Enter code",
   "choice_enter_verification_code": "Enter verification code",
   "print_takes_one_minute": "Printing takes about 1 minute.",
-  "currency_won": "KRW"
+  "currency_won": "KRW",
+  "common_btn_back": "Back"
 }

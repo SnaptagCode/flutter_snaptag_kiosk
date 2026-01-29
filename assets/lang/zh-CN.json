@@ -65,5 +65,6 @@
   "choice_enter_code": "输入验证码",
   "choice_enter_verification_code": "输入验证码",
   "print_takes_one_minute": "打印大约需要1分钟。",
-  "currency_won": "韩元"
+  "currency_won": "韩元",
+  "common_btn_back": "返回"
 }

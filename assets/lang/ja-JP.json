@@ -66,5 +66,6 @@
   "choice_enter_code": "認証番号を入力",
   "choice_enter_verification_code": "認証番号を入力",
   "print_takes_one_minute": "印刷には約1分かかります。",
-  "currency_won": "ウォン"
+  "currency_won": "ウォン",
+  "common_btn_back": "戻る"
 }

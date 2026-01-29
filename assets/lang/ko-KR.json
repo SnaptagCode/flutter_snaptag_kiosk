@@ -66,5 +66,6 @@
   "choice_enter_code": "인증번호 입력하기",
   "choice_enter_verification_code": "인증번호 입력하기",
   "print_takes_one_minute": "카드가 출력되기까지 약 1분 정도의 시간이 소요됩니다.",
-  "currency_won": "원"
+  "currency_won": "원",
+  "common_btn_back": "뒤로가기"
 }
