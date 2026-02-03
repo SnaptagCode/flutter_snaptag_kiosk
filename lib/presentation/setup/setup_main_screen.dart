@@ -158,8 +158,6 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
     final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
     final kioskEventId = ref.read(kioskInfoServiceProvider)?.kioskEventId ?? 0;
     final cardCountState = ref.read(cardCountProvider);
-    final deviceUUID = await ref.read(deviceUuidProvider.future);
-    final getInfoByKey = ref.read(kioskInfoServiceProvider.notifier).getInfoByKey;
 
     await ref.read(printerServiceProvider.notifier).printerStateLog();
 
@@ -168,15 +166,6 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
           machineId: machineId,
           remainingSingleSidedCount: cardCountState.remainingSingleSidedCount,
         );
-
-    if (!getInfoByKey) {
-      await ref.read(kioskRepositoryProvider).createUniqueKeyHistory(
-            request: UniqueKeyRequest(
-              machineId: machineId.toString(),
-              uniqueKey: deviceUUID,
-            ),
-          );
-    }
 
     SlackLogService()
         .sendLogToSlack('machineId:$machineId, currentVersion:$currentVersion, latestVersion:$latestVersion');
