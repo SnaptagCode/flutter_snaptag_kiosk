@@ -172,7 +172,7 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
     if (!getInfoByKey) {
       await ref.read(kioskRepositoryProvider).createUniqueKeyHistory(
             request: UniqueKeyRequest(
-              kioskMachineId: machineId.toString(),
+              machineId: machineId.toString(),
               uniqueKey: deviceUUID,
             ),
           );

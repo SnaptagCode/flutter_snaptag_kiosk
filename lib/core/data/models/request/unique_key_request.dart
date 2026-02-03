@@ -6,7 +6,7 @@ part 'unique_key_request.g.dart';
 @freezed
 class UniqueKeyRequest with _$UniqueKeyRequest {
   const factory UniqueKeyRequest({
-    required String kioskMachineId,
+    required String machineId,
     required String uniqueKey,
   }) = _UniqueKeyRequest;
 
