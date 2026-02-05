@@ -6,7 +6,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_snaptag_kiosk/core/common/sound/sound_manager.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:go_router/go_router.dart';
 import 'package:flutter_snaptag_kiosk/core/ui/widget/code_keypad.dart';
 
 ///
@@ -98,153 +97,23 @@ class DialogHelper {
     );
   }
 
-  static Future<bool> showSetupOneButtonDialog(
+  /// 공통 확인/취소 다이얼로그. [showSetupDialog], [showKioskDialog]에서 사용.
+  static Future<bool> _showConfirmDialog(
     BuildContext context, {
     required String title,
-    String confirmButtonText = '확인',
-  }) async {
-    return await showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return DefaultTextStyle(
-          style: TextStyle(
-            fontFamily: context.locale.languageCode == 'ja' ? 'MPLUSRounded' : 'Cafe24Ssurround2',
-          ),
-          child: AlertDialog(
-            backgroundColor: Colors.white,
-            insetPadding: EdgeInsets.symmetric(horizontal: 100.w),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20.r),
-            ),
-            titlePadding: EdgeInsets.zero,
-            actionsPadding: EdgeInsets.zero,
-            title: Center(
-              child: Padding(
-                padding: EdgeInsets.only(top: 60.h, bottom: 36.h, left: 40.w, right: 40.w),
-                child: Text(
-                  title,
-                  textAlign: TextAlign.center,
-                  style: context.typography.kioskAlert1B.copyWith(
-                    fontFamily: 'Pretendard',
-                    color: Colors.black,
-                  ),
-                ),
-              ),
-            ),
-            actions: [
-              Padding(
-                padding: EdgeInsets.only(bottom: 40.h, left: 40.w, right: 40.w),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () async {
-                          await SoundManager().playSound();
-                          Navigator.of(context).pop(true);
-                        },
-                        style: context.setupDialogConfirmButtonStyle,
-                        child: Text(
-                          confirmButtonText,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              )
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  static Future<bool> showSetupDialog(
-    BuildContext context, {
-    required String title,
+    String? content,
+    bool showCancelButton = false,
     String cancelButtonText = '취소',
-    String confirmButtonText = '확인',
+    required String confirmButtonText,
+    required ButtonStyle cancelButtonStyle,
+    required ButtonStyle confirmButtonStyle,
+    TextStyle? cancelTextStyle,
+    TextStyle? confirmTextStyle,
   }) async {
-    return await showDialog(
+    final result = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
-      builder: (BuildContext context) {
-        return DefaultTextStyle(
-          style: TextStyle(
-            fontFamily: context.locale.languageCode == 'ja' ? 'MPLUSRounded' : 'Cafe24Ssurround2',
-          ),
-          child: AlertDialog(
-            backgroundColor: Colors.white,
-            insetPadding: EdgeInsets.symmetric(horizontal: 100.w),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20.r),
-            ),
-            titlePadding: EdgeInsets.zero,
-            actionsPadding: EdgeInsets.zero,
-            title: Center(
-              child: Padding(
-                padding: EdgeInsets.only(top: 60.h, bottom: 36.h, left: 40.w, right: 40.w),
-                child: Text(
-                  title,
-                  textAlign: TextAlign.center,
-                  style: context.typography.kioskAlert1B.copyWith(
-                    fontFamily: 'Pretendard',
-                    color: Colors.black,
-                  ),
-                ),
-              ),
-            ),
-            actions: [
-              Padding(
-                padding: EdgeInsets.only(bottom: 40.h, left: 40.w, right: 40.w),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () async {
-                          await SoundManager().playSound();
-                          Navigator.of(context).pop(false);
-                        },
-                        style: context.setupDialogCancelButtonStyle,
-                        child: Text(
-                          cancelButtonText,
-                        ),
-                      ),
-                    ),
-                    SizedBox(width: 12.w),
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () async {
-                          await SoundManager().playSound();
-                          Navigator.of(context).pop(true);
-                        },
-                        style: context.setupDialogConfirmButtonStyle,
-                        child: Text(
-                          confirmButtonText,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              )
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  static Future<bool> _showOneButtonKioskDialog(
-    BuildContext context, {
-    required String title,
-    required String message,
-    required String buttonText,
-    VoidCallback? onButtonPressed,
-  }) async {
-    await showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
+      builder: (BuildContext dialogContext) {
         return DefaultTextStyle(
           style: TextStyle(
             fontFamily: context.locale.languageCode == 'ja' ? 'MPLUSRounded' : 'Cafe24Ssurround2',
@@ -260,7 +129,7 @@ class DialogHelper {
             actionsPadding: EdgeInsets.zero,
             title: Center(
               child: Padding(
-                padding: EdgeInsets.only(top: 60.h, bottom: 20.h, left: 40.w, right: 40.w),
+                padding: EdgeInsets.only(top: 60.h, left: 40.w, right: 40.w),
                 child: Text(
                   title,
                   textAlign: TextAlign.center,
@@ -271,36 +140,44 @@ class DialogHelper {
                 ),
               ),
             ),
-            content: message.isNotEmpty
+            content: content != null
                 ? Padding(
-                    padding: EdgeInsets.only(left: 40.w, right: 40.w),
+                    padding: EdgeInsets.only(top: 20.h, left: 40.w, right: 40.w),
                     child: Text(
-                      message,
+                      content,
+                      textAlign: TextAlign.center,
                       style: context.typography.kioskAlert2M.copyWith(
                         color: Colors.black,
                         fontFamily: 'Pretendard',
                       ),
-                      textAlign: TextAlign.center,
                     ),
                   )
                 : null,
             actions: [
               Padding(
-                padding: EdgeInsets.only(bottom: 40.h, top: 36.h, left: 40.w, right: 40.w),
+                padding: EdgeInsets.only(top: 36.h, bottom: 40.h, left: 40.w, right: 40.w),
                 child: Row(
                   children: [
+                    if (showCancelButton)
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () async {
+                            await SoundManager().playSound();
+                            Navigator.of(dialogContext).pop(false);
+                          },
+                          style: cancelButtonStyle,
+                          child: Text(cancelButtonText, style: cancelTextStyle),
+                        ),
+                      ),
+                    if (showCancelButton) SizedBox(width: 12.w),
                     Expanded(
                       child: ElevatedButton(
-                        onPressed: () {
-                          context.pop();
-                          if (onButtonPressed != null) {
-                            onButtonPressed();
-                          }
+                        onPressed: () async {
+                          await SoundManager().playSound();
+                          Navigator.of(dialogContext).pop(true);
                         },
-                        style: context.dialogButtonStyle,
-                        child: Text(
-                          buttonText,
-                        ),
+                        style: confirmButtonStyle,
+                        child: Text(confirmButtonText, style: confirmTextStyle),
                       ),
                     ),
                   ],
@@ -311,98 +188,51 @@ class DialogHelper {
         );
       },
     );
-    return true;
+    return result ?? false;
   }
 
-  static Future<bool> showTwoButtonKioskDialog(
-    BuildContext context,
-    ButtonStyle? confirmButtonStyle, {
+  static Future<bool> showSetupDialog(
+    BuildContext context, {
     required String title,
-    required String contentText,
-    required String cancelButtonText,
-    required String confirmButtonText,
+    String? content,
+    bool showCancelButton = false,
+    String cancelButtonText = '취소',
+    String confirmButtonText = '확인',
   }) async {
-    return await showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return DefaultTextStyle(
-          style: TextStyle(
-            fontFamily: context.locale.languageCode == 'ja' ? 'MPLUSRounded' : 'Cafe24Ssurround2',
-          ),
-          child: AlertDialog(
-            backgroundColor: Colors.white,
-            insetPadding: EdgeInsets.symmetric(horizontal: 100.h),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20.r),
-            ),
-            title: Center(
-              child: Text(
-                title,
-                textAlign: TextAlign.center,
-                style: context.typography.kioskAlert1B.copyWith(
-                  fontFamily: 'Pretendard',
-                  color: Colors.black,
-                ),
-              ),
-            ),
-            content: Text(
-              contentText,
-              textAlign: TextAlign.center,
-              style: context.typography.kioskAlert2M.copyWith(
-                fontFamily: 'Pretendard',
-                color: Color(0xFF414448),
-              ),
-            ),
-            actions: [
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () async {
-                        await SoundManager().playSound();
-                        Navigator.of(context).pop(false);
-                      },
-                      style: context.refundDialogCancelButtonStyle,
-                      child: Text(cancelButtonText, style: TextStyle(color: Color(0xFF999999))),
-                    ),
-                  ),
-                  SizedBox(width: 12.w),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () async {
-                        await SoundManager().playSound();
-                        Navigator.of(context).pop(true);
-                      },
-                      style: context.dialogKioskStyle,
-                      child: Text(confirmButtonText, style: TextStyle(color: Color(0xFFFFFFFF))),
-                    ),
-                  ),
-                ],
-              )
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  //showCustomDialog
-  static Future<void> showCustomDialog(BuildContext context,
-      {required String title,
-      required String message,
-      required String buttonText,
-      VoidCallback? onButtonPressed}) async {
-    await _showOneButtonKioskDialog(
+    return await _showConfirmDialog(
       context,
       title: title,
-      message: message,
-      buttonText: buttonText,
-      onButtonPressed: onButtonPressed,
+      content: content,
+      showCancelButton: showCancelButton,
+      cancelButtonText: cancelButtonText,
+      confirmButtonText: confirmButtonText,
+      cancelButtonStyle: context.setupDialogCancelButtonStyle,
+      confirmButtonStyle: context.setupDialogConfirmButtonStyle,
     );
   }
 
-  //    2.3.0 이하 버전용
+  static Future<bool> showKioskDialog(
+    BuildContext context, {
+    required String title,
+    required String contentText,
+    String? cancelButtonText,
+    required String confirmButtonText,
+    ButtonStyle? confirmButtonStyle,
+  }) async {
+    return await _showConfirmDialog(
+      context,
+      title: title,
+      content: contentText,
+      showCancelButton: cancelButtonText != null,
+      cancelButtonText: cancelButtonText ?? '취소',
+      confirmButtonText: confirmButtonText,
+      cancelButtonStyle: context.refundDialogCancelButtonStyle,
+      confirmButtonStyle: confirmButtonStyle ?? context.dialogKioskStyle,
+      cancelTextStyle: const TextStyle(color: Color(0xFF999999)),
+      confirmTextStyle: const TextStyle(color: Color(0xFFFFFFFF)),
+    );
+  }
+
   static Future<void> showPrintCompleteDialog(
     //5초 후 자동으로 닫히고 QR 화면으로 이동
     BuildContext context, {
@@ -414,13 +244,16 @@ class DialogHelper {
         Navigator.of(context, rootNavigator: true).pop();
       }
     });
-    await _showOneButtonKioskDialog(
+    final result = await showKioskDialog(
       context,
       title: LocaleKeys.alert_title_print_complete.tr(),
-      message: LocaleKeys.alert_txt_print_complete.tr(),
-      buttonText: LocaleKeys.alert_btn_print_complete.tr(),
-      onButtonPressed: onButtonPressed,
+      contentText: LocaleKeys.alert_txt_print_complete.tr(),
+      confirmButtonText: LocaleKeys.alert_btn_print_complete.tr(),
     );
+
+    if (result) {
+      HomeRouteData().go(context);
+    }
   }
 
   /// 타임아웃 알럿 (실시간 카운트다운 표시)
@@ -454,177 +287,110 @@ class DialogHelper {
   }
 
   static Future<void> showCardLimitExceededDialog(BuildContext context) async {
-    await _showOneButtonKioskDialog(
+    await showKioskDialog(
       context,
       title: LocaleKeys.alert_title_purchase_failure.tr(),
-      message: LocaleKeys.alert_txt_card_limit_exceeded.tr(),
-      buttonText: LocaleKeys.alert_btn_paymentcard_failure.tr(),
+      contentText: LocaleKeys.alert_txt_card_limit_exceeded.tr(),
+      confirmButtonText: LocaleKeys.alert_btn_paymentcard_failure.tr(),
     );
   }
 
   static Future<void> showInsufficientBalanceDialog(BuildContext context) async {
-    await _showOneButtonKioskDialog(
+    await showKioskDialog(
       context,
       title: LocaleKeys.alert_title_purchase_failure.tr(),
-      message: LocaleKeys.alert_txt_insufficient_balance.tr(),
-      buttonText: LocaleKeys.alert_btn_paymentcard_failure.tr(),
+      contentText: LocaleKeys.alert_txt_insufficient_balance.tr(),
+      confirmButtonText: LocaleKeys.alert_btn_paymentcard_failure.tr(),
     );
   }
 
   static Future<void> showVerificationErrorDialog(BuildContext context) async {
-    await _showOneButtonKioskDialog(
+    await showKioskDialog(
       context,
       title: LocaleKeys.alert_title_purchase_failure.tr(),
-      message: LocaleKeys.alert_txt_verification_error.tr(),
-      buttonText: LocaleKeys.alert_btn_paymentcard_failure.tr(),
+      contentText: LocaleKeys.alert_txt_verification_error.tr(),
+      confirmButtonText: LocaleKeys.alert_btn_paymentcard_failure.tr(),
     );
   }
 
   static Future<void> showMerchantRestrictionDialog(BuildContext context) async {
-    await _showOneButtonKioskDialog(
+    await showKioskDialog(
       context,
       title: LocaleKeys.alert_title_purchase_failure.tr(),
-      message: LocaleKeys.alert_txt_merchant_restriction.tr(),
-      buttonText: LocaleKeys.alert_btn_paymentcard_failure.tr(),
+      contentText: LocaleKeys.alert_txt_merchant_restriction.tr(),
+      confirmButtonText: LocaleKeys.alert_btn_paymentcard_failure.tr(),
     );
   }
 
   static Future<void> showTimeoutPaymentDialog(BuildContext context) async {
-    await _showOneButtonKioskDialog(
+    await showKioskDialog(
       context,
       title: LocaleKeys.alert_title_purchase_failure.tr(),
-      message: LocaleKeys.alert_txt_timeout_payment.tr(),
-      buttonText: LocaleKeys.alert_btn_paymentcard_failure.tr(),
-    );
-  }
-
-  static Future<void> showPrintWaitingDialog(BuildContext context) async {
-    await _showOneButtonKioskDialog(
-      context,
-      title: "프린트가 준비중입니다.",
-      message: "",
-      buttonText: LocaleKeys.alert_btn_paymentcard_failure.tr(),
-    );
-  }
-
-  static Future<void> showNeedRibbonFilmDialog(BuildContext context, VoidCallback? onButtonPressed) async {
-    await _showOneButtonKioskDialog(
-      context,
-      title: LocaleKeys.alert_title_need_ribbon_film.tr(),
-      message: LocaleKeys.alert_txt_need_ribbon_film.tr(),
-      buttonText: LocaleKeys.alert_btn_paymentcard_failure.tr(),
-      onButtonPressed: onButtonPressed,
+      contentText: LocaleKeys.alert_txt_timeout_payment.tr(),
+      confirmButtonText: LocaleKeys.alert_btn_paymentcard_failure.tr(),
     );
   }
 
   static Future<void> showAuthNumReissueCompleteDialog(BuildContext context) async {
-    await _showOneButtonKioskDialog(
+    await showKioskDialog(
       context,
       title: LocaleKeys.alert_title_authNum_reissue_complete.tr(),
-      message: LocaleKeys.alert_txt_authNum_reissue_complete.tr(),
-      buttonText: LocaleKeys.alert_btn_authNum_reissue_complete.tr(),
-    );
-  }
-
-  static Future<void> showEmptyEventDialog(BuildContext context) async {
-    await _showOneButtonKioskDialog(
-      context,
-      title: LocaleKeys.alert_title_empty_event.tr(),
-      message: "",
-      buttonText: LocaleKeys.alert_btn_ok.tr(),
+      contentText: LocaleKeys.alert_txt_authNum_reissue_complete.tr(),
+      confirmButtonText: LocaleKeys.alert_btn_authNum_reissue_complete.tr(),
     );
   }
 
   static Future<void> showAuthNumReissueFailureDialog(BuildContext context) async {
-    await _showOneButtonKioskDialog(
+    await showKioskDialog(
       context,
       title: LocaleKeys.alert_title_authNum_reissue_failure.tr(),
-      message: LocaleKeys.alert_txt_authNum_reissue_failure.tr(),
-      buttonText: LocaleKeys.alert_btn_authNum_reissue_failure.tr(),
-    );
-  }
-
-  static Future<void> showCheckPrintStateDialog(BuildContext context) async {
-    await _showOneButtonKioskDialog(
-      context,
-      title: "프린트 기기 상태를 확인해주세요.",
-      message: "",
-      buttonText: LocaleKeys.alert_btn_paymentcard_failure.tr(),
+      contentText: LocaleKeys.alert_txt_authNum_reissue_failure.tr(),
+      confirmButtonText: LocaleKeys.alert_btn_authNum_reissue_failure.tr(),
     );
   }
 
   static Future<void> showErrorDialog(BuildContext context) async {
-    await _showOneButtonKioskDialog(
+    await showKioskDialog(
       context,
       title: LocaleKeys.alert_title_authNum_error.tr(),
-      message: LocaleKeys.alert_txt_authNum_error.tr(),
-      buttonText: LocaleKeys.alert_btn_authNum_error.tr(),
+      contentText: LocaleKeys.alert_txt_authNum_error.tr(),
+      confirmButtonText: LocaleKeys.alert_btn_authNum_error.tr(),
     );
   }
 
   static Future<void> showVerificationCodeExpriedDialog(BuildContext context) async {
-    await _showOneButtonKioskDialog(
+    await showKioskDialog(
       context,
       title: LocaleKeys.alert_title_verification_code_expried.tr(),
-      message: LocaleKeys.alert_txt_verification_code_expried.tr(),
-      buttonText: LocaleKeys.alert_btn_verification_code_expried.tr(),
+      contentText: LocaleKeys.alert_txt_verification_code_expried.tr(),
+      confirmButtonText: LocaleKeys.alert_btn_verification_code_expried.tr(),
     );
   }
 
   static Future<void> showPurchaseFailedDialog(BuildContext context) async {
-    await _showOneButtonKioskDialog(
+    await showKioskDialog(
       context,
       title: LocaleKeys.alert_title_purchase_failure.tr(),
-      message: LocaleKeys.alert_txt_purchase_failure.tr(),
-      buttonText: LocaleKeys.alert_btn_purchase_failure.tr(),
+      contentText: LocaleKeys.alert_txt_purchase_failure.tr(),
+      confirmButtonText: LocaleKeys.alert_btn_purchase_failure.tr(),
     );
   }
 
-  static Future<void> showPaymentCardFailedDialog(BuildContext context) async {
-    await _showOneButtonKioskDialog(
-      context,
-      title: LocaleKeys.alert_title_paymentcard_failure.tr(),
-      message: LocaleKeys.alert_txt_paymentcard_failure.tr(),
-      buttonText: LocaleKeys.alert_btn_paymentcard_failure.tr(),
-    );
-  }
-
-  static Future<void> showAutoRefundDescriptionDialog(
-    BuildContext context, {
-    VoidCallback? onButtonPressed,
-  }) async {
-    await _showOneButtonKioskDialog(
-      context,
-      title: LocaleKeys.alert_title_auto_refund_alert.tr(),
-      message: LocaleKeys.alert_txt_auto_refund_alert.tr(),
-      buttonText: LocaleKeys.alert_btn_paymentcard_failure.tr(),
-      onButtonPressed: onButtonPressed,
-    );
-  }
-
-  static Future<bool> showPrintErrorDialog(
-    BuildContext context, {
-    VoidCallback? onButtonPressed,
-  }) async {
-    return await _showOneButtonKioskDialog(
+  static Future<bool> showPrintErrorDialog(BuildContext context) async {
+    return await showKioskDialog(
       context,
       title: LocaleKeys.alert_title_print_failure.tr(),
-      message: LocaleKeys.alert_txt_print_failure.tr(),
-      buttonText: LocaleKeys.alert_btn_print_failure.tr(),
-      onButtonPressed: onButtonPressed,
+      contentText: LocaleKeys.alert_txt_print_failure.tr(),
+      confirmButtonText: LocaleKeys.alert_btn_print_failure.tr(),
     );
   }
 
-  static Future<bool> showPrintCardRefillDialog(
-    BuildContext context, {
-    VoidCallback? onButtonPressed,
-  }) async {
-    return await _showOneButtonKioskDialog(
+  static Future<bool> showPrintCardRefillDialog(BuildContext context) async {
+    return await showKioskDialog(
       context,
       title: LocaleKeys.alert_title_card_refill.tr(),
-      message: LocaleKeys.alert_txt_card_refill.tr(),
-      buttonText: LocaleKeys.alert_btn_card_refill.tr(),
-      onButtonPressed: onButtonPressed,
+      contentText: LocaleKeys.alert_txt_card_refill.tr(),
+      confirmButtonText: LocaleKeys.alert_btn_card_refill.tr(),
     );
   }
 
@@ -663,21 +429,6 @@ class DialogHelper {
     );
   }
 }
-
-/* Admin 패스워드 실패시 다이얼로그
-  static Future<void> showAdminFailDialog(
-      BuildContext context, {
-        VoidCallback? onButtonPressed,
-      }) async {
-    await _showOneButtonKioskDialog(
-      context,
-      title: '비밀번호 오류',
-      message: '비밀번호를 다시 입력해주세요',
-      buttonText: LocaleKeys.alert_btn_print_complete.tr(),
-      onButtonPressed: onButtonPressed,
-    );
-  }
-*/
 
 /// 타임아웃 다이얼로그 위젯 (실시간 카운트다운)
 class _TimeoutDialogWidget extends StatefulWidget {

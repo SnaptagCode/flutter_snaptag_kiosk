@@ -129,8 +129,14 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> with Si
               return;
             }
 
-            // 환불 알럿
-            await DialogHelper.showAutoRefundDescriptionDialog(context, onButtonPressed: () async {
+            final result = await DialogHelper.showKioskDialog(
+              context,
+              title: LocaleKeys.alert_title_auto_refund_alert.tr(),
+              contentText: LocaleKeys.alert_txt_auto_refund_alert.tr(),
+              confirmButtonText: LocaleKeys.alert_btn_paymentcard_failure.tr(),
+            );
+
+            if (result) {
               // 에러 발생 시 환불 처리
               await refund();
 
@@ -141,19 +147,19 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> with Si
               if (checkCardFeederIsEmpty(errorMessage)) {
                 await DialogHelper.showPrintCardRefillDialog(
                   context,
-                  onButtonPressed: () {
-                    HomeRouteData().go(context);
-                  },
                 );
+                if (result) {
+                  HomeRouteData().go(context);
+                }
               } else {
-                await DialogHelper.showPrintErrorDialog(
+                final result = await DialogHelper.showPrintErrorDialog(
                   context,
-                  onButtonPressed: () {
-                    HomeRouteData().go(context);
-                  },
                 );
+                if (result) {
+                  HomeRouteData().go(context);
+                }
               }
-            });
+            }
           },
           loading: () => null,
           data: (_) async {

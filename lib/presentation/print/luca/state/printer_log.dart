@@ -20,6 +20,8 @@ class PrinterLog with _$PrinterLog {
     @Default(null) bool? isPrintingNow,
     @Default(null) bool? isFeederEmpty,
     @Default(null) String? sdkErrorMessage,
+    @Default(null) String? remainingSingleSidedCountPre,
+    @Default(null) String? remainingSingleSidedCountPost,
   }) = _PrinterLog;
 
   factory PrinterLog.fromJson(Map<String, dynamic> json) => _$PrinterLogFromJson(json);

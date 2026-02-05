@@ -103,11 +103,14 @@ class CodeVerificationScreen extends ConsumerWidget {
       case 409:
         //KioskBackPhotoCardStatus.REFUNDED_FAILED_BEFORE_PRINTED
         final orderDto = data?['res']['order'];
-        final result = await DialogHelper.showTwoButtonKioskDialog(context, context.dialogButtonStyle,
-            title: LocaleKeys.alert_title_refund_info.tr(),
-            contentText: LocaleKeys.alert_txt_refund_info.tr(),
-            cancelButtonText: LocaleKeys.alert_btn_cancel.tr(),
-            confirmButtonText: LocaleKeys.alert_btn_ok.tr());
+        final result = await DialogHelper.showKioskDialog(
+          context,
+          title: LocaleKeys.alert_title_refund_info.tr(),
+          contentText: LocaleKeys.alert_txt_refund_info.tr(),
+          cancelButtonText: LocaleKeys.alert_btn_cancel.tr(),
+          confirmButtonText: LocaleKeys.alert_btn_ok.tr(),
+          confirmButtonStyle: context.dialogButtonStyle,
+        );
         if (result) {
           if (orderDto != null) {
             final order = OrderErrorEntity.fromJson(orderDto);

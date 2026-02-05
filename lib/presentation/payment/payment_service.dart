@@ -106,8 +106,6 @@ class PaymentService extends _$PaymentService {
   Future<void> _handleEmptyApprovalNumber(PaymentResponse paymentResponse, String machineId) async {
     final backPhoto = ref.watch(verifyPhotoCardProvider).value!;
 
-    SlackLogService().sendWarningLogToSlack('*[MachineId: $machineId]*\nNull approvalNo Card');
-
     await ref.read(kioskRepositoryProvider).updateBackPhotoStatus(UpdateBackPhotoRequest(
           photoAuthNumber: backPhoto.photoAuthNumber,
           status: "STARTED",
@@ -274,7 +272,7 @@ class PaymentService extends _$PaymentService {
       ref.read(paymentResponseStateProvider.notifier).update(paymentResponse);
       isSuccess = paymentResponse.isSuccess;
     } catch (e) {
-      SlackLogService().sendWarningLogToSlack('error409 refund fail error : $e');
+      SlackLogService().sendLogToSlack('error409 refund fail error : $e');
       logger.e('Refund failed', error: e);
       rethrow;
     } finally {
@@ -363,7 +361,7 @@ class PaymentService extends _$PaymentService {
 
       return await ref.read(kioskRepositoryProvider).updateOrderStatus(orderId.toInt(), request);
     } catch (e) {
-      SlackLogService().sendWarningLogToSlack('update order error: $e');
+      SlackLogService().sendLogToSlack('update order error: $e');
       rethrow;
     }
   }

@@ -67,6 +67,7 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
                 final result = await DialogHelper.showSetupDialog(
                   context,
                   title: '메인페이지로 이동합니다.',
+                  showCancelButton: true,
                 );
                 if (result) {
                   Navigator.pop(context);
@@ -318,6 +319,7 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
                 final result1 = await DialogHelper.showSetupDialog(
                   context,
                   title: '환불을 진행합니다.',
+                  showCancelButton: true,
                 );
                 if (!result1) {
                   context.loaderOverlay.hide();
@@ -361,6 +363,7 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
                 final result1 = await DialogHelper.showSetupDialog(
                   context,
                   title: '환불을 진행합니다.',
+                  showCancelButton: true,
                 );
                 if (!result1) {
                   context.loaderOverlay.hide();

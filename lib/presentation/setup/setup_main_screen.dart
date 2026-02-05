@@ -76,10 +76,15 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
 
     if (!isReady) return;
 
+    final isPaymentDeviceReady = await _checkPaymentDevice();
+
+    if (!isPaymentDeviceReady) return;
+
     final kioskInfo = ref.read(kioskInfoServiceProvider);
 
-    print(
+    logger.d(
         'kioskInfo: $kioskInfo kioskEventId: ${kioskInfo?.kioskEventId} kioskMachineId: ${kioskInfo?.kioskMachineId}');
+
     if (kioskInfo == null) {
       if (kioskInfo?.kioskEventId == 0 ||
           kioskInfo?.kioskEventId == null ||
@@ -87,7 +92,7 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
           kioskInfo?.kioskMachineId == null) {
         await DialogHelper.showSetupDialog(
           context,
-          title: LocaleKeys.alert_title_empty_event.tr(),
+          title: "이벤트를 실행하려면\n키오스크 기기번호를 입력해 주세요.",
         );
         return;
       }
@@ -98,6 +103,7 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
     final confirmed = await DialogHelper.showSetupDialog(
       context,
       title: '이벤트를 실행합니다.',
+      showCancelButton: true,
     );
     if (!confirmed) return;
 
@@ -108,14 +114,14 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
     final connected = await ref.read(printerServiceProvider.notifier).connectedPrinter();
     final settingPrinter = await ref.read(printerServiceProvider.notifier).checkSettingPrinter();
     if (!connected) {
-      await DialogHelper.showSetupOneButtonDialog(
+      await DialogHelper.showSetupDialog(
         context,
         title: '프린트가 준비중입니다.',
       );
       return false;
     }
     if (!settingPrinter) {
-      await DialogHelper.showSetupOneButtonDialog(
+      await DialogHelper.showSetupDialog(
         context,
         title: '프린트 기기 상태를 확인해주세요.',
       );
@@ -179,14 +185,25 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
     }
 
     HomeRouteData().go(context);
+  }
 
+  Future<bool> _checkPaymentDevice() async {
     try {
       final response = await ref.read(paymentRepositoryProvider).check();
       SlackLogService().sendInspectionEndBroadcastLogToSlack(InfoKey.inspectionEnd.key, isPaymentOn: true);
       SlackLogService().sendLogToSlack("Payment Device check: $response");
+
+      return true;
     } catch (e) {
       SlackLogService().sendInspectionEndBroadcastLogToSlack(InfoKey.inspectionEnd.key, isPaymentOn: false);
       SlackLogService().sendErrorLogToSlack("Payment Device check: $e");
+
+      DialogHelper.showSetupDialog(
+        context,
+        title: '리더기 점검',
+        content: '리더기 응답이 없습니다.\n연결 상태를 확인한 뒤 다시 시도해 주세요.',
+      );
+      return false;
     }
   }
 
@@ -223,13 +240,18 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
                 final result = await DialogHelper.showSetupDialog(
                   context,
                   title: '프로그램을 종료합니다.',
+                  showCancelButton: true,
                 );
                 if (result) {
-                  await ref.read(kioskRepositoryProvider).endKioskApplication(
-                        kioskEventId: ref.read(kioskInfoServiceProvider)?.kioskEventId ?? 0,
-                        machineId: ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0,
-                        remainingSingleSidedCount: cardCountState.remainingSingleSidedCount,
-                      );
+                  try {
+                    await ref.read(kioskRepositoryProvider).endKioskApplication(
+                          kioskEventId: ref.read(kioskInfoServiceProvider)?.kioskEventId ?? 0,
+                          machineId: ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0,
+                          remainingSingleSidedCount: cardCountState.remainingSingleSidedCount,
+                        );
+                  } catch (e) {
+                    SlackLogService().sendErrorLogToSlack("End Kiosk Application: $e");
+                  }
 
                   // 종료
                   exit(0);
@@ -537,7 +559,7 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
                         buttonName: '업데이트',
                         isActive: isUpdateAvailable,
                         onUpdatePressed: () async {
-                          final result = await DialogHelper.showTwoButtonKioskDialog(context, null,
+                          final result = await DialogHelper.showKioskDialog(context, null,
                               title: '업데이트 하시겠습니까?',
                               contentText: '업데이트 시 앱이 재시작 됩니다.',
                               cancelButtonText: '취소',
