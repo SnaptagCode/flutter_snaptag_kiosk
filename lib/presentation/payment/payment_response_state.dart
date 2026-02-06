@@ -14,11 +14,7 @@ class PaymentResponseState extends _$PaymentResponseState {
       final approvalNo = response.approvalNo ?? '';
       if (response.res != '0000' || approvalNo.trim().isEmpty) {
         final orderResponse = ref.read(createOrderInfoProvider);
-        if (orderResponse == null) {
-          SlackLogService().sendWarningLogToSlack('No order response available: Null ApprovalNo');
-          // throw Exception('No order response available');
-        }
-        SlackLogService().sendWarningLogToSlack('OrderResponse : $orderResponse \n PaymentResponse: $response');
+        SlackLogService().sendLogToSlack('OrderResponse : $orderResponse');
       }
 
       SlackLogService().sendLogToSlack('PaymentResponse: $response');

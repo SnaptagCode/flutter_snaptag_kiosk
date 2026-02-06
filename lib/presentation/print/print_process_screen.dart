@@ -39,7 +39,8 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> with Si
 
     // 단면(약 30초) / 양면(약 60초) 기준으로 99%까지 부드럽게 증가
     final pagePrintType = ref.read(pagePrintProvider);
-    final seconds = pagePrintType == PagePrintType.double ? 60 : 30;
+    final isMetal = ref.read(kioskInfoServiceProvider)?.isMetal ?? false;
+    final seconds = pagePrintType == PagePrintType.double ? (isMetal ? 68 : 60) : (isMetal ? 35 : 30);
     _progressController.duration = Duration(seconds: seconds);
 
     // 0% -> 99% (0.99)까지 선형으로 진행
@@ -129,8 +130,14 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> with Si
               return;
             }
 
-            // 환불 알럿
-            await DialogHelper.showAutoRefundDescriptionDialog(context, onButtonPressed: () async {
+            final result = await DialogHelper.showKioskDialog(
+              context,
+              title: LocaleKeys.alert_title_auto_refund_alert.tr(),
+              contentText: LocaleKeys.alert_txt_auto_refund_alert.tr(),
+              confirmButtonText: LocaleKeys.alert_btn_paymentcard_failure.tr(),
+            );
+
+            if (result) {
               // 에러 발생 시 환불 처리
               await refund();
 
@@ -141,19 +148,19 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> with Si
               if (checkCardFeederIsEmpty(errorMessage)) {
                 await DialogHelper.showPrintCardRefillDialog(
                   context,
-                  onButtonPressed: () {
-                    HomeRouteData().go(context);
-                  },
                 );
+                if (result) {
+                  HomeRouteData().go(context);
+                }
               } else {
-                await DialogHelper.showPrintErrorDialog(
+                final result = await DialogHelper.showPrintErrorDialog(
                   context,
-                  onButtonPressed: () {
-                    HomeRouteData().go(context);
-                  },
                 );
+                if (result) {
+                  HomeRouteData().go(context);
+                }
               }
-            });
+            }
           },
           loading: () => null,
           data: (_) async {

@@ -151,10 +151,12 @@ class _KioskRepository {
       final cardCount = _ref.read(cardCountProvider);
 
       await _apiClient.updatePrintLog(
-        body: {
-          ...request.toJson(),
-          'remainingSingleSidedCount': cardCount.remainingSingleSidedCount,
-        },
+        body: request
+            .copyWith(
+              remainingSingleSidedCountPre: cardCount.currentCount.toString(),
+              remainingSingleSidedCountPost: cardCount.initialCount.toString(),
+            )
+            .toJson(),
       );
     } catch (e) {
       rethrow;
