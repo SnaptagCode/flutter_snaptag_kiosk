@@ -26,9 +26,6 @@ class DialogTestWidget extends StatelessWidget {
         ElevatedButton(
           onPressed: () => DialogHelper.showPrintErrorDialog(
             context,
-            onButtonPressed: () {
-              HomeRouteData().go(context);
-            },
           ),
           style: context.dialogButtonStyle,
           child: Text('Show Print Error Dialog'),

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_snaptag_kiosk/core/common/sound/sound_manager.dart';
+import 'package:flutter_snaptag_kiosk/core/data/models/response/nominated_back_photo_card.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
 import 'package:flutter_snaptag_kiosk/presentation/payment/payment_failed_type.dart';
 import 'package:flutter_snaptag_kiosk/presentation/home/back_photo_type_provider.dart';
@@ -52,345 +53,6 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
   SelectionDesignVariant _currentVariant = SelectionDesignVariant.animatedScaleOnUnselected;
   bool _showTabs = false;
 
-  /// 시안별 카드 빌더 라우터
-  Widget _buildFixedBackPhotoCard({
-    required int index,
-    required int? selectedIndex,
-    required String? imageUrl,
-    required VoidCallback onTap,
-  }) {
-    switch (_currentVariant) {
-      case SelectionDesignVariant.opacityWithBottomRadio:
-        return _buildVariant1OpacityWithBottomRadio(
-          index: index,
-          selectedIndex: selectedIndex,
-          imageUrl: imageUrl,
-          onTap: onTap,
-        );
-      case SelectionDesignVariant.opacityWithTopRightCheck:
-        return _buildVariant2OpacityWithTopRightCheck(
-          index: index,
-          selectedIndex: selectedIndex,
-          imageUrl: imageUrl,
-          onTap: onTap,
-        );
-      case SelectionDesignVariant.opacityWithBoldBorder:
-        return _buildVariant3OpacityWithBoldBorder(
-          index: index,
-          selectedIndex: selectedIndex,
-          imageUrl: imageUrl,
-          onTap: onTap,
-        );
-      case SelectionDesignVariant.opacityWithCenterOverlay:
-        return _buildVariant4OpacityWithCenterOverlay(
-          index: index,
-          selectedIndex: selectedIndex,
-          imageUrl: imageUrl,
-          onTap: onTap,
-        );
-      case SelectionDesignVariant.opacityWithTopCheckAndBottomRadio:
-        return _buildVariant5OpacityWithTopCheckAndBottomRadio(
-          index: index,
-          selectedIndex: selectedIndex,
-          imageUrl: imageUrl,
-          onTap: onTap,
-        );
-      case SelectionDesignVariant.animatedScaleOnUnselected:
-        return _buildVariant6AnimatedScaleOnUnselected(
-          index: index,
-          selectedIndex: selectedIndex,
-          imageUrl: imageUrl,
-          onTap: onTap,
-        );
-    }
-  }
-
-  /// 시안 1: 투명도 + 카드 아래 체크 라디오 버튼
-  Widget _buildVariant1OpacityWithBottomRadio({
-    required int index,
-    required int? selectedIndex,
-    required String? imageUrl,
-    required VoidCallback onTap,
-  }) {
-    final isSelected = selectedIndex == index;
-    final kioskColors = Theme.of(context).extension<KioskColors>();
-    final buttonColor = kioskColors?.buttonColor ?? const Color(0xFF1B5E4F);
-
-    return GestureDetector(
-      onTap: onTap,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Opacity(
-            opacity: selectedIndex == null ? 1.2 : (isSelected ? 1.2 : 0.7),
-            child: Container(
-              width: 226.w,
-              height: 355.h,
-              clipBehavior: Clip.antiAlias,
-              decoration: ShapeDecoration(
-                color: Colors.grey[200],
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10.r),
-                ),
-              ),
-              child: imageUrl != null ? _buildNetworkImage(imageUrl) : _buildEmptyImagePlaceholder(),
-            ),
-          ),
-          SizedBox(height: 12.h),
-          // 체크 라디오 버튼
-          Container(
-            width: 40.w,
-            height: 40.w,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: isSelected ? buttonColor : Colors.grey[300],
-              border: Border.all(
-                color: isSelected ? buttonColor : (Colors.grey[400] ?? Colors.grey),
-                width: 2.w,
-              ),
-            ),
-            child: isSelected
-                ? Icon(
-                    Icons.check,
-                    color: Colors.white,
-                    size: 24.sp,
-                  )
-                : null,
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// 시안 2: 투명도 + 카드 위 우측 상단 체크 아이콘
-  Widget _buildVariant2OpacityWithTopRightCheck({
-    required int index,
-    required int? selectedIndex,
-    required String? imageUrl,
-    required VoidCallback onTap,
-  }) {
-    final isSelected = selectedIndex == index;
-    final kioskColors = Theme.of(context).extension<KioskColors>();
-    final buttonColor = kioskColors?.buttonColor ?? const Color(0xFF1B5E4F);
-
-    return GestureDetector(
-      onTap: onTap,
-      child: Stack(
-        children: [
-          Opacity(
-            opacity: selectedIndex == null ? 1.0 : (isSelected ? 1.0 : 0.3),
-            child: Container(
-              width: 226.w,
-              height: 355.h,
-              clipBehavior: Clip.antiAlias,
-              decoration: ShapeDecoration(
-                color: Colors.grey[200],
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10.r),
-                ),
-              ),
-              child: imageUrl != null ? _buildNetworkImage(imageUrl) : _buildEmptyImagePlaceholder(),
-            ),
-          ),
-          // 우측 상단 체크 아이콘
-          if (isSelected)
-            Positioned(
-              top: 8.h,
-              right: 8.w,
-              child: Container(
-                width: 48.w,
-                height: 48.w,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: buttonColor,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.3),
-                      blurRadius: 8.r,
-                      offset: Offset(0, 2.h),
-                    ),
-                  ],
-                ),
-                child: Icon(
-                  Icons.check,
-                  color: Colors.white,
-                  size: 28.sp,
-                ),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-
-  /// 시안 3: 투명도 + 두꺼운 테두리 강조
-  Widget _buildVariant3OpacityWithBoldBorder({
-    required int index,
-    required int? selectedIndex,
-    required String? imageUrl,
-    required VoidCallback onTap,
-  }) {
-    final isSelected = selectedIndex == index;
-    final kioskColors = Theme.of(context).extension<KioskColors>();
-    final buttonColor = kioskColors?.buttonColor ?? const Color(0xFF1B5E4F);
-
-    return GestureDetector(
-      onTap: onTap,
-      child: Opacity(
-        opacity: selectedIndex == null ? 1.0 : (isSelected ? 1.0 : 0.3),
-        child: Container(
-          width: 226.w,
-          height: 355.h,
-          clipBehavior: Clip.antiAlias,
-          decoration: BoxDecoration(
-            color: Colors.grey[200],
-            borderRadius: BorderRadius.circular(10.r),
-            border: Border.all(
-              color: isSelected ? buttonColor : Colors.transparent,
-              width: isSelected ? 4.w : 0,
-            ),
-            boxShadow: isSelected
-                ? [
-                    BoxShadow(
-                      color: buttonColor.withOpacity(0.4),
-                      blurRadius: 12.r,
-                      spreadRadius: 2.r,
-                      offset: Offset(0, 4.h),
-                    ),
-                  ]
-                : null,
-          ),
-          child: imageUrl != null ? _buildNetworkImage(imageUrl) : _buildEmptyImagePlaceholder(),
-        ),
-      ),
-    );
-  }
-
-  /// 시안 4: 투명도 + 중앙 오버레이 + 체크 아이콘
-  Widget _buildVariant4OpacityWithCenterOverlay({
-    required int index,
-    required int? selectedIndex,
-    required String? imageUrl,
-    required VoidCallback onTap,
-  }) {
-    final isSelected = selectedIndex == index;
-    final kioskColors = Theme.of(context).extension<KioskColors>();
-    final buttonColor = kioskColors?.buttonColor ?? const Color(0xFF1B5E4F);
-
-    return GestureDetector(
-      onTap: onTap,
-      child: Stack(
-        children: [
-          Opacity(
-            opacity: selectedIndex == null ? 1.0 : (isSelected ? 1.0 : 0.3),
-            child: Container(
-              width: 226.w,
-              height: 355.h,
-              clipBehavior: Clip.antiAlias,
-              decoration: ShapeDecoration(
-                color: Colors.grey[200],
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10.r),
-                ),
-              ),
-              child: imageUrl != null ? _buildNetworkImage(imageUrl) : _buildEmptyImagePlaceholder(),
-            ),
-          ),
-          // 중앙 오버레이 + 체크 아이콘
-          if (isSelected)
-            Positioned.fill(
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10.r),
-                  color: buttonColor.withOpacity(0.25),
-                ),
-                child: Center(
-                  child: Container(
-                    width: 64.w,
-                    height: 64.w,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: buttonColor,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.3),
-                          blurRadius: 12.r,
-                          offset: Offset(0, 4.h),
-                        ),
-                      ],
-                    ),
-                    child: Icon(
-                      Icons.check,
-                      color: Colors.white,
-                      size: 36.sp,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-
-  /// 시안 5: 투명도 + 카드 위 체크 라디오 버튼 (1번 시안의 대칭)
-  Widget _buildVariant5OpacityWithTopCheckAndBottomRadio({
-    required int index,
-    required int? selectedIndex,
-    required String? imageUrl,
-    required VoidCallback onTap,
-  }) {
-    final isSelected = selectedIndex == index;
-    final kioskColors = Theme.of(context).extension<KioskColors>();
-    final buttonColor = kioskColors?.buttonColor ?? const Color(0xFF1B5E4F);
-
-    return GestureDetector(
-      onTap: onTap,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // 체크 라디오 버튼 (카드 위)
-          Container(
-            width: 40.w,
-            height: 40.w,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: isSelected ? buttonColor : Colors.grey[300],
-              border: Border.all(
-                color: isSelected ? buttonColor : (Colors.grey[400] ?? Colors.grey),
-                width: 2.w,
-              ),
-            ),
-            child: isSelected
-                ? Icon(
-                    Icons.check,
-                    color: Colors.white,
-                    size: 24.sp,
-                  )
-                : null,
-          ),
-          SizedBox(height: 12.h),
-          // 카드
-          Opacity(
-            opacity: selectedIndex == null ? 1.0 : (isSelected ? 1.0 : 0.5),
-            child: Container(
-              width: 226.w,
-              height: 355.h,
-              clipBehavior: Clip.antiAlias,
-              decoration: ShapeDecoration(
-                color: Colors.grey[200],
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10.r),
-                ),
-              ),
-              child: imageUrl != null ? _buildNetworkImage(imageUrl) : _buildEmptyImagePlaceholder(),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   /// 시안 6: 선택되지 않은 카드 크기 축소 + 애니메이션
   Widget _buildVariant6AnimatedScaleOnUnselected({
     required int index,
@@ -416,34 +78,46 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
           opacity: opacity,
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeOutCubic,
-          child: Container(
-            width: 226.w,
-            height: 355.h,
-            clipBehavior: Clip.antiAlias,
-            decoration: BoxDecoration(
-              color: Colors.grey[200],
-              borderRadius: BorderRadius.circular(10.r),
-              border: null,
-              boxShadow: isSelected
-                  ? [
-                      BoxShadow(
-                        color: buttonColor.withOpacity(0.4),
-                        blurRadius: 12.r,
-                        spreadRadius: 2.r,
-                        offset: Offset(0, 4.h),
-                      ),
-                    ]
-                  : [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 4.r,
-                        offset: Offset(0, 2.h),
-                      ),
-                    ],
-            ),
-            child: imageUrl != null ? _buildNetworkImage(imageUrl) : _buildEmptyImagePlaceholder(),
+          child: _buildFixedBackPhotoCard(
+            boxShadow: isSelected
+                ? [
+                    BoxShadow(
+                      color: buttonColor.withOpacity(0.4),
+                      blurRadius: 12.r,
+                      spreadRadius: 2.r,
+                      offset: Offset(0, 4.h),
+                    ),
+                  ]
+                : [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 4.r,
+                      offset: Offset(0, 2.h),
+                    ),
+                  ],
+            imageUrl: imageUrl,
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildFixedBackPhotoCard({
+    required List<BoxShadow>? boxShadow,
+    required String? imageUrl,
+  }) {
+    return Container(
+      width: 226.w,
+      height: 355.h,
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10.r),
+        border: null,
+        boxShadow: boxShadow,
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(10.r),
+        child: imageUrl != null && imageUrl.isNotEmpty ? _buildNetworkImage(imageUrl) : _buildEmptyImagePlaceholder(),
       ),
     );
   }
@@ -487,115 +161,54 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
     );
   }
 
-  /// 탭 토글 버튼
-  Widget _buildTabToggleButton() {
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          _showTabs = !_showTabs;
-        });
-      },
-      child: Container(
-        width: 48.w,
-        height: 48.w,
-        decoration: BoxDecoration(
-          color: Colors.transparent, // 투명하게
-          shape: BoxShape.circle,
-        ),
-        child: Icon(
-          _showTabs ? Icons.close : Icons.tune,
-          color: Colors.transparent, // 투명하게
-          size: 24.sp,
-        ),
-      ),
-    );
-  }
-
-  /// 시안 선택 탭 UI
-  Widget _buildDesignVariantTabs() {
-    final kioskColors = Theme.of(context).extension<KioskColors>();
-    final buttonColor = kioskColors?.buttonColor ?? const Color(0xFF1B5E4F);
-
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 8.h),
-      decoration: BoxDecoration(
-        color: Colors.transparent, // 투명하게
-        borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: Colors.transparent, width: 1.w), // 투명하게
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          _buildVariantTab(
-            label: '시안 1',
-            variant: SelectionDesignVariant.opacityWithBottomRadio,
-            buttonColor: buttonColor,
-          ),
-          SizedBox(width: 8.w),
-          _buildVariantTab(
-            label: '시안 2',
-            variant: SelectionDesignVariant.opacityWithTopRightCheck,
-            buttonColor: buttonColor,
-          ),
-          SizedBox(width: 8.w),
-          _buildVariantTab(
-            label: '시안 3',
-            variant: SelectionDesignVariant.opacityWithBoldBorder,
-            buttonColor: buttonColor,
-          ),
-          SizedBox(width: 8.w),
-          _buildVariantTab(
-            label: '시안 4',
-            variant: SelectionDesignVariant.opacityWithCenterOverlay,
-            buttonColor: buttonColor,
-          ),
-          SizedBox(width: 8.w),
-          _buildVariantTab(
-            label: '시안 5',
-            variant: SelectionDesignVariant.opacityWithTopCheckAndBottomRadio,
-            buttonColor: buttonColor,
-          ),
-          SizedBox(width: 8.w),
-          _buildVariantTab(
-            label: '시안 6',
-            variant: SelectionDesignVariant.animatedScaleOnUnselected,
-            buttonColor: buttonColor,
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// 개별 시안 탭 버튼
-  Widget _buildVariantTab({
-    required String label,
-    required SelectionDesignVariant variant,
-    required Color buttonColor,
+  Widget _buildFixedBackPhotoCardList({
+    required KioskMachineInfo? kiosk,
+    required bool isFixed,
+    required int? selectedIndex,
   }) {
-    final isSelected = _currentVariant == variant;
+    final nominatedBackPhotoCardList = kiosk?.nominatedBackPhotoCardList ?? [];
+    if (kiosk == null || nominatedBackPhotoCardList.isEmpty) return _buildEmptyImagePlaceholder();
 
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          _currentVariant = variant;
-        });
-      },
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
-        decoration: BoxDecoration(
-          color: isSelected ? buttonColor : Colors.transparent,
-          borderRadius: BorderRadius.circular(8.r),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            fontSize: 14.sp,
-            fontWeight: FontWeight.w600,
-            color: Colors.transparent, // 투명하게
-          ),
-        ),
-      ),
-    );
+    return isFixed
+        ? Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              if (nominatedBackPhotoCardList.length == 1)
+                _buildFixedBackPhotoCard(boxShadow: null, imageUrl: nominatedBackPhotoCardList[0].originUrl)
+              else
+                _buildVariant6AnimatedScaleOnUnselected(
+                  index: 0,
+                  selectedIndex: selectedIndex,
+                  imageUrl: nominatedBackPhotoCardList[0].originUrl,
+                  onTap: () {
+                    ref.read(backPhotoTypeProvider.notifier).selectFixed(0);
+                  },
+                ),
+              if (nominatedBackPhotoCardList.length > 1) SizedBox(width: 100.w),
+              if (nominatedBackPhotoCardList.length > 1)
+                _buildVariant6AnimatedScaleOnUnselected(
+                  index: 1,
+                  selectedIndex: selectedIndex,
+                  imageUrl: nominatedBackPhotoCardList[1].originUrl,
+                  onTap: () {
+                    ref.read(backPhotoTypeProvider.notifier).selectFixed(1);
+                  },
+                ),
+            ],
+          )
+        : ref.watch(verifyPhotoCardProvider).when(
+              data: (data) {
+                final imageUrl = data?.formattedBackPhotoCardUrl ?? '';
+                return imageUrl.isNotEmpty
+                    ? _buildFixedBackPhotoCard(boxShadow: null, imageUrl: imageUrl)
+                    : _buildEmptyImagePlaceholder();
+              },
+              loading: () => const CircularProgressIndicator(),
+              error: (error, stack) => GeneralErrorWidget(
+                exception: error as Exception,
+                onRetry: () => ref.refresh(verifyPhotoCardProvider),
+              ),
+            );
   }
 
   @override
@@ -690,57 +303,16 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Text(
-                  isFixed ? LocaleKeys.choice_select_recommended_image.tr() : LocaleKeys.sub02_txt_01.tr(),
+                  isFixed &&
+                          kiosk?.nominatedBackPhotoCardList.length != null &&
+                          kiosk!.nominatedBackPhotoCardList.length > 1
+                      ? LocaleKeys.choice_select_recommended_image.tr()
+                      : LocaleKeys.sub02_txt_01.tr(),
                   textAlign: TextAlign.center,
                   style: context.typography.kioskBtn1B.copyWith(fontSize: 53.sp, color: mainTextColor),
                 ),
                 SizedBox(height: 50.h),
-                if (isFixed)
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      _buildFixedBackPhotoCard(
-                        index: 0,
-                        selectedIndex: selectedIndex,
-                        imageUrl: kiosk?.nominatedBackPhotoCardList.isNotEmpty == true &&
-                                (kiosk!.nominatedBackPhotoCardList.isNotEmpty)
-                            ? kiosk.nominatedBackPhotoCardList[0].originUrl
-                            : null,
-                        onTap: () {
-                          ref.read(backPhotoTypeProvider.notifier).selectFixed(0);
-                        },
-                      ),
-                      SizedBox(width: 100.w),
-                      _buildFixedBackPhotoCard(
-                        index: 1,
-                        selectedIndex: selectedIndex,
-                        imageUrl: kiosk?.nominatedBackPhotoCardList.isNotEmpty == true &&
-                                (kiosk!.nominatedBackPhotoCardList.length > 1)
-                            ? kiosk.nominatedBackPhotoCardList[1].originUrl
-                            : null,
-                        onTap: () {
-                          ref.read(backPhotoTypeProvider.notifier).selectFixed(1);
-                        },
-                      ),
-                    ],
-                  )
-                else
-                  GradientContainer(
-                    content: ClipRRect(
-                      borderRadius: BorderRadius.circular(10.r),
-                      child: ref.watch(verifyPhotoCardProvider).when(
-                            data: (data) {
-                              final imageUrl = data?.formattedBackPhotoCardUrl ?? '';
-                              return imageUrl.isNotEmpty ? _buildNetworkImage(imageUrl) : _buildEmptyImagePlaceholder();
-                            },
-                            loading: () => const CircularProgressIndicator(),
-                            error: (error, stack) => GeneralErrorWidget(
-                              exception: error as Exception,
-                              onRetry: () => ref.refresh(verifyPhotoCardProvider),
-                            ),
-                          ),
-                    ),
-                  ),
+                _buildFixedBackPhotoCardList(kiosk: kiosk, isFixed: isFixed, selectedIndex: selectedIndex),
                 SizedBox(height: 50.h),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -760,45 +332,7 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
                               : () async {
                                   await SoundManager().playSound();
 
-                                  // // 선택된 뒷면 이미지 타입 확인
-                                  final selection = ref.read(backPhotoTypeProvider);
-
-                                  if (selection?.type == BackPhotoType.fixed && selection?.fixedIndex != null) {
-                                    // 고정 뒷면 이미지 결제 처리
-                                    final kiosk = ref.read(kioskInfoServiceProvider);
-                                    final selectedIndex = selection!.fixedIndex!;
-
-                                    if (kiosk != null && selectedIndex < kiosk.nominatedBackPhotoCardList.length) {
-                                      final selectedCard = kiosk.nominatedBackPhotoCardList[selectedIndex];
-
-                                      final response = await ref.read(kioskRepositoryProvider).getBackPhotoCardByQr(
-                                            GetBackPhotoByQrRequest(
-                                              kioskEventId: kiosk.kioskEventId,
-                                              nominatedBackPhotoCardId: selectedCard.id,
-                                            ),
-                                          );
-
-                                      ref.read(verifyPhotoCardProvider.notifier).updateState(BackPhotoCardResponse(
-                                          kioskEventId: kiosk.kioskEventId,
-                                          backPhotoCardId: response.backPhotoCardId,
-                                          backPhotoCardOriginUrl: selectedCard.originUrl,
-                                          photoAuthNumber: response.photoAuthNumber,
-                                          formattedBackPhotoCardUrl: response.formattedBackPhotoCardUrl));
-                                    }
-                                  }
-
-                                  final timeoutNotifier = ref.read(homeTimeoutNotifierProvider.notifier);
-                                  timeoutNotifier.cancelTimerWithCallback();
-
                                   await ref.read(photoCardPreviewScreenProviderProvider.notifier).payment();
-                                  final isPaymentFailed = ref.read(paymentFailureProvider);
-                                  if (isPaymentFailed) {
-                                    ref.read(paymentFailureProvider.notifier).reset();
-                                    DialogHelper.showPaymentCardFailedDialog(
-                                      context,
-                                    );
-                                    HomeRouteData().go(context);
-                                  }
                                 },
                           child: Text(LocaleKeys.sub02_btn_pay.tr()),
                         );
@@ -817,25 +351,6 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
               ],
             ),
           ),
-          // 오른쪽 상단 탭 토글 버튼 및 탭 UI (캡처를 위해 투명 처리, 클릭은 가능)
-          if (isFixed)
-            Positioned(
-              top: 0,
-              right: 0,
-              child: Container(
-                color: Colors.transparent, // 투명 배경
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    // _buildTabToggleButton(),
-                    // if (_showTabs) ...[
-                    //   SizedBox(height: 8.h),
-                    //   _buildDesignVariantTabs(),
-                    // ],
-                  ],
-                ),
-              ),
-            ),
         ],
       ),
     );

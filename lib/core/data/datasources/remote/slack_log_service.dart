@@ -26,8 +26,6 @@ class SlackLogService {
 
   final slackWebhookRibbonFilmWarnUrl = dotenv.env['SLACK_WEBHOOK_RIBBON_FILM_WARN_URL'];
 
-  final slackWebhookWarningUrl = dotenv.env['SLACK_WEBHOOK_WARNING_URL'];
-
   final slackWebhookBroadcastUrl = dotenv.env['SLACK_WEBHOOK_BROADCAST_URL'];
 
   void init(ProviderContainer container) {
@@ -41,14 +39,6 @@ class SlackLogService {
 
   Future<void> sendLogToSlack(String message) async {
     await sendLog(slackWebhookUrl, message);
-  }
-
-  Future<void> sendRibbonFilmWarningLog(String message) async {
-    await sendLog(slackWebhookRibbonFilmWarnUrl, message);
-  }
-
-  Future<void> sendWarningLogToSlack(String message) async {
-    await sendLog(slackWebhookWarningUrl, message);
   }
 
   // 1) 객체 만드는 함수 LogState

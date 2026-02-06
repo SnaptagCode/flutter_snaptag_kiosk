@@ -94,12 +94,12 @@ abstract class KioskApiClient {
       @Path('machineId') required int machineId,
       @Query('remainingSingleSidedCount') required String remainingSingleSidedCount});
 
-  @POST('/v1/machine/unique-key/history')
+  @POST('/v1/machine/unique-key/register')
   Future<void> createUniqueKeyHistory({
     @Body() required Map<String, dynamic> body,
   });
 
-  @POST('/v1/qr/back-photo')
+  @POST('/v1/qr/back-photo-nominated')
   Future<BackPhotoCardResponse> getBackPhotoCardByQr({
     @Body() required Map<String, dynamic> body,
   });

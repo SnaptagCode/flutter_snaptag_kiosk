@@ -1,7 +1,7 @@
 name: flutter_snaptag_kiosk
 description: "A new Flutter project."
 publish_to: "none"
-version: 3.4.1
+version: 4.0.0
 
 environment:
   sdk: ^3.6.0

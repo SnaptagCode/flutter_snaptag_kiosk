@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_snaptag_kiosk/core/data/models/request/unique_key_request.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_snaptag_kiosk/core/ui/widget/dialog_helper.dart';
 import 'package:flutter_snaptag_kiosk/core/ui/widget/kiosk_info_widget.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
+import 'package:flutter_snaptag_kiosk/presentation/setup/uuid_provider.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class KioskInfoScreen extends ConsumerWidget {
@@ -24,6 +26,7 @@ class KioskInfoScreen extends ConsumerWidget {
             final result = await DialogHelper.showSetupDialog(
               context,
               title: '메인페이지로 이동합니다.',
+              showCancelButton: true,
             );
             if (result) {
               Navigator.pop(context);
@@ -37,13 +40,31 @@ class KioskInfoScreen extends ConsumerWidget {
         actions: [
           IconButton(
             onPressed: () async {
+              // NOTE: ref는 build 동안에만 안전하게 사용할 수 있으므로,
+              // 비동기 갭(첫 await) 이전에 필요한 의존성을 모두 read 해둔다.
+              final deviceUuidFuture = ref.read(deviceUuidProvider.future);
+              final kioskInfoNotifier = ref.read(kioskInfoServiceProvider.notifier);
+              final kioskRepository = ref.read(kioskRepositoryProvider);
+
               String? value = await DialogHelper.showKeypadDialog(context, mode: ModeType.event);
 
               if (value == null || value.isEmpty) return; // 값이 없으면 종료
 
-              final result = await DialogHelper.showSetupDialog(context, title: '최신 이벤트로 새로고침 됩니다.');
+              final result =
+                  await DialogHelper.showSetupDialog(context, title: '최신 이벤트로 새로고침 됩니다.', showCancelButton: true);
               if (result == true) {
-                await ref.read(kioskInfoServiceProvider.notifier).refreshWithMachineId(int.parse(value));
+                final machineId = int.parse(value);
+                final deviceUUID = await deviceUuidFuture;
+
+                await kioskInfoNotifier.refreshWithMachineId(machineId);
+
+                await kioskRepository.createUniqueKeyHistory(
+                  request: UniqueKeyRequest(
+                    machineId: machineId.toString(),
+                    uniqueKey: deviceUUID,
+                  ),
+                );
+
                 SlackLogService().sendBroadcastLogToSlack(InfoKey.inspectionStart.key);
               }
             },
