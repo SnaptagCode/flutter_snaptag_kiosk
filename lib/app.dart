@@ -308,7 +308,7 @@ class _NetworkStatusAlertWrapperState extends ConsumerState<_NetworkStatusAlertW
 
   void _displayNetworkDialog(BuildContext context) {
     try {
-      DialogHelper.showSetupOneButtonDialog(
+      DialogHelper.showSetupDialog(
         context,
         title: _networkAlertTitle,
         confirmButtonText: _networkAlertConfirmText,
