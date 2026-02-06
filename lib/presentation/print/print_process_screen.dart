@@ -39,7 +39,8 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> with Si
 
     // 단면(약 30초) / 양면(약 60초) 기준으로 99%까지 부드럽게 증가
     final pagePrintType = ref.read(pagePrintProvider);
-    final seconds = pagePrintType == PagePrintType.double ? 60 : 30;
+    final isMetal = ref.read(kioskInfoServiceProvider)?.isMetal ?? false;
+    final seconds = pagePrintType == PagePrintType.double ? (isMetal ? 68 : 60) : (isMetal ? 35 : 30);
     _progressController.duration = Duration(seconds: seconds);
 
     // 0% -> 99% (0.99)까지 선형으로 진행

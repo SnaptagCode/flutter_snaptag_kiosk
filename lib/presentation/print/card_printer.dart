@@ -71,6 +71,7 @@ class PrinterService extends _$PrinterService {
         final log = printerLog.copyWith(kioskMachineId: machineId);
         if (machineId != 0) {
           await ref.read(kioskRepositoryProvider).updatePrintLog(request: log);
+          ref.read(printerLogProvider.notifier).update(log);
           SlackLogService().sendLogToSlack('PrintState : $log');
         }
       }

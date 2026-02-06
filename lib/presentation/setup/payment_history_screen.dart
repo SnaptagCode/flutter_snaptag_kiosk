@@ -330,6 +330,7 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
                   title: '결제한 카드를 삽입해 주세요.',
                   cancelButtonText: '환불 취소',
                   confirmButtonText: '환불 진행',
+                  showCancelButton: true,
                 );
                 if (result2) {
                   await ref.read(setupRefundProcessProvider.notifier).startRefund(order);
@@ -374,6 +375,7 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
                   title: '결제한 카드를 삽입해 주세요.',
                   cancelButtonText: '환불 취소',
                   confirmButtonText: '환불 진행',
+                  showCancelButton: true,
                 );
                 if (result2) {
                   await ref.read(setupRefundProcessProvider.notifier).startRefund(order);

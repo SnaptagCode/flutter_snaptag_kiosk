@@ -356,16 +356,6 @@ class PrinterBindings {
     }
   }
 
-  // 이미지 회전 기능 추가
-  Uint8List flipImage180(Uint8List imageBytes) {
-    final originalImage = img.decodeImage(imageBytes);
-    if (originalImage != null) {
-      final flippedImage = img.copyRotate(originalImage, angle: 180);
-      return Uint8List.fromList(img.encodePng(flippedImage));
-    }
-    return imageBytes;
-  }
-
   // commitCanvas 메서드 추가
   int commitCanvas(Pointer<Utf8> strPtr, Pointer<Int32> lenPtr) {
     final result = _commitCanvas(strPtr, lenPtr);

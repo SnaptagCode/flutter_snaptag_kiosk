@@ -77,7 +77,6 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
     if (!isReady) return;
 
     final isPaymentDeviceReady = await _checkPaymentDevice();
-
     if (!isPaymentDeviceReady) return;
 
     final kioskInfo = ref.read(kioskInfoServiceProvider);
@@ -185,17 +184,17 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
     }
 
     HomeRouteData().go(context);
+
+    SlackLogService().sendInspectionEndBroadcastLogToSlack(InfoKey.inspectionEnd.key, isPaymentOn: true);
   }
 
   Future<bool> _checkPaymentDevice() async {
     try {
       final response = await ref.read(paymentRepositoryProvider).check();
-      SlackLogService().sendInspectionEndBroadcastLogToSlack(InfoKey.inspectionEnd.key, isPaymentOn: true);
       SlackLogService().sendLogToSlack("Payment Device check: $response");
 
       return true;
     } catch (e) {
-      SlackLogService().sendInspectionEndBroadcastLogToSlack(InfoKey.inspectionEnd.key, isPaymentOn: false);
       SlackLogService().sendErrorLogToSlack("Payment Device check: $e");
 
       DialogHelper.showSetupDialog(
@@ -559,11 +558,13 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
                         buttonName: '업데이트',
                         isActive: isUpdateAvailable,
                         onUpdatePressed: () async {
-                          final result = await DialogHelper.showKioskDialog(context, null,
-                              title: '업데이트 하시겠습니까?',
-                              contentText: '업데이트 시 앱이 재시작 됩니다.',
-                              cancelButtonText: '취소',
-                              confirmButtonText: '완료');
+                          final result = await DialogHelper.showKioskDialog(
+                            context,
+                            title: '업데이트 하시겠습니까?',
+                            contentText: '업데이트 시 앱이 재시작 됩니다.',
+                            cancelButtonText: '취소',
+                            confirmButtonText: '완료',
+                          );
                           if (result) {
                             try {
                               final launcherPath = await LauncherPathUtil.getLauncherPath();
