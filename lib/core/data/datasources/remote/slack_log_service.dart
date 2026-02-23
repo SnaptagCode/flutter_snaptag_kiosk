@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:developer';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_snaptag_kiosk/core/data/models/entities/slack_log_template.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -33,12 +34,31 @@ class SlackLogService {
     sendLogToSlack("🚀 Flutter App Started!");
   }
 
+  Future<void> sendLog(String type, String message) async {
+    if (message.isEmpty) {
+      log("❌ Slack 알림 메시지가 없습니다.");
+      return;
+    }
+    try {
+      await _container.read(kioskRepositoryProvider).sendSlackAlert(type, message);
+    } catch (e) {
+      log("❌ Slack 알림 API 오류: $e");
+    }
+  }
+
   Future<void> sendErrorLogToSlack(String message) async {
-    await sendLog(slackWebhookErrorUrl, message);
+    final type = kDebugMode ? 'test_error_log' : 'error_log';
+    await sendLog('error_log', message);
   }
 
   Future<void> sendLogToSlack(String message) async {
-    await sendLog(slackWebhookUrl, message);
+    final type = kDebugMode ? 'test_log' : 'log';
+    await sendLog('log', message);
+  }
+
+  Future<void> sendBroadcastLogToSlack(String message) async {
+    final type = kDebugMode ? 'test_service' : 'service';
+    await sendLog('service', message);
   }
 
   // 1) 객체 만드는 함수 LogState
@@ -109,7 +129,7 @@ ${slackLogTemplate.description}
         cardCount: cardCount.currentCount,
       );
 
-      await sendLog(slackWebhookBroadcastUrl, message);
+      await sendBroadcastLogToSlack(message);
     }
   }
 
@@ -126,7 +146,7 @@ ${slackLogTemplate.description}
 
       final message = buildSlackAlertMessage(slackLogTemplate: slackLogTemplate.copyWith(description: description));
 
-      await sendLog(slackWebhookBroadcastUrl, message);
+      await sendBroadcastLogToSlack(message);
     }
   }
 
@@ -150,11 +170,11 @@ ${slackLogTemplate.description}
       final message = buildSlackAlertMessage(
           slackLogTemplate: slackLogTemplate.copyWith(title: '프린트 상태', category: 'info', description: description));
 
-      await sendLog(slackWebhookBroadcastUrl, message);
+      await sendBroadcastLogToSlack(message);
     }
   }
 
-  Future<void> sendBroadcastLogToSlack(String errorKey) async {
+  Future<void> sendBroadcastLogToSlackWithKey(String errorKey) async {
     final slackLogTemplate = await createSlackLogTemplate(errorKey);
     final cardCount = _container.read(cardCountProvider);
 
@@ -164,38 +184,38 @@ ${slackLogTemplate.description}
         cardCount: cardCount.currentCount,
       );
 
-      await sendLog(slackWebhookBroadcastUrl, message);
+      await sendBroadcastLogToSlack(message);
     }
   }
 
-  Future<void> sendLog(String? url, String message) async {
-    if (url == null) {
-      log("❌ Slack Webhook URL이 없습니다.");
-      return;
-    }
-    if (message.isEmpty) {
-      log("❌ Slack Webhook 메시지가 없습니다.");
-      return;
-    } else {
-      final payload = jsonEncode({"text": message});
+  // Future<void> sendLog(String? url, String message) async {
+  //   if (url == null) {
+  //     log("❌ Slack Webhook URL이 없습니다.");
+  //     return;
+  //   }
+  //   if (message.isEmpty) {
+  //     log("❌ Slack Webhook 메시지가 없습니다.");
+  //     return;
+  //   } else {
+  //     final payload = jsonEncode({"text": message});
 
-      try {
-        final response = await http.post(
-          Uri.parse(url),
-          headers: {"Content-Type": "application/json"},
-          body: payload,
-        );
+  //     try {
+  //       final response = await http.post(
+  //         Uri.parse(url),
+  //         headers: {"Content-Type": "application/json"},
+  //         body: payload,
+  //       );
 
-        if (response.statusCode != 200) {
-          log("❌ Slack Webhook 오류: ${response.body}");
-          log("curl -X POST -H \"Content-Type: application/json\" -d '$payload' $url");
-        }
-      } catch (e) {
-        log("❌ Slack Webhook 오류: $e");
-        log("curl -X POST -H \"Content-Type: application/json\" -d '$payload' $url");
-      }
-    }
-  }
+  //       if (response.statusCode != 200) {
+  //         log("❌ Slack Webhook 오류: ${response.body}");
+  //         log("curl -X POST -H \"Content-Type: application/json\" -d '$payload' $url");
+  //       }
+  //     } catch (e) {
+  //       log("❌ Slack Webhook 오류: $e");
+  //       log("curl -X POST -H \"Content-Type: application/json\" -d '$payload' $url");
+  //     }
+  //   }
+  // }
 
   String buildSlackAlertMessage({
     required SlackLogTemplate slackLogTemplate,
