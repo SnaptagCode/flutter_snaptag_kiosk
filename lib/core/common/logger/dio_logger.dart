@@ -100,7 +100,11 @@ class DioLogger extends Interceptor {
         }
       }
     }
-    sendHook?.call(_buffer.toString());
+
+    // Slack API 자체 호출은 제외하여 무한 루프 방지
+    if (!options.path.contains('slack')) {
+      sendHook?.call(_buffer.toString());
+    }
     handler.next(options);
   }
 
@@ -134,7 +138,9 @@ class DioLogger extends Interceptor {
         _printBoxed(header: 'DioError ║ ${err.type}', text: err.message);
       }
     }
-    sendHook?.call(_buffer.toString());
+    if (!err.requestOptions.path.contains('slack')) {
+      sendHook?.call(_buffer.toString());
+    }
     handler.next(err);
   }
 
@@ -166,7 +172,9 @@ class DioLogger extends Interceptor {
       logPrint('║');
       _printLine('╚');
     }
-    sendHook?.call(_buffer.toString());
+    if (!response.requestOptions.path.contains('slack')) {
+      sendHook?.call(_buffer.toString());
+    }
     handler.next(response);
   }
 

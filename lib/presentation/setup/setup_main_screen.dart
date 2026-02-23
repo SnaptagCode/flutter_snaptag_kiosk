@@ -185,7 +185,7 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
 
     HomeRouteData().go(context);
 
-    SlackLogService().sendInspectionEndBroadcastLogToSlack(InfoKey.inspectionEnd.key, isPaymentOn: true);
+    SlackLogService().sendInspectionEndBroadcastLogToSlack(InfoKey.inspectionEnd.key);
   }
 
   Future<bool> _checkPaymentDevice() async {

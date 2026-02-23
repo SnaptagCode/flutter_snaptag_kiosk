@@ -9,7 +9,6 @@ import 'package:flutter_snaptag_kiosk/presentation/core/printer_log_provider.dar
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
 import 'package:flutter_snaptag_kiosk/presentation/setup/alert_definition_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/core/card_count_provider.dart';
-import 'package:http/http.dart' as http;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter_snaptag_kiosk/core/providers/version_notifier.dart';
@@ -40,7 +39,7 @@ class SlackLogService {
       return;
     }
     try {
-      await _container.read(kioskRepositoryProvider).sendSlackAlert(type, message);
+      _container.read(kioskRepositoryProvider).sendSlackAlert(type, message);
     } catch (e) {
       log("❌ Slack 알림 API 오류: $e");
     }
@@ -48,17 +47,17 @@ class SlackLogService {
 
   Future<void> sendErrorLogToSlack(String message) async {
     final type = kDebugMode ? 'test_error_log' : 'error_log';
-    await sendLog('error_log', message);
+    await sendLog(type, message);
   }
 
   Future<void> sendLogToSlack(String message) async {
     final type = kDebugMode ? 'test_log' : 'log';
-    await sendLog('log', message);
+    await sendLog(type, message);
   }
 
   Future<void> sendBroadcastLogToSlack(String message) async {
     final type = kDebugMode ? 'test_service' : 'service';
-    await sendLog('service', message);
+    await sendLog(type, message);
   }
 
   // 1) 객체 만드는 함수 LogState
@@ -99,7 +98,7 @@ class SlackLogService {
             kioskMachineInfo: kioskInfo);
   }
 
-  Future<void> sendInspectionEndBroadcastLogToSlack(String errorKey, {required bool isPaymentOn}) async {
+  Future<void> sendInspectionEndBroadcastLogToSlack(String errorKey) async {
     final slackLogTemplate = await createSlackLogTemplate(errorKey);
     final cardCount = _container.read(cardCountProvider);
 
@@ -118,7 +117,7 @@ ${slackLogTemplate.description}
 - 단면 카드 수량 : ${cardCount.currentCount} / ${cardCount.initialCount}
 - 불러온 이벤트 : $eventName
 - 프린터 연결 상태 : 정상
-- 결제 단말기 연결 상태 : ${isPaymentOn == true ? '정상' : '미연결'}
+- 결제 단말기 연결 상태 : 정상
 - 프린터 온도 : $printerheadTempString°C
 - 리본 잔량 : ${printLog?.rbnRemainingRatio != null ? "${printLog?.rbnRemainingRatio}%" : "알 수 없음"}
 - 필름 잔량 : ${printLog?.filmRemainingRatio != null ? "${printLog?.filmRemainingRatio}%" : "알 수 없음"}
