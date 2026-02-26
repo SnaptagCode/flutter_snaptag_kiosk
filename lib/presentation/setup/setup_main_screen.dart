@@ -185,7 +185,7 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
 
     HomeRouteData().go(context);
 
-    SlackLogService().sendInspectionEndBroadcastLogToSlack(InfoKey.inspectionEnd.key, isPaymentOn: true);
+    SlackLogService().sendInspectionEndBroadcastLogToSlack(InfoKey.inspectionEnd.key);
   }
 
   Future<bool> _checkPaymentDevice() async {
@@ -307,7 +307,7 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
                           await SoundManager().playSound();
                           ref.read(pagePrintProvider.notifier).set(PagePrintType.double);
                           if (machineId != 0) {
-                            SlackLogService().sendBroadcastLogToSlack(InfoKey.cardPrintModeSwitchDuplex.key);
+                            SlackLogService().sendBroadcastLogToSlackWithKey(InfoKey.cardPrintModeSwitchDuplex.key);
                           }
                         }
                       },
@@ -376,7 +376,7 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
                           } else {
                             ref.read(pagePrintProvider.notifier).set(PagePrintType.single);
                             if (machineId != 0) {
-                              SlackLogService().sendBroadcastLogToSlack(InfoKey.cardPrintModeSwitchSingle.key);
+                              SlackLogService().sendBroadcastLogToSlackWithKey(InfoKey.cardPrintModeSwitchSingle.key);
                             }
                           }
                         } else {
@@ -595,7 +595,7 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
                         label: '서비스 점검',
                         assetName: SnaptagSvg.maintenance,
                         onTap: () async {
-                          SlackLogService().sendBroadcastLogToSlack(InfoKey.serviceMaintenanceEnter.key);
+                          SlackLogService().sendBroadcastLogToSlackWithKey(InfoKey.serviceMaintenanceEnter.key);
                           await SoundManager().playSound();
                           MaintenanceRouteData().go(context);
                         },

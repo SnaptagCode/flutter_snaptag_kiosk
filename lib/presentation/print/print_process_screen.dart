@@ -95,16 +95,16 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> with Si
 
             switch (error.toString().replaceFirst('Exception: ', '').trim()) {
               case "Card feeder is empty":
-                SlackLogService().sendBroadcastLogToSlack(ErrorKey.printerCardEmpty.key);
+                SlackLogService().sendBroadcastLogToSlackWithKey(ErrorKey.printerCardEmpty.key);
                 break;
               case "Failed to eject card":
-                SlackLogService().sendBroadcastLogToSlack(ErrorKey.printerEjectFail.key);
+                SlackLogService().sendBroadcastLogToSlackWithKey(ErrorKey.printerEjectFail.key);
                 break;
               case "Printer is not ready":
-                SlackLogService().sendBroadcastLogToSlack(ErrorKey.printerReadyFail.key);
+                SlackLogService().sendBroadcastLogToSlackWithKey(ErrorKey.printerReadyFail.key);
                 break;
               default:
-                SlackLogService().sendBroadcastLogToSlack(ErrorKey.printerPrintFail.key);
+                SlackLogService().sendBroadcastLogToSlackWithKey(ErrorKey.printerPrintFail.key);
                 break;
             }
 
