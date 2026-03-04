@@ -238,7 +238,10 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
     ];
   }
 
-  bool isPrinted(PrintedStatus printed) {
+  bool isPrinted(PrintedStatus? printed) {
+    if (printed == null) {
+      return false;
+    }
     switch (printed) {
       case PrintedStatus.pending:
       case PrintedStatus.started:
