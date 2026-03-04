@@ -289,6 +289,10 @@ class PrinterManager {
     return isReady;
   }
 
+  Future<void> checkFeeder() async {
+    await _sendAndHandleResponse(CheckFeederMessage());
+  }
+
   bool _checkSettingPrinter(PrinterBindings bindings) {
     // 3. 리본 설정
     // 레거시 코드와 동일하게 setRibbonOpt 호출
