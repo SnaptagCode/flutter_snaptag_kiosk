@@ -243,7 +243,11 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> with Si
   }
 
   void checkCardSingleCardCount() {
-    final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
+    final kioskInfo = ref.read(kioskInfoServiceProvider);
+    final machineId = kioskInfo?.kioskMachineId ?? 0;
+
+    // HWE 이벤트는 수량 기반 자동 모드 전환 없음 (관리자가 직접 설정)
+    if (kioskInfo?.isHwe == true) return;
 
     if (ref.read(cardCountProvider).currentCount < 1) {
       ref.read(pagePrintProvider.notifier).set(PagePrintType.double);
