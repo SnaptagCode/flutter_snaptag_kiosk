@@ -16,7 +16,7 @@ class OrderEntity with _$OrderEntity {
     required DateTime? completedAt,
     required DateTime? refundedAt,
     required OrderStatus orderStatus,
-    required PrintedStatus printedStatus,
+    required PrintedStatus? printedStatus,
   }) = _OrderEntity;
 
   factory OrderEntity.fromJson(Map<String, dynamic> json) => _$OrderEntityFromJson(json);
