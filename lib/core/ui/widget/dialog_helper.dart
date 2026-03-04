@@ -27,29 +27,34 @@ class DialogHelper {
           style: TextStyle(
             fontFamily: context.locale.languageCode == 'ja' ? 'MPLUSRounded' : 'Cafe24Ssurround2',
           ),
-          child: AlertDialog(
-            backgroundColor: Colors.white,
-            insetPadding: EdgeInsets.symmetric(horizontal: 100.w),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20.r),
-            ),
-            title: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                SvgPicture.asset(
-                  SnaptagSvg.error,
-                  width: 44.w,
-                  height: 44.w,
+          child: Center(
+            child: SizedBox(
+              width: 658.w,
+              child: AlertDialog(
+                backgroundColor: Colors.white,
+                insetPadding: EdgeInsets.zero,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20.r),
                 ),
-                SizedBox(width: 20.w),
-                Text(
-                  '환불이 실패했습니다.',
-                  style: context.typography.kioskAlert1B.copyWith(
-                    fontFamily: 'Pretendard',
-                    color: Colors.black,
-                  ),
+                title: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SvgPicture.asset(
+                      SnaptagSvg.error,
+                      width: 44.w,
+                      height: 44.w,
+                    ),
+                    SizedBox(width: 20.w),
+                    Text(
+                      '환불이 실패했습니다.',
+                      style: context.typography.kioskAlert1B.copyWith(
+                        fontFamily: 'Pretendard',
+                        color: Colors.black,
+                      ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
         );
@@ -67,29 +72,34 @@ class DialogHelper {
           style: TextStyle(
             fontFamily: context.locale.languageCode == 'ja' ? 'MPLUSRounded' : 'Cafe24Ssurround2',
           ),
-          child: AlertDialog(
-            backgroundColor: Colors.white,
-            insetPadding: EdgeInsets.symmetric(horizontal: 100.w),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20.r),
-            ),
-            title: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                SvgPicture.asset(
-                  SnaptagSvg.success,
-                  width: 44.w,
-                  height: 44.4,
+          child: Center(
+            child: SizedBox(
+              width: 658.w,
+              child: AlertDialog(
+                backgroundColor: Colors.white,
+                insetPadding: EdgeInsets.zero,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20.r),
                 ),
-                SizedBox(width: 20.w),
-                Text(
-                  '환불이 완료되었습니다.',
-                  style: context.typography.kioskAlert1B.copyWith(
-                    fontFamily: 'Pretendard',
-                    color: Colors.black,
-                  ),
+                title: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SvgPicture.asset(
+                      SnaptagSvg.success,
+                      width: 44.w,
+                      height: 44.4,
+                    ),
+                    SizedBox(width: 20.w),
+                    Text(
+                      '환불이 완료되었습니다.',
+                      style: context.typography.kioskAlert1B.copyWith(
+                        fontFamily: 'Pretendard',
+                        color: Colors.black,
+                      ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
         );
@@ -118,72 +128,77 @@ class DialogHelper {
           style: TextStyle(
             fontFamily: context.locale.languageCode == 'ja' ? 'MPLUSRounded' : 'Cafe24Ssurround2',
           ),
-          child: AlertDialog(
-            backgroundColor: Colors.white,
-            insetPadding: EdgeInsets.symmetric(horizontal: 100.w),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20.r),
-            ),
-            titlePadding: EdgeInsets.zero,
-            contentPadding: EdgeInsets.zero,
-            actionsPadding: EdgeInsets.zero,
-            title: Center(
-              child: Padding(
-                padding: EdgeInsets.only(top: 60.h, left: 40.w, right: 40.w),
-                child: Text(
-                  title,
-                  textAlign: TextAlign.center,
-                  style: context.typography.kioskAlert1B.copyWith(
-                    fontFamily: 'Pretendard',
-                    color: Colors.black,
+          child: Center(
+            child: SizedBox(
+              width: 658.w,
+              child: AlertDialog(
+                backgroundColor: Colors.white,
+                insetPadding: EdgeInsets.zero,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20.r),
+                ),
+                titlePadding: EdgeInsets.zero,
+                contentPadding: EdgeInsets.zero,
+                actionsPadding: EdgeInsets.zero,
+                title: Center(
+                  child: Padding(
+                    padding: EdgeInsets.only(top: 60.h, left: 40.w, right: 40.w),
+                    child: Text(
+                      title,
+                      textAlign: TextAlign.center,
+                      style: context.typography.kioskAlert1B.copyWith(
+                        fontFamily: 'Pretendard',
+                        color: Colors.black,
+                      ),
+                    ),
                   ),
                 ),
-              ),
-            ),
-            content: content != null
-                ? Padding(
-                    padding: EdgeInsets.only(top: 20.h, left: 40.w, right: 40.w),
-                    child: Text(
-                      content,
-                      textAlign: TextAlign.center,
-                      style: context.typography.kioskAlert2M.copyWith(
-                        color: Colors.black,
-                        fontFamily: 'Pretendard',
-                      ),
+                content: content != null
+                    ? Padding(
+                        padding: EdgeInsets.only(top: 20.h, left: 40.w, right: 40.w),
+                        child: Text(
+                          content,
+                          textAlign: TextAlign.center,
+                          style: context.typography.kioskAlert2M.copyWith(
+                            color: Colors.black,
+                            fontFamily: 'Pretendard',
+                          ),
+                        ),
+                      )
+                    : null,
+                actions: [
+                  Padding(
+                    padding: EdgeInsets.only(top: 36.h, bottom: 40.h, left: 40.w, right: 40.w),
+                    child: Row(
+                      children: [
+                        if (showCancelButton)
+                          Expanded(
+                            child: OutlinedButton(
+                              onPressed: () async {
+                                await SoundManager().playSound();
+                                Navigator.of(dialogContext).pop(false);
+                              },
+                              style: cancelButtonStyle,
+                              child: Text(cancelButtonText, style: cancelTextStyle),
+                            ),
+                          ),
+                        if (showCancelButton) SizedBox(width: 12.w),
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: () async {
+                              await SoundManager().playSound();
+                              Navigator.of(dialogContext).pop(true);
+                            },
+                            style: confirmButtonStyle,
+                            child: Text(confirmButtonText, style: confirmTextStyle),
+                          ),
+                        ),
+                      ],
                     ),
                   )
-                : null,
-            actions: [
-              Padding(
-                padding: EdgeInsets.only(top: 36.h, bottom: 40.h, left: 40.w, right: 40.w),
-                child: Row(
-                  children: [
-                    if (showCancelButton)
-                      Expanded(
-                        child: OutlinedButton(
-                          onPressed: () async {
-                            await SoundManager().playSound();
-                            Navigator.of(dialogContext).pop(false);
-                          },
-                          style: cancelButtonStyle,
-                          child: Text(cancelButtonText, style: cancelTextStyle),
-                        ),
-                      ),
-                    if (showCancelButton) SizedBox(width: 12.w),
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () async {
-                          await SoundManager().playSound();
-                          Navigator.of(dialogContext).pop(true);
-                        },
-                        style: confirmButtonStyle,
-                        child: Text(confirmButtonText, style: confirmTextStyle),
-                      ),
-                    ),
-                  ],
-                ),
-              )
-            ],
+                ],
+              ),
+            ),
           ),
         );
       },
@@ -506,71 +521,76 @@ class _TimeoutDialogWidgetState extends State<_TimeoutDialogWidget> {
       style: TextStyle(
         fontFamily: context.locale.languageCode == 'ja' ? 'MPLUSRounded' : 'Cafe24Ssurround2',
       ),
-      child: AlertDialog(
-        backgroundColor: Colors.white,
-        insetPadding: EdgeInsets.symmetric(horizontal: 100.w),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20.r),
-        ),
-        titlePadding: EdgeInsets.zero,
-        contentPadding: EdgeInsets.zero,
-        actionsPadding: EdgeInsets.zero,
-        title: Center(
-          child: Padding(
-            padding: EdgeInsets.only(top: 60.h, bottom: 20.h, left: 40.w, right: 40.w),
-            child: Text(
-              widget.title,
-              textAlign: TextAlign.center,
-              style: context.typography.kioskAlert1B.copyWith(
-                fontFamily: 'Pretendard',
-                color: Colors.black,
+      child: Center(
+        child: SizedBox(
+          width: 658.w,
+          child: AlertDialog(
+            backgroundColor: Colors.white,
+            insetPadding: EdgeInsets.zero,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20.r),
+            ),
+            titlePadding: EdgeInsets.zero,
+            contentPadding: EdgeInsets.zero,
+            actionsPadding: EdgeInsets.zero,
+            title: Center(
+              child: Padding(
+                padding: EdgeInsets.only(top: 60.h, bottom: 20.h, left: 40.w, right: 40.w),
+                child: Text(
+                  widget.title,
+                  textAlign: TextAlign.center,
+                  style: context.typography.kioskAlert1B.copyWith(
+                    fontFamily: 'Pretendard',
+                    color: Colors.black,
+                  ),
+                ),
               ),
             ),
+            content: Padding(
+              padding: EdgeInsets.only(left: 40.w, right: 40.w),
+              child: Text(
+                widget.messageKey != null
+                    ? widget.messageKey!.tr().replaceAll('{}', '$_remainingSeconds')
+                    : (widget.message?.replaceAll('{}', '$_remainingSeconds') ?? ''),
+                textAlign: TextAlign.center,
+                style: context.typography.kioskAlert2M.copyWith(
+                  fontFamily: 'Pretendard',
+                  color: Color(0xFF414448),
+                ),
+              ),
+            ),
+            actions: [
+              Padding(
+                padding: EdgeInsets.only(bottom: 40.h, top: 36.h, left: 40.w, right: 40.w),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () async {
+                          await SoundManager().playSound();
+                          Navigator.of(context).pop(false);
+                        },
+                        style: context.refundDialogCancelButtonStyle,
+                        child: Text(widget.cancelButtonText, style: TextStyle(color: Color(0xFF999999))),
+                      ),
+                    ),
+                    SizedBox(width: 12.w),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          await SoundManager().playSound();
+                          Navigator.of(context).pop(true);
+                        },
+                        style: widget.confirmButtonStyle ?? context.refundDialogConfirmButtonStyle,
+                        child: Text(widget.confirmButtonText, style: TextStyle(color: Color(0xFFFFFFFF))),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
-        content: Padding(
-          padding: EdgeInsets.only(left: 40.w, right: 40.w),
-          child: Text(
-            widget.messageKey != null
-                ? widget.messageKey!.tr().replaceAll('{}', '$_remainingSeconds')
-                : (widget.message?.replaceAll('{}', '$_remainingSeconds') ?? ''),
-            textAlign: TextAlign.center,
-            style: context.typography.kioskAlert2M.copyWith(
-              fontFamily: 'Pretendard',
-              color: Color(0xFF414448),
-            ),
-          ),
-        ),
-        actions: [
-          Padding(
-            padding: EdgeInsets.only(bottom: 40.h, top: 36.h, left: 40.w, right: 40.w),
-            child: Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () async {
-                      await SoundManager().playSound();
-                      Navigator.of(context).pop(false);
-                    },
-                    style: context.refundDialogCancelButtonStyle,
-                    child: Text(widget.cancelButtonText, style: TextStyle(color: Color(0xFF999999))),
-                  ),
-                ),
-                SizedBox(width: 12.w),
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () async {
-                      await SoundManager().playSound();
-                      Navigator.of(context).pop(true);
-                    },
-                    style: widget.confirmButtonStyle ?? context.refundDialogConfirmButtonStyle,
-                    child: Text(widget.confirmButtonText, style: TextStyle(color: Color(0xFFFFFFFF))),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
       ),
     );
   }
