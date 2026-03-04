@@ -66,5 +66,7 @@
   "choice_enter_verification_code": "输入验证码",
   "print_takes_one_minute": "打印大约需要1分钟。",
   "currency_won": "韩元",
-  "common_btn_back": "返回"
+  "common_btn_back": "返回",
+  "alert_title_network_error": "Network Connection Error",
+  "alert_txt_network_error": "The network connection is unstable, so the event could not be loaded. Please check your internet connection and run the app again."
 }

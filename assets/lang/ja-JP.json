@@ -67,5 +67,7 @@
   "choice_enter_verification_code": "認証番号を入力",
   "print_takes_one_minute": "印刷には約1分かかります。",
   "currency_won": "ウォン",
-  "common_btn_back": "戻る"
+  "common_btn_back": "戻る",
+  "alert_title_network_error": "ネットワーク接続エラー",
+  "alert_txt_network_error": "ネットワークエラーのため\nイベントを読み込めません。\n接続を確認して再試行してください。"
 }

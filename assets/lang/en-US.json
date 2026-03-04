@@ -67,5 +67,7 @@
   "choice_enter_verification_code": "Enter verification code",
   "print_takes_one_minute": "Printing takes about 1 minute.",
   "currency_won": "KRW",
-  "common_btn_back": "Back"
+  "common_btn_back": "Back",
+  "alert_title_network_error": "Network Connection Error",
+  "alert_txt_network_error": "Unable to load the event\ndue to a network error.\nCheck your connection and try again."
 }

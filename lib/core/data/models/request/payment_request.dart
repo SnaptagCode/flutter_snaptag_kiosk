@@ -1,3 +1,4 @@
+import 'package:flutter_snaptag_kiosk/core/common/constants/default.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'payment_request.freezed.dart';
@@ -52,7 +53,7 @@ class PaymentRequest with _$PaymentRequest {
     required String totalAmount,
     String tax = '0',
     String supplyAmount = '0',
-    bool isTest = false,
+    String cardTerminalId = defaultCardTerminalId,
   }) {
     return PaymentRequest(
       stx: String.fromCharCode(2),
@@ -60,7 +61,7 @@ class PaymentRequest with _$PaymentRequest {
       businessType: '01',
       messageType: '0200',
       transactionForm: 'N',
-      terminalId: isTest ? 'DPT0TEST03' : 'AT0416146A',
+      terminalId: cardTerminalId,
       companyInfo: '    ',
       seqNo: '000000000000',
       posEntryMode: ' ',
@@ -95,7 +96,7 @@ class PaymentRequest with _$PaymentRequest {
     String supplyAmount = '0',
     required String originalApprovalNo,
     required String originalApprovalDate,
-    bool isTest = false,
+    String cardTerminalId = defaultCardTerminalId,
   }) {
     return PaymentRequest(
       stx: String.fromCharCode(2),
@@ -103,7 +104,7 @@ class PaymentRequest with _$PaymentRequest {
       businessType: '01',
       messageType: '0420',
       transactionForm: 'N',
-      terminalId: isTest ? 'DPT0TEST03' : 'AT0416146A',
+      terminalId: cardTerminalId,
       companyInfo: '    ',
       seqNo: '000000000000',
       posEntryMode: ' ',

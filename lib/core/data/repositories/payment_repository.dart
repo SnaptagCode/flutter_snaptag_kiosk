@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_snaptag_kiosk/core/common/constants/default.dart';
 import 'package:flutter_snaptag_kiosk/core/data/models/request/kscat_device_request.dart';
 import 'package:flutter_snaptag_kiosk/core/data/models/response/kscat_device_response.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
@@ -31,7 +32,9 @@ class PaymentRepository {
     required int totalAmount,
   }) async {
     final Invoice invoice = Invoice.calculate(totalAmount);
+    final cardTerminalId = ref.read(kioskInfoServiceProvider)?.cardTerminalId;
     final request = PaymentRequest.approval(
+      cardTerminalId: cardTerminalId ?? defaultCardTerminalId,
       totalAmount: invoice.total.toString(),
       tax: invoice.taxAmount.toString(),
       supplyAmount: invoice.supplyAmount.toString(),
@@ -54,12 +57,14 @@ class PaymentRepository {
     required String originalApprovalDate,
   }) async {
     final Invoice invoice = Invoice.calculate(totalAmount);
+    final cardTerminalId = ref.read(kioskInfoServiceProvider)?.cardTerminalId;
     final request = PaymentRequest.cancel(
       totalAmount: invoice.total.toString(),
       tax: invoice.taxAmount.toString(),
       supplyAmount: invoice.supplyAmount.toString(),
       originalApprovalNo: originalApprovalNo,
       originalApprovalDate: originalApprovalDate,
+      cardTerminalId: cardTerminalId ?? defaultCardTerminalId,
     );
 
     return _request(request);
