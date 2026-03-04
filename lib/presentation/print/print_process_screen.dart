@@ -62,27 +62,9 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> with Si
     ref.watch(printProcessScreenProviderProvider);
 
     final randomAdImage = getRandomAdImageFilePath(ref);
-    /**
-        final printProcess = ref.watch(printProcessScreenProviderProvider);
-        if (printProcess.isLoading) {
-        if (!context.loaderOverlay.visible) context.loaderOverlay.show();
-        } else {
-        if (context.loaderOverlay.visible) context.loaderOverlay.hide();
-        }
-     */
 
     // listen 부분에서는 로딩 오버레이 처리를 제거
     ref.listen(printProcessScreenProviderProvider, (previous, next) async {
-      /**
-          if (next.isLoading && !context.loaderOverlay.visible) {
-          context.loaderOverlay.show();
-          return;
-          }
-
-          if (context.loaderOverlay.visible) {
-          context.loaderOverlay.hide();
-          }
-       */
       if (!next.isLoading) {
         // 로딩이 아닐 때만 처리
         await next.when(
@@ -93,19 +75,16 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> with Si
               _progressController.stop();
             }
 
-            switch (error.toString().replaceFirst('Exception: ', '').trim()) {
-              case "Card feeder is empty":
-                SlackLogService().sendBroadcastLogToSlackWithKey(ErrorKey.printerCardEmpty.key);
-                break;
-              case "Failed to eject card":
-                SlackLogService().sendBroadcastLogToSlackWithKey(ErrorKey.printerEjectFail.key);
-                break;
-              case "Printer is not ready":
-                SlackLogService().sendBroadcastLogToSlackWithKey(ErrorKey.printerReadyFail.key);
-                break;
-              default:
-                SlackLogService().sendBroadcastLogToSlackWithKey(ErrorKey.printerPrintFail.key);
-                break;
+            final cleanedError = error.toString().replaceFirst('Exception: ', '').trim();
+
+            if (cleanedError.contains('Card feeder is empty')) {
+              SlackLogService().sendBroadcastLogToSlackWithKey(ErrorKey.printerCardEmpty.key);
+            } else if (cleanedError.contains('Failed to eject card')) {
+              SlackLogService().sendBroadcastLogToSlackWithKey(ErrorKey.printerEjectFail.key);
+            } else if (cleanedError.contains('Printer is not ready')) {
+              SlackLogService().sendBroadcastLogToSlackWithKey(ErrorKey.printerReadyFail.key);
+            } else {
+              SlackLogService().sendBroadcastLogToSlackWithKey(ErrorKey.printerPrintFail.key);
             }
 
             final errorMessage = error.toString();
