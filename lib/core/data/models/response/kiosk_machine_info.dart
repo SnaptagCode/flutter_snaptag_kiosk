@@ -11,6 +11,7 @@ abstract class KioskMachineInfo with _$KioskMachineInfo {
   const factory KioskMachineInfo({
     @Default(0) int kioskEventId,
     @Default(0) int kioskMachineId,
+    @Default(null) String? cardTerminalId,
     @Default('') String kioskMachineName,
     @Default('') String kioskMachineDescription,
     @Default(0) int photoCardPrice,
@@ -38,4 +39,5 @@ abstract class KioskMachineInfo with _$KioskMachineInfo {
 
 extension KioskMachineInfoX on KioskMachineInfo {
   bool get isSuwon => kioskMachineId == 2 || kioskMachineId == 3;
+  bool get isHwe => eventType == 'HWE';
 }

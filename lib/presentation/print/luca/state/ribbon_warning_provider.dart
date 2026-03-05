@@ -202,7 +202,7 @@ class RibbonWarning extends _$RibbonWarning {
     // 각 레벨별로 독립적으로 경고 상태 확인
     // 2% 미만 체크 (가장 심각한 경고)
     if (ribbonLevel < 2 && !state.isSentUnder2Ribbon) {
-      SlackLogService().sendBroadcastLogToSlack(ErrorKey.printerRibonEmpty.key);
+      SlackLogService().sendBroadcastLogToSlackWithKey(ErrorKey.printerRibonEmpty.key);
       SlackLogService().sendErrorLogToSlack(
           '*[MachineId : $machineId]* ERROR: Ribbon level is ${ribbonLevel.toInt()}% (under 1%), please replace immediately!');
       setRibbonUnder20Sent(ribbonLevel); // 5% 미만이므로 20% 경고도 함께 설정
@@ -212,7 +212,7 @@ class RibbonWarning extends _$RibbonWarning {
     }
 
     if (filmLevel < 2 && !state.isSentUnder2Film) {
-      SlackLogService().sendBroadcastLogToSlack(ErrorKey.printerFilmEmpty.key);
+      SlackLogService().sendBroadcastLogToSlackWithKey(ErrorKey.printerFilmEmpty.key);
       SlackLogService().sendErrorLogToSlack(
           '*[MachineId : $machineId]* ERROR: Film level is ${filmLevel.toInt()}% (under 1%), please replace immediately!');
       setFilmUnder20Sent(filmLevel); // 5% 미만이므로 20% 경고도 함께 설정
@@ -223,14 +223,14 @@ class RibbonWarning extends _$RibbonWarning {
 
     // 5% 미만 체크
     if (ribbonLevel <= 5 && !state.isSentUnder5Ribbon) {
-      SlackLogService().sendBroadcastLogToSlack(WarningKey.printerRibonR5.key);
+      SlackLogService().sendBroadcastLogToSlackWithKey(WarningKey.printerRibonR5.key);
       setRibbonUnder20Sent(ribbonLevel); // 5% 미만이므로 20% 경고도 함께 설정
       setRibbonUnder10Sent(ribbonLevel); // 5% 미만이므로 10% 경고도 함께 설정
       setRibbonUnder5Sent(ribbonLevel);
     }
 
     if (filmLevel <= 5 && !state.isSentUnder5Film) {
-      SlackLogService().sendBroadcastLogToSlack(WarningKey.printerFilmR5.key);
+      SlackLogService().sendBroadcastLogToSlackWithKey(WarningKey.printerFilmR5.key);
       setFilmUnder20Sent(filmLevel); // 5% 미만이므로 20% 경고도 함께 설정
       setFilmUnder10Sent(filmLevel); // 5% 미만이므로 10% 경고도 함께 설정
       setFilmUnder5Sent(filmLevel);
@@ -238,25 +238,25 @@ class RibbonWarning extends _$RibbonWarning {
 
     // 10% 미만 체크 (5% 경고와 독립적으로 실행)
     if (ribbonLevel <= 10 && !state.isSentUnder10Ribbon) {
-      SlackLogService().sendBroadcastLogToSlack(WarningKey.printerRibonR10.key);
+      SlackLogService().sendBroadcastLogToSlackWithKey(WarningKey.printerRibonR10.key);
       setRibbonUnder20Sent(ribbonLevel); // 10% 미만이므로 20% 경고도 함께 설정
       setRibbonUnder10Sent(ribbonLevel);
     }
 
     if (filmLevel <= 10 && !state.isSentUnder10Film) {
-      SlackLogService().sendBroadcastLogToSlack(WarningKey.printerFilmR10.key);
+      SlackLogService().sendBroadcastLogToSlackWithKey(WarningKey.printerFilmR10.key);
       setFilmUnder20Sent(filmLevel); // 10% 미만이므로 20% 경고도 함께 설정
       setFilmUnder10Sent(filmLevel);
     }
 
     // 20% 미만 체크 (다른 경고와 독립적으로 실행)
     if (ribbonLevel <= 20 && !state.isSentUnder20Ribbon) {
-      SlackLogService().sendBroadcastLogToSlack(WarningKey.printerRibonR20.key);
+      SlackLogService().sendBroadcastLogToSlackWithKey(WarningKey.printerRibonR20.key);
       setRibbonUnder20Sent(ribbonLevel);
     }
 
     if (filmLevel <= 20 && !state.isSentUnder20Film) {
-      SlackLogService().sendBroadcastLogToSlack(WarningKey.printerFilmR20.key);
+      SlackLogService().sendBroadcastLogToSlackWithKey(WarningKey.printerFilmR20.key);
       setFilmUnder20Sent(filmLevel);
     }
   }

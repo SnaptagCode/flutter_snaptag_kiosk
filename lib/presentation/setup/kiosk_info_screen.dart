@@ -65,7 +65,7 @@ class KioskInfoScreen extends ConsumerWidget {
                   ),
                 );
 
-                SlackLogService().sendBroadcastLogToSlack(InfoKey.inspectionStart.key);
+                SlackLogService().sendBroadcastLogToSlackWithKey(InfoKey.inspectionStart.key);
               }
             },
             icon: SvgPicture.asset(

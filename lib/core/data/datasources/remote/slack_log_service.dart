@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:developer';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_snaptag_kiosk/core/data/models/entities/slack_log_template.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -8,7 +9,6 @@ import 'package:flutter_snaptag_kiosk/presentation/core/printer_log_provider.dar
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
 import 'package:flutter_snaptag_kiosk/presentation/setup/alert_definition_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/core/card_count_provider.dart';
-import 'package:http/http.dart' as http;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter_snaptag_kiosk/core/providers/version_notifier.dart';
@@ -33,12 +33,34 @@ class SlackLogService {
     sendLogToSlack("🚀 Flutter App Started!");
   }
 
+  Future<void> sendLog(String type, String message) async {
+    if (message.isEmpty) {
+      log("❌ Slack 알림 메시지가 없습니다.");
+      return;
+    }
+    try {
+      _container.read(kioskRepositoryProvider).sendSlackAlert(type, message);
+    } catch (e) {
+      log("❌ Slack 알림 API 오류: $e");
+    }
+  }
+
   Future<void> sendErrorLogToSlack(String message) async {
-    await sendLog(slackWebhookErrorUrl, message);
+    final type = kDebugMode ? 'test_error_log' : 'error_log';
+    // await sendLog('test_error_log', message);
+    await sendLog(type, message);
   }
 
   Future<void> sendLogToSlack(String message) async {
-    await sendLog(slackWebhookUrl, message);
+    final type = kDebugMode ? 'test_log' : 'log';
+    // await sendLog('test_log', message);
+    await sendLog(type, message);
+  }
+
+  Future<void> sendBroadcastLogToSlack(String message) async {
+    final type = kDebugMode ? 'test_service' : 'service';
+    // await sendLog('test_service', message);
+    await sendLog(type, message);
   }
 
   // 1) 객체 만드는 함수 LogState
@@ -79,7 +101,7 @@ class SlackLogService {
             kioskMachineInfo: kioskInfo);
   }
 
-  Future<void> sendInspectionEndBroadcastLogToSlack(String errorKey, {required bool isPaymentOn}) async {
+  Future<void> sendInspectionEndBroadcastLogToSlack(String errorKey) async {
     final slackLogTemplate = await createSlackLogTemplate(errorKey);
     final cardCount = _container.read(cardCountProvider);
 
@@ -98,7 +120,7 @@ ${slackLogTemplate.description}
 - 단면 카드 수량 : ${cardCount.currentCount} / ${cardCount.initialCount}
 - 불러온 이벤트 : $eventName
 - 프린터 연결 상태 : 정상
-- 결제 단말기 연결 상태 : ${isPaymentOn == true ? '정상' : '미연결'}
+- 결제 단말기 연결 상태 : 정상
 - 프린터 온도 : $printerheadTempString°C
 - 리본 잔량 : ${printLog?.rbnRemainingRatio != null ? "${printLog?.rbnRemainingRatio}%" : "알 수 없음"}
 - 필름 잔량 : ${printLog?.filmRemainingRatio != null ? "${printLog?.filmRemainingRatio}%" : "알 수 없음"}
@@ -109,7 +131,7 @@ ${slackLogTemplate.description}
         cardCount: cardCount.currentCount,
       );
 
-      await sendLog(slackWebhookBroadcastUrl, message);
+      await sendBroadcastLogToSlack(message);
     }
   }
 
@@ -126,7 +148,7 @@ ${slackLogTemplate.description}
 
       final message = buildSlackAlertMessage(slackLogTemplate: slackLogTemplate.copyWith(description: description));
 
-      await sendLog(slackWebhookBroadcastUrl, message);
+      await sendBroadcastLogToSlack(message);
     }
   }
 
@@ -150,11 +172,11 @@ ${slackLogTemplate.description}
       final message = buildSlackAlertMessage(
           slackLogTemplate: slackLogTemplate.copyWith(title: '프린트 상태', category: 'info', description: description));
 
-      await sendLog(slackWebhookBroadcastUrl, message);
+      await sendBroadcastLogToSlack(message);
     }
   }
 
-  Future<void> sendBroadcastLogToSlack(String errorKey) async {
+  Future<void> sendBroadcastLogToSlackWithKey(String errorKey) async {
     final slackLogTemplate = await createSlackLogTemplate(errorKey);
     final cardCount = _container.read(cardCountProvider);
 
@@ -164,38 +186,38 @@ ${slackLogTemplate.description}
         cardCount: cardCount.currentCount,
       );
 
-      await sendLog(slackWebhookBroadcastUrl, message);
+      await sendBroadcastLogToSlack(message);
     }
   }
 
-  Future<void> sendLog(String? url, String message) async {
-    if (url == null) {
-      log("❌ Slack Webhook URL이 없습니다.");
-      return;
-    }
-    if (message.isEmpty) {
-      log("❌ Slack Webhook 메시지가 없습니다.");
-      return;
-    } else {
-      final payload = jsonEncode({"text": message});
+  // Future<void> sendLog(String? url, String message) async {
+  //   if (url == null) {
+  //     log("❌ Slack Webhook URL이 없습니다.");
+  //     return;
+  //   }
+  //   if (message.isEmpty) {
+  //     log("❌ Slack Webhook 메시지가 없습니다.");
+  //     return;
+  //   } else {
+  //     final payload = jsonEncode({"text": message});
 
-      try {
-        final response = await http.post(
-          Uri.parse(url),
-          headers: {"Content-Type": "application/json"},
-          body: payload,
-        );
+  //     try {
+  //       final response = await http.post(
+  //         Uri.parse(url),
+  //         headers: {"Content-Type": "application/json"},
+  //         body: payload,
+  //       );
 
-        if (response.statusCode != 200) {
-          log("❌ Slack Webhook 오류: ${response.body}");
-          log("curl -X POST -H \"Content-Type: application/json\" -d '$payload' $url");
-        }
-      } catch (e) {
-        log("❌ Slack Webhook 오류: $e");
-        log("curl -X POST -H \"Content-Type: application/json\" -d '$payload' $url");
-      }
-    }
-  }
+  //       if (response.statusCode != 200) {
+  //         log("❌ Slack Webhook 오류: ${response.body}");
+  //         log("curl -X POST -H \"Content-Type: application/json\" -d '$payload' $url");
+  //       }
+  //     } catch (e) {
+  //       log("❌ Slack Webhook 오류: $e");
+  //       log("curl -X POST -H \"Content-Type: application/json\" -d '$payload' $url");
+  //     }
+  //   }
+  // }
 
   String buildSlackAlertMessage({
     required SlackLogTemplate slackLogTemplate,

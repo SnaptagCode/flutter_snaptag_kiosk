@@ -238,6 +238,15 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
               timeoutNotifier.resumeTimer();
             }
 
+            SlackLogService().sendErrorLogToSlack('Payment process failed: $error');
+
+            if (error.toString().contains('Card feeder is empty')) {
+              await DialogHelper.showPrintCardRefillDialog(
+                context,
+              );
+              return;
+            }
+
             if (error is PaymentFailedException) {
               if (error is TimeoutPaymentException) {
                 await DialogHelper.showTimeoutPaymentDialog(

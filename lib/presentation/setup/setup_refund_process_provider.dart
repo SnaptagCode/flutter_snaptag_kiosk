@@ -28,6 +28,7 @@ class SetupRefundProcess extends _$SetupRefundProcess {
             originalApprovalNo: order.paymentAuthNumber ?? '',
             originalApprovalDate: DateFormat('yyMMdd').format(order.completedAt!),
           );
+      SlackLogService().sendLogToSlack("[SET UP] refund response: $response");
 
       state = AsyncValue.data(response);
       await _updateOrderStatus(order);

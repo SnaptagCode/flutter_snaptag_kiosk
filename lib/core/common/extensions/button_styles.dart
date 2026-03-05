@@ -119,7 +119,7 @@ extension ButtonStyles on BuildContext {
       );
 
   ButtonStyle get dialogKioskStyle => ElevatedButton.styleFrom(
-        fixedSize: Size(double.infinity, 82.h),
+        fixedSize: Size(double.infinity, 94.h),
         minimumSize: Size(283.w, 78.h),
         backgroundColor: kioskColors.popupButtonColor,
         foregroundColor: Colors.white,
