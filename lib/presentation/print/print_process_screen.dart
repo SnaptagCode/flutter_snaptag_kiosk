@@ -327,7 +327,7 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> with Si
 
     final adImageFolder = Directory((machineId == 2 || machineId == 3)
         ? '$userDir\\Snaptag\\$version\\assets\\adImages\\suwon'
-        : (machineId == 1 || machineId == 4)
+        : (machineId == 1)
             ? '$userDir\\Snaptag\\$version\\assets\\adImages\\eland'
             : '$userDir\\Snaptag\\$version\\assets\\adImages\\ansan');
 
