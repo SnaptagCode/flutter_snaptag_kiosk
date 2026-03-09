@@ -124,7 +124,8 @@ class PrintService extends _$PrintService {
           .read(kioskRepositoryProvider)
           .updatePrintStatus(printedPhotoCardId: printedPhotoCardId, request: request);
     } catch (e) {
-      rethrow;
+      SlackLogService().sendErrorLogToSlack('PrintService._updatePrintStatus failure: $e');
+      logger.e('PrintService._updatePrintStatus failure', error: e);
     }
   }
 

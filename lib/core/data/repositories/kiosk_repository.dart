@@ -168,7 +168,8 @@ class _KioskRepository {
             .toJson(),
       );
     } catch (e) {
-      rethrow;
+      SlackLogService().sendErrorLogToSlack('KioskRepository.updatePrintLog failure: $e');
+      logger.e('KioskRepository.updatePrintLog failure', error: e);
     }
   }
 
