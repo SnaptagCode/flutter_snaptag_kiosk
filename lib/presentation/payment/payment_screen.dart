@@ -295,8 +295,7 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
     final selection = ref.watch(backPhotoTypeProvider);
     final isFixed = selection?.type == BackPhotoType.fixed;
     final selectedIndex = selection?.fixedIndex;
-    final mainTextColor =
-        kiosk?.mainTextColor != null ? Color(int.parse(kiosk!.mainTextColor.replaceFirst('#', '0xff'))) : Colors.white;
+    final mainTextColor = kiosk?.mainTextColor.toColor(fallback: Colors.white) ?? Colors.white;
 
     return DefaultTextStyle(
       style: TextStyle(
@@ -351,7 +350,7 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
                 Text(
                   LocaleKeys.sub03_txt_03.tr(),
                   style: context.typography.kioskBody2B.copyWith(
-                    color: Color(int.parse(kiosk?.couponTextColor.replaceFirst('#', '0xff') ?? '0xffffff')),
+                    color: (kiosk?.couponTextColor ?? '').toColor(fallback: Colors.white),
                     //fontFamily: 'Pretendard',
                   ),
                 ),

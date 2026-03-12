@@ -13,14 +13,9 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final kiosk = ref.watch(kioskInfoServiceProvider);
-    final buttonColor = kiosk?.mainButtonColor != null
-        ? Color(int.parse(kiosk!.mainButtonColor.replaceFirst('#', '0xff')))
-        : Colors.black;
-    final buttonTextColor = kiosk?.buttonTextColor != null
-        ? Color(int.parse(kiosk!.buttonTextColor.replaceFirst('#', '0xff')))
-        : Colors.white;
-    final mainTextColor =
-        kiosk?.mainTextColor != null ? Color(int.parse(kiosk!.mainTextColor.replaceFirst('#', '0xff'))) : Colors.white;
+    final buttonColor = kiosk?.mainButtonColor.toColor() ?? Colors.black;
+    final buttonTextColor = kiosk?.buttonTextColor.toColor(fallback: Colors.white) ?? Colors.white;
+    final mainTextColor = kiosk?.mainTextColor.toColor(fallback: Colors.white) ?? Colors.white;
     String priceValue = NumberFormat.currency(locale: 'ko_KR', symbol: '').format(kiosk?.photoCardPrice);
 
     return DefaultTextStyle(
@@ -66,7 +61,7 @@ class HomeScreen extends ConsumerWidget {
                 mainTextColor: mainTextColor,
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(10.r),
-                  child: Image.network(kiosk?.emblemImageUrl ?? '', width: 264.w, height: 264.h, fit: BoxFit.cover),
+                  child: Image.network(kiosk?.emblemImageUrl ?? '', width: 264.w, height: 264.h, fit: BoxFit.contain),
                 ),
                 onTap: () async {
                   ref.read(backPhotoTypeProvider.notifier).selectFixed(0);

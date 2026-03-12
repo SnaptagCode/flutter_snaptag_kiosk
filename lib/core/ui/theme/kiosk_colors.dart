@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_snaptag_kiosk/core/common/extensions/color.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -25,14 +26,7 @@ class KioskColorsNotifier extends _$KioskColorsNotifier {
     );
   }
 
-  Color _parseColor(String hexColor) {
-    if (hexColor.isEmpty) return Colors.black;
-    try {
-      return Color(int.parse(hexColor.replaceFirst('#', '0xff')));
-    } catch (e) {
-      return Colors.black;
-    }
-  }
+  Color _parseColor(String hexColor) => hexColor.toColor();
 }
 
 class KioskColors extends ThemeExtension<KioskColors> {
