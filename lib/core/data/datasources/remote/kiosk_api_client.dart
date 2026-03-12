@@ -8,8 +8,11 @@ part 'kiosk_api_client.g.dart';
 abstract class KioskApiClient {
   factory KioskApiClient(Dio dio, {String baseUrl}) = _KioskApiClient;
 
-  @POST('/v1/internal/slack/kiosk-by-type')
-  Future<void> sendSlackAlert(@Body() Map<String, dynamic> body);
+  @POST('/v1/internal/slack/kiosk-by-type/{machineId}')
+  Future<void> sendSlackAlert({
+    @Path('machineId') required int machineId,
+    @Body() required Map<String, dynamic> body,
+  });
 
   // Health Check
   @GET('/v1/health-check')
