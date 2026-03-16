@@ -58,117 +58,113 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> with Si
 
   @override
   Widget build(BuildContext context) {
-    // print 카드 출력 트리거 (provider build에서 printCard 수행)
-    // ref.watch(printProcessScreenProviderProvider);
-
     final randomAdImage = getRandomAdImageFilePath(ref);
     final isHwe = ref.read(kioskInfoServiceProvider)?.isHwe == true;
 
     // listen 부분에서는 로딩 오버레이 처리를 제거
-    // ref.listen(printProcessScreenProviderProvider, (previous, next) async {
-    //   if (!next.isLoading) {
-    //     // 로딩이 아닐 때만 처리
-    //     await next.when(
-    //       error: (error, stack) async {
-    //         // 오류 발생 시: 현재 진행률에서 멈춤 (요구사항)
-    //         if (!_progressCompleted && !_progressFrozen) {
-    //           _progressFrozen = true;
-    //           _progressController.stop();
-    //         }
+    ref.listen(printProcessScreenProviderProvider, (previous, next) async {
+      if (!next.isLoading) {
+        // 로딩이 아닐 때만 처리
+        await next.when(
+          error: (error, stack) async {
+            // 오류 발생 시: 현재 진행률에서 멈춤 (요구사항)
+            if (!_progressCompleted && !_progressFrozen) {
+              _progressFrozen = true;
+              _progressController.stop();
+            }
 
-    //         final cleanedError = error.toString().replaceFirst('Exception: ', '').trim();
+            final cleanedError = error.toString().replaceFirst('Exception: ', '').trim();
 
-    //         if (cleanedError.contains('Card feeder is empty')) {
-    //           SlackLogService().sendBroadcastLogToSlackWithKey(ErrorKey.printerCardEmpty.key);
-    //         } else if (cleanedError.contains('Failed to eject card')) {
-    //           SlackLogService().sendBroadcastLogToSlackWithKey(ErrorKey.printerEjectFail.key);
-    //         } else if (cleanedError.contains('Printer is not ready')) {
-    //           SlackLogService().sendBroadcastLogToSlackWithKey(ErrorKey.printerReadyFail.key);
-    //         } else {
-    //           SlackLogService().sendBroadcastLogToSlackWithKey(ErrorKey.printerPrintFail.key);
-    //         }
+            if (cleanedError.contains('Card feeder is empty')) {
+              SlackLogService().sendBroadcastLogToSlackWithKey(ErrorKey.printerCardEmpty.key);
+            } else if (cleanedError.contains('Failed to eject card')) {
+              SlackLogService().sendBroadcastLogToSlackWithKey(ErrorKey.printerEjectFail.key);
+            } else if (cleanedError.contains('Printer is not ready')) {
+              SlackLogService().sendBroadcastLogToSlackWithKey(ErrorKey.printerReadyFail.key);
+            } else {
+              SlackLogService().sendBroadcastLogToSlackWithKey(ErrorKey.printerPrintFail.key);
+            }
 
-    //         final errorMessage = error.toString();
+            final errorMessage = error.toString();
 
-    //         // 슬랙에 에러 로그 전송
-    //         errorLogging(error.toString(), stack);
+            // 슬랙에 에러 로그 전송
+            errorLogging(error.toString(), stack);
 
-    //         // 네트워크 오류인지 체크
-    //         final isNetworkError = ref.read(networkStatusNotifierProvider.notifier).isNetworkError(error);
+            // 네트워크 오류인지 체크
+            final isNetworkError = ref.read(networkStatusNotifierProvider.notifier).isNetworkError(error);
 
-    //         // 네트워크 오류라면 카드 단일 카드 수량 확인 후 완료 알럿 표시
-    //         if (isNetworkError) {
-    //           // 카드 단일 카드 수량 확인
-    //           checkCardSingleCardCount();
+            // 네트워크 오류라면 카드 단일 카드 수량 확인 후 완료 알럿 표시
+            if (isNetworkError) {
+              // 카드 단일 카드 수량 확인
+              checkCardSingleCardCount();
 
-    //           await DialogHelper.showPrintCompleteDialog(
-    //             context,
-    //             onButtonPressed: () {
-    //               HomeRouteData().go(context);
-    //             },
-    //           );
-    //           return;
-    //         }
+              await DialogHelper.showPrintCompleteDialog(
+                context,
+                onButtonPressed: () {
+                  HomeRouteData().go(context);
+                },
+              );
+              return;
+            }
 
-    //         final result = await DialogHelper.showKioskDialog(
-    //           context,
-    //           title: LocaleKeys.alert_title_auto_refund_alert.tr(),
-    //           contentText: LocaleKeys.alert_txt_auto_refund_alert.tr(),
-    //           confirmButtonText: LocaleKeys.alert_btn_paymentcard_failure.tr(),
-    //         );
+            final result = await DialogHelper.showKioskDialog(
+              context,
+              title: LocaleKeys.alert_title_auto_refund_alert.tr(),
+              contentText: LocaleKeys.alert_txt_auto_refund_alert.tr(),
+              confirmButtonText: LocaleKeys.alert_btn_paymentcard_failure.tr(),
+            );
 
-    //         if (result) {
-    //           // 에러 발생 시 환불 처리
-    //           await refund();
+            if (result) {
+              // 에러 발생 시 환불 처리
+              await refund();
 
-    //           // 카드 단일 카드 수량 확인
-    //           checkCardSingleCardCount();
+              // 카드 단일 카드 수량 확인
+              checkCardSingleCardCount();
 
-    //           // 카드 공급기가 비어있는지 확인
-    //           if (checkCardFeederIsEmpty(errorMessage)) {
-    //             await DialogHelper.showPrintCardRefillDialog(
-    //               context,
-    //             );
-    //             if (result) {
-    //               HomeRouteData().go(context);
-    //             }
-    //           } else {
-    //             final result = await DialogHelper.showPrintErrorDialog(
-    //               context,
-    //             );
-    //             if (result) {
-    //               HomeRouteData().go(context);
-    //             }
-    //           }
-    //         }
-    //       },
-    //       loading: () => null,
-    //       data: (_) async {
-    //         if (!_progressCompleted) {
-    //           _progressCompleted = true;
-    //           await _progressController.animateTo(
-    //             1.0,
-    //             duration: const Duration(milliseconds: 450),
-    //             curve: Curves.easeOutCubic,
-    //           );
-    //         }
+              // 카드 공급기가 비어있는지 확인
+              if (checkCardFeederIsEmpty(errorMessage)) {
+                await DialogHelper.showPrintCardRefillDialog(
+                  context,
+                );
+                if (result) {
+                  HomeRouteData().go(context);
+                }
+              } else {
+                final result = await DialogHelper.showPrintErrorDialog(
+                  context,
+                );
+                if (result) {
+                  HomeRouteData().go(context);
+                }
+              }
+            }
+          },
+          loading: () => null,
+          data: (_) async {
+            if (!_progressCompleted) {
+              _progressCompleted = true;
+              await _progressController.animateTo(
+                1.0,
+                duration: const Duration(milliseconds: 450),
+                curve: Curves.easeOutCubic,
+              );
+            }
 
-    //         checkCardSingleCardCount();
+            checkCardSingleCardCount();
 
-    //         ref.read(paymentResponseStateProvider.notifier).reset();
+            ref.read(paymentResponseStateProvider.notifier).reset();
 
-    //         await DialogHelper.showPrintCompleteDialog(
-    //           context,
-    //           onButtonPressed: () {
-    //             HomeRouteData().go(context);
-    //           },
-    //         );
-    //       },
-    //     );
-    //   }
-    // });
-    // NOTE: kioskInfoServiceProvider는 하위 로직/화면에서 사용될 수 있어 watch 유지
-    ref.watch(kioskInfoServiceProvider);
+            await DialogHelper.showPrintCompleteDialog(
+              context,
+              onButtonPressed: () {
+                HomeRouteData().go(context);
+              },
+            );
+          },
+        );
+      }
+    });
+
     final mainTextColor =
         ref.watch(kioskInfoServiceProvider)?.mainTextColor.toColor(fallback: Colors.white) ?? Colors.white;
 
