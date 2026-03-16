@@ -4,6 +4,16 @@ import 'package:flutter_snaptag_kiosk/core/ui/theme/kiosk_colors.dart';
 
 class KioskTypography extends ThemeExtension<KioskTypography> {
   const KioskTypography({
+    required this.vendingBtn1B,
+    required this.vendingBtn2B,
+    required this.vendingBtn3B,
+    required this.vendingTitle1B,
+    required this.vendingTitle2B,
+    required this.vendingBody1B,
+    required this.vendingBody2B,
+    required this.vendingBody3B,
+    required this.vendingBody4B,
+    required this.vendingAlert1B,
     required this.kioskBtn1B,
     required this.kioskBody1B,
     required this.kioskBody2B,
@@ -17,6 +27,16 @@ class KioskTypography extends ThemeExtension<KioskTypography> {
     required this.kioskInput3B,
   });
 
+  final TextStyle vendingBtn1B;
+  final TextStyle vendingBtn2B;
+  final TextStyle vendingBtn3B;
+  final TextStyle vendingTitle1B;
+  final TextStyle vendingTitle2B;
+  final TextStyle vendingBody1B;
+  final TextStyle vendingBody2B;
+  final TextStyle vendingBody3B;
+  final TextStyle vendingBody4B;
+  final TextStyle vendingAlert1B;
   final TextStyle kioskBtn1B;
   final TextStyle kioskBody1B;
   final TextStyle kioskBody2B;
@@ -30,6 +50,74 @@ class KioskTypography extends ThemeExtension<KioskTypography> {
   final TextStyle kioskInput3B;
 
   factory KioskTypography.color({KioskColors colors = KioskColors.basic}) => KioskTypography(
+        vendingBtn1B: TextStyle(
+          fontSize: 48.sp,
+          fontWeight: FontWeight.w400,
+          fontFamily: 'Hanwha',
+          color: Colors.black,
+        ),
+        vendingBtn2B: TextStyle(
+          fontSize: 40.sp,
+          fontWeight: FontWeight.w400,
+          fontFamily: 'Hanwha',
+          color: Colors.black,
+        ),
+        vendingBtn3B: TextStyle(
+          fontSize: 32.sp,
+          fontWeight: FontWeight.w400,
+          fontFamily: 'Hanwha',
+          color: Colors.black,
+        ),
+        vendingTitle1B: TextStyle(
+          fontSize: 60.sp,
+          fontWeight: FontWeight.w400,
+          fontFamily: 'Hanwha',
+          color: Colors.black,
+          letterSpacing: 0.7,
+        ),
+        vendingTitle2B: TextStyle(
+          fontSize: 52.sp,
+          fontWeight: FontWeight.w400,
+          fontFamily: 'Hanwha',
+          color: Colors.black,
+          letterSpacing: 2.08,
+          height: 1.0,
+        ),
+        vendingBody1B: TextStyle(
+          fontSize: 40.sp,
+          fontWeight: FontWeight.w400,
+          fontFamily: 'Hanwha',
+          color: Colors.black,
+          letterSpacing: 3.84,
+        ),
+        vendingBody2B: TextStyle(
+          fontSize: 32.sp,
+          fontWeight: FontWeight.w400,
+          fontFamily: 'Hanwha',
+          color: Colors.black,
+        ),
+        vendingBody3B: TextStyle(
+          fontSize: 30.sp,
+          fontWeight: FontWeight.w600,
+          fontFamily: 'HanwhaGothic',
+          color: Colors.black,
+          letterSpacing: 0.56,
+        ),
+        vendingBody4B: TextStyle(
+          fontSize: 26.sp,
+          fontWeight: FontWeight.w600,
+          fontFamily: 'HanwhaGothic',
+          color: Colors.black,
+          letterSpacing: 1.08,
+        ),
+        vendingAlert1B: TextStyle(
+          fontSize: 52.sp,
+          fontWeight: FontWeight.w400,
+          fontFamily: 'Hanwha',
+          color: Colors.black,
+          letterSpacing: 1.04,
+          height: 1.3,
+        ),
         kioskBtn1B: TextStyle(
           fontSize: 34.sp,
           fontWeight: FontWeight.w700,
@@ -122,6 +210,16 @@ class KioskTypography extends ThemeExtension<KioskTypography> {
 
   @override
   KioskTypography copyWith({
+    TextStyle? vendingBtn1B,
+    TextStyle? vendingBtn2B,
+    TextStyle? vendingBtn3B,
+    TextStyle? vendingTitle1B,
+    TextStyle? vendingTitle2B,
+    TextStyle? vendingBody1B,
+    TextStyle? vendingBody2B,
+    TextStyle? vendingBody3B,
+    TextStyle? vendingBody4B,
+    TextStyle? vendingAlert1B,
     TextStyle? kioskBtn1B,
     TextStyle? kioskBody1B,
     TextStyle? kioskBody2B,
@@ -135,6 +233,16 @@ class KioskTypography extends ThemeExtension<KioskTypography> {
     TextStyle? kioskInput3B,
   }) {
     return KioskTypography(
+      vendingBtn1B: vendingBtn1B ?? this.vendingBtn1B,
+      vendingBtn2B: vendingBtn2B ?? this.vendingBtn2B,
+      vendingBtn3B: vendingBtn3B ?? this.vendingBtn3B,
+      vendingTitle1B: vendingTitle1B ?? this.vendingTitle1B,
+      vendingTitle2B: vendingTitle2B ?? this.vendingTitle2B,
+      vendingBody1B: vendingBody1B ?? this.vendingBody1B,
+      vendingBody2B: vendingBody2B ?? this.vendingBody2B,
+      vendingBody3B: vendingBody3B ?? this.vendingBody3B,
+      vendingBody4B: vendingBody4B ?? this.vendingBody4B,
+      vendingAlert1B: vendingAlert1B ?? this.vendingAlert1B,
       kioskBtn1B: kioskBtn1B ?? this.kioskBtn1B,
       kioskBody1B: kioskBody1B ?? this.kioskBody1B,
       kioskBody2B: kioskBody2B ?? this.kioskBody2B,
@@ -159,6 +267,16 @@ class KioskTypography extends ThemeExtension<KioskTypography> {
     }
 
     return KioskTypography(
+      vendingBtn1B: TextStyle.lerp(vendingBtn1B, other.vendingBtn1B, t)!,
+      vendingBtn2B: TextStyle.lerp(vendingBtn2B, other.vendingBtn2B, t)!,
+      vendingBtn3B: TextStyle.lerp(vendingBtn3B, other.vendingBtn3B, t)!,
+      vendingTitle1B: TextStyle.lerp(vendingTitle1B, other.vendingTitle1B, t)!,
+      vendingTitle2B: TextStyle.lerp(vendingTitle2B, other.vendingTitle2B, t)!,
+      vendingBody1B: TextStyle.lerp(vendingBody1B, other.vendingBody1B, t)!,
+      vendingBody2B: TextStyle.lerp(vendingBody2B, other.vendingBody2B, t)!,
+      vendingBody3B: TextStyle.lerp(vendingBody3B, other.vendingBody3B, t)!,
+      vendingBody4B: TextStyle.lerp(vendingBody4B, other.vendingBody4B, t)!,
+      vendingAlert1B: TextStyle.lerp(vendingAlert1B, other.vendingAlert1B, t)!,
       kioskBtn1B: TextStyle.lerp(kioskBtn1B, other.kioskBtn1B, t)!,
       kioskBody1B: TextStyle.lerp(kioskBody1B, other.kioskBody1B, t)!,
       kioskBody2B: TextStyle.lerp(kioskBody2B, other.kioskBody2B, t)!,

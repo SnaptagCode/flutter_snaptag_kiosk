@@ -174,7 +174,7 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
     final kioskEventId = ref.read(kioskInfoServiceProvider)?.kioskEventId ?? 0;
     final cardCountState = ref.read(cardCountProvider);
 
-    await ref.read(printerServiceProvider.notifier).printerStateLog();
+    // await ref.read(printerServiceProvider.notifier).printerStateLog();
 
     await ref.read(kioskRepositoryProvider).deleteEndMark(
           kioskEventId: kioskEventId,
@@ -232,7 +232,6 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
     final isUpdateAvailable = currentVersion != latestVersion;
     final isConnectedPrinter = ref.watch(printerConnectProvider) == PrinterConnectState.connected;
     final getInfoByKey = ref.watch(kioskInfoServiceProvider.notifier).getInfoByKey;
-    final isHwe = ref.watch(kioskInfoServiceProvider)?.isHwe ?? false;
     //final isUpdateAvailable = false;
 
     return Theme(
@@ -319,7 +318,7 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
                       activeAssetName: SnaptagSvg.printDoubleActive,
                       inactiveAssetName: SnaptagSvg.printDoubleInactive,
                       onTap: () async {
-                        if (isHwe || cardCountState.currentCount < 1) {
+                        if (cardCountState.currentCount < 1) {
                           await SoundManager().playSound();
                           ref.read(pagePrintProvider.notifier).set(PagePrintType.double);
                           if (machineId != 0) {
@@ -346,76 +345,73 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
                   ),
                 ],
               ),
-              if (!isHwe) ...[
-                SizedBox(
-                  height: 10,
-                ),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    SizedBox(
-                      width: 240.w,
-                      height: 80.h,
+              SizedBox(
+                height: 10,
+              ),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SizedBox(
+                    width: 240.w,
+                    height: 80.h,
+                    child: Align(
+                      alignment: Alignment.center,
+                      child: Text(
+                        '단면 카드 수량',
+                        textAlign: TextAlign.center,
+                        style: context.typography.kioskBody1B.copyWith(color: Colors.black),
+                      ),
+                    ),
+                  ),
+                  //SizedBox(width: 40.w),
+                  Container(
+                    width: 520.w,
+                    height: 80.h,
+                    //padding: EdgeInsets.only(top: 50.w),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      border: Border.all(
+                        color: ref.watch(pagePrintProvider) == PagePrintType.single ? Colors.black : Color(0xFFECEDEF),
+                      ),
+                      borderRadius: const BorderRadius.all(Radius.circular(12)),
+                    ),
+                    child: InkWell(
+                      borderRadius: const BorderRadius.all(Radius.circular(12)),
+                      onTap: () async {
+                        final isActive = ref.read(pagePrintProvider) == PagePrintType.single;
+                        if (isActive) {
+                          String? value = await DialogHelper.showKeypadDialog(context, mode: ModeType.card);
+
+                          if (value == null || value.isEmpty) return; // 값이 없으면 종료
+                          int cardNumber = int.parse(value);
+                          ref.read(cardCountProvider.notifier).update(cardNumber);
+                          if (cardNumber <= 0) {
+                            ref.read(pagePrintProvider.notifier).set(PagePrintType.double);
+                          } else {
+                            ref.read(pagePrintProvider.notifier).set(PagePrintType.single);
+                            if (machineId != 0) {
+                              SlackLogService().sendBroadcastLogToSlackWithKey(InfoKey.cardPrintModeSwitchSingle.key);
+                            }
+                          }
+                        } else {
+                          print('click when pagePringType not single');
+                        }
+                      },
                       child: Align(
                         alignment: Alignment.center,
                         child: Text(
-                          '단면 카드 수량',
+                          (cardCountState.currentCount).toString(),
                           textAlign: TextAlign.center,
-                          style: context.typography.kioskBody1B.copyWith(color: Colors.black),
+                          style: ref.watch(pagePrintProvider) != PagePrintType.single
+                              ? context.typography.kioskBody2B.copyWith(color: Color(0xFFECEDEF))
+                              : context.typography.kioskBody2B.copyWith(color: Colors.black),
                         ),
                       ),
                     ),
-                    //SizedBox(width: 40.w),
-                    Container(
-                      width: 520.w,
-                      height: 80.h,
-                      //padding: EdgeInsets.only(top: 50.w),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        border: Border.all(
-                          color:
-                              ref.watch(pagePrintProvider) == PagePrintType.single ? Colors.black : Color(0xFFECEDEF),
-                        ),
-                        borderRadius: const BorderRadius.all(Radius.circular(12)),
-                      ),
-                      child: InkWell(
-                        borderRadius: const BorderRadius.all(Radius.circular(12)),
-                        onTap: () async {
-                          final isActive = ref.read(pagePrintProvider) == PagePrintType.single;
-                          if (isActive) {
-                            String? value = await DialogHelper.showKeypadDialog(context, mode: ModeType.card);
-
-                            if (value == null || value.isEmpty) return; // 값이 없으면 종료
-                            int cardNumber = int.parse(value);
-                            ref.read(cardCountProvider.notifier).update(cardNumber);
-                            if (cardNumber <= 0) {
-                              ref.read(pagePrintProvider.notifier).set(PagePrintType.double);
-                            } else {
-                              ref.read(pagePrintProvider.notifier).set(PagePrintType.single);
-                              if (machineId != 0) {
-                                SlackLogService().sendBroadcastLogToSlackWithKey(InfoKey.cardPrintModeSwitchSingle.key);
-                              }
-                            }
-                          } else {
-                            print('click when pagePringType not single');
-                          }
-                        },
-                        child: Align(
-                          alignment: Alignment.center,
-                          child: Text(
-                            (cardCountState.currentCount).toString(),
-                            textAlign: TextAlign.center,
-                            style: ref.watch(pagePrintProvider) != PagePrintType.single
-                                ? context.typography.kioskBody2B.copyWith(color: Color(0xFFECEDEF))
-                                : context.typography.kioskBody2B.copyWith(color: Colors.black),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+                  ),
+                ],
+              ),
               SizedBox(
                 height: 80.h,
                 width: 760.w, //780

@@ -34,9 +34,9 @@ class _KioskRepository {
   /// POST /v1/internal/slack-alert — 서버가 타입·메시지에 따라 Slack 전송
   Future<void> sendSlackAlert(int machineId, String type, String text) async {
     try {
-      await _apiClient.sendSlackAlert(machineId: machineId, body: {'type': type, 'text': text});
+      // await _apiClient.sendSlackAlert(machineId: machineId, body: {'type': type, 'text': text});
     } catch (e) {
-      rethrow;
+      // rethrow;
     }
   }
 

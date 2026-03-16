@@ -2,9 +2,11 @@ import 'dart:async';
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_snaptag_kiosk/core/common/sound/sound_manager.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
+import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_snaptag_kiosk/core/ui/widget/code_keypad.dart';
 
@@ -117,13 +119,16 @@ class DialogHelper {
     required String confirmButtonText,
     required ButtonStyle cancelButtonStyle,
     required ButtonStyle confirmButtonStyle,
-    TextStyle? cancelTextStyle,
-    TextStyle? confirmTextStyle,
+    Color? cancelColor,
+    Color? confirmColor,
   }) async {
     final result = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext dialogContext) {
+        final kiosk = ProviderScope.containerOf(context).read(kioskInfoServiceProvider);
+        final isHwe = kiosk?.isHwe ?? false;
+
         return DefaultTextStyle(
           style: TextStyle(
             fontFamily: context.locale.languageCode == 'ja' ? 'MPLUSRounded' : 'Cafe24Ssurround2',
@@ -146,10 +151,12 @@ class DialogHelper {
                     child: Text(
                       title,
                       textAlign: TextAlign.center,
-                      style: context.typography.kioskAlert1B.copyWith(
-                        fontFamily: 'Pretendard',
-                        color: Colors.black,
-                      ),
+                      style: isHwe
+                          ? context.typography.vendingAlert1B.copyWith(color: Colors.black)
+                          : context.typography.kioskAlert1B.copyWith(
+                              fontFamily: 'Pretendard',
+                              color: Colors.black,
+                            ),
                     ),
                   ),
                 ),
@@ -179,7 +186,10 @@ class DialogHelper {
                                 Navigator.of(dialogContext).pop(false);
                               },
                               style: cancelButtonStyle,
-                              child: Text(cancelButtonText, style: cancelTextStyle),
+                              child: Text(cancelButtonText,
+                                  style: isHwe
+                                      ? context.typography.vendingBtn1B.copyWith(color: cancelColor)
+                                      : TextStyle(color: cancelColor)),
                             ),
                           ),
                         if (showCancelButton) SizedBox(width: 12.w),
@@ -190,7 +200,10 @@ class DialogHelper {
                               Navigator.of(dialogContext).pop(true);
                             },
                             style: confirmButtonStyle,
-                            child: Text(confirmButtonText, style: confirmTextStyle),
+                            child: Text(confirmButtonText,
+                                style: isHwe
+                                    ? context.typography.vendingBtn1B.copyWith(color: confirmColor ?? Colors.white)
+                                    : TextStyle(color: confirmColor ?? Colors.white)),
                           ),
                         ),
                       ],
@@ -243,8 +256,8 @@ class DialogHelper {
       confirmButtonText: confirmButtonText,
       cancelButtonStyle: context.refundDialogCancelButtonStyle,
       confirmButtonStyle: confirmButtonStyle ?? context.dialogKioskStyle,
-      cancelTextStyle: const TextStyle(color: Color(0xFF999999)),
-      confirmTextStyle: const TextStyle(color: Color(0xFFFFFFFF)),
+      cancelColor: const Color(0xFF999999),
+      confirmColor: const Color(0xFFFFFFFF),
     );
   }
 

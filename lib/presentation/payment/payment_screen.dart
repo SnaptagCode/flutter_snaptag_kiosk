@@ -293,6 +293,7 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
     );
     final kiosk = ref.watch(kioskInfoServiceProvider);
     final selection = ref.watch(backPhotoTypeProvider);
+    final isHwe = kiosk?.isHwe ?? false;
     final isFixed = selection?.type == BackPhotoType.fixed;
     final selectedIndex = selection?.fixedIndex;
     final mainTextColor = kiosk?.mainTextColor.toColor(fallback: Colors.white) ?? Colors.white;
@@ -315,7 +316,9 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
                       ? LocaleKeys.choice_select_recommended_image.tr()
                       : LocaleKeys.sub02_txt_01.tr(),
                   textAlign: TextAlign.center,
-                  style: context.typography.kioskBtn1B.copyWith(fontSize: 53.sp, color: mainTextColor),
+                  style: isHwe
+                      ? context.typography.vendingTitle1B.copyWith(color: mainTextColor)
+                      : context.typography.kioskBtn1B.copyWith(fontSize: 53.sp, color: mainTextColor),
                 ),
                 SizedBox(height: 50.h),
                 _buildFixedBackPhotoCardList(kiosk: kiosk, isFixed: isFixed, selectedIndex: selectedIndex),
@@ -338,9 +341,15 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
                               : () async {
                                   await SoundManager().playSound();
 
-                                  await ref.read(photoCardPreviewScreenProviderProvider.notifier).payment();
+                                  // await ref.read(photoCardPreviewScreenProviderProvider.notifier).payment();
+                                  PrintProcessRouteData().go(context);
                                 },
-                          child: Text(LocaleKeys.sub02_btn_pay.tr()),
+                          child: Text(LocaleKeys.sub02_btn_pay.tr(),
+                              style: isHwe
+                                  ? context.typography.vendingBtn2B
+                                      .copyWith(color: (kiosk?.buttonTextColor ?? '').toColor(fallback: Colors.white))
+                                  : context.typography.kioskBtn1B
+                                      .copyWith(color: (kiosk?.buttonTextColor ?? '').toColor(fallback: Colors.white))),
                         );
                       },
                     ),
@@ -349,10 +358,13 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
                 SizedBox(height: 30.h),
                 Text(
                   LocaleKeys.sub03_txt_03.tr(),
-                  style: context.typography.kioskBody2B.copyWith(
-                    color: (kiosk?.couponTextColor ?? '').toColor(fallback: Colors.white),
-                    //fontFamily: 'Pretendard',
-                  ),
+                  style: isHwe
+                      ? context.typography.vendingBody2B
+                          .copyWith(color: (kiosk?.couponTextColor ?? '').toColor(fallback: Colors.white))
+                      : context.typography.kioskBody2B.copyWith(
+                          color: (kiosk?.couponTextColor ?? '').toColor(fallback: Colors.white),
+                          //fontFamily: 'Pretendard',
+                        ),
                 ),
               ],
             ),
