@@ -90,6 +90,7 @@ flutter:
     - assets/adImages/eland/
     - assets/adImages/suwon/
     - assets/adImages/ansan/
+    - assets/adImages/hanwha/printing_img.png
     - assets/.env.version
 
   fonts:
@@ -173,3 +174,13 @@ flutter:
           weight: 800
         - asset: assets/fonts/Pretendard-Black.ttf
           weight: 900
+
+    - family: Hanwha
+      fonts:
+        - asset: assets/fonts/HanwhaEagles-Regular.ttf
+          weight: 400
+
+    - family: HanwhaGothic
+      fonts:
+        - asset: assets/fonts/HANWHAGOTHICL.ttf
+          weight: 400

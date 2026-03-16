@@ -59,115 +59,119 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> with Si
   @override
   Widget build(BuildContext context) {
     // print 카드 출력 트리거 (provider build에서 printCard 수행)
-    ref.watch(printProcessScreenProviderProvider);
+    // ref.watch(printProcessScreenProviderProvider);
 
     final randomAdImage = getRandomAdImageFilePath(ref);
+    final isHwe = ref.read(kioskInfoServiceProvider)?.isHwe == true;
 
     // listen 부분에서는 로딩 오버레이 처리를 제거
-    ref.listen(printProcessScreenProviderProvider, (previous, next) async {
-      if (!next.isLoading) {
-        // 로딩이 아닐 때만 처리
-        await next.when(
-          error: (error, stack) async {
-            // 오류 발생 시: 현재 진행률에서 멈춤 (요구사항)
-            if (!_progressCompleted && !_progressFrozen) {
-              _progressFrozen = true;
-              _progressController.stop();
-            }
+    // ref.listen(printProcessScreenProviderProvider, (previous, next) async {
+    //   if (!next.isLoading) {
+    //     // 로딩이 아닐 때만 처리
+    //     await next.when(
+    //       error: (error, stack) async {
+    //         // 오류 발생 시: 현재 진행률에서 멈춤 (요구사항)
+    //         if (!_progressCompleted && !_progressFrozen) {
+    //           _progressFrozen = true;
+    //           _progressController.stop();
+    //         }
 
-            final cleanedError = error.toString().replaceFirst('Exception: ', '').trim();
+    //         final cleanedError = error.toString().replaceFirst('Exception: ', '').trim();
 
-            if (cleanedError.contains('Card feeder is empty')) {
-              SlackLogService().sendBroadcastLogToSlackWithKey(ErrorKey.printerCardEmpty.key);
-            } else if (cleanedError.contains('Failed to eject card')) {
-              SlackLogService().sendBroadcastLogToSlackWithKey(ErrorKey.printerEjectFail.key);
-            } else if (cleanedError.contains('Printer is not ready')) {
-              SlackLogService().sendBroadcastLogToSlackWithKey(ErrorKey.printerReadyFail.key);
-            } else {
-              SlackLogService().sendBroadcastLogToSlackWithKey(ErrorKey.printerPrintFail.key);
-            }
+    //         if (cleanedError.contains('Card feeder is empty')) {
+    //           SlackLogService().sendBroadcastLogToSlackWithKey(ErrorKey.printerCardEmpty.key);
+    //         } else if (cleanedError.contains('Failed to eject card')) {
+    //           SlackLogService().sendBroadcastLogToSlackWithKey(ErrorKey.printerEjectFail.key);
+    //         } else if (cleanedError.contains('Printer is not ready')) {
+    //           SlackLogService().sendBroadcastLogToSlackWithKey(ErrorKey.printerReadyFail.key);
+    //         } else {
+    //           SlackLogService().sendBroadcastLogToSlackWithKey(ErrorKey.printerPrintFail.key);
+    //         }
 
-            final errorMessage = error.toString();
+    //         final errorMessage = error.toString();
 
-            // 슬랙에 에러 로그 전송
-            errorLogging(error.toString(), stack);
+    //         // 슬랙에 에러 로그 전송
+    //         errorLogging(error.toString(), stack);
 
-            // 네트워크 오류인지 체크
-            final isNetworkError = ref.read(networkStatusNotifierProvider.notifier).isNetworkError(error);
+    //         // 네트워크 오류인지 체크
+    //         final isNetworkError = ref.read(networkStatusNotifierProvider.notifier).isNetworkError(error);
 
-            // 네트워크 오류라면 카드 단일 카드 수량 확인 후 완료 알럿 표시
-            if (isNetworkError) {
-              // 카드 단일 카드 수량 확인
-              checkCardSingleCardCount();
+    //         // 네트워크 오류라면 카드 단일 카드 수량 확인 후 완료 알럿 표시
+    //         if (isNetworkError) {
+    //           // 카드 단일 카드 수량 확인
+    //           checkCardSingleCardCount();
 
-              await DialogHelper.showPrintCompleteDialog(
-                context,
-                onButtonPressed: () {
-                  HomeRouteData().go(context);
-                },
-              );
-              return;
-            }
+    //           await DialogHelper.showPrintCompleteDialog(
+    //             context,
+    //             onButtonPressed: () {
+    //               HomeRouteData().go(context);
+    //             },
+    //           );
+    //           return;
+    //         }
 
-            final result = await DialogHelper.showKioskDialog(
-              context,
-              title: LocaleKeys.alert_title_auto_refund_alert.tr(),
-              contentText: LocaleKeys.alert_txt_auto_refund_alert.tr(),
-              confirmButtonText: LocaleKeys.alert_btn_paymentcard_failure.tr(),
-            );
+    //         final result = await DialogHelper.showKioskDialog(
+    //           context,
+    //           title: LocaleKeys.alert_title_auto_refund_alert.tr(),
+    //           contentText: LocaleKeys.alert_txt_auto_refund_alert.tr(),
+    //           confirmButtonText: LocaleKeys.alert_btn_paymentcard_failure.tr(),
+    //         );
 
-            if (result) {
-              // 에러 발생 시 환불 처리
-              await refund();
+    //         if (result) {
+    //           // 에러 발생 시 환불 처리
+    //           await refund();
 
-              // 카드 단일 카드 수량 확인
-              checkCardSingleCardCount();
+    //           // 카드 단일 카드 수량 확인
+    //           checkCardSingleCardCount();
 
-              // 카드 공급기가 비어있는지 확인
-              if (checkCardFeederIsEmpty(errorMessage)) {
-                await DialogHelper.showPrintCardRefillDialog(
-                  context,
-                );
-                if (result) {
-                  HomeRouteData().go(context);
-                }
-              } else {
-                final result = await DialogHelper.showPrintErrorDialog(
-                  context,
-                );
-                if (result) {
-                  HomeRouteData().go(context);
-                }
-              }
-            }
-          },
-          loading: () => null,
-          data: (_) async {
-            if (!_progressCompleted) {
-              _progressCompleted = true;
-              await _progressController.animateTo(
-                1.0,
-                duration: const Duration(milliseconds: 450),
-                curve: Curves.easeOutCubic,
-              );
-            }
+    //           // 카드 공급기가 비어있는지 확인
+    //           if (checkCardFeederIsEmpty(errorMessage)) {
+    //             await DialogHelper.showPrintCardRefillDialog(
+    //               context,
+    //             );
+    //             if (result) {
+    //               HomeRouteData().go(context);
+    //             }
+    //           } else {
+    //             final result = await DialogHelper.showPrintErrorDialog(
+    //               context,
+    //             );
+    //             if (result) {
+    //               HomeRouteData().go(context);
+    //             }
+    //           }
+    //         }
+    //       },
+    //       loading: () => null,
+    //       data: (_) async {
+    //         if (!_progressCompleted) {
+    //           _progressCompleted = true;
+    //           await _progressController.animateTo(
+    //             1.0,
+    //             duration: const Duration(milliseconds: 450),
+    //             curve: Curves.easeOutCubic,
+    //           );
+    //         }
 
-            checkCardSingleCardCount();
+    //         checkCardSingleCardCount();
 
-            ref.read(paymentResponseStateProvider.notifier).reset();
+    //         ref.read(paymentResponseStateProvider.notifier).reset();
 
-            await DialogHelper.showPrintCompleteDialog(
-              context,
-              onButtonPressed: () {
-                HomeRouteData().go(context);
-              },
-            );
-          },
-        );
-      }
-    });
+    //         await DialogHelper.showPrintCompleteDialog(
+    //           context,
+    //           onButtonPressed: () {
+    //             HomeRouteData().go(context);
+    //           },
+    //         );
+    //       },
+    //     );
+    //   }
+    // });
     // NOTE: kioskInfoServiceProvider는 하위 로직/화면에서 사용될 수 있어 watch 유지
     ref.watch(kioskInfoServiceProvider);
+    final mainTextColor =
+        ref.watch(kioskInfoServiceProvider)?.mainTextColor.toColor(fallback: Colors.white) ?? Colors.white;
+
     return DefaultTextStyle(
       style: TextStyle(
         fontFamily: context.locale.languageCode == 'ja' ? 'MPLUSRounded' : 'Cafe24Ssurround2',
@@ -180,7 +184,9 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> with Si
             Text(
               LocaleKeys.sub03_txt_01.tr(),
               textAlign: TextAlign.center,
-              style: context.typography.kioskBody1B.copyWith(fontSize: 40.sp),
+              style: isHwe
+                  ? context.typography.vendingTitle2B.copyWith(color: mainTextColor)
+                  : context.typography.kioskBody1B.copyWith(fontSize: 40.sp, color: mainTextColor),
             ),
             SizedBox(height: 23.h),
             Container(
@@ -191,10 +197,13 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> with Si
               child: Text(
                 LocaleKeys.sub03_txt_02.tr(),
                 textAlign: TextAlign.center,
-                style: context.typography.kioskBody1B.copyWith(fontSize: 30.sp),
+                style: isHwe
+                    ? context.typography.vendingBody1B
+                        .copyWith(color: mainTextColor, fontSize: 36.sp, letterSpacing: -0.8)
+                    : context.typography.kioskBody1B.copyWith(fontSize: 30.sp, color: mainTextColor),
               ),
             ),
-            SizedBox(height: 30.h),
+            SizedBox(height: 60.h),
             randomAdImage == null
                 ? Container(
                     width: 1080.w,
@@ -209,11 +218,15 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> with Si
                       ),
                     ),
                   )
-                : Image.file(
-                    File(randomAdImage),
-                    fit: BoxFit.fill,
+                : SizedBox(
+                    width: 1080.w,
+                    height: 400.h,
+                    child: Image.file(
+                      File(randomAdImage),
+                      fit: BoxFit.contain,
+                    ),
                   ),
-            SizedBox(height: 60.h),
+            SizedBox(height: 40.h),
             AnimatedBuilder(
               animation: _progressController,
               builder: (context, child) {
@@ -230,7 +243,9 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> with Si
             Text(
               LocaleKeys.sub03_txt_03.tr(),
               textAlign: TextAlign.center,
-              style: context.typography.kioskBody2B.copyWith(fontSize: 26.sp),
+              style: isHwe
+                  ? context.typography.vendingBody2B.copyWith(color: mainTextColor, letterSpacing: 1.2)
+                  : context.typography.kioskBody2B.copyWith(color: mainTextColor),
             ),
           ],
         ),
@@ -245,9 +260,6 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> with Si
   void checkCardSingleCardCount() {
     final kioskInfo = ref.read(kioskInfoServiceProvider);
     final machineId = kioskInfo?.kioskMachineId ?? 0;
-
-    // HWE 이벤트는 수량 기반 자동 모드 전환 없음 (관리자가 직접 설정)
-    if (kioskInfo?.isHwe == true) return;
 
     if (ref.read(cardCountProvider).currentCount < 1) {
       ref.read(pagePrintProvider.notifier).set(PagePrintType.double);
@@ -317,6 +329,11 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> with Si
   }
 
   String? getRandomAdImageFilePath(WidgetRef ref) {
+    final kioskInfo = ref.read(kioskInfoServiceProvider);
+    if (kioskInfo?.isHwe == true) {
+      return 'assets/adImages/hanwha/printing_img.png';
+    }
+
     final version = ref.read(versionStateProvider).currentVersion;
     final userDir = getUserDirectorySync();
     final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
