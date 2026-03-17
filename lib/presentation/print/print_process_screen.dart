@@ -58,10 +58,8 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> with Si
 
   @override
   Widget build(BuildContext context) {
-    // print 카드 출력 트리거 (provider build에서 printCard 수행)
-    ref.watch(printProcessScreenProviderProvider);
-
     final randomAdImage = getRandomAdImageFilePath(ref);
+    final isHwe = ref.read(kioskInfoServiceProvider)?.isHwe == true;
 
     // listen 부분에서는 로딩 오버레이 처리를 제거
     ref.listen(printProcessScreenProviderProvider, (previous, next) async {
@@ -166,8 +164,10 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> with Si
         );
       }
     });
-    // NOTE: kioskInfoServiceProvider는 하위 로직/화면에서 사용될 수 있어 watch 유지
-    ref.watch(kioskInfoServiceProvider);
+
+    final mainTextColor =
+        ref.watch(kioskInfoServiceProvider)?.mainTextColor.toColor(fallback: Colors.white) ?? Colors.white;
+
     return DefaultTextStyle(
       style: TextStyle(
         fontFamily: context.locale.languageCode == 'ja' ? 'MPLUSRounded' : 'Cafe24Ssurround2',
@@ -180,7 +180,9 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> with Si
             Text(
               LocaleKeys.sub03_txt_01.tr(),
               textAlign: TextAlign.center,
-              style: context.typography.kioskBody1B.copyWith(fontSize: 40.sp),
+              style: isHwe
+                  ? context.typography.vendingTitle2B.copyWith(color: mainTextColor)
+                  : context.typography.kioskBody1B.copyWith(fontSize: 40.sp, color: mainTextColor),
             ),
             SizedBox(height: 23.h),
             Container(
@@ -191,10 +193,13 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> with Si
               child: Text(
                 LocaleKeys.sub03_txt_02.tr(),
                 textAlign: TextAlign.center,
-                style: context.typography.kioskBody1B.copyWith(fontSize: 30.sp),
+                style: isHwe
+                    ? context.typography.vendingBody1B
+                        .copyWith(color: mainTextColor, fontSize: 36.sp, letterSpacing: -0.8)
+                    : context.typography.kioskBody1B.copyWith(fontSize: 30.sp, color: mainTextColor),
               ),
             ),
-            SizedBox(height: 30.h),
+            SizedBox(height: 60.h),
             randomAdImage == null
                 ? Container(
                     width: 1080.w,
@@ -209,11 +214,15 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> with Si
                       ),
                     ),
                   )
-                : Image.file(
-                    File(randomAdImage),
-                    fit: BoxFit.fill,
+                : SizedBox(
+                    width: 1080.w,
+                    height: 400.h,
+                    child: Image.file(
+                      File(randomAdImage),
+                      fit: BoxFit.contain,
+                    ),
                   ),
-            SizedBox(height: 60.h),
+            SizedBox(height: 40.h),
             AnimatedBuilder(
               animation: _progressController,
               builder: (context, child) {
@@ -230,7 +239,9 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> with Si
             Text(
               LocaleKeys.sub03_txt_03.tr(),
               textAlign: TextAlign.center,
-              style: context.typography.kioskBody2B.copyWith(fontSize: 26.sp),
+              style: isHwe
+                  ? context.typography.vendingBody2B.copyWith(color: mainTextColor, letterSpacing: 1.2)
+                  : context.typography.kioskBody2B.copyWith(color: mainTextColor),
             ),
           ],
         ),
@@ -245,9 +256,6 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> with Si
   void checkCardSingleCardCount() {
     final kioskInfo = ref.read(kioskInfoServiceProvider);
     final machineId = kioskInfo?.kioskMachineId ?? 0;
-
-    // HWE 이벤트는 수량 기반 자동 모드 전환 없음 (관리자가 직접 설정)
-    if (kioskInfo?.isHwe == true) return;
 
     if (ref.read(cardCountProvider).currentCount < 1) {
       ref.read(pagePrintProvider.notifier).set(PagePrintType.double);
@@ -317,6 +325,11 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> with Si
   }
 
   String? getRandomAdImageFilePath(WidgetRef ref) {
+    final kioskInfo = ref.read(kioskInfoServiceProvider);
+    if (kioskInfo?.isHwe == true) {
+      return 'assets/adImages/hanwha/printing_img.png';
+    }
+
     final version = ref.read(versionStateProvider).currentVersion;
     final userDir = getUserDirectorySync();
     final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;

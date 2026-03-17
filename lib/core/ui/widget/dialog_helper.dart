@@ -2,9 +2,11 @@ import 'dart:async';
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_snaptag_kiosk/core/common/sound/sound_manager.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
+import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_snaptag_kiosk/core/ui/widget/code_keypad.dart';
 
@@ -124,6 +126,8 @@ class DialogHelper {
       context: context,
       barrierDismissible: false,
       builder: (BuildContext dialogContext) {
+        final isHwe = context.isHwe;
+
         return DefaultTextStyle(
           style: TextStyle(
             fontFamily: context.locale.languageCode == 'ja' ? 'MPLUSRounded' : 'Cafe24Ssurround2',
@@ -146,10 +150,12 @@ class DialogHelper {
                     child: Text(
                       title,
                       textAlign: TextAlign.center,
-                      style: context.typography.kioskAlert1B.copyWith(
-                        fontFamily: 'Pretendard',
-                        color: Colors.black,
-                      ),
+                      style: isHwe
+                          ? context.typography.vendingAlert1B.copyWith(color: Colors.black)
+                          : context.typography.kioskAlert1B.copyWith(
+                              fontFamily: 'Pretendard',
+                              color: Colors.black,
+                            ),
                     ),
                   ),
                 ),
@@ -243,8 +249,8 @@ class DialogHelper {
       confirmButtonText: confirmButtonText,
       cancelButtonStyle: context.refundDialogCancelButtonStyle,
       confirmButtonStyle: confirmButtonStyle ?? context.dialogKioskStyle,
-      cancelTextStyle: const TextStyle(color: Color(0xFF999999)),
-      confirmTextStyle: const TextStyle(color: Color(0xFFFFFFFF)),
+      cancelTextStyle: TextStyle(color: const Color(0xFF999999)),
+      confirmTextStyle: TextStyle(color: const Color(0xFFFFFFFF)),
     );
   }
 

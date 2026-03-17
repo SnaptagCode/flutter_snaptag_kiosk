@@ -39,7 +39,8 @@ class SlackLogService {
       return;
     }
     try {
-      _container.read(kioskRepositoryProvider).sendSlackAlert(type, message);
+      final machineId = _container.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
+      _container.read(kioskRepositoryProvider).sendSlackAlert(machineId, type, message);
     } catch (e) {
       log("❌ Slack 알림 API 오류: $e");
     }

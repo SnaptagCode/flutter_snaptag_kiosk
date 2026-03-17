@@ -39,5 +39,5 @@ abstract class KioskMachineInfo with _$KioskMachineInfo {
 
 extension KioskMachineInfoX on KioskMachineInfo {
   bool get isSuwon => kioskMachineId == 2 || kioskMachineId == 3;
-  bool get isHwe => eventType == 'HWE';
+  bool get isHwe => eventType == 'HWEG';
 }

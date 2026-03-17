@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
+import 'package:flutter_snaptag_kiosk/presentation/payment/create_order_info_state.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/card_printer.dart';
 import 'package:flutter_snaptag_kiosk/presentation/setup/front_photo_list.dart';
 import 'package:flutter_snaptag_kiosk/presentation/setup/page_print_provider.dart';
@@ -95,11 +96,13 @@ class PrintService extends _$PrintService {
     required int backPhotoCardId,
   }) async {
     try {
+      final kioskOrderId = ref.read(createOrderInfoProvider)?.orderId ?? 0;
       final request = CreatePrintRequest(
         kioskMachineId: ref.read(kioskInfoServiceProvider)!.kioskMachineId,
         kioskEventId: ref.read(kioskInfoServiceProvider)!.kioskEventId,
         frontPhotoCardId: frontPhotoCardId,
         backPhotoCardId: backPhotoCardId,
+        kioskOrderId: kioskOrderId,
       );
 
       final response = await ref.read(kioskRepositoryProvider).createPrintStatus(request: request);
@@ -124,7 +127,8 @@ class PrintService extends _$PrintService {
           .read(kioskRepositoryProvider)
           .updatePrintStatus(printedPhotoCardId: printedPhotoCardId, request: request);
     } catch (e) {
-      rethrow;
+      SlackLogService().sendErrorLogToSlack('PrintService._updatePrintStatus failure: $e');
+      logger.e('PrintService._updatePrintStatus failure', error: e);
     }
   }
 

@@ -2,6 +2,7 @@
 import 'dart:io';
 
 // Utf8 사용을 위한 임포트
+import 'package:flutter_snaptag_kiosk/core/common/logger/logger_service.dart';
 import 'package:flutter_snaptag_kiosk/presentation/core/card_count_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/core/printer_log_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
@@ -43,6 +44,7 @@ class PrinterService extends _$PrinterService {
 
   Future<void> checkFeeder() async {
     final printerManager = await PrinterManager.getInstance();
+    await printerManager.initLibrary();
     await printerManager.checkFeeder();
   }
 
@@ -97,6 +99,19 @@ class PrinterService extends _$PrinterService {
 
       final printerLog = await printerManager.startPrint(
           isSingleMode: isSingleMode, frontFile: frontFile, embeddedFile: embeddedFile, isMetal: isMetal);
+
+      await _updatePrintStatusAndCheckKioskAlive(printerLog);
+      // 프린트 성공 시 상태를 완료로 변경
+      state = const AsyncValue.data(null);
+    } catch (e, stackTrace) {
+      // 프린트 실패 시 에러 상태로 변경
+      state = AsyncValue.error(e, stackTrace);
+      rethrow;
+    }
+  }
+
+  Future<void> _updatePrintStatusAndCheckKioskAlive(PrinterLog? printerLog) async {
+    try {
       final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
 
       if (machineId != 0 && printerLog != null) {
@@ -106,19 +121,21 @@ class PrinterService extends _$PrinterService {
         ref.read(printerLogProvider.notifier).update(log);
         await ref.read(kioskRepositoryProvider).updatePrintLog(request: log);
         if (kioskEventId != 0) {
-          await ref.read(kioskRepositoryProvider).checkKioskAlive(
-                kioskEventId: kioskEventId,
-                machineId: machineId,
-                remainingSingleSidedCount: cardCountState.remainingSingleSidedCount,
-              );
+          try {
+            await ref.read(kioskRepositoryProvider).checkKioskAlive(
+                  kioskEventId: kioskEventId,
+                  machineId: machineId,
+                  remainingSingleSidedCount: cardCountState.remainingSingleSidedCount,
+                );
+          } catch (e) {
+            SlackLogService().sendErrorLogToSlack('CardPrinter.printImage checkKioskAlive failure: $e');
+            logger.e('CardPrinter.printImage checkKioskAlive failure', error: e);
+          }
         }
       }
-      // 프린트 성공 시 상태를 완료로 변경
-      state = const AsyncValue.data(null);
-    } catch (e, stackTrace) {
-      // 프린트 실패 시 에러 상태로 변경
-      state = AsyncValue.error(e, stackTrace);
-      rethrow;
+    } catch (e) {
+      SlackLogService().sendErrorLogToSlack('CardPrinter.printImage _updatePrintStatusAndCheckKioskAlive failure: $e');
+      logger.e('CardPrinter.printImage _updatePrintStatusAndCheckKioskAlive failure', error: e);
     }
   }
 }

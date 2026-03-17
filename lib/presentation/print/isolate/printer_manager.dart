@@ -14,6 +14,7 @@ import 'package:flutter_snaptag_kiosk/presentation/print/isolate/model/check_fee
 import 'package:flutter_snaptag_kiosk/presentation/print/isolate/model/connect_message.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/isolate/model/draw_image_message.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/isolate/model/eject_message.dart';
+import 'package:flutter_snaptag_kiosk/presentation/print/isolate/model/initLibrary.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/isolate/model/inject_message.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/isolate/model/print_message.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/isolate/model/print_ribbon_status_message.dart';
@@ -93,6 +94,16 @@ class PrinterManager {
           final replyPort = message['replyPort'] as SendPort;
 
           try {
+            if (ob is InitLibraryMessage) {
+              try {
+                await _initLibrary(bindings);
+                logger.i('_printEntry InitLibraryMessage: Library initialized');
+                replyPort.send({'errorMsg': ''});
+              } catch (e) {
+                replyPort.send({'errorMsg': e.toString()});
+              }
+            }
+
             if (ob is ConnectMessage) {
               try {
                 final isConnected = await _checkConnectedPrint(bindings);
@@ -223,6 +234,16 @@ class PrinterManager {
           logger.i('isolateReceivePort: $e');
         }
       });
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> _initLibrary(PrinterBindings bindings) async {
+    try {
+      logger.i('1. Initializing printer library...');
+      bindings.clearLibrary();
+      bindings.initLibrary();
     } catch (e) {
       rethrow;
     }
@@ -435,9 +456,21 @@ class PrinterManager {
     }
   }
 
+  Future<void> initLibrary() async {
+    try {
+      logger.i('1. Initializing printer library...');
+      final response = await _sendAndResponse(InitLibraryMessage());
+      final errorMsg = response['errorMsg'] as String;
+      if (errorMsg.isNotEmpty) {
+        throw Exception('Failed to initialize printer library: $errorMsg');
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<void> _prepareMetalWatermarkAsset() async {
     try {
-      // ✅ Method B:
       // 메탈 워터마크용 PNG는 메인 isolate에서 1회만 파일로 풀어두고,
       // 프린트 isolate에는 "파일 경로"만 전달합니다. (isolate에서 rootBundle/path_provider 호출 금지)
       _metalWatermarkPath = await copyAssetPngToFile(
