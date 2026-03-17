@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_snaptag_kiosk/core/data/data.dart';
+import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
 
 import '../../ui/theme/kiosk_colors.dart';
 import '../../ui/theme/kiosk_typography.dart';
@@ -12,4 +15,6 @@ extension BuildContextExtensions on BuildContext {
 
   KioskTypography get typography => theme.extension<KioskTypography>()!;
   KioskColors get kioskColors => theme.extension<KioskColors>()!;
+
+  bool get isHwe => ProviderScope.containerOf(this, listen: false).read(kioskInfoServiceProvider)?.isHwe ?? false;
 }

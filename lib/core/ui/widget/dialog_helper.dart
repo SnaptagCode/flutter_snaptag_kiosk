@@ -119,15 +119,14 @@ class DialogHelper {
     required String confirmButtonText,
     required ButtonStyle cancelButtonStyle,
     required ButtonStyle confirmButtonStyle,
-    Color? cancelColor,
-    Color? confirmColor,
+    TextStyle? cancelTextStyle,
+    TextStyle? confirmTextStyle,
   }) async {
     final result = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext dialogContext) {
-        final kiosk = ProviderScope.containerOf(context).read(kioskInfoServiceProvider);
-        final isHwe = kiosk?.isHwe ?? false;
+        final isHwe = context.isHwe;
 
         return DefaultTextStyle(
           style: TextStyle(
@@ -186,10 +185,7 @@ class DialogHelper {
                                 Navigator.of(dialogContext).pop(false);
                               },
                               style: cancelButtonStyle,
-                              child: Text(cancelButtonText,
-                                  style: isHwe
-                                      ? context.typography.vendingBtn1B.copyWith(color: cancelColor)
-                                      : TextStyle(color: cancelColor)),
+                              child: Text(cancelButtonText, style: cancelTextStyle),
                             ),
                           ),
                         if (showCancelButton) SizedBox(width: 12.w),
@@ -200,10 +196,7 @@ class DialogHelper {
                               Navigator.of(dialogContext).pop(true);
                             },
                             style: confirmButtonStyle,
-                            child: Text(confirmButtonText,
-                                style: isHwe
-                                    ? context.typography.vendingBtn1B.copyWith(color: confirmColor ?? Colors.white)
-                                    : TextStyle(color: confirmColor ?? Colors.white)),
+                            child: Text(confirmButtonText, style: confirmTextStyle),
                           ),
                         ),
                       ],
@@ -256,8 +249,8 @@ class DialogHelper {
       confirmButtonText: confirmButtonText,
       cancelButtonStyle: context.refundDialogCancelButtonStyle,
       confirmButtonStyle: confirmButtonStyle ?? context.dialogKioskStyle,
-      cancelColor: const Color(0xFF999999),
-      confirmColor: const Color(0xFFFFFFFF),
+      cancelTextStyle: TextStyle(color: const Color(0xFF999999)),
+      confirmTextStyle: TextStyle(color: const Color(0xFFFFFFFF)),
     );
   }
 
