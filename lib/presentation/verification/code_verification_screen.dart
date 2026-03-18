@@ -224,10 +224,6 @@ class _NumericPad extends ConsumerWidget {
   }
 
   Widget _buildGridItem(BuildContext context, WidgetRef ref, int index) {
-    final isHwe = ref.watch(kioskInfoServiceProvider)?.isHwe ?? false;
-    final kiosk = ref.watch(kioskInfoServiceProvider);
-    final buttonTextColor = kiosk?.buttonTextColor.toColor(fallback: Colors.white) ?? Colors.white;
-
     if (index == 9) {
       return ElevatedButton(
         style: context.keypadNumberStyle,
@@ -240,6 +236,7 @@ class _NumericPad extends ConsumerWidget {
           height: 60.h,
           child: Image.asset(
             SnaptagImages.arrowBack,
+            color: context.kioskColors.keypadTextColor,
           ),
         ),
       );
@@ -251,10 +248,7 @@ class _NumericPad extends ConsumerWidget {
           await SoundManager().playSound();
           ref.read(authCodeProvider.notifier).addNumber('0');
         },
-        child: Text('0',
-            style: isHwe
-                ? context.typography.vendingBtn1B.copyWith(color: Colors.white, fontSize: 54.sp)
-                : context.typography.kioksNum1SB.copyWith(color: Colors.white)),
+        child: Text('0'),
       );
     }
     if (index == 11) {
@@ -264,15 +258,10 @@ class _NumericPad extends ConsumerWidget {
           await SoundManager().playSound();
           final code = ref.read(authCodeProvider);
           if (ref.read(authCodeProvider.notifier).isValid()) {
-            // ref.read(verifyPhotoCardProvider.notifier).verify(code);
-            PhotoCardPreviewRouteData().go(context);
+            ref.read(verifyPhotoCardProvider.notifier).verify(code);
           }
         },
-        child: Text(LocaleKeys.sub01_btn_done.tr(),
-            style: isHwe
-                ? context.typography.vendingBtn1B.copyWith(color: buttonTextColor, fontSize: 48.sp)
-                : context.typography.kioskBtn1B
-                    .copyWith(color: buttonTextColor, fontSize: 42.sp, letterSpacing: 0, height: 1.0)),
+        child: Text(LocaleKeys.sub01_btn_done.tr()),
       );
     }
     return ElevatedButton(
@@ -281,10 +270,7 @@ class _NumericPad extends ConsumerWidget {
         await SoundManager().playSound();
         ref.read(authCodeProvider.notifier).addNumber('${index + 1}');
       },
-      child: Text('${index + 1}',
-          style: isHwe
-              ? context.typography.vendingBtn1B.copyWith(color: Colors.white, fontSize: 54.sp)
-              : context.typography.kioksNum1SB.copyWith(color: Colors.white)),
+      child: Text('${index + 1}'),
     );
   }
 }

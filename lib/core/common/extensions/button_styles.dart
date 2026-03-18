@@ -167,7 +167,7 @@ extension ButtonStyles on BuildContext {
         //padding: EdgeInsets.fromLTRB(10.r, 21.r, 10.r, 10.r),
         padding: EdgeInsets.fromLTRB(10.r, 18.r, 10.r, 2.r),
         backgroundColor: kioskColors.keypadButtonColor,
-        foregroundColor: Colors.white,
+        foregroundColor: kioskColors.keypadTextColor,
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10.r),
             side: BorderSide(
@@ -186,7 +186,7 @@ extension ButtonStyles on BuildContext {
         fixedSize: Size(130.w, 90.h),
         padding: EdgeInsets.all(10.r),
         backgroundColor: kioskColors.keypadButtonColor,
-        foregroundColor: Colors.white,
+        foregroundColor: kioskColors.keypadTextColor,
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10.r),
             side: BorderSide(

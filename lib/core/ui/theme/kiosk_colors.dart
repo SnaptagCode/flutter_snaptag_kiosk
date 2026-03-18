@@ -20,6 +20,7 @@ class KioskColorsNotifier extends _$KioskColorsNotifier {
       buttonColor: _parseColor(kiosk.mainButtonColor),
       buttonTextColor: _parseColor(kiosk.buttonTextColor),
       keypadButtonColor: _parseColor(kiosk.keyPadColor),
+      keypadTextColor: _parseColor(kiosk.keyPadTextColor),
       couponTextColor: _parseColor(kiosk.couponTextColor),
       textColor: _parseColor(kiosk.mainTextColor),
       popupButtonColor: _parseColor(kiosk.popupButtonColor),
@@ -36,6 +37,7 @@ class KioskColors extends ThemeExtension<KioskColors> {
     required this.buttonColor,
     required this.buttonTextColor,
     required this.keypadButtonColor,
+    required this.keypadTextColor,
     required this.couponTextColor,
     required this.textColor,
     required this.popupButtonColor,
@@ -51,6 +53,8 @@ class KioskColors extends ThemeExtension<KioskColors> {
   final Color buttonTextColor;
   // 키패드/쿠폰번호 버튼
   final Color keypadButtonColor;
+  // 키패드 텍스트
+  final Color keypadTextColor;
   // 쿠폰번호 텍스트
   final Color couponTextColor;
   // 텍스트
@@ -64,6 +68,7 @@ class KioskColors extends ThemeExtension<KioskColors> {
     buttonColor: Color.fromARGB(255, 13, 96, 32), // #ffffff
     buttonTextColor: Color(0xFFFFFFFF), // #1C1C1C
     keypadButtonColor: Color(0xFF232323), // #797B80
+    keypadTextColor: Color(0xFF232323), // #ADADAD
     couponTextColor: Color(0xFFFFFFFF), // #ffffff
     textColor: Color(0xFF232323), // #ADADAD
     popupButtonColor: Color.fromARGB(255, 13, 96, 32), // #1C1C1C
@@ -84,6 +89,7 @@ class KioskColors extends ThemeExtension<KioskColors> {
       buttonColor: buttonColor ?? this.buttonColor,
       buttonTextColor: buttonTextColor ?? this.buttonTextColor,
       keypadButtonColor: keypadButtonColor ?? this.keypadButtonColor,
+      keypadTextColor: keypadTextColor ?? this.keypadTextColor,
       couponTextColor: couponTextColor ?? this.couponTextColor,
       textColor: textColor ?? this.textColor,
       popupButtonColor: popupButtonColor ?? this.popupButtonColor,
@@ -105,6 +111,7 @@ class KioskColors extends ThemeExtension<KioskColors> {
       buttonColor: Color.lerp(buttonColor, other.buttonColor, t)!,
       buttonTextColor: Color.lerp(buttonTextColor, other.buttonTextColor, t)!,
       keypadButtonColor: Color.lerp(keypadButtonColor, other.keypadButtonColor, t)!,
+      keypadTextColor: Color.lerp(keypadTextColor, other.keypadTextColor, t)!,
       couponTextColor: Color.lerp(couponTextColor, other.couponTextColor, t)!,
       textColor: Color.lerp(textColor, other.textColor, t)!,
       popupButtonColor: Color.lerp(popupButtonColor, other.popupButtonColor, t)!,

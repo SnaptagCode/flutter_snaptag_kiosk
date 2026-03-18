@@ -43,7 +43,7 @@ class HomeScreen extends ConsumerWidget {
                     ),
             ),
           ),
-          SizedBox(height: 24.h),
+          SizedBox(height: 20.h),
           Text(
             LocaleKeys.choice_select_back_image.tr(),
             style: isHwe
@@ -190,7 +190,7 @@ class HomeScreen extends ConsumerWidget {
                                         .copyWith(fontSize: subtitleSize, color: mainTextColor),
                                 textAlign: TextAlign.left,
                               ),
-                              if (subtitle2 != null) SizedBox(height: 10.h),
+                              if (subtitle2 != null) SizedBox(height: 5.h),
                               if (subtitle2 != null)
                                 Text(
                                   subtitle2,
@@ -204,7 +204,8 @@ class HomeScreen extends ConsumerWidget {
                             ],
                           ),
                         ),
-                      )
+                      ),
+                      SizedBox(height: 8.h),
                     ],
                   ),
                 ),

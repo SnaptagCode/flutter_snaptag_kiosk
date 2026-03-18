@@ -23,6 +23,7 @@ abstract class KioskMachineInfo with _$KioskMachineInfo {
     @Default('#000000') String mainButtonColor,
     @Default('#FFFFFF') String buttonTextColor,
     @Default('#CCCCCC') String keyPadColor,
+    @Default('#000000') String keyPadTextColor,
     @Default('#000000') String couponTextColor,
     @Default('#000000') String mainTextColor,
     @Default('#000000') String popupButtonColor,

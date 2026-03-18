@@ -174,7 +174,7 @@ class _NumericPad extends StatelessWidget {
         child: SizedBox(
           width: 60.w,
           height: 60.h,
-          child: Image.asset(SnaptagImages.arrowBack),
+          child: Image.asset(SnaptagImages.arrowBack, color: context.kioskColors.keypadTextColor),
         ),
       );
     }
