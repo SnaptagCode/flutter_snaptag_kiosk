@@ -309,7 +309,7 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
                           kiosk?.nominatedBackPhotoCardList.length != null &&
                           kiosk!.nominatedBackPhotoCardList.length > 1
                       ? LocaleKeys.choice_select_recommended_image.tr()
-                      : LocaleKeys.sub02_txt_01.tr(),
+                      : LocaleKeys.sub02_txt_02.tr(),
                   textAlign: TextAlign.center,
                   style: isHwe
                       ? context.typography.vendingTitle1B.copyWith(color: mainTextColor)
