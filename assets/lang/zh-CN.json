@@ -55,7 +55,7 @@
   "alert_txt_timeout_to_home": "检测到无活动。\n{}秒后返回首页。",
   "alert_title_empty_event": "请输入设备编号以运行事件。",
   "choice_recommended_images": "推荐图片选择",
-  "choice_select_recommended_image": "请选择推荐图片。",
+  "choice_select_recommended_image": "おすすめ画像を選択してください。",
   "choice_upload_my_photo": "上传我的照片",
   "choice_select_and_print": "选择并打印",
   "choice_step1_qr_upload": "步骤1. 扫描二维码并上传",
