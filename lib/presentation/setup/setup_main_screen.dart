@@ -174,29 +174,24 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
     final kioskEventId = ref.read(kioskInfoServiceProvider)?.kioskEventId ?? 0;
     final cardCountState = ref.read(cardCountProvider);
 
-    // await ref.read(printerServiceProvider.notifier).printerStateLog();
+    try {
+      await ref.read(printerServiceProvider.notifier).printerStateLog();
+    } catch (e) {
+      SlackLogService().sendErrorLogToSlack("Printer State Log: $e");
+    }
 
-    await ref.read(kioskRepositoryProvider).deleteEndMark(
-          kioskEventId: kioskEventId,
-          machineId: machineId,
-          remainingSingleSidedCount: cardCountState.remainingSingleSidedCount,
-        );
+    try {
+      await ref.read(kioskRepositoryProvider).deleteEndMark(
+            kioskEventId: kioskEventId,
+            machineId: machineId,
+            remainingSingleSidedCount: cardCountState.remainingSingleSidedCount,
+          );
+    } catch (e) {
+      SlackLogService().sendErrorLogToSlack("Delete End Mark: $e");
+    }
 
     SlackLogService()
         .sendLogToSlack('machineId:$machineId, currentVersion:$currentVersion, latestVersion:$latestVersion');
-
-    final isHwe = ref.read(kioskInfoServiceProvider)?.isHwe ?? false;
-    if (!isHwe) {
-      if (cardCountState.currentCount < 1) {
-        ref.read(pagePrintProvider.notifier).set(PagePrintType.double);
-        SlackLogService()
-            .sendLogToSlack('machineId: $machineId, singleCard: $cardCountState, set pagePrintType double');
-      } else {
-        ref.read(pagePrintProvider.notifier).set(PagePrintType.single);
-        SlackLogService()
-            .sendLogToSlack('machineId: $machineId, singleCard: $cardCountState, set pagePrintType single');
-      }
-    }
 
     HomeRouteData().go(context);
 
