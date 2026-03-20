@@ -48,20 +48,20 @@ class SlackLogService {
 
   Future<void> sendErrorLogToSlack(String message) async {
     final type = kDebugMode ? 'test_error_log' : 'error_log';
-    await sendLog('test_error_log', message);
-    // await sendLog(type, message);
+    // await sendLog('test_error_log', message);
+    await sendLog(type, message);
   }
 
   Future<void> sendLogToSlack(String message) async {
     final type = kDebugMode ? 'test_log' : 'log';
-    await sendLog('test_log', message);
-    // await sendLog(type, message);
+    // await sendLog('test_log', message);
+    await sendLog(type, message);
   }
 
   Future<void> sendBroadcastLogToSlack(String message) async {
     final type = kDebugMode ? 'test_service' : 'service';
-    await sendLog('test_service', message);
-    // await sendLog(type, message);
+    // await sendLog('test_service', message);
+    await sendLog(type, message);
   }
 
   // 1) 객체 만드는 함수 LogState

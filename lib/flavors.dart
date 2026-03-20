@@ -31,8 +31,6 @@ class F {
   }
 
   static String get kioskBaseUrl {
-    // return 'http://192.168.1.220:8080';
-    return 'https://dev-api-spring-kiosk.snaptag.co.kr';
     switch (F.appFlavor) {
       case Flavor.dev:
         return 'https://dev-api-spring-kiosk.snaptag.co.kr';
