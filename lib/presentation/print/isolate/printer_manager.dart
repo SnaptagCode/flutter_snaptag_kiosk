@@ -251,7 +251,21 @@ class PrinterManager {
 
   void _checkFeeder(PrinterBindings bindings) {
     logger.i('Checking feeder status...');
-    final hasCard = bindings.checkFeederStatus();
+    late final bool hasCard;
+    try {
+      hasCard = bindings.checkFeederStatus();
+    } catch (e) {
+      // SDK 조회 실패 시에만 에러 클리어용 리셋 (카드 없음은 API 성공 케이스라 제외)
+      logger.w('R600IsFeederNoEmpty failed: $e — attempting R600PrtReset');
+      try {
+        bindings.resetPrinter();
+        logger.i('R600PrtReset completed after feeder check error');
+      } catch (resetError) {
+        logger.e('R600PrtReset failed after feeder check error', error: resetError);
+        rethrow;
+      }
+      rethrow;
+    }
     if (!hasCard) {
       throw Exception('Card feeder is empty');
     }

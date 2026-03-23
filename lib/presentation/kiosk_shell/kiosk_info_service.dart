@@ -1,11 +1,17 @@
 import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_snaptag_kiosk/presentation/core/card_count_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/setup/front_photo_list.dart';
 import 'package:flutter_snaptag_kiosk/presentation/setup/uuid_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:path/path.dart' as p;
 
 part 'kiosk_info_service.g.dart';
+
+final getInfoByKeyProvider = StateProvider<bool>((ref) => true);
 
 @Riverpod(keepAlive: true)
 class KioskInfoService extends _$KioskInfoService {
@@ -40,6 +46,24 @@ class KioskInfoService extends _$KioskInfoService {
 
     try {
       _isLoading = true;
+
+      final cached = await _readFromLauncherCache();
+
+      SlackLogService().sendLogToSlack("getKioskMachineInfo: cached: $cached");
+      if (cached != null && cached.kioskMachineId != 0) {
+        state = cached;
+        _cachedMachineId = cached.kioskMachineId;
+        _cachedKioskEventId = cached.kioskEventId;
+        ref.read(frontPhotoListProvider.notifier).fetch();
+        await _startPeriodicTimer();
+        _getInfoByKey = true;
+        _isLoading = false;
+        ref.read(getInfoByKeyProvider.notifier).state = true;
+
+        SlackLogService().sendLogToSlack("getKioskMachineInfo: $cached");
+        return cached;
+      }
+
       final kioskRepo = ref.read(kioskRepositoryProvider);
       final deviceUUID = await ref.read(deviceUuidProvider.future);
       final response = await kioskRepo.getKioskMachineInfoByKey(deviceUUID);
@@ -150,5 +174,20 @@ class KioskInfoService extends _$KioskInfoService {
   void _cancelTimer() {
     _periodicTimer?.cancel();
     _periodicTimer = null;
+  }
+
+  /// 런처가 ~/Snaptag/runtime/kiosk_machine_info.json에 저장한 캐시를 읽습니다.
+  Future<KioskMachineInfo?> _readFromLauncherCache() async {
+    try {
+      final home = Platform.environment['USERPROFILE'];
+      if (home == null) return null;
+      final file = File(p.join(home, 'Snaptag', 'runtime', 'kiosk_machine_info.json'));
+      if (!await file.exists()) return null;
+      final body = await file.readAsString();
+      final json = jsonDecode(body) as Map<String, dynamic>;
+      return KioskMachineInfo.fromJson(json);
+    } catch (_) {
+      return null;
+    }
   }
 }
