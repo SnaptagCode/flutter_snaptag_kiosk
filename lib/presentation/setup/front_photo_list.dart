@@ -35,16 +35,23 @@ class FrontPhotoList extends _$FrontPhotoList {
     }
   }
 
+  int? _lastSelectedId;
+
   Future<NominatedPhoto> getRandomPhoto() async {
     if (state.isEmpty) {
       throw Exception('No front images available');
     }
 
     try {
-      // 파일명에서 정보 추출
-      final result = RandomPhotoUtil.getRandomPhotoByWeight(state);
+      // 이전에 선택된 앞면이 있고, 다른 선택지가 있으면 제외
+      final candidates = state.length > 1 && _lastSelectedId != null
+          ? state.where((photo) => photo.id != _lastSelectedId).toList()
+          : state;
+
+      final result = RandomPhotoUtil.getRandomPhotoByWeight(candidates);
 
       if (result != null) {
+        _lastSelectedId = result.id;
         return result;
       }
 
