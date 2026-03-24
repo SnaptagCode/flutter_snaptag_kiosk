@@ -31,6 +31,8 @@ class PrinterBindings {
   late final R600CommitCanvas _commitCanvas;
   late final R600SelectPrt _selectPrinter; // 추가
   late final R600LibClear _libClear;
+  late final R600PrtReset _prtReset;
+  late final R600PrtRestart _prtRestart;
   late final R600SetRibbonOpt _setRibbonOpt;
   late final R600DrawWaterMark _drawWaterMark;
   late final R600SetFont _setFont;
@@ -64,6 +66,8 @@ class PrinterBindings {
     _commitCanvas = _dll.lookupFunction<R600CommitCanvasNative, R600CommitCanvas>('R600CommitCanvas');
     _selectPrinter = _dll.lookupFunction<R600SelectPrtNative, R600SelectPrt>('R600SelectPrt');
     _libClear = _dll.lookupFunction<R600LibClearNative, R600LibClear>('R600LibClear');
+    _prtReset = _dll.lookupFunction<R600PrtResetNative, R600PrtReset>('R600PrtReset');
+    _prtRestart = _dll.lookupFunction<R600PrtRestartNative, R600PrtRestart>('R600PrtRestart');
     _setRibbonOpt = _dll.lookupFunction<R600SetRibbonOptNative, R600SetRibbonOpt>('R600SetRibbonOpt');
     _drawWaterMark = _dll.lookupFunction<R600DrawWaterMarkNative, R600DrawWaterMark>('R600DrawWaterMark');
     _setFont = _dll.lookupFunction<R600SetFontNative, R600SetFont>('R600SetFont');
@@ -431,6 +435,24 @@ class PrinterBindings {
 
   void clearLibrary() {
     _libClear();
+  }
+
+  /// 현재 에러 클리어. 캐시는 지우지 않음. (SDK `R600PrtReset`)
+  void resetPrinter() {
+    final result = _prtReset();
+    if (result != 0) {
+      final error = getErrorInfo(result);
+      throw Exception('[R600PrtReset] Failed: $error (code: $result)');
+    }
+  }
+
+  /// 소프트 재시작(전원 없이). 캐시 포함 정리. (SDK `R600PrtRestart`)
+  void restartPrinter() {
+    final result = _prtRestart();
+    if (result != 0) {
+      final error = getErrorInfo(result);
+      throw Exception('[R600PrtRestart] Failed: $error (code: $result)');
+    }
   }
 
   void setRibbonOpt(

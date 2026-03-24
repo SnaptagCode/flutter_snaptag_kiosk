@@ -13,14 +13,10 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final kiosk = ref.watch(kioskInfoServiceProvider);
-    final buttonColor = kiosk?.mainButtonColor != null
-        ? Color(int.parse(kiosk!.mainButtonColor.replaceFirst('#', '0xff')))
-        : Colors.black;
-    final buttonTextColor = kiosk?.buttonTextColor != null
-        ? Color(int.parse(kiosk!.buttonTextColor.replaceFirst('#', '0xff')))
-        : Colors.white;
-    final mainTextColor =
-        kiosk?.mainTextColor != null ? Color(int.parse(kiosk!.mainTextColor.replaceFirst('#', '0xff'))) : Colors.white;
+    final isHwe = kiosk?.isHwe ?? false;
+    final buttonColor = kiosk?.mainButtonColor.toColor() ?? Colors.black;
+    final buttonTextColor = kiosk?.buttonTextColor.toColor(fallback: Colors.white) ?? Colors.white;
+    final mainTextColor = kiosk?.mainTextColor.toColor(fallback: Colors.white) ?? Colors.white;
     String priceValue = NumberFormat.currency(locale: 'ko_KR', symbol: '').format(kiosk?.photoCardPrice);
 
     return DefaultTextStyle(
@@ -38,16 +34,21 @@ class HomeScreen extends ConsumerWidget {
             ),
             child: Text(
               '1EA | $priceValue${LocaleKeys.currency_won.tr()}',
-              style: TextStyle(
-                fontSize: 30.sp,
-                color: buttonTextColor,
-              ),
+              style: isHwe
+                  ? context.typography.vendingBody3B.copyWith(color: buttonTextColor, letterSpacing: 2.4)
+                  : context.typography.kioskBody1B.copyWith(
+                      color: buttonTextColor,
+                      fontSize: 30.sp,
+                      letterSpacing: -0.6,
+                    ),
             ),
           ),
           SizedBox(height: 20.h),
           Text(
             LocaleKeys.choice_select_back_image.tr(),
-            style: context.typography.kioskBtn1B.copyWith(fontSize: 53.sp, color: mainTextColor),
+            style: isHwe
+                ? context.typography.vendingTitle1B.copyWith(color: mainTextColor)
+                : context.typography.kioskBtn1B.copyWith(fontSize: 53.sp, color: mainTextColor),
             textAlign: TextAlign.center,
           ),
           SizedBox(height: 15.h),
@@ -56,6 +57,7 @@ class HomeScreen extends ConsumerWidget {
             children: [
               _buildRecommendedImageCard(
                 context,
+                isHwe: isHwe,
                 title: LocaleKeys.choice_recommended_images.tr(),
                 subtitle1: LocaleKeys.choice_select_and_print.tr(),
                 subtitle2: null,
@@ -66,7 +68,7 @@ class HomeScreen extends ConsumerWidget {
                 mainTextColor: mainTextColor,
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(10.r),
-                  child: Image.network(kiosk?.emblemImageUrl ?? '', width: 264.w, height: 264.h, fit: BoxFit.cover),
+                  child: Image.network(kiosk?.emblemImageUrl ?? '', width: 264.w, height: 264.h, fit: BoxFit.contain),
                 ),
                 onTap: () async {
                   ref.read(backPhotoTypeProvider.notifier).selectFixed(0);
@@ -76,6 +78,7 @@ class HomeScreen extends ConsumerWidget {
               SizedBox(width: 40.w),
               _buildRecommendedImageCard(
                 context,
+                isHwe: isHwe,
                 title: LocaleKeys.choice_upload_my_photo.tr(),
                 subtitle1: LocaleKeys.choice_step1_qr_upload.tr(),
                 subtitle2: LocaleKeys.choice_step2_enter_code_print.tr(),
@@ -104,6 +107,7 @@ class HomeScreen extends ConsumerWidget {
               ),
             ],
           ),
+          SizedBox(height: 60.h),
         ],
       ),
     );
@@ -122,6 +126,7 @@ class HomeScreen extends ConsumerWidget {
     required Color mainTextColor,
     required VoidCallback onTap,
     required Widget child,
+    required bool isHwe,
   }) {
     return GestureDetector(
       onTap: onTap,
@@ -160,10 +165,12 @@ class HomeScreen extends ConsumerWidget {
                       SizedBox(height: 27.h),
                       Text(
                         title,
-                        style: context.typography.kioskBtn1B.copyWith(
-                          fontSize: context.locale.languageCode == 'en' ? 32.sp : 45.sp,
-                          color: mainButtonColor,
-                        ),
+                        style: isHwe
+                            ? context.typography.vendingTitle2B.copyWith(color: mainButtonColor)
+                            : context.typography.kioskBtn1B.copyWith(
+                                fontSize: context.locale.languageCode == 'en' ? 32.sp : 45.sp,
+                                color: mainButtonColor,
+                              ),
                         textAlign: TextAlign.center,
                       ),
                       Expanded(
@@ -176,22 +183,29 @@ class HomeScreen extends ConsumerWidget {
                             children: [
                               Text(
                                 subtitle1,
-                                style: context.typography.kioskBtn1B
-                                    .copyWith(fontSize: subtitleSize, color: mainTextColor),
+                                style: isHwe
+                                    ? context.typography.vendingBody4B
+                                        .copyWith(color: mainTextColor, fontSize: subtitleSize)
+                                    : context.typography.kioskBtn1B
+                                        .copyWith(fontSize: subtitleSize, color: mainTextColor),
                                 textAlign: TextAlign.left,
                               ),
-                              if (subtitle2 != null) SizedBox(height: 10.h),
+                              if (subtitle2 != null) SizedBox(height: 5.h),
                               if (subtitle2 != null)
                                 Text(
                                   subtitle2,
-                                  style: context.typography.kioskBtn1B
-                                      .copyWith(fontSize: subtitleSize, color: mainTextColor),
+                                  style: isHwe
+                                      ? context.typography.vendingBody4B
+                                          .copyWith(color: mainTextColor, fontSize: subtitleSize)
+                                      : context.typography.kioskBtn1B
+                                          .copyWith(fontSize: subtitleSize, color: mainTextColor),
                                   textAlign: TextAlign.left,
                                 ),
                             ],
                           ),
                         ),
-                      )
+                      ),
+                      SizedBox(height: 8.h),
                     ],
                   ),
                 ),
@@ -205,15 +219,17 @@ class HomeScreen extends ConsumerWidget {
                     Container(
                       width: 282.w,
                       height: 67.h,
-                      padding: EdgeInsets.symmetric(horizontal: 23.5.w, vertical: 18.5.h),
                       decoration: BoxDecoration(
                         color: mainButtonColor,
                         borderRadius: BorderRadius.circular(10.r),
                       ),
+                      alignment: Alignment.center,
                       child: Text(
                         imageUrl != null ? LocaleKeys.choice_select_image.tr() : LocaleKeys.choice_enter_code.tr(),
-                        style: context.typography.kioskBtn1B.copyWith(
-                            fontSize: context.locale.languageCode == 'en' ? 25.sp : 30.sp, color: buttonTextColor),
+                        style: isHwe
+                            ? context.typography.vendingBtn3B.copyWith(color: buttonTextColor, fontSize: 32.sp)
+                            : context.typography.kioskBtn1B.copyWith(
+                                fontSize: context.locale.languageCode == 'en' ? 25.sp : 30.sp, color: buttonTextColor),
                         textAlign: TextAlign.center,
                       ),
                     ),

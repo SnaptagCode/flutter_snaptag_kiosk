@@ -18,9 +18,8 @@ class PriceBox extends ConsumerWidget {
   @override
   Widget build(BuildContext context, ref) {
     final photoCardPrice = ref.read(kioskInfoServiceProvider)?.photoCardPrice;
+    final isHwe = ref.read(kioskInfoServiceProvider)?.isHwe ?? false;
     String priceValue = NumberFormat.currency(locale: 'ko_KR', symbol: '').format(photoCardPrice);
-
-    String currency = context.locale.languageCode == 'ko' ? '원' : 'KRW';
 
     return Container(
       width: 360.w,
@@ -33,12 +32,16 @@ class PriceBox extends ConsumerWidget {
         children: [
           Text(
             priceValue,
-            style: context.typography.kioskInput2B.copyWith(color: Colors.black),
+            style: isHwe
+                ? context.typography.vendingBody3B.copyWith(color: Colors.black, fontSize: 44.sp, letterSpacing: 1.76)
+                : context.typography.kioskInput2B.copyWith(color: Colors.black),
           ),
           SizedBox(width: 12.w),
           Text(
             LocaleKeys.currency_won.tr(),
-            style: context.typography.kioskInput3B.copyWith(color: Colors.black),
+            style: isHwe
+                ? context.typography.vendingBody3B.copyWith(color: Colors.black, fontSize: 36.sp, letterSpacing: 1.76)
+                : context.typography.kioskInput3B.copyWith(color: Colors.black),
           ),
         ],
       ),

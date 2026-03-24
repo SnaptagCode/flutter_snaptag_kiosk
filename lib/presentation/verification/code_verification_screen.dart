@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_snaptag_kiosk/core/common/sound/sound_manager.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
+import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
 import 'package:flutter_snaptag_kiosk/presentation/verification/auth_code_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/verification/verify_photo_card_provider.dart';
 import 'package:flutter_snaptag_kiosk/core/ui/widget/dialog_helper.dart';
@@ -49,6 +50,10 @@ class CodeVerificationScreen extends ConsumerWidget {
       },
     );
 
+    final isHwe = ref.watch(kioskInfoServiceProvider)?.isHwe ?? false;
+    final mainTextColor =
+        ref.watch(kioskInfoServiceProvider)?.mainTextColor.toColor(fallback: Colors.white) ?? Colors.white;
+
     return DefaultTextStyle(
       style: TextStyle(
         fontFamily: context.locale.languageCode == 'ja' ? 'MPLUSRounded' : 'Cafe24Ssurround2',
@@ -59,14 +64,18 @@ class CodeVerificationScreen extends ConsumerWidget {
         children: [
           Text(
             LocaleKeys.choice_enter_verification_code.tr(),
-            style: context.typography.kioksNum1SB.copyWith(color: Colors.white),
+            style: isHwe
+                ? context.typography.vendingTitle1B.copyWith(color: Colors.white)
+                : context.typography.kioskBtn1B.copyWith(fontSize: 53.sp, color: mainTextColor),
           ),
           SizedBox(
             height: 70.h,
           ),
           Text(
             LocaleKeys.sub01_txt_01.tr(),
-            style: context.typography.kioskBody1B,
+            style: isHwe
+                ? context.typography.vendingBody1B.copyWith(color: mainTextColor, fontSize: 36.sp)
+                : context.typography.kioskBody1B,
           ),
           ...[LocaleKeys.sub01_txt_02.tr().isNotEmpty ? SizedBox(height: 12.h) : SizedBox(height: 0)],
           Text(
@@ -225,11 +234,9 @@ class _NumericPad extends ConsumerWidget {
         child: SizedBox(
           width: 60.w,
           height: 60.h,
-          child: Padding(
-            padding: EdgeInsets.only(bottom: 8),
-            child: Image.asset(
-              SnaptagImages.arrowBack,
-            ),
+          child: Image.asset(
+            SnaptagImages.arrowBack,
+            color: context.kioskColors.keypadTextColor,
           ),
         ),
       );

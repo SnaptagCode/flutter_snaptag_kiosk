@@ -80,6 +80,14 @@ typedef R600SelectPrt = int Function(Pointer<Uint8> enumList);
 typedef R600LibClearNative = Uint32 Function();
 typedef R600LibClear = int Function();
 
+/// Clears current error. Does not clear cache. (SDK: R600PrtReset)
+typedef R600PrtResetNative = Uint32 Function();
+typedef R600PrtReset = int Function();
+
+/// Soft restart; clears cache. (SDK: R600PrtRestart)
+typedef R600PrtRestartNative = Uint32 Function();
+typedef R600PrtRestart = int Function();
+
 typedef R600SetRibbonOptNative = Uint32 Function(
   Uint8 isWrite,
   Uint32 key,

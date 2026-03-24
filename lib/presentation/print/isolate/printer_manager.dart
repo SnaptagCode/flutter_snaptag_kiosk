@@ -14,6 +14,7 @@ import 'package:flutter_snaptag_kiosk/presentation/print/isolate/model/check_fee
 import 'package:flutter_snaptag_kiosk/presentation/print/isolate/model/connect_message.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/isolate/model/draw_image_message.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/isolate/model/eject_message.dart';
+import 'package:flutter_snaptag_kiosk/presentation/print/isolate/model/initLibrary.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/isolate/model/inject_message.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/isolate/model/print_message.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/isolate/model/print_ribbon_status_message.dart';
@@ -93,6 +94,16 @@ class PrinterManager {
           final replyPort = message['replyPort'] as SendPort;
 
           try {
+            if (ob is InitLibraryMessage) {
+              try {
+                await _initLibrary(bindings);
+                logger.i('_printEntry InitLibraryMessage: Library initialized');
+                replyPort.send({'errorMsg': ''});
+              } catch (e) {
+                replyPort.send({'errorMsg': e.toString()});
+              }
+            }
+
             if (ob is ConnectMessage) {
               try {
                 final isConnected = await _checkConnectedPrint(bindings);
@@ -228,9 +239,33 @@ class PrinterManager {
     }
   }
 
+  Future<void> _initLibrary(PrinterBindings bindings) async {
+    try {
+      logger.i('1. Initializing printer library...');
+      bindings.clearLibrary();
+      bindings.initLibrary();
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   void _checkFeeder(PrinterBindings bindings) {
     logger.i('Checking feeder status...');
-    final hasCard = bindings.checkFeederStatus();
+    late final bool hasCard;
+    try {
+      hasCard = bindings.checkFeederStatus();
+    } catch (e) {
+      // SDK 조회 실패 시에만 에러 클리어용 리셋 (카드 없음은 API 성공 케이스라 제외)
+      logger.w('R600IsFeederNoEmpty failed: $e — attempting R600PrtReset');
+      try {
+        bindings.resetPrinter();
+        logger.i('R600PrtReset completed after feeder check error');
+      } catch (resetError) {
+        logger.e('R600PrtReset failed after feeder check error', error: resetError);
+        rethrow;
+      }
+      rethrow;
+    }
     if (!hasCard) {
       throw Exception('Card feeder is empty');
     }
@@ -435,9 +470,21 @@ class PrinterManager {
     }
   }
 
+  Future<void> initLibrary() async {
+    try {
+      logger.i('1. Initializing printer library...');
+      final response = await _sendAndResponse(InitLibraryMessage());
+      final errorMsg = response['errorMsg'] as String;
+      if (errorMsg.isNotEmpty) {
+        throw Exception('Failed to initialize printer library: $errorMsg');
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<void> _prepareMetalWatermarkAsset() async {
     try {
-      // ✅ Method B:
       // 메탈 워터마크용 PNG는 메인 isolate에서 1회만 파일로 풀어두고,
       // 프린트 isolate에는 "파일 경로"만 전달합니다. (isolate에서 rootBundle/path_provider 호출 금지)
       _metalWatermarkPath = await copyAssetPngToFile(

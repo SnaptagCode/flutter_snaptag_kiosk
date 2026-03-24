@@ -12,9 +12,11 @@ extension ButtonStyles on BuildContext {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
         elevation: 10,
         shadowColor: Colors.black.withOpacity(0.4),
-        textStyle: locale.languageCode == 'ja'
-            ? typography.kioskAlertBtnB.copyWith(fontFamily: 'MPLUSRounded')
-            : typography.kioskAlertBtnB.copyWith(fontFamily: 'Cafe24Ssurround2'),
+        textStyle: isHwe
+            ? typography.kioskAlertBtnB.copyWith(fontFamily: 'Hanwha')
+            : locale.languageCode == 'ja'
+                ? typography.kioskAlertBtnB.copyWith(fontFamily: 'MPLUSRounded')
+                : typography.kioskAlertBtnB.copyWith(fontFamily: 'Cafe24Ssurround2'),
       );
   ButtonStyle get setupDialogConfirmButtonStyle => OutlinedButton.styleFrom(
         fixedSize: Size(double.infinity, 94.h),
@@ -25,9 +27,11 @@ extension ButtonStyles on BuildContext {
         elevation: 10,
         shadowColor: Colors.black.withOpacity(0.4),
         //textStyle: typography.kioskAlertBtnB
-        textStyle: locale.languageCode == 'ja'
-            ? typography.kioskAlertBtnB.copyWith(fontFamily: 'MPLUSRounded')
-            : typography.kioskAlertBtnB.copyWith(fontFamily: 'Cafe24Ssurround2'),
+        textStyle: isHwe
+            ? typography.kioskAlertBtnB.copyWith(fontFamily: 'Hanwha')
+            : locale.languageCode == 'ja'
+                ? typography.kioskAlertBtnB.copyWith(fontFamily: 'MPLUSRounded')
+                : typography.kioskAlertBtnB.copyWith(fontFamily: 'Cafe24Ssurround2'),
       );
 
   ButtonStyle get recommendedImageButtonStyle => OutlinedButton.styleFrom(
@@ -49,9 +53,11 @@ extension ButtonStyles on BuildContext {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
       elevation: 10,
       shadowColor: Colors.black.withOpacity(0.4),
-      textStyle: locale.languageCode == 'ja'
-          ? typography.kioskAlertBtnB.copyWith(fontFamily: 'MPLUSRounded')
-          : typography.kioskAlertBtnB.copyWith(fontFamily: 'Cafe24Ssurround2'),
+      textStyle: isHwe
+          ? typography.kioskAlertBtnB.copyWith(fontFamily: 'Hanwha')
+          : locale.languageCode == 'ja'
+              ? typography.kioskAlertBtnB.copyWith(fontFamily: 'MPLUSRounded')
+              : typography.kioskAlertBtnB.copyWith(fontFamily: 'Cafe24Ssurround2'),
       side: BorderSide(
         //color: kioskColors.popupButtonColor,
         color: Color(0xFF999999),
@@ -113,9 +119,11 @@ extension ButtonStyles on BuildContext {
         shadowColor: Colors.black.withOpacity(0.4),
         //textStyle: typography.kioskAlertBtnB.copyWith(fontFamily: 'Cafe24Ssurround2')
         //textStyle: typography.kioskAlertBtnB
-        textStyle: locale.languageCode == 'ja'
-            ? typography.kioskAlertBtnB.copyWith(fontFamily: 'MPLUSRounded')
-            : typography.kioskAlertBtnB.copyWith(fontFamily: 'Cafe24Ssurround2'),
+        textStyle: isHwe
+            ? typography.kioskAlertBtnB.copyWith(fontFamily: 'Hanwha', fontSize: 34.sp)
+            : locale.languageCode == 'ja'
+                ? typography.kioskAlertBtnB.copyWith(fontFamily: 'MPLUSRounded', fontSize: 34.sp)
+                : typography.kioskAlertBtnB.copyWith(fontFamily: 'Cafe24Ssurround2', fontSize: 34.sp),
       );
 
   ButtonStyle get dialogKioskStyle => ElevatedButton.styleFrom(
@@ -126,9 +134,11 @@ extension ButtonStyles on BuildContext {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
         elevation: 10,
         shadowColor: Colors.black.withOpacity(0.4),
-        textStyle: locale.languageCode == 'ja'
-            ? typography.kioskAlertBtnB.copyWith(fontFamily: 'MPLUSRounded')
-            : typography.kioskAlertBtnB.copyWith(fontFamily: 'Cafe24Ssurround2'),
+        textStyle: isHwe
+            ? typography.kioskAlertBtnB.copyWith(fontFamily: 'Hanwha', fontSize: 34.sp)
+            : locale.languageCode == 'ja'
+                ? typography.kioskAlertBtnB.copyWith(fontFamily: 'MPLUSRounded', fontSize: 34.sp)
+                : typography.kioskAlertBtnB.copyWith(fontFamily: 'Cafe24Ssurround2', fontSize: 34.sp),
       );
 
   ///
@@ -163,7 +173,8 @@ extension ButtonStyles on BuildContext {
         //padding: EdgeInsets.fromLTRB(10.r, 21.r, 10.r, 10.r),
         padding: EdgeInsets.fromLTRB(10.r, 18.r, 10.r, 2.r),
         backgroundColor: kioskColors.keypadButtonColor,
-        foregroundColor: Colors.white,
+        foregroundColor: kioskColors.keypadTextColor,
+        alignment: Alignment.center,
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10.r),
             side: BorderSide(
@@ -182,7 +193,7 @@ extension ButtonStyles on BuildContext {
         fixedSize: Size(130.w, 90.h),
         padding: EdgeInsets.all(10.r),
         backgroundColor: kioskColors.keypadButtonColor,
-        foregroundColor: Colors.white,
+        foregroundColor: kioskColors.keypadTextColor,
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10.r),
             side: BorderSide(
@@ -208,11 +219,14 @@ extension ButtonStyles on BuildContext {
         padding: EdgeInsets.fromLTRB(10.w, 14.w, 10.h, 3.h),
         backgroundColor: kioskColors.buttonColor,
         foregroundColor: kioskColors.buttonTextColor,
+        alignment: Alignment.center,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
         //textStyle: typography.kioskNum2B.copyWith(fontFamily: 'Cafe24Ssurround2')
         //textStyle: typography.kioskNum2B
-        textStyle: locale.languageCode == 'ja'
-            ? typography.kioskNum2B.copyWith(fontFamily: 'MPLUSRounded')
-            : typography.kioskNum2B.copyWith(fontFamily: 'Cafe24Ssurround2'),
+        textStyle: isHwe
+            ? typography.kioskNum2B.copyWith(fontFamily: 'Hanwha')
+            : locale.languageCode == 'ja'
+                ? typography.kioskNum2B.copyWith(fontFamily: 'MPLUSRounded')
+                : typography.kioskNum2B.copyWith(fontFamily: 'Cafe24Ssurround2'),
       );
 }
