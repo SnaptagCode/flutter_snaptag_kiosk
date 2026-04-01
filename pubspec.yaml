@@ -1,7 +1,7 @@
 name: flutter_snaptag_kiosk
 description: "A new Flutter project."
 publish_to: "none"
-version: 4.1.0
+version: 4.1.1
 
 environment:
   sdk: ^3.6.0
@@ -12,7 +12,7 @@ dependencies:
 
   # Network
   dio: ^5.7.0
-  retrofit: ^4.4.1
+  retrofit: ">=4.4.1 <4.9.0"
   connectivity_plus: ^6.1.0
   internet_connection_checker: ^3.0.1
 
