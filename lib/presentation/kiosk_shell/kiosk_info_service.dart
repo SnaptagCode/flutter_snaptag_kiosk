@@ -115,8 +115,13 @@ class KioskInfoService extends _$KioskInfoService {
       // 응답을 받은 후 10분마다 실행되는 타이머 시작
       await _startPeriodicTimer();
 
+      _getInfoByKey = true;
+      ref.read(getInfoByKeyProvider.notifier).state = true;
+
       return response;
     } catch (e) {
+      _getInfoByKey = false;
+      ref.read(getInfoByKeyProvider.notifier).state = false;
       ref.invalidateSelf();
       rethrow;
     }

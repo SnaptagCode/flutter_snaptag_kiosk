@@ -39,7 +39,9 @@ class SlackLogService {
       return;
     }
     try {
-      final machineId = _container.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
+      final kioskInfo = _container.read(kioskInfoServiceProvider);
+      final machineId = kioskInfo?.kioskMachineId ?? 0;
+      
       _container.read(kioskRepositoryProvider).sendSlackAlert(machineId, type, message);
     } catch (e) {
       log("❌ Slack 알림 API 오류: $e");
@@ -246,7 +248,7 @@ ${cardCount == 0 ? "- 단면 -> 양면 모드" : "- 단면 모드 설정\n- 단�
     return '''
 $formattedTitle
 ───────────────────
-Kiosk: ${slackLogTemplate.kioskMachineInfo?.kioskMachineId ?? 0}  /  ${slackLogTemplate.appVersion}
+Kiosk: ${slackLogTemplate.kioskMachineInfo?.kioskMachineName.isNotEmpty == true ? slackLogTemplate.kioskMachineInfo!.kioskMachineName : '-'}(${slackLogTemplate.kioskMachineInfo?.kioskMachineId ?? 0})  /  ${slackLogTemplate.appVersion}
 업체(구단): ${slackLogTemplate.serviceName}
 ───────────────────
 ${slackLogTemplate.description}
