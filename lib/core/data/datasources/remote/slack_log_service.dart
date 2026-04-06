@@ -19,6 +19,7 @@ class SlackLogService {
   SlackLogService._internal();
 
   late ProviderContainer _container;
+  bool _isSending = false;
 
   final slackWebhookUrl = dotenv.env['SLACK_WEBHOOK_URL'];
 
@@ -38,13 +39,21 @@ class SlackLogService {
       log("❌ Slack 알림 메시지가 없습니다.");
       return;
     }
+    // 슬랙 알림 전송 중 500 에러 → onError → 다시 슬랙 알림 시도 무한 루프 방지
+    if (_isSending) {
+      log("⚠️ Slack 알림 전송 중 재진입 차단: $message");
+      return;
+    }
+    _isSending = true;
     try {
       final kioskInfo = _container.read(kioskInfoServiceProvider);
       final machineId = kioskInfo?.kioskMachineId ?? 0;
-      
-      _container.read(kioskRepositoryProvider).sendSlackAlert(machineId, type, message);
+
+      await _container.read(kioskRepositoryProvider).sendSlackAlert(machineId, type, message);
     } catch (e) {
       log("❌ Slack 알림 API 오류: $e");
+    } finally {
+      _isSending = false;
     }
   }
 
