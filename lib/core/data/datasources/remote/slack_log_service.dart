@@ -19,6 +19,7 @@ class SlackLogService {
   SlackLogService._internal();
 
   late ProviderContainer _container;
+  bool _isSending = false;
 
   final slackWebhookUrl = dotenv.env['SLACK_WEBHOOK_URL'];
 
@@ -38,11 +39,21 @@ class SlackLogService {
       log("❌ Slack 알림 메시지가 없습니다.");
       return;
     }
+    // 슬랙 알림 전송 중 500 에러 → onError → 다시 슬랙 알림 시도 무한 루프 방지
+    if (_isSending) {
+      log("⚠️ Slack 알림 전송 중 재진입 차단: $message");
+      return;
+    }
+    _isSending = true;
     try {
-      final machineId = _container.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
-      _container.read(kioskRepositoryProvider).sendSlackAlert(machineId, type, message);
+      final kioskInfo = _container.read(kioskInfoServiceProvider);
+      final machineId = kioskInfo?.kioskMachineId ?? 0;
+
+      await _container.read(kioskRepositoryProvider).sendSlackAlert(machineId, type, message);
     } catch (e) {
       log("❌ Slack 알림 API 오류: $e");
+    } finally {
+      _isSending = false;
     }
   }
 
@@ -153,6 +164,7 @@ ${slackLogTemplate.description}
     }
   }
 
+<<<<<<< HEAD
   // Future<void> sendPeriodicLogBroadcastLogToSlack() async {
   //   final slackLogTemplate = await createSlackLogTemplate(null);
   //   final machineId = slackLogTemplate.kioskMachineInfo?.kioskMachineId ?? 0;
@@ -176,6 +188,31 @@ ${slackLogTemplate.description}
   //     await sendBroadcastLogToSlack(message);
   //   }
   // }
+=======
+//   Future<void> sendPeriodicLogBroadcastLogToSlack() async {
+//     final slackLogTemplate = await createSlackLogTemplate(null);
+//     final machineId = slackLogTemplate.kioskMachineInfo?.kioskMachineId ?? 0;
+
+//     if (machineId != 0) {
+//       final printerLog = _container.read(printerLogProvider);
+//       final cardCount = _container.read(cardCountProvider);
+//       final printerheadTemp = printerLog?.heaterTemperature ?? 0;
+//       final printerheadTempString = printerheadTemp != 0 ? (printerheadTemp / 100).toStringAsFixed(2) : "알 수 없음";
+//       String description;
+//       description = '''
+// - 프린터 온도 : $printerheadTempString°C
+// - 리본 잔량 : ${printerLog?.rbnRemainingRatio != null ? "${printerLog?.rbnRemainingRatio}%" : "알 수 없음"}
+// - 필름 잔량 : ${printerLog?.filmRemainingRatio != null ? "${printerLog?.filmRemainingRatio}%" : "알 수 없음"}
+// - 단면 카드 수량 : ${cardCount.currentCount} / ${cardCount.initialCount}
+// ''';
+
+//       final message = buildSlackAlertMessage(
+//           slackLogTemplate: slackLogTemplate.copyWith(title: '프린트 상태', category: 'info', description: description));
+
+//       await sendBroadcastLogToSlack(message);
+//     }
+//   }
+>>>>>>> 7e65445582ed51c2afdc0d5788177531bd6dab6f
 
   Future<void> sendBroadcastLogToSlackWithKey(String errorKey) async {
     final slackLogTemplate = await createSlackLogTemplate(errorKey);
@@ -246,7 +283,11 @@ ${cardCount == 0 ? "- 단면 -> 양면 모드" : "- 단면 모드 설정\n- 단�
     return '''
 $formattedTitle
 ───────────────────
+<<<<<<< HEAD
 Kiosk: ${slackLogTemplate.kioskMachineInfo?.kioskMachineName.isNotEmpty == true ? '${slackLogTemplate.kioskMachineInfo!.kioskMachineName} (${slackLogTemplate.kioskMachineInfo!.kioskMachineId})' : slackLogTemplate.kioskMachineInfo?.kioskMachineId ?? 0}  /  ${slackLogTemplate.appVersion}
+=======
+Kiosk: ${slackLogTemplate.kioskMachineInfo?.kioskMachineName.isNotEmpty == true ? '${slackLogTemplate.kioskMachineInfo!.kioskMachineName}(${slackLogTemplate.kioskMachineInfo!.kioskMachineId})' : '${slackLogTemplate.kioskMachineInfo?.kioskMachineId ?? 0}'}  /  ${slackLogTemplate.appVersion}
+>>>>>>> 7e65445582ed51c2afdc0d5788177531bd6dab6f
 업체(구단): ${slackLogTemplate.serviceName}
 ───────────────────
 ${slackLogTemplate.description}
