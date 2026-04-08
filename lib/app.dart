@@ -77,6 +77,7 @@ class _AppState extends ConsumerState<App> with WindowListener {
         titleBarStyle: TitleBarStyle.hidden,
       );
       await windowManager.waitUntilReadyToShow(windowOptions, () async {
+        await windowManager.setPosition(Offset(-6,0.0));
         await windowManager.setFullScreen(true);
         await windowManager.show();
       });

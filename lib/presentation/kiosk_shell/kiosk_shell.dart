@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_snaptag_kiosk/lib.dart';
+// import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_snaptag_kiosk/core/ui/widget/back_button.dart';
 import 'package:flutter_snaptag_kiosk/core/ui/widget/kiosk_navigator_button.dart';
 import 'package:flutter_snaptag_kiosk/core/ui/widget/printer_status_badge.dart';
@@ -28,9 +28,9 @@ class _KioskShellState extends ConsumerState<KioskShell> {
   void initState() {
     super.initState();
 
-    _periodicTimer = Timer.periodic(const Duration(minutes: 30), (timer) {
-      SlackLogService().sendPeriodicLogBroadcastLogToSlack();
-    });
+    // _periodicTimer = Timer.periodic(const Duration(minutes: 30), (timer) {
+    //   SlackLogService().sendPeriodicLogBroadcastLogToSlack();
+    // });
   }
 
   @override

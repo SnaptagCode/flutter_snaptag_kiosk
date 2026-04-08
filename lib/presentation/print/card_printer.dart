@@ -65,8 +65,8 @@ class PrinterService extends _$PrinterService {
 
       await _printerStateLog(printerLog);
     } catch (e) {
-      final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
-      SlackLogService().sendLogToSlack('*[MachineId : $machineId]* \n printerError: $e');
+      final machineName = ref.read(kioskInfoServiceProvider)?.kioskMachineName ?? '-';
+      SlackLogService().sendLogToSlack('*[$machineName]* \n printerError: $e');
       rethrow;
     }
   }
