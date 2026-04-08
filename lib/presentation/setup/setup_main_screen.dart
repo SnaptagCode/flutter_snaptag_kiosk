@@ -89,22 +89,26 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
     final isPaymentDeviceReady = await _checkPaymentDevice();
     if (!isPaymentDeviceReady) return;
 
-    final kioskInfo = ref.read(kioskInfoServiceProvider);
+    var kioskInfo = ref.read(kioskInfoServiceProvider);
 
     logger.d(
-        'kioskInfo: $kioskInfo kioskEventId: ${kioskInfo?.kioskEventId} kioskMachineId: ${kioskInfo?.kioskMachineId}');
+        'kioskInfo: $kioskInfo kioskMachineName: ${kioskInfo?.kioskMachineName} kioskMachineId: ${kioskInfo?.kioskMachineId}');
 
+    // KioskMachineInfo가 없으면 다시 fetch
     if (kioskInfo == null) {
-      if (kioskInfo?.kioskEventId == 0 ||
-          kioskInfo?.kioskEventId == null ||
-          kioskInfo?.kioskMachineId == 0 ||
-          kioskInfo?.kioskMachineId == null) {
-        await DialogHelper.showSetupDialog(
-          context,
-          title: "이벤트를 실행하려면\n키오스크 기기번호를 입력해 주세요.",
-        );
-        return;
-      }
+      await ref.read(kioskInfoServiceProvider.notifier).getKioskMachineInfo();
+      kioskInfo = ref.read(kioskInfoServiceProvider);
+    }
+
+    if (kioskInfo == null ||
+        kioskInfo.kioskEventId == 0 ||
+        kioskInfo.kioskMachineId == 0) {
+      if (!context.mounted) return;
+      await DialogHelper.showSetupDialog(
+        context,
+        title: "이벤트를 실행하려면\n키오스크 기기번호를 입력해 주세요.",
+      );
+      return;
     }
 
     await _writePhotocodeMeta();
