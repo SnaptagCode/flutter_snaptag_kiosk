@@ -47,22 +47,22 @@ class KioskInfoService extends _$KioskInfoService {
     try {
       _isLoading = true;
 
-      // final cached = await _readFromLauncherCache();
+      final cached = await _readFromLauncherCache();
 
-      // SlackLogService().sendLogToSlack("getKioskMachineInfo: cached: $cached");
-      // if (cached != null && cached.kioskMachineId != 0) {
-      //   state = cached;
-      //   _cachedMachineId = cached.kioskMachineId;
-      //   _cachedKioskEventId = cached.kioskEventId;
-      //   ref.read(frontPhotoListProvider.notifier).fetch();
-      //   // await _startPeriodicTimer();
-      //   _getInfoByKey = true;
-      //   _isLoading = false;
-      //   ref.read(getInfoByKeyProvider.notifier).state = true;
+      SlackLogService().sendLogToSlack("getKioskMachineInfo: cached: $cached");
+      if (cached != null && cached.kioskMachineId != 0) {
+        state = cached;
+        _cachedMachineId = cached.kioskMachineId;
+        _cachedKioskEventId = cached.kioskEventId;
+        ref.read(frontPhotoListProvider.notifier).fetch();
+        // await _startPeriodicTimer();
+        _getInfoByKey = true;
+        _isLoading = false;
+        ref.read(getInfoByKeyProvider.notifier).state = true;
 
-      //   SlackLogService().sendLogToSlack("getKioskMachineInfo: $cached");
-      //   return cached;
-      // }
+        SlackLogService().sendLogToSlack("getKioskMachineInfo: $cached");
+        return cached;
+      }
 
       final kioskRepo = ref.read(kioskRepositoryProvider);
       final deviceUUID = await ref.read(deviceUuidProvider.future);
