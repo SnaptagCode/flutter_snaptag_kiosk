@@ -292,15 +292,15 @@ class PaymentService extends _$PaymentService {
         switch (paymentRes) {
           case '1000':
             await _updateOrder(isRefund: true, orderid: order.orderId, photoAuthNumber: code, description: "고객취소");
-            // SlackLogService().sendPaymentBroadcastLogToSlak(InfoKey.paymentRefundFail.key,
-            //     paymentDescription:
-            //         "동작로직: 환불안내\n- 사유: 사용자가 환불취소 누름\n- 인증번호: $code\n- 승인번호: ${approvalInfo?.approvalNo ?? "없음"}");
+            SlackLogService().sendPaymentBroadcastLogToSlak(InfoKey.paymentRefundFail.key,
+                paymentDescription:
+                    "동작로직: 환불안내\n- 사유: 사용자가 환불취소 누름\n- 인증번호: $code\n- 승인번호: ${approvalInfo?.approvalNo ?? "없음"}");
             break;
           case '1004':
             await _updateOrder(isRefund: true, orderid: order.orderId, photoAuthNumber: code, description: "시간초과");
-            // SlackLogService().sendPaymentBroadcastLogToSlak(InfoKey.paymentRefundFail.key,
-            //     paymentDescription:
-            //         "동작로직: 환불안내\n- 사유: 시간초과\n- 인증번호: $code\n- 승인번호: ${approvalInfo?.approvalNo ?? "없음"}");
+            SlackLogService().sendPaymentBroadcastLogToSlak(InfoKey.paymentRefundFail.key,
+                paymentDescription:
+                    "동작로직: 환불안내\n- 사유: 시간초과\n- 인증번호: $code\n- 승인번호: ${approvalInfo?.approvalNo ?? "없음"}");
             break;
           default:
             await _updateOrder(isRefund: true, orderid: order.orderId, photoAuthNumber: code, description: "확인필요");
