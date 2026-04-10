@@ -1,15 +1,15 @@
 import 'package:flutter_snaptag_kiosk/core/data/models/request/update_back_photo_request.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
-import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
-import 'package:flutter_snaptag_kiosk/presentation/verification/auth_code_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/core/card_count_provider.dart';
-import 'package:flutter_snaptag_kiosk/presentation/setup/page_print_provider.dart';
-import 'package:flutter_snaptag_kiosk/presentation/verification/verify_photo_card_provider.dart';
+import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
 import 'package:flutter_snaptag_kiosk/presentation/payment/create_order_info_state.dart';
-import 'package:flutter_snaptag_kiosk/presentation/payment/payment_response_state.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:flutter_snaptag_kiosk/presentation/payment/payment_failed_type.dart';
+import 'package:flutter_snaptag_kiosk/presentation/payment/payment_response_state.dart';
+import 'package:flutter_snaptag_kiosk/presentation/setup/page_print_provider.dart';
+import 'package:flutter_snaptag_kiosk/presentation/verification/auth_code_provider.dart';
+import 'package:flutter_snaptag_kiosk/presentation/verification/verify_photo_card_provider.dart';
 import 'package:intl/intl.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'payment_service.g.dart';
 
@@ -154,9 +154,9 @@ class PaymentService extends _$PaymentService {
     final response = await _updateOrder(isRefund: false, description: "시간초과");
     SlackLogService().sendLogToSlack("paymentResponse1004 : $response");
 
-    SlackLogService().sendPaymentBroadcastLogToSlak(InfoKey.paymentFail.key,
-        paymentDescription:
-            "사유: 시간초과\n- 인증번호: ${backPhoto.photoAuthNumber}\n- 승인번호: ${paymentResponse.approvalNo ?? "없음"}");
+    // SlackLogService().sendPaymentBroadcastLogToSlak(InfoKey.paymentFail.key,
+    //     paymentDescription:
+    //         "사유: 시간초과\n- 인증번호: ${backPhoto.photoAuthNumber}\n- 승인번호: ${paymentResponse.approvalNo ?? "없음"}");
 
     // 결제 실패 Exception throw
     throw TimeoutPaymentException(description: "시간초과");
@@ -164,12 +164,12 @@ class PaymentService extends _$PaymentService {
 
   /// 취소된 결제 처리
   Future<void> _handleCancelledPayment(BackPhotoCardResponse backPhoto, PaymentResponse paymentResponse) async {
-    final response = await _updateOrder(isRefund: false, description: "고객취소");
-    SlackLogService().sendLogToSlack("paymentResponse1000 : $response");
+    // final response = await _updateOrder(isRefund: false, description: "고객취소");
+    // SlackLogService().sendLogToSlack("paymentResponse1000 : $response");
 
-    SlackLogService().sendPaymentBroadcastLogToSlak(InfoKey.paymentFail.key,
-        paymentDescription:
-            "사유: 사용자가 결제취소 누름\n- 인증번호: ${backPhoto.photoAuthNumber}\n- 승인번호: ${paymentResponse.approvalNo ?? "없음"}");
+    // SlackLogService().sendPaymentBroadcastLogToSlak(InfoKey.paymentFail.key,
+    //     paymentDescription:
+    //         "사유: 사용자가 결제취소 누름\n- 인증번호: ${backPhoto.photoAuthNumber}\n- 승인번호: ${paymentResponse.approvalNo ?? "없음"}");
 
     // 결제 실패 Exception throw
     throw CancelledPaymentException(description: "고객취소");
