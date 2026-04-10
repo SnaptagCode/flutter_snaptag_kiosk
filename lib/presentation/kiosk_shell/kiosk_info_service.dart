@@ -1,13 +1,13 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
-import 'package:flutter_snaptag_kiosk/presentation/core/card_count_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/setup/front_photo_list.dart';
 import 'package:flutter_snaptag_kiosk/presentation/setup/uuid_provider.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:path/path.dart' as p;
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'kiosk_info_service.g.dart';
 
@@ -47,22 +47,22 @@ class KioskInfoService extends _$KioskInfoService {
     try {
       _isLoading = true;
 
-      final cached = await _readFromLauncherCache();
+      // final cached = await _readFromLauncherCache();
 
-      SlackLogService().sendLogToSlack("getKioskMachineInfo: cached: $cached");
-      if (cached != null && cached.kioskMachineId != 0) {
-        state = cached;
-        _cachedMachineId = cached.kioskMachineId;
-        _cachedKioskEventId = cached.kioskEventId;
-        ref.read(frontPhotoListProvider.notifier).fetch();
-        // await _startPeriodicTimer();
-        _getInfoByKey = true;
-        _isLoading = false;
-        ref.read(getInfoByKeyProvider.notifier).state = true;
+      // SlackLogService().sendLogToSlack("getKioskMachineInfo: cached: $cached");
+      // if (cached != null && cached.kioskMachineId != 0) {
+      //   state = cached;
+      //   _cachedMachineId = cached.kioskMachineId;
+      //   _cachedKioskEventId = cached.kioskEventId;
+      //   ref.read(frontPhotoListProvider.notifier).fetch();
+      //   // await _startPeriodicTimer();
+      //   _getInfoByKey = true;
+      //   _isLoading = false;
+      //   ref.read(getInfoByKeyProvider.notifier).state = true;
 
-        SlackLogService().sendLogToSlack("getKioskMachineInfo: $cached");
-        return cached;
-      }
+      //   SlackLogService().sendLogToSlack("getKioskMachineInfo: $cached");
+      //   return cached;
+      // }
 
       final kioskRepo = ref.read(kioskRepositoryProvider);
       final deviceUUID = await ref.read(deviceUuidProvider.future);
