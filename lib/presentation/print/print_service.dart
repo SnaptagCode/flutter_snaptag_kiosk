@@ -3,12 +3,13 @@ import 'dart:io';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
 import 'package:flutter_snaptag_kiosk/presentation/payment/create_order_info_state.dart';
+import 'package:flutter_snaptag_kiosk/presentation/payment/payment_response_state.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/card_printer.dart';
 import 'package:flutter_snaptag_kiosk/presentation/setup/front_photo_list.dart';
 import 'package:flutter_snaptag_kiosk/presentation/setup/page_print_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/verification/verify_photo_card_provider.dart';
-import 'package:flutter_snaptag_kiosk/presentation/payment/payment_response_state.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+
 part 'print_service.g.dart';
 
 @riverpod
@@ -116,19 +117,32 @@ class PrintService extends _$PrintService {
   }
 
   Future<void> _updatePrintStatus(int printedPhotoCardId, PrintedStatus status) async {
-    try {
-      final request = UpdatePrintRequest(
-        kioskMachineId: ref.read(kioskInfoServiceProvider)!.kioskMachineId,
-        kioskEventId: ref.read(kioskInfoServiceProvider)!.kioskEventId,
-        status: status,
-      );
+    const maxRetries = 3;
+    int attempt = 0;
 
-      await ref
-          .read(kioskRepositoryProvider)
-          .updatePrintStatus(printedPhotoCardId: printedPhotoCardId, request: request);
-    } catch (e) {
-      SlackLogService().sendErrorLogToSlack('PrintService._updatePrintStatus failure: $e');
-      logger.e('PrintService._updatePrintStatus failure', error: e);
+    while (attempt < maxRetries) {
+      try {
+        final request = UpdatePrintRequest(
+          kioskMachineId: ref.read(kioskInfoServiceProvider)!.kioskMachineId,
+          kioskEventId: ref.read(kioskInfoServiceProvider)!.kioskEventId,
+          status: status,
+        );
+
+        await ref
+            .read(kioskRepositoryProvider)
+            .updatePrintStatus(printedPhotoCardId: printedPhotoCardId, request: request);
+        return;
+      } catch (e) {
+        attempt++;
+        // logger.w('PrintService._updatePrintStatus attempt $attempt/$maxRetries failure', error: e);
+
+        if (attempt >= maxRetries) {
+          SlackLogService()
+              .sendErrorLogToSlack('PrintService._updatePrintStatus failure after $maxRetries retries: $e');
+          logger.e('PrintService._updatePrintStatus failure', error: e);
+          return;
+        }
+      }
     }
   }
 
