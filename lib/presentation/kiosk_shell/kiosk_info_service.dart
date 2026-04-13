@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
+import 'package:flutter_snaptag_kiosk/presentation/core/card_count_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/setup/front_photo_list.dart';
 import 'package:flutter_snaptag_kiosk/presentation/setup/uuid_provider.dart';
 import 'package:path/path.dart' as p;
@@ -55,7 +56,7 @@ class KioskInfoService extends _$KioskInfoService {
         _cachedMachineId = cached.kioskMachineId;
         _cachedKioskEventId = cached.kioskEventId;
         ref.read(frontPhotoListProvider.notifier).fetch();
-        // await _startPeriodicTimer();
+        await _startPeriodicTimer();
         _getInfoByKey = true;
         _isLoading = false;
         ref.read(getInfoByKeyProvider.notifier).state = true;
@@ -77,7 +78,7 @@ class KioskInfoService extends _$KioskInfoService {
       _cachedKioskEventId = response.kioskEventId;
 
       // 응답을 받은 후 10분마다 실행되는 타이머 시작
-      // await _startPeriodicTimer();
+      await _startPeriodicTimer();
 
       _getInfoByKey = true;
       _isLoading = false;
@@ -113,7 +114,7 @@ class KioskInfoService extends _$KioskInfoService {
       _cachedKioskEventId = response.kioskEventId;
 
       // 응답을 받은 후 10분마다 실행되는 타이머 시작
-      // await _startPeriodicTimer();
+      await _startPeriodicTimer();
 
       _getInfoByKey = true;
       ref.read(getInfoByKeyProvider.notifier).state = true;
@@ -132,48 +133,48 @@ class KioskInfoService extends _$KioskInfoService {
     state = await _fetchAndUpdateKioskInfo(machineId: machineId);
   }
 
-  // /// 10분마다 실행되는 주기적 타이머 시작
-  // Future<void> _startPeriodicTimer() async {
-  //   // 기존 타이머가 있다면 취소
-  //   _periodicTimer?.cancel();
+  /// 10분마다 실행되는 주기적 타이머 시작
+  Future<void> _startPeriodicTimer() async {
+    // 기존 타이머가 있다면 취소
+    _periodicTimer?.cancel();
 
-  //   SlackLogService().sendLogToSlack("Periodic _startPeriodicTimer");
+    SlackLogService().sendLogToSlack("Periodic _startPeriodicTimer");
 
-  //   // 즉시 실행되는 비동기 함수
-  //   Future<void> executePeriodicLogic() async {
-  //     try {
-  //       // 캐시된 값들 사용 (순환 의존성 방지)
-  //       final kioskEventId = _cachedKioskEventId ?? 0;
-  //       final machineId = _cachedMachineId ?? 0;
-  //       final cardCountState = ref.read(cardCountProvider);
+    // 즉시 실행되는 비동기 함수
+    Future<void> executePeriodicLogic() async {
+      try {
+        // 캐시된 값들 사용 (순환 의존성 방지)
+        final kioskEventId = _cachedKioskEventId ?? 0;
+        final machineId = _cachedMachineId ?? 0;
+        final cardCountState = ref.read(cardCountProvider);
 
-  //       if (kioskEventId != 0 && machineId != 0) {
-  //         await ref.read(kioskRepositoryProvider).checkKioskAlive(
-  //               kioskEventId: kioskEventId,
-  //               machineId: machineId,
-  //               remainingSingleSidedCount: cardCountState.remainingSingleSidedCount,
-  //             );
-  //       }
-  //       SlackLogService()
-  //           .sendLogToSlack("Periodic timer: $kioskEventId, $machineId, ${cardCountState.remainingSingleSidedCount}");
-  //     } catch (e) {
-  //       // 에러가 발생해도 타이머는 계속 실행
-  //       print('Periodic timer error: $e');
-  //       SlackLogService().sendLogToSlack("Periodic timer error: $e");
-  //     }
-  //   }
+        if (kioskEventId != 0 && machineId != 0) {
+          await ref.read(kioskRepositoryProvider).checkKioskAlive(
+                kioskEventId: kioskEventId,
+                machineId: machineId,
+                remainingSingleSidedCount: cardCountState.remainingSingleSidedCount,
+              );
+        }
+        SlackLogService()
+            .sendLogToSlack("Periodic timer: $kioskEventId, $machineId, ${cardCountState.remainingSingleSidedCount}");
+      } catch (e) {
+        // 에러가 발생해도 타이머는 계속 실행
+        // print('Periodic timer error: $e');
+        SlackLogService().sendLogToSlack("Periodic timer error: $e");
+      }
+    }
 
-  //   // 즉시 실행
-  //   await executePeriodicLogic();
+    // 즉시 실행
+    await executePeriodicLogic();
 
-  //   // 10분마다 실행되는 새로운 타이머 시작
-  //   _periodicTimer = Timer.periodic(
-  //     const Duration(minutes: 10),
-  //     (timer) async {
-  //       await executePeriodicLogic();
-  //     },
-  //   );
-  // }
+    // 10분마다 실행되는 새로운 타이머 시작
+    _periodicTimer = Timer.periodic(
+      const Duration(minutes: 10),
+      (timer) async {
+        await executePeriodicLogic();
+      },
+    );
+  }
 
   /// 타이머 취소
   void _cancelTimer() {
