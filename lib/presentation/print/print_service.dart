@@ -137,11 +137,15 @@ class PrintService extends _$PrintService {
         // logger.w('PrintService._updatePrintStatus attempt $attempt/$maxRetries failure', error: e);
 
         if (attempt >= maxRetries) {
-          SlackLogService()
-              .sendErrorLogToSlack('PrintService._updatePrintStatus failure after $maxRetries retries: $e');
+          final kioskInfo = ref.read(kioskInfoServiceProvider);
+          final machineId = kioskInfo?.kioskMachineId ?? 0;
+          final machineName = kioskInfo?.kioskMachineName ?? '';
+          SlackLogService().sendErrorLogToSlack(
+              '[MACHINE_NAME: $machineName (MACHINE_ID: $machineId)] PrintService._updatePrintStatus failure after $maxRetries retries: $e');
           logger.e('PrintService._updatePrintStatus failure', error: e);
           return;
         }
+        await Future.delayed(const Duration(milliseconds: 300));
       }
     }
   }
