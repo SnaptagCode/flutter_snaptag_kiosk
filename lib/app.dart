@@ -1,16 +1,17 @@
 import 'dart:async';
+import 'dart:ffi' hide Size;
 import 'dart:io';
 import 'dart:ui';
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_snaptag_kiosk/lib.dart';
-import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
-import 'package:flutter_snaptag_kiosk/presentation/setup/alert_definition_provider.dart';
-import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/home_timeout_provider.dart';
 import 'package:flutter_snaptag_kiosk/core/ui/widget/dialog_helper.dart';
 import 'package:flutter_snaptag_kiosk/core/ui/widget/general_error_widget.dart';
+import 'package:flutter_snaptag_kiosk/lib.dart';
+import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/home_timeout_provider.dart';
+import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
+import 'package:flutter_snaptag_kiosk/presentation/setup/alert_definition_provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -35,6 +36,11 @@ class _AppState extends ConsumerState<App> with WindowListener {
 
     // 앱 실행과 동시에 KioskInfo 미리 로드
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      // 첫 프레임 이후 디스플레이 정보가 확정된 시점에 창 크기 적용
+      if (Platform.isWindows) {
+        await _applyWindowSize();
+      }
+
       if (_hasInitializedKioskInfo) return;
       _hasInitializedKioskInfo = true;
 
@@ -71,17 +77,35 @@ class _AppState extends ConsumerState<App> with WindowListener {
 
     if (Platform.isWindows) {
       WindowOptions windowOptions = WindowOptions(
-        fullScreen: true,
+        // fullScreen: true,
         backgroundColor: Colors.transparent,
         skipTaskbar: false,
         titleBarStyle: TitleBarStyle.hidden,
+        alwaysOnTop: true,
       );
       await windowManager.waitUntilReadyToShow(windowOptions, () async {
-        await windowManager.setPosition(Offset(-6,0.0));
-        await windowManager.setFullScreen(true);
+        await windowManager.setPosition(Offset(-6, 0.0));
         await windowManager.show();
       });
     }
+  }
+
+  /// Windows API(FFI)로 실제 화면 해상도와 DPI를 읽어 창 크기를 적용
+  /// PlatformDispatcher.displays는 초기화 타이밍에 따라 0을 반환할 수 있어 FFI로 직접 조회
+  Future<void> _applyWindowSize() async {
+    final user32 = DynamicLibrary.open('user32.dll');
+
+    // GetSystemMetrics: 물리 픽셀 기준 화면 크기
+    final getSystemMetrics = user32.lookupFunction<Int32 Function(Int32), int Function(int)>('GetSystemMetrics');
+    const smCxScreen = 0;
+    const smCyScreen = 1;
+    final physicalWidth = getSystemMetrics(smCxScreen).toDouble();
+    final physicalHeight = getSystemMetrics(smCyScreen).toDouble();
+
+    final logicalSize = Size(physicalWidth + 16, physicalHeight + 10);
+    logger.i('App: screen=${physicalWidth}x$physicalHeight, logical=$logicalSize');
+
+    await windowManager.setSize(logicalSize);
   }
 
   @override

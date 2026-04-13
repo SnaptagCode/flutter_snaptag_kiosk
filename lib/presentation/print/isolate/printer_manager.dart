@@ -3,11 +3,9 @@ import 'dart:ffi' as ffi; // ffi 임포트 확인
 import 'dart:ffi';
 import 'dart:io';
 import 'dart:isolate';
-import 'dart:typed_data';
 
 import 'package:ffi/ffi.dart'; // Utf8 사용을 위한 임포트
 import 'package:flutter/services.dart';
-import 'package:flutter_snaptag_kiosk/core/common/logger/logger_service.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/isolate/model/check_card_position_message.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/isolate/model/check_feeder_message.dart';
@@ -272,24 +270,34 @@ class PrinterManager {
   }
 
   void _checkCardInPrinter(PrinterBindings bindings) {
-    logger.i('Checking card in printer...');
-    final isCardInPrinter = bindings.checkCardPosition();
-    if (isCardInPrinter) {
-      logger.i('Card found, ejecting...');
-      bindings.ejectCard();
+    try {
+      logger.i('Checking card in printer...');
+      final isCardInPrinter = bindings.checkCardPosition();
+      if (isCardInPrinter) {
+        logger.i('Card found, ejecting...');
+        bindings.ejectCard();
+      }
+    } catch (e) {
+      SlackLogService().sendErrorLogToSlack('[PRINTER] _checkCardInPrinter 오류: $e');
+      rethrow;
     }
   }
 
   Future<bool> checkConnectedPrint() async {
-    final response = await _sendAndResponse(ConnectMessage());
-    final isConnected = response['isConnected'] as bool;
-    final errorMsg = response['errorMsg'] as String;
+    try {
+      final response = await _sendAndResponse(ConnectMessage());
+      final isConnected = response['isConnected'] as bool;
+      final errorMsg = response['errorMsg'] as String;
 
-    if (errorMsg.isNotEmpty) {
-      throw Exception(errorMsg);
+      if (errorMsg.isNotEmpty) {
+        throw Exception(errorMsg);
+      }
+
+      return isConnected;
+    } catch (e) {
+      SlackLogService().sendBroadcastLogToSlack('[PRINTER] checkConnectedPrint 오류: $e');
+      return false;
     }
-
-    return isConnected;
   }
 
   Future<bool> _checkConnectedPrint(PrinterBindings bindings) async {
