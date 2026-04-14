@@ -57,7 +57,7 @@ final dioProvider = Provider.family<Dio, String>((ref, baseUrl) {
             SlackLogService().sendErrorLogToSlack(formattedMessage);
           } else if (statusCode >= 500) {
             SlackLogService().sendErrorLogToSlack(formattedMessage);
-            SlackLogService().sendBroadcastLogToSlackWithKey(ErrorKey.severError.key);
+            // SlackLogService().sendBroadcastLogToSlackWithKey(ErrorKey.severError.key);
           }
         },
         request: false,

@@ -18,7 +18,6 @@ class SlackLogService {
   SlackLogService._internal();
 
   late ProviderContainer _container;
-  bool _isSending = false;
 
   final slackWebhookUrl = dotenv.env['SLACK_WEBHOOK_URL'];
 
@@ -38,12 +37,6 @@ class SlackLogService {
       log("❌ Slack 알림 메시지가 없습니다.");
       return;
     }
-    // 슬랙 알림 전송 중 500 에러 → onError → 다시 슬랙 알림 시도 무한 루프 방지
-    if (_isSending) {
-      log("⚠️ Slack 알림 전송 중 재진입 차단: $message");
-      return;
-    }
-    _isSending = true;
     try {
       final kioskInfo = _container.read(kioskInfoServiceProvider);
       final machineId = kioskInfo?.kioskMachineId ?? 0;
@@ -51,8 +44,6 @@ class SlackLogService {
       await _container.read(kioskRepositoryProvider).sendSlackAlert(machineId, type, message);
     } catch (e) {
       log("❌ Slack 알림 API 오류: $e");
-    } finally {
-      _isSending = false;
     }
   }
 
@@ -87,9 +78,15 @@ class SlackLogService {
     final version = _container.read(versionStateProvider).currentVersion;
     final eventType = kioskInfo?.eventType ?? "-";
 
-    final serviceNameMap = {"SUF": "수원FC", "SEF": "서울 이랜드 FC", "KEEFO": "성수 B'Day", "AGFC": "안산그리너스FC"};
+    final serviceNameMap = {
+      "SUF": "수원FC",
+      "SEF": "서울 이랜드 FC",
+      "KEEFO": "성수 B'Day",
+      "AGFC": "안산그리너스FC",
+      "HWEG": "한화이글스"
+    };
 
-    final serviceName = serviceNameMap[eventType] ?? '-';
+    final serviceName = serviceNameMap[eventType] ?? '기타';
 
     return def != null && errorKey != null
         ? SlackLogTemplate(
@@ -162,29 +159,30 @@ ${slackLogTemplate.description}
       await sendBroadcastLogToSlack(message);
     }
   }
-  // Future<void> sendPeriodicLogBroadcastLogToSlack() async {
-  //   final slackLogTemplate = await createSlackLogTemplate(null);
-  //   final machineId = slackLogTemplate.kioskMachineInfo?.kioskMachineId ?? 0;
-  //
-  //   if (machineId != 0) {
-  //     final printerLog = _container.read(printerLogProvider);
-  //     final cardCount = _container.read(cardCountProvider);
-  //     final printerheadTemp = printerLog?.heaterTemperature ?? 0;
-  //     final printerheadTempString = printerheadTemp != 0 ? (printerheadTemp / 100).toStringAsFixed(2) : "알 수 없음";
-  //     String description;
-  //     description = '''
-  // - 프린터 온도 : $printerheadTempString°C
-  // - 리본 잔량 : ${printerLog?.rbnRemainingRatio != null ? "${printerLog?.rbnRemainingRatio}%" : "알 수 없음"}
-  // - 필름 잔량 : ${printerLog?.filmRemainingRatio != null ? "${printerLog?.filmRemainingRatio}%" : "알 수 없음"}
-  // - 단면 카드 수량 : ${cardCount.currentCount} / ${cardCount.initialCount}
-  // ''';
-  //
-  //     final message = buildSlackAlertMessage(
-  //         slackLogTemplate: slackLogTemplate.copyWith(title: '프린트 상태', category: 'info', description: description));
-  //
-  //     await sendBroadcastLogToSlack(message);
-  //   }
-  // }
+
+  Future<void> sendPeriodicLogBroadcastLogToSlack() async {
+    final slackLogTemplate = await createSlackLogTemplate(null);
+    final machineId = slackLogTemplate.kioskMachineInfo?.kioskMachineId ?? 0;
+
+    if (machineId != 0) {
+      final printerLog = _container.read(printerLogProvider);
+      final cardCount = _container.read(cardCountProvider);
+      final printerheadTemp = printerLog?.heaterTemperature ?? 0;
+      final printerheadTempString = printerheadTemp != 0 ? (printerheadTemp / 100).toStringAsFixed(2) : "알 수 없음";
+      String description;
+      description = '''
+  - 프린터 온도 : $printerheadTempString°C
+  - 리본 잔량 : ${printerLog?.rbnRemainingRatio != null ? "${printerLog?.rbnRemainingRatio}%" : "알 수 없음"}
+  - 필름 잔량 : ${printerLog?.filmRemainingRatio != null ? "${printerLog?.filmRemainingRatio}%" : "알 수 없음"}
+  - 단면 카드 수량 : ${cardCount.currentCount} / ${cardCount.initialCount}
+  ''';
+
+      final message = buildSlackAlertMessage(
+          slackLogTemplate: slackLogTemplate.copyWith(title: '프린트 상태', category: 'info', description: description));
+
+      await sendBroadcastLogToSlack(message);
+    }
+  }
 
   Future<void> sendBroadcastLogToSlackWithKey(String errorKey) async {
     final slackLogTemplate = await createSlackLogTemplate(errorKey);
@@ -199,35 +197,6 @@ ${slackLogTemplate.description}
       await sendBroadcastLogToSlack(message);
     }
   }
-
-  // Future<void> sendLog(String? url, String message) async {
-  //   if (url == null) {
-  //     log("❌ Slack Webhook URL이 없습니다.");
-  //     return;
-  //   }
-  //   if (message.isEmpty) {
-  //     log("❌ Slack Webhook 메시지가 없습니다.");
-  //     return;
-  //   } else {
-  //     final payload = jsonEncode({"text": message});
-
-  //     try {
-  //       final response = await http.post(
-  //         Uri.parse(url),
-  //         headers: {"Content-Type": "application/json"},
-  //         body: payload,
-  //       );
-
-  //       if (response.statusCode != 200) {
-  //         log("❌ Slack Webhook 오류: ${response.body}");
-  //         log("curl -X POST -H \"Content-Type: application/json\" -d '$payload' $url");
-  //       }
-  //     } catch (e) {
-  //       log("❌ Slack Webhook 오류: $e");
-  //       log("curl -X POST -H \"Content-Type: application/json\" -d '$payload' $url");
-  //     }
-  //   }
-  // }
 
   String buildSlackAlertMessage({
     required SlackLogTemplate slackLogTemplate,
