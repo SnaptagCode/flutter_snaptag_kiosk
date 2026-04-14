@@ -92,9 +92,9 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
       }
     }
 
-    // final isReady = await _validatePrinterReadyAndShowDialogs(context);
+    final isReady = await _validatePrinterReadyAndShowDialogs(context);
 
-    // if (!isReady) return;
+    if (!isReady) return;
 
     final isPaymentDeviceReady = await _checkPaymentDevice();
     if (!isPaymentDeviceReady) return;
