@@ -1,10 +1,13 @@
+import 'dart:developer';
+
+import 'package:dio/dio.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_snaptag_kiosk/core/data/models/request/unique_key_request.dart';
 import 'package:flutter_snaptag_kiosk/core/data/models/request/update_back_photo_request.dart';
-import 'package:flutter_snaptag_kiosk/presentation/print/luca/state/printer_log.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_snaptag_kiosk/presentation/core/card_count_provider.dart';
+import 'package:flutter_snaptag_kiosk/presentation/print/luca/state/printer_log.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 part 'kiosk_repository.g.dart';
 
@@ -35,8 +38,14 @@ class _KioskRepository {
   Future<void> sendSlackAlert(int machineId, String type, String text) async {
     try {
       await _apiClient.sendSlackAlert(machineId: machineId, body: {'type': type, 'text': text});
-    } catch (e) {
-      // rethrow;
+    } on DioException catch (e) {
+      final statusCode = e.response?.statusCode ?? 0;
+      if (statusCode >= 500) {
+        // 서버 5xx 에러 시 슬랙 알림 없이 무시
+        log('Slack 알림 전송 실패 (5xx 에러 무시): $statusCode');
+        return;
+      }
+      rethrow;
     }
   }
 
