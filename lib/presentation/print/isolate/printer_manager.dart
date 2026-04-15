@@ -295,7 +295,7 @@ class PrinterManager {
 
       return isConnected;
     } catch (e) {
-      SlackLogService().sendErrorLogToSlack('[PRINTER] checkConnectedPrint 오류: $e');
+      SlackLogService().sendBroadcastLogToSlack('[PRINTER] checkConnectedPrint 오류: $e');
       return false;
     }
   }
@@ -526,7 +526,7 @@ class PrinterManager {
       if (errorMsg.isNotEmpty) throw Exception(errorMsg);
       return printerLog;
     } catch (e) {
-      SlackLogService().sendBroadcastLogToSlack('[PRINTER] startLog 오류: $e');
+      SlackLogService().sendErrorLogToSlack('[PRINTER] startLog 오류: $e');
       rethrow;
     }
   }
@@ -539,7 +539,7 @@ class PrinterManager {
       if (errorMsg.isNotEmpty) throw Exception(errorMsg);
       return ribbonStatus ?? RibbonStatus(rbnRemaining: 0, filmRemaining: 0);
     } catch (e) {
-      SlackLogService().sendBroadcastLogToSlack('[PRINTER] getRibbonStatus 오류: $e');
+      SlackLogService().sendErrorLogToSlack('[PRINTER] getRibbonStatus 오류: $e');
       rethrow;
     }
   }
