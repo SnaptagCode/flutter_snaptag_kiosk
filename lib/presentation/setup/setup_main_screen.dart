@@ -84,7 +84,8 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
         if (!context.mounted) return;
         final confirmed = await DialogHelper.showSetupDialog(
           context,
-          title: '단면 카드 수량이 0장입니다.\n양면 모드로 변경하시겠습니까?',
+          title: '양면 인쇄 전환',
+          content: '단면 카드 수량이 0장으로 설정되었습니다.\n양면 인쇄로 전환하시겠습니까?',
           showCancelButton: true,
         );
         if (!confirmed) return;
