@@ -295,7 +295,7 @@ class PrinterManager {
 
       return isConnected;
     } catch (e) {
-      SlackLogService().sendBroadcastLogToSlack('[PRINTER] checkConnectedPrint 오류: $e');
+      SlackLogService().sendErrorLogToSlack('[PRINTER] checkConnectedPrint 오류: $e');
       return false;
     }
   }
@@ -321,19 +321,25 @@ class PrinterManager {
   }
 
   Future<bool> checkSettingPrinter() async {
-    final response = await _sendAndResponse(SettingPrinterMessage());
-    final isReady = response['isReady'] as bool;
-    final errorMsg = response['errorMsg'] as String;
-
-    if (errorMsg.isNotEmpty) {
-      throw Exception(errorMsg);
+    try {
+      final response = await _sendAndResponse(SettingPrinterMessage());
+      final isReady = response['isReady'] as bool? ?? false;
+      final errorMsg = response['errorMsg'] as String? ?? '';
+      if (errorMsg.isNotEmpty) throw Exception(errorMsg);
+      return isReady;
+    } catch (e) {
+      SlackLogService().sendErrorLogToSlack('[PRINTER] checkSettingPrinter 오류: $e');
+      return false;
     }
-
-    return isReady;
   }
 
   Future<void> checkFeeder() async {
-    await _sendAndHandleResponse(CheckFeederMessage());
+    try {
+      await _sendAndHandleResponse(CheckFeederMessage());
+    } catch (e) {
+      SlackLogService().sendErrorLogToSlack('[PRINTER] checkFeeder 오류: $e');
+      rethrow;
+    }
   }
 
   bool _checkSettingPrinter(PrinterBindings bindings) {
@@ -424,13 +430,14 @@ class PrinterManager {
   }
 
   Future<Map<String, dynamic>> _sendAndResponse(Object object) async {
-    final responsePort = ReceivePort();
-
-    _sendPort.send({'object': object, 'replyPort': responsePort.sendPort});
-
-    final response = await responsePort.first as Map<String, dynamic>;
-
-    return response;
+    try {
+      final responsePort = ReceivePort();
+      _sendPort.send({'object': object, 'replyPort': responsePort.sendPort});
+      final response = await responsePort.first.timeout(const Duration(seconds: 30)) as Map<String, dynamic>;
+      return response;
+    } catch (e) {
+      rethrow;
+    }
   }
 
   Future<String?> _imageBufferResponse(Object object) async {
@@ -512,27 +519,29 @@ class PrinterManager {
   }
 
   Future<PrinterLog?> startLog() async {
-    final response = await _sendAndResponse(PrintStateMessage());
-    final printerLog = response['printerLog'] as PrinterLog;
-    final errorMsg = response['errorMsg'] as String;
-
-    if (errorMsg.isNotEmpty) {
-      throw Exception(errorMsg);
+    try {
+      final response = await _sendAndResponse(PrintStateMessage());
+      final printerLog = response['printerLog'] as PrinterLog?;
+      final errorMsg = response['errorMsg'] as String? ?? '';
+      if (errorMsg.isNotEmpty) throw Exception(errorMsg);
+      return printerLog;
+    } catch (e) {
+      SlackLogService().sendBroadcastLogToSlack('[PRINTER] startLog 오류: $e');
+      rethrow;
     }
-
-    return printerLog;
   }
 
   Future<RibbonStatus> getRibbonStatus() async {
-    final response = await _sendAndResponse(PrintRibbonStatusMessage());
-    final ribbonStatus = response['ribbonStatus'] as RibbonStatus?;
-    final errorMsg = response['errorMsg'] as String;
-
-    if (errorMsg.isNotEmpty) {
-      throw Exception(errorMsg);
+    try {
+      final response = await _sendAndResponse(PrintRibbonStatusMessage());
+      final ribbonStatus = response['ribbonStatus'] as RibbonStatus?;
+      final errorMsg = response['errorMsg'] as String? ?? '';
+      if (errorMsg.isNotEmpty) throw Exception(errorMsg);
+      return ribbonStatus ?? RibbonStatus(rbnRemaining: 0, filmRemaining: 0);
+    } catch (e) {
+      SlackLogService().sendBroadcastLogToSlack('[PRINTER] getRibbonStatus 오류: $e');
+      rethrow;
     }
-
-    return ribbonStatus ?? RibbonStatus(rbnRemaining: 0, filmRemaining: 0);
   }
 
   RibbonStatus _getRibbonStatus(PrinterBindings bindings) {
@@ -572,14 +581,16 @@ class PrinterManager {
   }
 
   Future<String> _rearImage({required File file}) async {
-    final rearImage = await file.readAsBytes();
-    final rotatedRearImage = _flipImage180(rearImage);
-    // 임시 파일로 저장
-    final temp = DateTime.now().millisecondsSinceEpoch.toString();
-    final rotatedRearPath = '${temp}_rotated.png';
-    await File(rotatedRearPath).writeAsBytes(rotatedRearImage);
-
-    return rotatedRearPath;
+    try {
+      final rearImage = await file.readAsBytes();
+      final rotatedRearImage = _flipImage180(rearImage);
+      final temp = DateTime.now().millisecondsSinceEpoch.toString();
+      final rotatedRearPath = '${temp}_rotated.png';
+      await File(rotatedRearPath).writeAsBytes(rotatedRearImage);
+      return rotatedRearPath;
+    } catch (e) {
+      throw Exception('[_rearImage] 뒷면 이미지 준비 실패: $e');
+    }
   }
 
   // 이미지 회전 기능 추가

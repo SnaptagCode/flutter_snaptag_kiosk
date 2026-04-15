@@ -43,9 +43,13 @@ class PrinterService extends _$PrinterService {
   }
 
   Future<void> checkFeeder() async {
-    final printerManager = await PrinterManager.getInstance();
-    // await printerManager.initLibrary();
-    await printerManager.checkFeeder();
+    try {
+      final printerManager = await PrinterManager.getInstance();
+      // await printerManager.initLibrary();
+      await printerManager.checkFeeder();
+    } catch (e) {
+      rethrow;
+    }
   }
 
   Future<RibbonStatus> getRibbonStatus() async {

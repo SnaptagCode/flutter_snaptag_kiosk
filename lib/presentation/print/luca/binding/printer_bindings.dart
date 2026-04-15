@@ -1,12 +1,10 @@
 import 'dart:ffi';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:ffi/ffi.dart';
+import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/luca/state/printer_status.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/luca/state/ribbon_status.dart';
-import 'package:flutter_snaptag_kiosk/lib.dart';
-import 'package:image/image.dart' as img;
 
 part 'printer_bindings.typedef.dart';
 
@@ -80,8 +78,12 @@ class PrinterBindings {
     _ribbonSettingsSW = _dll.lookupFunction<R600RibbonSettingsRWNative, R600RibbonSettingsRW>('R600RibbonSettingsRW');
   }
 
-  int initLibrary() {
-    return _libInit();
+  void initLibrary() {
+    final result = _libInit();
+    if (result != 0) {
+      final error = getErrorInfo(result);
+      throw Exception('[R600LibInit] 라이브러리 초기화 실패: $error (code: $result)');
+    }
   }
 
   String getErrorInfo(int errorCode) {
@@ -434,7 +436,11 @@ class PrinterBindings {
   }
 
   void clearLibrary() {
-    _libClear();
+    final result = _libClear();
+    if (result != 0) {
+      logger.w('[R600LibClear] 라이브러리 해제 실패 (code: $result) — 계속 진행');
+      // throw 하지 않음: clear 실패는 치명적이지 않으므로 경고만
+    }
   }
 
   /// 현재 에러 클리어. 캐시는 지우지 않음. (SDK `R600PrtReset`)
