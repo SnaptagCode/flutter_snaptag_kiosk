@@ -92,21 +92,20 @@ class DioLogger extends Interceptor {
     if (requestBody && options.method != 'GET') {
       final dynamic data = options.data;
       if (data != null) {
+        logPrint('╔ Body');
+        logPrint('║');
         if (data is Map) {
-          logPrint('╔ Body');
-          logPrint('║');
-          _printPrettyMap(options.data as Map);
-          logPrint('║');
-          _printLine('╚');
-        }
-        if (data is FormData) {
+          _printPrettyMap(data);
+        } else if (data is FormData) {
           final formDataMap = <String, dynamic>{}
             ..addEntries(data.fields)
             ..addEntries(data.files);
-          _printMapAsTable(formDataMap, header: 'Form data | ${data.boundary}');
+          _printPrettyMap(formDataMap);
         } else {
           _printBlock(data.toString());
         }
+        logPrint('║');
+        _printLine('╚');
       }
     }
 
