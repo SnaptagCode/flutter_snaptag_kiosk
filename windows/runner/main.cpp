@@ -23,13 +23,14 @@ static void WriteCrashLog(const std::string& reason) {
   std::ofstream file(logPath);
   if (file.is_open()) {
     time_t now = time(nullptr);
+    char timeBuf[64];
+    ctime_s(timeBuf, sizeof(timeBuf), &now);
     file << "[CRASH] " << reason << "\n";
-    file << "Time: " << ctime(&now);
+    file << "Time: " << timeBuf;
     file.close();
   }
 }
 
-// 4. SetUnhandledExceptionFilter — OS 레벨 크래시 감지
 LONG WINAPI UnhandledExceptionHandler(EXCEPTION_POINTERS* info) {
   char msg[128];
   snprintf(msg, sizeof(msg), "SetUnhandledExceptionFilter: ExceptionCode=0x%lx",
@@ -38,7 +39,6 @@ LONG WINAPI UnhandledExceptionHandler(EXCEPTION_POINTERS* info) {
   return EXCEPTION_EXECUTE_HANDLER;
 }
 
-// 5. std::set_terminate — 처리되지 않은 C++ 예외 감지
 void TerminateHandler() {
   WriteCrashLog("std::terminate called (uncaught C++ exception)");
   abort();
