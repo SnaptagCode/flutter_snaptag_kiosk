@@ -1,4 +1,3 @@
-import 'package:flutter_snaptag_kiosk/core/data/models/request/update_back_photo_request.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_snaptag_kiosk/presentation/core/card_count_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
@@ -106,10 +105,10 @@ class PaymentService extends _$PaymentService {
   Future<void> _handleEmptyApprovalNumber(PaymentResponse paymentResponse, String machineId) async {
     final backPhoto = ref.watch(verifyPhotoCardProvider).value!;
 
-    await ref.read(kioskRepositoryProvider).updateBackPhotoStatus(UpdateBackPhotoRequest(
-          photoAuthNumber: backPhoto.photoAuthNumber,
-          status: "STARTED",
-        ));
+    // await ref.read(kioskRepositoryProvider).updateBackPhotoStatus(UpdateBackPhotoRequest(
+    //       photoAuthNumber: backPhoto.photoAuthNumber,
+    //       status: "STARTED",
+    //     ));
 
     await _updateFailOrder(description: _formatPaymentMessages(paymentResponse));
 
