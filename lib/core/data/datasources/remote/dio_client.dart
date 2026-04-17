@@ -10,11 +10,12 @@ final dioProvider = Provider.family<Dio, String>((ref, baseUrl) {
     ..options.connectTimeout = const Duration(seconds: 30)
     ..options.receiveTimeout = const Duration(seconds: 30);
   dio.interceptors.add(DioLogger(
-    sendHook: (log) {
-      SlackLogService().sendLogToSlack(log);
-    },
-    request: false,
-  ));
+      sendHook: (log) {
+        SlackLogService().sendLogToSlack(log);
+      },
+      machineIdProvider: () => ref.read(kioskInfoServiceProvider)?.kioskMachineId,
+      request: true,
+      requestBody: true));
   dio.interceptors.add(
     PrettyDioLogger(
       requestHeader: true,
@@ -64,7 +65,8 @@ final dioProvider = Provider.family<Dio, String>((ref, baseUrl) {
       );
 
       // DioLogger를 실제로 실행시켜서 sendHook이 호출되도록 함
-      errorLogger.onError(err, handler);
+      // 로깅 전용 핸들러를 별도로 넘겨서 실제 handler가 중복 호출되는 버그 방지
+      errorLogger.onError(err, ErrorInterceptorHandler());
 
       if (err.response?.data != null) {
         try {
