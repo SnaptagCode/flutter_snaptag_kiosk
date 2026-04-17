@@ -163,7 +163,7 @@ class PaymentService extends _$PaymentService {
 
   /// 취소된 결제 처리
   Future<void> _handleCancelledPayment(BackPhotoCardResponse backPhoto, PaymentResponse paymentResponse) async {
-    // final response = await _updateOrder(isRefund: false, description: "고객취소");
+    await _updateOrder(isRefund: false, description: "고객취소");
     // SlackLogService().sendLogToSlack("paymentResponse1000 : $response");
 
     // SlackLogService().sendPaymentBroadcastLogToSlak(InfoKey.paymentFail.key,
@@ -331,38 +331,48 @@ class PaymentService extends _$PaymentService {
 
   Future<UpdateOrderResponse> _updateOrder(
       {required bool isRefund, int? orderid, String? photoAuthNumber, String? description}) async {
-    try {
-      final settings = ref.read(kioskInfoServiceProvider);
-      final backPhotoAuthNumber = photoAuthNumber ?? ref.read(verifyPhotoCardProvider).value?.photoAuthNumber; //여기서 예외
-      final approval = ref.read(paymentResponseStateProvider);
-      final orderId = orderid ?? ref.read(createOrderInfoProvider)?.orderId;
-      if (orderId == null) {
-        throw Exception('No order id available');
-      }
-      logger.i(
-          'respCode: ${approval?.respCode} \trespCode: ${approval?.respCode} \nORDER STATUS: ${approval?.orderState}');
-      final OrderStatus defaultStatus = isRefund ? OrderStatus.refunded_failed : OrderStatus.failed;
-      final OrderStatus orderStatus = (isRefund && approval?.orderState == OrderStatus.failed)
-          ? OrderStatus.refunded_failed
-          : approval?.orderState ?? defaultStatus;
-      final request = UpdateOrderRequest(
-        kioskEventId: settings!.kioskEventId,
-        kioskMachineId: settings.kioskMachineId,
-        photoAuthNumber: backPhotoAuthNumber ?? '-',
-        amount: settings.photoCardPrice,
-        status: orderStatus,
-        approvalNumber: approval?.approvalNo ?? '-',
-        purchaseAuthNumber: approval?.approvalNo ?? '-',
-        authSeqNumber: approval?.approvalNo ?? '-',
-        detail: approval?.KSNET ?? '{}',
-        description: description,
-      );
+    const maxRetries = 3;
+    const retryDelay = Duration(milliseconds: 500);
 
-      return await ref.read(kioskRepositoryProvider).updateOrderStatus(orderId.toInt(), request);
-    } catch (e) {
-      SlackLogService().sendLogToSlack('update order error: $e');
-      rethrow;
+    final settings = ref.read(kioskInfoServiceProvider);
+    final backPhotoAuthNumber = photoAuthNumber ?? ref.read(verifyPhotoCardProvider).value?.photoAuthNumber; //여기서 예외
+    final approval = ref.read(paymentResponseStateProvider);
+    final orderId = orderid ?? ref.read(createOrderInfoProvider)?.orderId;
+    if (orderId == null) {
+      throw Exception('No order id available');
     }
+    logger
+        .i('respCode: ${approval?.respCode} \trespCode: ${approval?.respCode} \nORDER STATUS: ${approval?.orderState}');
+    final OrderStatus defaultStatus = isRefund ? OrderStatus.refunded_failed : OrderStatus.failed;
+    final OrderStatus orderStatus = (isRefund && approval?.orderState == OrderStatus.failed)
+        ? OrderStatus.refunded_failed
+        : approval?.orderState ?? defaultStatus;
+    final request = UpdateOrderRequest(
+      kioskEventId: settings!.kioskEventId,
+      kioskMachineId: settings.kioskMachineId,
+      photoAuthNumber: backPhotoAuthNumber ?? '-',
+      amount: settings.photoCardPrice,
+      status: orderStatus,
+      approvalNumber: approval?.approvalNo ?? '-',
+      purchaseAuthNumber: approval?.approvalNo ?? '-',
+      authSeqNumber: approval?.approvalNo ?? '-',
+      detail: approval?.KSNET ?? '{}',
+      description: description,
+    );
+
+    for (int attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        return await ref.read(kioskRepositoryProvider).updateOrderStatus(orderId.toInt(), request);
+      } catch (e) {
+        if (attempt == maxRetries) {
+          SlackLogService().sendLogToSlack('update order error (attempt $attempt/$maxRetries): $e');
+          rethrow;
+        }
+        logger.w('update order attempt $attempt failed, retrying in ${retryDelay.inMilliseconds}ms... $e');
+        await Future.delayed(retryDelay);
+      }
+    }
+    throw Exception('unreachable');
   }
 
   Future<UpdateOrderResponse> _updateFailOrder({required String description}) async {
