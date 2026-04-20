@@ -84,7 +84,7 @@ class PrinterManager {
       final PrinterBindings bindings = PrinterBindings();
 
       // 프린트 초기화 작업
-      _initializePrinter(bindings);
+      await _initializePrinter(bindings);
 
       isolateReceivePort.listen((message) async {
         try {
