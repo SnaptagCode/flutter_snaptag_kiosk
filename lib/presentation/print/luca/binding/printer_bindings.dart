@@ -43,7 +43,11 @@ class PrinterBindings {
 
   PrinterBindings() {
     // DLL 로드
-    _dll = DynamicLibrary.open(FilePaths.printerDLL.buildPath);
+    final dllPath = FilePaths.printerDLL.buildPath;
+    if (!File(dllPath).existsSync()) {
+      throw Exception('[PrinterBindings] DLL not found: $dllPath');
+    }
+    _dll = DynamicLibrary.open(dllPath);
 
     _libInit = _dll.lookupFunction<R600LibInitNative, R600LibInit>('R600LibInit');
     _getErrorInfo = _dll.lookupFunction<R600GetErrorOuterInfoNative, R600GetErrorOuterInfo>('R600GetErrorOuterInfo');
