@@ -210,7 +210,7 @@ class PrinterManager {
 
                 replyPort.send({'errorMsg': ''});
               } catch (e) {
-                replyPort.send({'error': e.toString()});
+                replyPort.send({'errorMsg': e.toString()});
               }
               return;
             }
