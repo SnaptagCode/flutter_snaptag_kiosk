@@ -64,10 +64,10 @@ class DialogHelper {
     );
   }
 
-  static Future<bool> showRefundSuccessDialog(
+  static Future<void> showRefundSuccessDialog(
     BuildContext context,
   ) async {
-    return await showDialog(
+    await showDialog<void>(
       context: context,
       builder: (BuildContext context) {
         return DefaultTextStyle(
