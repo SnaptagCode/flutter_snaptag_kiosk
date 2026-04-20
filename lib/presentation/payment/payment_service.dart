@@ -25,10 +25,16 @@ class PaymentService extends _$PaymentService {
     final orderResponse = await _createOrder().catchError((e) => throw OrderCreationException('Create order fail: $e'));
     ref.read(createOrderInfoProvider.notifier).update(orderResponse);
 
+    final price = ref.read(kioskInfoServiceProvider)!.photoCardPrice;
     try {
-      // 3. 결제 승인 및 처리
-      final paymentResponse = await _approvePayment();
-      await _handlePaymentResult(paymentResponse);
+      if (price == 0) {
+        // 3a. 무료 결제 (KSCAT 스킵)
+        await _handleFreePayment();
+      } else {
+        // 3b. 일반 카드 결제
+        final paymentResponse = await _approvePayment();
+        await _handlePaymentResult(paymentResponse);
+      }
     } catch (e) {
       // PaymentFailedException은 이미 처리된 예외이므로 그대로 rethrow
       if (e is PaymentFailedException) {
@@ -53,6 +59,19 @@ class PaymentService extends _$PaymentService {
     if (backPhoto == null) {
       throw PreconditionFailedException('No back photo available');
     }
+  }
+
+  /// 무료 결제 처리 (KSCAT 스킵)
+  Future<void> _handleFreePayment() async {
+    const mockResponse = PaymentResponse(
+      res: '0000',
+      respCode: '0000',
+      approvalNo: 'FREE',
+      telegramFlag: '0210',
+    );
+    ref.read(paymentResponseStateProvider.notifier).update(mockResponse);
+    await _handleSuccessfulPayment();
+    SlackLogService().sendLogToSlack("freePayment: completed");
   }
 
   /// 결제 승인 처리
@@ -188,6 +207,22 @@ class PaymentService extends _$PaymentService {
   }
 
   Future<void> refund() async {
+    final price = ref.read(kioskInfoServiceProvider)!.photoCardPrice;
+    if (price == 0) {
+      const mockRefund = PaymentResponse(
+        res: '0000',
+        respCode: '0000',
+        approvalNo: 'FREE',
+        telegramFlag: '0430',
+      );
+      ref.read(paymentResponseStateProvider.notifier).update(mockRefund);
+      await _updateOrder(isRefund: true, description: "자동환불");
+      SlackLogService().sendPaymentBroadcastLogToSlak(InfoKey.paymentRefund.key,
+          paymentDescription: "동작로직: 무료결제 자동환불");
+      ref.read(paymentResponseStateProvider.notifier).reset();
+      return;
+    }
+
     try {
       final approvalInfo = ref.read(paymentResponseStateProvider);
       if (approvalInfo == null) {
@@ -317,12 +352,13 @@ class PaymentService extends _$PaymentService {
     final backPhoto = ref.watch(verifyPhotoCardProvider).value;
     final isSingleSided = ref.read(pagePrintProvider) == PagePrintType.single;
 
+    final isFree = settings!.photoCardPrice == 0;
     final request = CreateOrderRequest(
-      kioskEventId: settings!.kioskEventId,
+      kioskEventId: settings.kioskEventId,
       kioskMachineId: settings.kioskMachineId,
       photoAuthNumber: backPhoto?.photoAuthNumber ?? '',
       amount: settings.photoCardPrice,
-      paymentType: PaymentType.card,
+      paymentType: isFree ? PaymentType.free : PaymentType.card,
       isSingleSided: isSingleSided,
     );
 
