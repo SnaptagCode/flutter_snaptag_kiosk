@@ -54,7 +54,7 @@ class PrintService extends _$PrintService {
 
       // 실제 프린트 실행
       //await _executePrint(frontPhoto: frontPhoto, embedded: embedded);
-      final isSingleSidedMode = ref.watch(pagePrintProvider) == PagePrintType.single;
+      final isSingleSidedMode = ref.read(pagePrintProvider) == PagePrintType.single;
       if (isSingleSidedMode) {
         final tempFront = null;
         await _executePrint(frontPhoto: tempFront, embedded: embedded);
@@ -79,7 +79,7 @@ class PrintService extends _$PrintService {
   }
 
   void _validatePrintRequirements() {
-    final backPhotoCardResponseInfo = ref.watch(verifyPhotoCardProvider).value;
+    final backPhotoCardResponseInfo = ref.read(verifyPhotoCardProvider).value;
     final approvalInfo = ref.read(paymentResponseStateProvider);
     final printerState = ref.read(printerServiceProvider);
 
@@ -158,7 +158,7 @@ class PrintService extends _$PrintService {
       await ref.read(printerServiceProvider.notifier).printImage(
             frontFile: frontPhoto,
             embeddedFile: embedded,
-            isSingleMode: ref.watch(pagePrintProvider) == PagePrintType.single,
+            isSingleMode: ref.read(pagePrintProvider) == PagePrintType.single,
           );
     } catch (e) {
       rethrow;
