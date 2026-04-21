@@ -12,7 +12,6 @@ import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_snaptag_kiosk/presentation/verification/verify_photo_card_provider.dart';
 import 'package:flutter_snaptag_kiosk/core/ui/widget/dialog_helper.dart';
 import 'package:flutter_snaptag_kiosk/core/ui/widget/general_error_widget.dart';
-import 'package:flutter_snaptag_kiosk/core/ui/widget/price_box.dart';
 import 'package:flutter_snaptag_kiosk/presentation/payment/photo_card_preview_screen_provider.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 
@@ -233,10 +232,13 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
 
             SlackLogService().sendErrorLogToSlack('Payment process failed: $error');
 
+            if (error.toString().contains('R600')) {
+              await DialogHelper.showPrintErrorDialog(context);
+              return;
+            }
+
             if (error.toString().contains('Card feeder is empty')) {
-              await DialogHelper.showPrintCardRefillDialog(
-                context,
-              );
+              await DialogHelper.showPrintCardRefillDialog(context);
               return;
             }
 
@@ -318,47 +320,29 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
                 SizedBox(height: 50.h),
                 _buildFixedBackPhotoCardList(kiosk: kiosk, isFixed: isFixed, selectedIndex: selectedIndex),
                 SizedBox(height: 50.h),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    const PriceBox(),
-                    SizedBox(width: 20.w),
-                    Consumer(
-                      builder: (context, ref, child) {
-                        final paymentState = ref.watch(photoCardPreviewScreenProviderProvider);
-                        final isLoading = paymentState.isLoading;
+                Consumer(
+                  builder: (context, ref, child) {
+                    final paymentState = ref.watch(photoCardPreviewScreenProviderProvider);
+                    final isLoading = paymentState.isLoading;
 
-                        return ElevatedButton(
-                          style: context.paymentButtonStyle,
-                          onPressed: isLoading
-                              ? null // 로딩 중일 때 버튼 비활성화
-                              : () async {
-                                  await SoundManager().playSound();
-
-                                  await ref.read(photoCardPreviewScreenProviderProvider.notifier).payment();
-                                },
-                          child: Text(LocaleKeys.sub02_btn_pay.tr(),
-                              style: isHwe
-                                  ? context.typography.vendingBtn2B
-                                      .copyWith(color: (kiosk?.buttonTextColor ?? '').toColor(fallback: Colors.white))
-                                  : context.typography.kioskBtn1B
-                                      .copyWith(color: (kiosk?.buttonTextColor ?? '').toColor(fallback: Colors.white))),
-                        );
-                      },
-                    ),
-                  ],
-                ),
-                SizedBox(height: 30.h),
-                Text(
-                  LocaleKeys.sub03_txt_03.tr(),
-                  style: isHwe
-                      ? context.typography.vendingBody2B
-                          .copyWith(color: (kiosk?.couponTextColor ?? '').toColor(fallback: Colors.white))
-                      : context.typography.kioskBody2B.copyWith(
-                          color: (kiosk?.couponTextColor ?? '').toColor(fallback: Colors.white),
-                          //fontFamily: 'Pretendard',
-                        ),
+                    return ElevatedButton(
+                      style: context.paymentButtonStyle.copyWith(
+                        fixedSize: WidgetStatePropertyAll(Size(380.w, 78.h)),
+                      ),
+                      onPressed: isLoading
+                          ? null
+                          : () async {
+                              await SoundManager().playSound();
+                              await ref.read(photoCardPreviewScreenProviderProvider.notifier).payment();
+                            },
+                      child: Text(LocaleKeys.choice_btn_print.tr(),
+                          style: isHwe
+                              ? context.typography.vendingBtn2B
+                                  .copyWith(color: (kiosk?.buttonTextColor ?? '').toColor(fallback: Colors.white))
+                              : context.typography.kioskBtn1B
+                                  .copyWith(color: (kiosk?.buttonTextColor ?? '').toColor(fallback: Colors.white))),
+                    );
+                  },
                 ),
               ],
             ),

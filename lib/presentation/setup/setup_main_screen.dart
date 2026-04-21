@@ -97,9 +97,6 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
 
     if (!isReady) return;
 
-    final isPaymentDeviceReady = await _checkPaymentDevice();
-    if (!isPaymentDeviceReady) return;
-
     var kioskInfo = ref.read(kioskInfoServiceProvider);
 
     logger.d(
@@ -118,6 +115,12 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
         title: "이벤트를 실행하려면\n키오스크 기기번호를 입력해 주세요.",
       );
       return;
+    }
+
+    // 유료 결제인 경우만 KSCAT 리더기 점검
+    if (kioskInfo.photoCardPrice > 0) {
+      final isPaymentDeviceReady = await _checkPaymentDevice();
+      if (!isPaymentDeviceReady) return;
     }
 
     await _writePhotocodeMeta();

@@ -60,6 +60,7 @@
   "choice_select_recommended_image": "추천 이미지 선택하기",
   "choice_upload_my_photo": "내 사진 업로드",
   "choice_select_and_print": "이미지 선택 후 바로 출력",
+  "choice_btn_print": "출력하기",
   "choice_step1_qr_upload": "STEP 1. QR 코드 스캔 후 이미지 업로드",
   "choice_step2_enter_code_print": "STEP 2. 발급 받은 인증번호 입력 후 출력",
   "choice_select_image": "이미지 선택하기",
