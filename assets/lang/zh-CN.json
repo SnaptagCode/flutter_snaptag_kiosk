@@ -58,6 +58,7 @@
   "choice_select_recommended_image": "おすすめ画像を選択してください。",
   "choice_upload_my_photo": "上传我的照片",
   "choice_select_and_print": "选择并打印",
+  "choice_btn_print": "打印",
   "choice_step1_qr_upload": "步骤1. 扫描二维码并上传",
   "choice_step2_enter_code_print": "步骤2. 输入验证码并打印",
   "choice_select_image": "选择图片",

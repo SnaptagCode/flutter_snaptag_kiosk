@@ -107,35 +107,20 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> with Si
               return;
             }
 
-            final result = await DialogHelper.showKioskDialog(
-              context,
-              title: LocaleKeys.alert_title_auto_refund_alert.tr(),
-              contentText: LocaleKeys.alert_txt_auto_refund_alert.tr(),
-              confirmButtonText: LocaleKeys.alert_btn_paymentcard_failure.tr(),
-            );
+            // 무료 뽑기: 실제 결제 없으므로 환불 처리 스킵
+            // await refund();
 
-            if (result) {
-              // 에러 발생 시 환불 처리
-              await refund();
+            // 카드 단일 카드 수량 확인
+            checkCardSingleCardCount();
 
-              // 카드 단일 카드 수량 확인
-              checkCardSingleCardCount();
-
-              // 카드 공급기가 비어있는지 확인
-              if (checkCardFeederIsEmpty(errorMessage)) {
-                await DialogHelper.showPrintCardRefillDialog(
-                  context,
-                );
-                if (result) {
-                  HomeRouteData().go(context);
-                }
-              } else {
-                final result = await DialogHelper.showPrintErrorDialog(
-                  context,
-                );
-                if (result) {
-                  HomeRouteData().go(context);
-                }
+            // 카드 공급기가 비어있는지 확인
+            if (checkCardFeederIsEmpty(errorMessage)) {
+              await DialogHelper.showPrintCardRefillDialog(context);
+              HomeRouteData().go(context);
+            } else {
+              final result = await DialogHelper.showPrintErrorDialog(context);
+              if (result) {
+                HomeRouteData().go(context);
               }
             }
           },
