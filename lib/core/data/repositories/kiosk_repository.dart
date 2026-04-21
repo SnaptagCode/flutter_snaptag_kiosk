@@ -1,12 +1,7 @@
-import 'dart:developer';
-
-import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_snaptag_kiosk/core/data/models/request/unique_key_request.dart';
+import 'package:flutter_snaptag_kiosk/core/data/datasources/local/offline_config_service.dart';
 import 'package:flutter_snaptag_kiosk/core/data/models/request/update_back_photo_request.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
-import 'package:flutter_snaptag_kiosk/presentation/core/card_count_provider.dart';
-import 'package:flutter_snaptag_kiosk/presentation/print/luca/state/printer_log.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'kiosk_repository.g.dart';
@@ -14,228 +9,120 @@ part 'kiosk_repository.g.dart';
 @riverpod
 class KioskRepository extends _$KioskRepository {
   @override
-  _KioskRepository build() {
-    final dio = ref.watch(dioProvider(F.kioskBaseUrl));
-
-    return _KioskRepository(KioskApiClient(dio), ref);
-  }
+  _KioskRepository build() => _KioskRepository(ref);
 }
 
 class _KioskRepository {
-  final KioskApiClient _apiClient;
   final Ref _ref;
 
-  _KioskRepository(this._apiClient, this._ref);
-  Future<String> healthCheck() async {
-    try {
-      return await _apiClient.healthCheck();
-    } catch (e) {
-      rethrow;
-    }
-  }
+  _KioskRepository(this._ref);
 
-  /// POST /v1/internal/slack-alert — 서버가 타입·메시지에 따라 Slack 전송
-  Future<void> sendSlackAlert(int machineId, String type, String text) async {
-    try {
-      await _apiClient.sendSlackAlert(machineId: machineId, body: {'type': type, 'text': text});
-    } on DioException catch (e) {
-      final statusCode = e.response?.statusCode ?? 0;
-      if (statusCode >= 500) {
-        // 서버 5xx 에러 시 슬랙 알림 없이 무시
-        log('Slack 알림 전송 실패 (5xx 에러 무시): $statusCode');
-        return;
-      }
-      rethrow;
-    }
-  }
+  Future<String> healthCheck() async => 'ok';
 
-  // Slack Alert definitions
-  Future<List<AlertDefinitionResponse>> getAlertDefinition() async {
-    try {
-      return await _apiClient.getAlertDefinitions();
-    } catch (e) {
-      rethrow;
-    }
-  }
+  Future<void> sendSlackAlert(int machineId, String type, String text) async {}
 
-  // Machine Info Operations
-  Future<KioskMachineInfo> getKioskMachineInfo(int machineId) async {
-    try {
-      return await _apiClient.getKioskMachineInfo(kioskMachineId: machineId);
-    } catch (e) {
-      rethrow;
-    }
-  }
+  Future<List<AlertDefinitionResponse>> getAlertDefinition() async => [];
 
-  Future<KioskMachineInfo> getKioskMachineInfoByKey(String uniqueKey) async {
-    try {
-      return await _apiClient.getKioskMachineInfoByKey(uniqueKey: uniqueKey);
-    } catch (e) {
-      rethrow;
-    }
-  }
+  Future<KioskMachineInfo> getKioskMachineInfo(int machineId) async =>
+      _ref.read(offlineConfigServiceProvider).load();
 
-  // Photo Operations
-  Future<NominatedPhotoList> getFrontPhotoList(int eventId) async {
-    try {
-      return await _apiClient.getFrontPhotoList(kioskEventId: eventId);
-    } catch (e) {
-      rethrow;
-    }
-  }
+  Future<KioskMachineInfo> getKioskMachineInfoByKey(String uniqueKey) async =>
+      _ref.read(offlineConfigServiceProvider).load();
 
-  Future<BackPhotoCardResponse> getBackPhotoCard(int eventId, String authNumber) async {
-    try {
-      return await _apiClient.getBackPhotoCard(
-        kioskEventId: eventId,
-        photoAuthNumber: authNumber,
+  Future<NominatedPhotoList> getFrontPhotoList(int eventId) async =>
+      const NominatedPhotoList(list: []);
+
+  Future<BackPhotoCardResponse> getBackPhotoCard(int eventId, String authNumber) async =>
+      const BackPhotoCardResponse(
+        kioskEventId: 0,
+        backPhotoCardId: 0,
+        nominatedBackPhotoCardId: 0,
+        backPhotoCardOriginUrl: '',
+        photoAuthNumber: '',
+        embeddingProductId: 0,
+        formattedBackPhotoCardUrl: '',
       );
-    } catch (e) {
-      rethrow;
-    }
-  }
 
-  Future<BackPhotoStatusResponse> updateBackPhotoStatus(UpdateBackPhotoRequest request) async {
-    try {
-      return await _apiClient.updateBackPhotoStatus(
-        body: request.toJson(),
+  Future<BackPhotoStatusResponse> updateBackPhotoStatus(UpdateBackPhotoRequest request) async =>
+      const BackPhotoStatusResponse(success: true);
+
+  Future<OrderListResponse> getOrders(GetOrdersRequest request) async =>
+      OrderListResponse(
+        list: [],
+        paging: PagingEntity(totalCount: 0, pageSize: 10, currentPage: 1, canNext: false),
       );
-    } catch (e) {
-      rethrow;
-    }
-  }
 
-  Future<OrderListResponse> getOrders(GetOrdersRequest request) async {
-    try {
-      return await _apiClient.getOrders(
-        pageSize: request.pageSize,
-        currentPage: request.currentPage,
+  Future<CreateOrderResponse> createOrderStatus(CreateOrderRequest request) async =>
+      CreateOrderResponse(
+        orderId: 1,
+        kioskEventId: request.kioskEventId,
         kioskMachineId: request.kioskMachineId,
+        backPhotoCardId: 0,
+        amount: request.amount,
+        status: OrderStatus.completed,
+        paymentType: request.paymentType.name,
       );
-    } catch (e) {
-      rethrow;
-    }
-  }
 
-  Future<CreateOrderResponse> createOrderStatus(CreateOrderRequest request) async {
-    try {
-      return await _apiClient.createOrder(
-        body: request.toJson(),
-      );
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  Future<UpdateOrderResponse> updateOrderStatus(int orderId, UpdateOrderRequest request) async {
-    try {
-      return await _apiClient.updateOrder(
+  Future<UpdateOrderResponse> updateOrderStatus(int orderId, UpdateOrderRequest request) async =>
+      UpdateOrderResponse(
         orderId: orderId,
-        body: request.toJson(),
+        kioskEventId: request.kioskEventId,
+        kioskMachineId: request.kioskMachineId,
+        amount: request.amount.toDouble(),
+        status: request.status,
+        paymentType: PaymentType.free,
+        kioskPaymentRecordId: 0,
       );
-    } catch (e) {
-      rethrow;
-    }
-  }
 
-  Future<CreatePrintResponse> createPrintStatus({
-    required CreatePrintRequest request,
-  }) async {
-    try {
-      return await _apiClient.createPrint(body: request.toJson());
-    } catch (e) {
-      rethrow;
-    }
-  }
+  Future<CreatePrintResponse> createPrintStatus({required CreatePrintRequest request}) async =>
+      CreatePrintResponse(
+        kioskEventId: request.kioskEventId,
+        backPhotoId: request.backPhotoCardId,
+        printedPhotoCardId: 1,
+        formattedImageUrl: '',
+      );
 
   Future<UpdatePrintResponse> updatePrintStatus({
     required int printedPhotoCardId,
     required UpdatePrintRequest request,
   }) async {
-    try {
-      return await _apiClient.updatePrint(
-        printedPhotoCardId: printedPhotoCardId,
-        body: request.toJson(),
-      );
-    } catch (e) {
-      rethrow;
-    }
+    return UpdatePrintResponse(
+      kioskEventId: request.kioskEventId,
+      status: request.status,
+      printedPhotoCardId: printedPhotoCardId,
+    );
   }
 
-  Future<void> updatePrintLog({
-    required PrinterLog request,
-  }) async {
-    try {
-      final cardCount = _ref.read(cardCountProvider);
-
-      await _apiClient.updatePrintLog(
-        body: request
-            .copyWith(
-              remainingSingleSidedCountPre: cardCount.currentCount.toString(),
-              remainingSingleSidedCountPost: cardCount.initialCount.toString(),
-            )
-            .toJson(),
-      );
-    } catch (e) {
-      SlackLogService().sendErrorLogToSlack('KioskRepository.updatePrintLog failure: $e');
-      logger.e('KioskRepository.updatePrintLog failure', error: e);
-    }
-  }
+  Future<void> updatePrintLog({required dynamic request}) async {}
 
   Future<void> endKioskApplication({
     required int kioskEventId,
     required int machineId,
     required String remainingSingleSidedCount,
-  }) async {
-    try {
-      await _apiClient.endKioskApplication(
-          kioskEventId: kioskEventId, machineId: machineId, remainingSingleSidedCount: remainingSingleSidedCount);
-    } catch (e) {
-      rethrow;
-    }
-  }
+  }) async {}
 
   Future<void> deleteEndMark({
     required int kioskEventId,
     required int machineId,
     required String remainingSingleSidedCount,
-  }) async {
-    try {
-      await _apiClient.deleteEndMark(
-          kioskEventId: kioskEventId, machineId: machineId, remainingSingleSidedCount: remainingSingleSidedCount);
-    } catch (e) {
-      rethrow;
-    }
-  }
+  }) async {}
 
   Future<void> checkKioskAlive({
     required int kioskEventId,
     required int machineId,
     required String remainingSingleSidedCount,
-  }) async {
-    try {
-      await _apiClient.checkKioskAlive(
-          kioskEventId: kioskEventId, machineId: machineId, remainingSingleSidedCount: remainingSingleSidedCount);
-    } catch (e) {
-      rethrow;
-    }
-  }
+  }) async {}
 
-  Future<void> createUniqueKeyHistory({required UniqueKeyRequest request}) async {
-    try {
-      await _apiClient.createUniqueKeyHistory(body: request.toJson());
-    } catch (e) {
-      rethrow;
-    }
-  }
+  Future<void> createUniqueKeyHistory({required dynamic request}) async {}
 
-  Future<BackPhotoCardResponse> getBackPhotoCardByQr(GetBackPhotoByQrRequest request) async {
-    try {
-      return await _apiClient.getBackPhotoCardByQr(
-        body: request.toJson(),
+  Future<BackPhotoCardResponse> getBackPhotoCardByQr(GetBackPhotoByQrRequest request) async =>
+      const BackPhotoCardResponse(
+        kioskEventId: 0,
+        backPhotoCardId: 0,
+        nominatedBackPhotoCardId: 0,
+        backPhotoCardOriginUrl: '',
+        photoAuthNumber: '',
+        embeddingProductId: 0,
+        formattedBackPhotoCardUrl: '',
       );
-    } catch (e) {
-      rethrow;
-    }
-  }
 }

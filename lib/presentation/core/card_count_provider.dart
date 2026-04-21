@@ -1,11 +1,11 @@
+import 'package:flutter_snaptag_kiosk/core/data/datasources/local/local_db_service.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:flutter_snaptag_kiosk/core/data/datasources/local/id_writer.dart';
 
 part 'card_count_provider.g.dart';
 
 class CardCountState {
-  final int initialCount; // 처음 설정(기준) 수량
-  final int currentCount; // 현재 수량
+  final int initialCount;
+  final int currentCount;
 
   const CardCountState({
     required this.initialCount,
@@ -47,21 +47,13 @@ class CardCount extends _$CardCount {
   Future<void> increase([int step = 1]) async {
     final next = state.currentCount + step;
     state = state.copyWith(currentCount: next);
-    try {
-      await writeSingleCardCount("${next.toString()} / ${state.initialCount}");
-    } catch (e) {
-      // print('writeSingleCardCount failed: $e');
-    }
   }
 
-  Future<void> decrease([int step = 1]) async {
-    final next = state.currentCount - step;
-    final clamped = next < 0 ? 0 : next;
-    state = state.copyWith(currentCount: clamped);
+  Future<void> decrease({required bool isSingle, int step = 1}) async {
+    final next = (state.currentCount - step).clamp(0, state.initialCount);
+    state = state.copyWith(currentCount: next);
     try {
-      await writeSingleCardCount("${clamped.toString()} / ${state.initialCount}");
-    } catch (e) {
-      // print('writeSingleCardCount failed: $e');
-    }
+      await ref.read(localDbServiceProvider).writePrintLog(isSingle: isSingle);
+    } catch (_) {}
   }
 }

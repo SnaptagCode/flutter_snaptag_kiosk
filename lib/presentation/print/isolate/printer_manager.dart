@@ -373,6 +373,9 @@ class PrinterManager {
 
       logger.i('6. Starting print process...');
 
+      // 이전 print job의 DLL canvas 잔여 상태 초기화
+      await initLibrary();
+
       await _sendAndHandleResponse(CheckFeederMessage());
 
       logger.i('7. Checking Setting Card...');

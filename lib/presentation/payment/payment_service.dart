@@ -114,7 +114,6 @@ class PaymentService extends _$PaymentService {
     );
     ref.read(paymentResponseStateProvider.notifier).update(mockResponse);
     await _handleSuccessfulPayment();
-    SlackLogService().sendLogToSlack("freePayment: completed");
   }
 
   /// 결제 승인 처리
@@ -165,18 +164,12 @@ class PaymentService extends _$PaymentService {
 
   /// 승인번호가 없는 결제 처리
   Future<void> _handleEmptyApprovalNumber(PaymentResponse paymentResponse, String machineId) async {
-    final backPhoto = ref.watch(verifyPhotoCardProvider).value!;
-
     // await ref.read(kioskRepositoryProvider).updateBackPhotoStatus(UpdateBackPhotoRequest(
     //       photoAuthNumber: backPhoto.photoAuthNumber,
     //       status: "STARTED",
     //     ));
 
     await _updateFailOrder(description: _formatPaymentMessages(paymentResponse));
-
-    SlackLogService().sendPaymentBroadcastLogToSlak(InfoKey.paymentFail.key,
-        paymentDescription:
-            "사유: ${_formatPaymentMessages(paymentResponse)}\n- 인증번호: ${backPhoto.photoAuthNumber}\n- 승인번호: ${paymentResponse.approvalNo ?? "없음"}");
 
     // 결제 실패 Exception throw
     throw EmptyApprovalNumberException(description: _formatPaymentMessages(paymentResponse));
@@ -185,8 +178,6 @@ class PaymentService extends _$PaymentService {
   /// 결제 응답 처리
   Future<void> _handlePaymentResponse(PaymentResponse paymentResponse) async {
     final backPhoto = ref.watch(verifyPhotoCardProvider).value!;
-
-    SlackLogService().sendLogToSlack("paymentResponse : $paymentResponse");
 
     switch (paymentResponse.res) {
       case '0000':
@@ -205,34 +196,20 @@ class PaymentService extends _$PaymentService {
 
   /// 성공적인 결제 처리
   Future<void> _handleSuccessfulPayment() async {
-    final response = await _updateOrder(isRefund: false);
-    await ref.read(cardCountProvider.notifier).decrease();
-    SlackLogService().sendLogToSlack("paymentResponse0000 : $response");
+    await _updateOrder(isRefund: false);
+    final isSingle = ref.read(pagePrintProvider) == PagePrintType.single;
+    await ref.read(cardCountProvider.notifier).decrease(isSingle: isSingle);
   }
 
   /// 시간 초과 결제 처리
   Future<void> _handleTimeoutPayment(BackPhotoCardResponse backPhoto, PaymentResponse paymentResponse) async {
-    final response = await _updateOrder(isRefund: false, description: "시간초과");
-    SlackLogService().sendLogToSlack("paymentResponse1004 : $response");
-
-    // SlackLogService().sendPaymentBroadcastLogToSlak(InfoKey.paymentFail.key,
-    //     paymentDescription:
-    //         "사유: 시간초과\n- 인증번호: ${backPhoto.photoAuthNumber}\n- 승인번호: ${paymentResponse.approvalNo ?? "없음"}");
-
-    // 결제 실패 Exception throw
+    await _updateOrder(isRefund: false, description: "시간초과");
     throw TimeoutPaymentException(description: "시간초과");
   }
 
   /// 취소된 결제 처리
   Future<void> _handleCancelledPayment(BackPhotoCardResponse backPhoto, PaymentResponse paymentResponse) async {
     await _updateOrder(isRefund: false, description: "고객취소");
-    // SlackLogService().sendLogToSlack("paymentResponse1000 : $response");
-
-    // SlackLogService().sendPaymentBroadcastLogToSlak(InfoKey.paymentFail.key,
-    //     paymentDescription:
-    //         "사유: 사용자가 결제취소 누름\n- 인증번호: ${backPhoto.photoAuthNumber}\n- 승인번호: ${paymentResponse.approvalNo ?? "없음"}");
-
-    // 결제 실패 Exception throw
     throw CancelledPaymentException(description: "고객취소");
   }
 
@@ -263,8 +240,6 @@ class PaymentService extends _$PaymentService {
     );
     ref.read(paymentResponseStateProvider.notifier).update(mockRefund);
     await _updateOrder(isRefund: true, description: "자동환불");
-    SlackLogService().sendPaymentBroadcastLogToSlak(InfoKey.paymentRefund.key,
-        paymentDescription: "동작로직: 무료뽑기 자동환불");
     ref.read(paymentResponseStateProvider.notifier).reset();
   }
 
@@ -288,47 +263,31 @@ class PaymentService extends _$PaymentService {
             originalApprovalNo: approvalInfo.authSeqNumber ?? '',
             originalApprovalDate: DateFormat('yyMMdd').format(approvalInfo.completedAt!),
           );
-      SlackLogService().sendLogToSlack('error409_refund paymentResponse: $paymentResponse'); //paymentTestSlack
       // logger.i(
       //     'respCode: ${approvalInfo.respCode} \trespCode: ${approvalInfo.respCode} \nORDER STATUS: ${approvalInfo.orderState}');
       ref.read(paymentResponseStateProvider.notifier).update(paymentResponse);
       isSuccess = paymentResponse.isSuccess;
     } catch (e) {
-      SlackLogService().sendLogToSlack('error409 refund fail error : $e');
       logger.e('Refund failed', error: e);
       rethrow;
     } finally {
       final code = ref.read(authCodeProvider);
       final approval = ref.read(paymentResponseStateProvider);
       if (approval?.orderState == OrderStatus.refunded) {
-        final response =
-            await _updateOrder(isRefund: true, orderid: order.orderId, photoAuthNumber: code, description: "환불안내");
-        SlackLogService().sendLogToSlack('error409 response: $response'); //paymentTestSlack
-        SlackLogService().sendPaymentBroadcastLogToSlak(InfoKey.paymentRefund.key,
-            paymentDescription: "동작로직: 환불안내\n- 인증번호: $code\n- 승인번호: ${order.authSeqNumber ?? "없음"}");
+        await _updateOrder(isRefund: true, orderid: order.orderId, photoAuthNumber: code, description: "환불안내");
         ref.read(paymentResponseStateProvider.notifier).reset();
-        SlackLogService().sendLogToSlack('error409 paymentResponseState Reset'); //paymentTestSlack
       } else {
         final approvalInfo = ref.read(paymentResponseStateProvider);
         final paymentRes = approvalInfo?.res;
         switch (paymentRes) {
           case '1000':
             await _updateOrder(isRefund: true, orderid: order.orderId, photoAuthNumber: code, description: "고객취소");
-            SlackLogService().sendPaymentBroadcastLogToSlak(InfoKey.paymentRefundFail.key,
-                paymentDescription:
-                    "동작로직: 환불안내\n- 사유: 사용자가 환불취소 누름\n- 인증번호: $code\n- 승인번호: ${approvalInfo?.approvalNo ?? "없음"}");
             break;
           case '1004':
             await _updateOrder(isRefund: true, orderid: order.orderId, photoAuthNumber: code, description: "시간초과");
-            SlackLogService().sendPaymentBroadcastLogToSlak(InfoKey.paymentRefundFail.key,
-                paymentDescription:
-                    "동작로직: 환불안내\n- 사유: 시간초과\n- 인증번호: $code\n- 승인번호: ${approvalInfo?.approvalNo ?? "없음"}");
             break;
           default:
             await _updateOrder(isRefund: true, orderid: order.orderId, photoAuthNumber: code, description: "확인필요");
-            SlackLogService().sendPaymentBroadcastLogToSlak(InfoKey.paymentRefundFail.key,
-                paymentDescription:
-                    "동작로직: 환불안내\n- 사유: 확인필요\n- 인증번호: $code\n- 승인번호: ${approvalInfo?.approvalNo ?? "없음"}");
         }
       }
     }
@@ -389,7 +348,6 @@ class PaymentService extends _$PaymentService {
         return await ref.read(kioskRepositoryProvider).updateOrderStatus(orderId.toInt(), request);
       } catch (e) {
         if (attempt == maxRetries) {
-          SlackLogService().sendLogToSlack('update order error (attempt $attempt/$maxRetries): $e');
           rethrow;
         }
         logger.w('update order attempt $attempt failed, retrying in ${retryDelay.inMilliseconds}ms... $e');

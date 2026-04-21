@@ -1,10 +1,8 @@
 import 'dart:io';
-import 'dart:typed_data';
 
-import 'package:dio/dio.dart' as dio;
 import 'package:flutter_snaptag_kiosk/core/common/random/random_photo_util.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
-import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
+import 'package:path/path.dart' as p;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'front_photo_list.g.dart';
@@ -12,24 +10,36 @@ part 'front_photo_list.g.dart';
 @Riverpod(keepAlive: true)
 class FrontPhotoList extends _$FrontPhotoList {
   @override
-  List<NominatedPhoto> build() {
-    return [];
-  }
+  List<NominatedPhoto> build() => [];
 
   Future<void> fetch() async {
     try {
-      await clearDirectory();
+      final exeDir = p.dirname(Platform.resolvedExecutable);
+      final frontPhotosDir = Directory(p.join(exeDir, 'image', 'front_photos'));
 
-      final kioskEventId = ref.read(kioskInfoServiceProvider)?.kioskEventId;
-
-      if (kioskEventId == null) {
-        throw Exception('No kiosk event id available');
+      if (!await frontPhotosDir.exists()) {
+        state = [];
+        return;
       }
-      // API를 통해 이미지 목록 가져오기
-      final kioskRepo = ref.read(kioskRepositoryProvider);
-      final NominatedPhotoList response = await kioskRepo.getFrontPhotoList(kioskEventId);
-      final data = await saveImages(response.list);
-      state = data;
+
+      final files = await frontPhotosDir
+          .list()
+          .where((e) => e is File && _isImageFile(e.path))
+          .cast<File>()
+          .toList();
+
+      state = files.asMap().entries.map((entry) {
+        return NominatedPhoto(
+          id: entry.key + 1,
+          embeddingProductId: 1,
+          code: 1,
+          originUrl: '',
+          embedUrl: '',
+          selectionWeight: 1,
+          isWin: false,
+          embedImage: entry.value,
+        );
+      }).toList();
     } catch (e) {
       state = [];
     }
@@ -43,68 +53,29 @@ class FrontPhotoList extends _$FrontPhotoList {
     }
 
     try {
-      // 이전에 선택된 앞면이 있고, 다른 선택지가 있으면 제외
       final candidates = state.length > 1 && _lastSelectedId != null
           ? state.where((photo) => photo.id != _lastSelectedId).toList()
           : state;
 
       final result = RandomPhotoUtil.getRandomPhotoByWeight(candidates);
-
       if (result != null) {
         _lastSelectedId = result.id;
         return result;
       }
-
-      throw Exception('Invalid file name format: ${result?.embedImage?.path}');
+      throw Exception('Failed to get random photo');
     } catch (e) {
       logger.e('이미지 정보 추출 중 오류가 발생했습니다: $e');
       throw Exception('Failed to get random photo');
     }
   }
 
-  final _fileSystem = FileSystemService.instance;
-
-  Future<List<NominatedPhoto>> saveImages(List<NominatedPhoto> photos) async {
-    final List<NominatedPhoto> cacheList = [];
-
-    await _fileSystem.ensureDirectoryExists(DirectoryPaths.frontImages);
-
-    for (var photo in photos) {
-      try {
-        final dio.Response response = await ImageHelper().getImageBytes(photo.embedUrl);
-        final contentType = response.headers.value('content-type');
-        final extension = contentType != null
-            ? ImageHelper().getFileExtensionFromContentType(contentType)
-            : ImageHelper().getFileExtensionFromUrl(photo.embedUrl);
-
-        final Uint8List bytes = Uint8List.fromList(response.data);
-        final File file = File('${DirectoryPaths.frontImages.buildPath}/${photo.getFileName}$extension');
-
-        await file.writeAsBytes(bytes); // 파일 저장
-
-        cacheList.add(photo.copyWith(embedImage: file)); // File로 저장
-      } catch (e, stack) {
-        throw StorageException(
-          StorageErrorType.saveError,
-          path: '${DirectoryPaths.frontImages.buildPath}/${photo.embeddingProductId}: ${photo.embedUrl}',
-          originalError: e,
-          stackTrace: stack,
-        );
-      }
-    }
-    return cacheList;
+  void clearDirectory() {
+    state = [];
+    _lastSelectedId = null;
   }
 
-  Future<void> clearDirectory() async {
-    try {
-      await _fileSystem.clearDirectory(DirectoryPaths.frontImages);
-    } catch (e) {
-      throw StorageException(
-        StorageErrorType.deleteError,
-      );
-    } finally {
-      //갱신
-      state = [];
-    }
+  bool _isImageFile(String path) {
+    final lower = path.toLowerCase();
+    return lower.endsWith('.jpg') || lower.endsWith('.jpeg') || lower.endsWith('.png');
   }
 }

@@ -1,13 +1,10 @@
-import 'dart:async';
-import 'dart:convert';
-import 'dart:io';
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_snaptag_kiosk/core/data/datasources/local/local_db_service.dart';
+import 'package:flutter_snaptag_kiosk/core/data/datasources/local/offline_config_service.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_snaptag_kiosk/presentation/core/card_count_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/setup/front_photo_list.dart';
-import 'package:flutter_snaptag_kiosk/presentation/setup/uuid_provider.dart';
-import 'package:path/path.dart' as p;
+import 'package:flutter_snaptag_kiosk/presentation/setup/page_print_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'kiosk_info_service.g.dart';
@@ -16,183 +13,44 @@ final getInfoByKeyProvider = StateProvider<bool>((ref) => true);
 
 @Riverpod(keepAlive: true)
 class KioskInfoService extends _$KioskInfoService {
-  Timer? _periodicTimer;
-  int? _cachedMachineId;
-  int? _cachedKioskEventId;
-  bool _getInfoByKey = true;
-  bool _isLoading = false;
-
-  bool get getInfoByKey => _getInfoByKey;
-
   @override
-  KioskMachineInfo? build() {
-    // 서비스가 dispose될 때 타이머 취소
-    ref.onDispose(() {
-      _cancelTimer();
-    });
-
-    return null;
-  }
+  KioskMachineInfo? build() => null;
 
   Future<KioskMachineInfo?> getKioskMachineInfo() async {
-    // 이미 로딩 중이면 기다리거나 현재 상태 반환
-    if (_isLoading) {
-      return state;
-    }
-
-    // 이미 데이터가 있으면 바로 반환 (중복 호출 방지)
-    if (state != null && _getInfoByKey) {
-      return state;
-    }
+    if (state != null) return state;
 
     try {
-      _isLoading = true;
-
-      final cached = await _readFromLauncherCache();
-
-      SlackLogService().sendLogToSlack("getKioskMachineInfo: cached: $cached");
-      if (cached != null && cached.kioskMachineId != 0) {
-        state = cached;
-        _cachedMachineId = cached.kioskMachineId;
-        _cachedKioskEventId = cached.kioskEventId;
-        ref.read(frontPhotoListProvider.notifier).fetch();
-        await _startPeriodicTimer();
-        _getInfoByKey = true;
-        _isLoading = false;
-        ref.read(getInfoByKeyProvider.notifier).state = true;
-
-        SlackLogService().sendLogToSlack("getKioskMachineInfo: $cached");
-        return cached;
-      }
-
-      final kioskRepo = ref.read(kioskRepositoryProvider);
-      final deviceUUID = await ref.read(deviceUuidProvider.future);
-      final response = await kioskRepo.getKioskMachineInfoByKey(deviceUUID);
-
-      state = response;
-
+      final config = await ref.read(offlineConfigServiceProvider).load();
+      state = config;
       ref.read(frontPhotoListProvider.notifier).fetch();
-
-      // 캐시된 값들 업데이트
-      _cachedMachineId = response.kioskMachineId;
-      _cachedKioskEventId = response.kioskEventId;
-
-      // 응답을 받은 후 10분마다 실행되는 타이머 시작
-      await _startPeriodicTimer();
-
-      _getInfoByKey = true;
-      _isLoading = false;
-
-      return response;
+      ref.read(getInfoByKeyProvider.notifier).state = true;
+      await _restoreCardCount();
+      return config;
     } catch (e) {
-      _getInfoByKey = false;
-      _isLoading = false;
+      ref.read(getInfoByKeyProvider.notifier).state = false;
       return null;
     }
   }
 
-  Future<KioskMachineInfo> _fetchAndUpdateKioskInfo({int? machineId}) async {
+  Future<void> _restoreCardCount() async {
+    final localDb = ref.read(localDbServiceProvider);
+    final mode = ref.read(pagePrintProvider);
+    final isSingle = mode != PagePrintType.double;
+    final initial = await localDb.getInitialCount(isSingle: isSingle);
+    final remaining = await localDb.getRemainingCount(isSingle: isSingle);
+    ref.read(cardCountProvider.notifier).update(initial);
+    ref.read(cardCountProvider.notifier).updateCurrent(remaining);
+  }
+
+  Future<KioskMachineInfo?> refreshWithMachineId(int machineId) async {
     try {
-      // kioskMachineId가 없는 경우 예외 발생
-      if (machineId == null) {
-        throw Exception('No kiosk machine id available');
-      }
-      state = KioskMachineInfo();
-      // API를 통해 최신 정보 가져오기
-      final kioskRepo = ref.read(kioskRepositoryProvider);
-
-      final response = await kioskRepo.getKioskMachineInfo(
-        machineId,
-      );
-
-      state = response;
-
+      final config = await ref.read(offlineConfigServiceProvider).load();
+      state = config;
       ref.read(frontPhotoListProvider.notifier).fetch();
-
-      // 캐시된 값들 업데이트
-      _cachedMachineId = machineId;
-      _cachedKioskEventId = response.kioskEventId;
-
-      // 응답을 받은 후 10분마다 실행되는 타이머 시작
-      await _startPeriodicTimer();
-
-      _getInfoByKey = true;
       ref.read(getInfoByKeyProvider.notifier).state = true;
-
-      return response;
+      return config;
     } catch (e) {
-      _getInfoByKey = false;
       ref.read(getInfoByKeyProvider.notifier).state = false;
-      ref.invalidateSelf();
-      rethrow;
-    }
-  }
-
-  /// 새로운 머신 ID로 업데이트 후 새로고침
-  Future<void> refreshWithMachineId(int machineId) async {
-    state = await _fetchAndUpdateKioskInfo(machineId: machineId);
-  }
-
-  /// 10분마다 실행되는 주기적 타이머 시작
-  Future<void> _startPeriodicTimer() async {
-    // 기존 타이머가 있다면 취소
-    _periodicTimer?.cancel();
-
-    SlackLogService().sendLogToSlack("Periodic _startPeriodicTimer");
-
-    // 즉시 실행되는 비동기 함수
-    Future<void> executePeriodicLogic() async {
-      try {
-        // 캐시된 값들 사용 (순환 의존성 방지)
-        final kioskEventId = _cachedKioskEventId ?? 0;
-        final machineId = _cachedMachineId ?? 0;
-        final cardCountState = ref.read(cardCountProvider);
-
-        if (kioskEventId != 0 && machineId != 0) {
-          await ref.read(kioskRepositoryProvider).checkKioskAlive(
-                kioskEventId: kioskEventId,
-                machineId: machineId,
-                remainingSingleSidedCount: cardCountState.remainingSingleSidedCount,
-              );
-        }
-        SlackLogService()
-            .sendLogToSlack("Periodic timer: $kioskEventId, $machineId, ${cardCountState.remainingSingleSidedCount}");
-      } catch (e) {
-        // 에러가 발생해도 타이머는 계속 실행
-        // print('Periodic timer error: $e');
-        SlackLogService().sendLogToSlack("Periodic timer error: $e");
-      }
-    }
-
-    // 즉시 실행
-    await executePeriodicLogic();
-
-    // 10분마다 실행되는 새로운 타이머 시작
-    _periodicTimer = Timer.periodic(
-      const Duration(minutes: 10),
-      (timer) async {
-        await executePeriodicLogic();
-      },
-    );
-  }
-
-  /// 타이머 취소
-  void _cancelTimer() {
-    _periodicTimer?.cancel();
-    _periodicTimer = null;
-  }
-
-  /// 런처가 ~/Snaptag/runtime/kiosk_machine_info.json에 저장한 캐시를 읽습니다.
-  Future<KioskMachineInfo?> _readFromLauncherCache() async {
-    try {
-      final home = Platform.environment['USERPROFILE'];
-      if (home == null) return null;
-      final file = File(p.join(home, 'Snaptag', 'runtime', 'kiosk_machine_info.json'));
-      if (!await file.exists()) return null;
-      final body = await file.readAsString();
-      final json = jsonDecode(body) as Map<String, dynamic>;
-      return KioskMachineInfo.fromJson(json);
-    } catch (_) {
       return null;
     }
   }

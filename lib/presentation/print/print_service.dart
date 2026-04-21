@@ -1,13 +1,14 @@
 import 'dart:io';
+import 'dart:math';
 
+import 'package:flutter_snaptag_kiosk/core/data/datasources/local/local_db_service.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
+import 'package:flutter_snaptag_kiosk/presentation/core/card_count_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
-import 'package:flutter_snaptag_kiosk/presentation/payment/create_order_info_state.dart';
-import 'package:flutter_snaptag_kiosk/presentation/payment/payment_response_state.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/card_printer.dart';
 import 'package:flutter_snaptag_kiosk/presentation/setup/front_photo_list.dart';
 import 'package:flutter_snaptag_kiosk/presentation/setup/page_print_provider.dart';
-import 'package:flutter_snaptag_kiosk/presentation/verification/verify_photo_card_provider.dart';
+import 'package:path/path.dart' as p;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'print_service.g.dart';
@@ -27,133 +28,91 @@ class PrintService extends _$PrintService {
   }
 
   Future<void> _handlePrintProcess() async {
-    // 1. 사전 검증
-    _validatePrintRequirements();
+    // 단면 수량이 0이면 자동으로 양면 전환
+    if (ref.read(pagePrintProvider) == PagePrintType.single &&
+        ref.read(cardCountProvider).currentCount <= 0) {
+      ref.read(pagePrintProvider.notifier).set(PagePrintType.double);
+    }
 
-    // 2. 프론트 이미지 준비
+    // 1. 앞면 이미지 준비
     final frontPhotoInfo = await _prepareFrontPhoto();
 
-    // 3. 프린트 작업 생성 및 백 이미지 준비
-    final printJobInfo = await _createPrintJobWithEmbeddingBackImage(
-      frontPhotoCardId: frontPhotoInfo.id,
-      backPhotoCardId: ref.read(verifyPhotoCardProvider).value?.backPhotoCardId ?? 0,
-    );
+    // 2. 뒷면 이미지 준비 (로컬 back_photos 폴더에서 랜덤 선택)
+    final backPhotoFile = await _pickRandomBackPhoto();
 
-    // 4. 프린트 진행 및 상태 업데이트
-    await _executePrintJob(
-      printJobInfo.printedPhotoCardId,
-      frontPhotoInfo.safeEmbedImage,
-      printJobInfo.backPhotoFile,
-    );
+    // 3. 프린트 진행 및 상태 업데이트
+    await _executePrintJob(1, frontPhotoInfo.safeEmbedImage, backPhotoFile);
   }
 
-  Future<void> _executePrintJob(int printedPhotoCardId, File frontPhoto, File embedded) async {
+  Future<NominatedPhoto> _prepareFrontPhoto() async {
+    return await ref.read(frontPhotoListProvider.notifier).getRandomPhoto();
+  }
+
+  Future<File> _pickRandomBackPhoto() async {
+    final exeDir = p.dirname(Platform.resolvedExecutable);
+    final backPhotosDir = Directory(p.join(exeDir, 'image', 'back_photos'));
+
+    if (!await backPhotosDir.exists()) {
+      throw Exception('image/back_photos/ 폴더를 찾을 수 없습니다: ${backPhotosDir.path}');
+    }
+
+    final files = await backPhotosDir
+        .list()
+        .where((e) => e is File && _isImageFile(e.path))
+        .cast<File>()
+        .toList();
+
+    if (files.isEmpty) {
+      throw Exception('image/back_photos/ 폴더에 이미지가 없습니다');
+    }
+
+    return files[Random().nextInt(files.length)];
+  }
+
+  bool _isImageFile(String path) {
+    final lower = path.toLowerCase();
+    return lower.endsWith('.jpg') || lower.endsWith('.jpeg') || lower.endsWith('.png');
+  }
+
+  Future<void> _executePrintJob(int printedPhotoCardId, File? frontPhoto, File embedded) async {
     try {
-      // 프린트 상태 시작
       await _updatePrintStatus(printedPhotoCardId, PrintedStatus.started);
 
-      // 실제 프린트 실행
-      //await _executePrint(frontPhoto: frontPhoto, embedded: embedded);
       final isSingleSidedMode = ref.read(pagePrintProvider) == PagePrintType.single;
       if (isSingleSidedMode) {
-        final tempFront = null;
-        await _executePrint(frontPhoto: tempFront, embedded: embedded);
+        await _executePrint(frontPhoto: null, embedded: embedded);
       } else {
         await _executePrint(frontPhoto: frontPhoto, embedded: embedded);
       }
 
-      // 프린트 상태 완료
       await _updatePrintStatus(printedPhotoCardId, PrintedStatus.completed);
+      final isSingle = ref.read(pagePrintProvider) == PagePrintType.single;
+      await ref.read(cardCountProvider.notifier).decrease(isSingle: isSingle);
     } catch (e, stack) {
       logger.e('PrintService._executePrintJob failure', error: e, stackTrace: stack);
       await _updatePrintStatus(printedPhotoCardId, PrintedStatus.failed);
-      rethrow;
-    }
-  }
-
-  Future<NominatedPhoto> _prepareFrontPhoto() async {
-    final frontPhotoList = ref.read(frontPhotoListProvider.notifier);
-    final randomPhoto = await frontPhotoList.getRandomPhoto();
-
-    return randomPhoto;
-  }
-
-  void _validatePrintRequirements() {
-    final backPhotoCardResponseInfo = ref.read(verifyPhotoCardProvider).value;
-    final approvalInfo = ref.read(paymentResponseStateProvider);
-    final printerState = ref.read(printerServiceProvider);
-
-    if (backPhotoCardResponseInfo == null) throw Exception('No back photo card response info available');
-    if (approvalInfo == null) throw Exception('No payment approval info available');
-    // if (printerState.hasError) throw Exception('Printer is not ready');
-  }
-
-  Future<
-      ({
-        int printedPhotoCardId,
-        File backPhotoFile,
-      })> _createPrintJobWithEmbeddingBackImage({
-    required int frontPhotoCardId,
-    required int backPhotoCardId,
-  }) async {
-    try {
-      final kioskOrderId = ref.read(createOrderInfoProvider)?.orderId ?? 0;
-      final request = CreatePrintRequest(
-        kioskMachineId: ref.read(kioskInfoServiceProvider)!.kioskMachineId,
-        kioskEventId: ref.read(kioskInfoServiceProvider)!.kioskEventId,
-        frontPhotoCardId: frontPhotoCardId,
-        backPhotoCardId: backPhotoCardId,
-        kioskOrderId: kioskOrderId,
-      );
-
-      final response = await ref.read(kioskRepositoryProvider).createPrintStatus(request: request);
-
-      final backPhotoFile = await ImageHelper().convertImageUrlToFile(response.formattedImageUrl);
-
-      return (printedPhotoCardId: response.printedPhotoCardId, backPhotoFile: backPhotoFile);
-    } catch (e) {
+      await ref.read(localDbServiceProvider).writeErrorLog('[인쇄 실패] $e');
       rethrow;
     }
   }
 
   Future<void> _updatePrintStatus(int printedPhotoCardId, PrintedStatus status) async {
-    const maxRetries = 3;
-    int attempt = 0;
-
-    while (attempt < maxRetries) {
-      try {
-        final request = UpdatePrintRequest(
-          kioskMachineId: ref.read(kioskInfoServiceProvider)!.kioskMachineId,
-          kioskEventId: ref.read(kioskInfoServiceProvider)!.kioskEventId,
-          status: status,
-        );
-
-        await ref
-            .read(kioskRepositoryProvider)
-            .updatePrintStatus(printedPhotoCardId: printedPhotoCardId, request: request);
-        return;
-      } catch (e) {
-        attempt++;
-        // logger.w('PrintService._updatePrintStatus attempt $attempt/$maxRetries failure', error: e);
-
-        if (attempt >= maxRetries) {
-          final kioskInfo = ref.read(kioskInfoServiceProvider);
-          final machineId = kioskInfo?.kioskMachineId ?? 0;
-          final machineName = kioskInfo?.kioskMachineName ?? '';
-          SlackLogService().sendErrorLogToSlack(
-              '[MACHINE_NAME: $machineName (MACHINE_ID: $machineId)] PrintService._updatePrintStatus failure after $maxRetries retries: $e');
-          logger.e('PrintService._updatePrintStatus failure', error: e);
-          return;
-        }
-        await Future.delayed(const Duration(milliseconds: 300));
-      }
+    try {
+      final request = UpdatePrintRequest(
+        kioskMachineId: ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0,
+        kioskEventId: ref.read(kioskInfoServiceProvider)?.kioskEventId ?? 0,
+        status: status,
+      );
+      await ref.read(kioskRepositoryProvider).updatePrintStatus(
+            printedPhotoCardId: printedPhotoCardId,
+            request: request,
+          );
+    } catch (e) {
+      logger.e('PrintService._updatePrintStatus failure', error: e);
     }
   }
 
-  Future<void> _executePrint({
-    File? frontPhoto,
-    required File embedded,
-  }) async {
+  Future<void> _executePrint({File? frontPhoto, required File embedded}) async {
     try {
       await ref.read(printerServiceProvider.notifier).printImage(
             frontFile: frontPhoto,
@@ -162,10 +121,6 @@ class PrintService extends _$PrintService {
           );
     } catch (e) {
       rethrow;
-    } finally {
-      if (await embedded.exists()) {
-        await embedded.delete();
-      }
     }
   }
 }

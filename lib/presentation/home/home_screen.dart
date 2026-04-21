@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -5,7 +7,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_snaptag_kiosk/presentation/home/back_photo_type_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
-import 'package:qr_flutter/qr_flutter.dart';
+import 'package:path/path.dart' as p;
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -32,65 +34,53 @@ class HomeScreen extends ConsumerWidget {
             textAlign: TextAlign.center,
           ),
           SizedBox(height: 15.h),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              _buildRecommendedImageCard(
-                context,
-                isHwe: isHwe,
-                title: LocaleKeys.choice_recommended_images.tr(),
-                subtitle1: LocaleKeys.choice_select_and_print.tr(),
-                subtitle2: null,
-                subtitleSize: 25.sp,
-                imageUrl: kiosk?.emblemImageUrl ?? '',
-                mainButtonColor: buttonColor,
-                buttonTextColor: buttonTextColor,
-                mainTextColor: mainTextColor,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(10.r),
-                  child: Image.network(kiosk?.emblemImageUrl ?? '', width: 264.w, height: 264.h, fit: BoxFit.contain),
-                ),
-                onTap: () async {
-                  ref.read(backPhotoTypeProvider.notifier).selectFixed(0);
-                  PhotoCardPreviewRouteData().go(context);
-                },
+          Center(
+            child: _buildRecommendedImageCard(
+              context,
+              isHwe: isHwe,
+              title: LocaleKeys.choice_recommended_images.tr(),
+              subtitle1: LocaleKeys.choice_select_and_print.tr(),
+              subtitle2: null,
+              subtitleSize: 25.sp,
+              imageUrl: kiosk?.emblemImageUrl ?? '',
+              mainButtonColor: buttonColor,
+              buttonTextColor: buttonTextColor,
+              mainTextColor: mainTextColor,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10.r),
+                child: _buildEmblemImage(),
               ),
-              SizedBox(width: 40.w),
-              _buildRecommendedImageCard(
-                context,
-                isHwe: isHwe,
-                title: LocaleKeys.choice_upload_my_photo.tr(),
-                subtitle1: LocaleKeys.choice_step1_qr_upload.tr(),
-                subtitle2: LocaleKeys.choice_step2_enter_code_print.tr(),
-                subtitleSize: 20.sp,
-                imageUrl: null,
-                mainButtonColor: buttonColor,
-                buttonTextColor: buttonTextColor,
-                mainTextColor: mainTextColor,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20.r),
-                  ),
-                  child: QrImageView(
-                    data:
-                        '${F.qrCodePrefix}/${context.locale.languageCode}/${ref.read(kioskInfoServiceProvider)?.kioskEventId} ',
-                    size: 264.r,
-                    version: QrVersions.auto,
-                    padding: EdgeInsets.all(20.r),
-                  ),
-                ),
-                onTap: () async {
-                  ref.read(backPhotoTypeProvider.notifier).selectCustom();
-                  CodeVerificationRouteData().go(context);
-                },
-              ),
-            ],
+              onTap: () async {
+                ref.read(backPhotoTypeProvider.notifier).selectFixed(0);
+                PhotoCardPreviewRouteData().go(context);
+              },
+            ),
           ),
           SizedBox(height: 60.h),
         ],
       ),
     );
+  }
+
+  static Directory get _backPhotosDir =>
+      Directory(p.join(p.dirname(Platform.resolvedExecutable), 'image', 'back_photos'));
+
+  Widget _buildEmblemImage() {
+    final dir = _backPhotosDir;
+    if (!dir.existsSync()) return SizedBox(width: 264.w, height: 264.h);
+
+    final files = dir
+        .listSync()
+        .whereType<File>()
+        .where((f) {
+          final lower = f.path.toLowerCase();
+          return lower.endsWith('.jpg') || lower.endsWith('.jpeg') || lower.endsWith('.png');
+        })
+        .toList();
+
+    if (files.isEmpty) return SizedBox(width: 264.w, height: 264.h);
+
+    return Image.file(files.first, width: 264.w, height: 264.h, fit: BoxFit.contain);
   }
 
   /// 추천 이미지 카드 위젯 빌드
@@ -223,45 +213,6 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildChoiceButton(BuildContext context, WidgetRef ref, String url,
-      {required String label, required VoidCallback onTap}) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 307.w,
-        height: 485.h,
-        margin: EdgeInsets.symmetric(vertical: 22.h),
-        clipBehavior: Clip.antiAlias,
-        decoration: ShapeDecoration(
-          color: Colors.transparent,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10.r),
-          ),
-        ),
-        alignment: Alignment.center,
-        child: url.isNotEmpty
-            ? Image.network(
-                url,
-                fit: BoxFit.fitHeight,
-                alignment: Alignment.center,
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    color: Colors.grey[200],
-                    child: Center(
-                      child: Icon(Icons.image, size: 60.sp, color: Colors.grey[400]),
-                    ),
-                  );
-                },
-              )
-            : Container(
-                color: Colors.grey[200],
-                child: Center(
-                  child: Icon(Icons.image, size: 60.sp, color: Colors.grey[400]),
-                ),
-              ),
-      ),
-    );
-  }
 }
 
 /// 그라데이션 오버레이를 그리는 CustomPainter

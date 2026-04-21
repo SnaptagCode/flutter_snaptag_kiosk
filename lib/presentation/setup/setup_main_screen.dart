@@ -7,6 +7,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_snaptag_kiosk/core/common/launcher/launcher_service.dart';
 import 'package:flutter_snaptag_kiosk/core/common/sound/sound_manager.dart';
 import 'package:flutter_snaptag_kiosk/core/data/datasources/local/id_writer.dart';
+import 'package:flutter_snaptag_kiosk/core/data/datasources/local/local_db_service.dart';
 import 'package:flutter_snaptag_kiosk/core/providers/version_notifier.dart';
 import 'package:flutter_snaptag_kiosk/core/ui/widget/dialog_helper.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
@@ -242,7 +243,7 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
     final latestVersion = versionState.latestVersion;
     final isUpdateAvailable = currentVersion != latestVersion;
     final isConnectedPrinter = ref.watch(printerConnectProvider) == PrinterConnectState.connected;
-    final getInfoByKey = ref.watch(kioskInfoServiceProvider.notifier).getInfoByKey;
+    final getInfoByKey = ref.watch(getInfoByKeyProvider);
     //final isUpdateAvailable = false;
 
     return Theme(
@@ -397,6 +398,7 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
                           if (value == null || value.isEmpty) return; // 값이 없으면 종료
                           int cardNumber = int.parse(value);
                           ref.read(cardCountProvider.notifier).update(cardNumber);
+                          await ref.read(localDbServiceProvider).saveCount(isSingle: true, count: cardNumber);
                           if (cardNumber <= 0) {
                             ref.read(pagePrintProvider.notifier).set(PagePrintType.double);
                           } else {

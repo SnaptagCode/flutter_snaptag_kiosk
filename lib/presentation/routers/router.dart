@@ -9,7 +9,6 @@ import 'package:flutter_snaptag_kiosk/presentation/home/home_screen.dart';
 import 'package:flutter_snaptag_kiosk/presentation/setup/payment_history_screen.dart';
 import 'package:flutter_snaptag_kiosk/presentation/setup/setup_main_screen.dart';
 import 'package:flutter_snaptag_kiosk/presentation/test/unit_test_screen.dart';
-import 'package:flutter_snaptag_kiosk/presentation/payment/payment_screen.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/print_process_screen.dart';
 import 'package:go_router/go_router.dart';
 
@@ -158,7 +157,7 @@ class PhotoCardPreviewRouteData extends GoRouteData with _$PhotoCardPreviewRoute
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) {
     return NoTransitionPage(
-      child: const PaymentScreen(),
+      child: const PrintProcessScreen(),
     );
   }
 }
