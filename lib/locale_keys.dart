@@ -64,6 +64,7 @@ abstract class LocaleKeys {
   static const choice_select_recommended_image = 'choice_select_recommended_image';
   static const choice_upload_my_photo = 'choice_upload_my_photo';
   static const choice_select_and_print = 'choice_select_and_print';
+  static const choice_btn_print = 'choice_btn_print';
   static const choice_step1_qr_upload = 'choice_step1_qr_upload';
   static const choice_step2_enter_code_print = 'choice_step2_enter_code_print';
   static const choice_select_image = 'choice_select_image';

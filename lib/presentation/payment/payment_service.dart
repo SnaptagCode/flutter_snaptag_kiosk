@@ -7,6 +7,7 @@ import 'package:flutter_snaptag_kiosk/presentation/payment/payment_response_stat
 import 'package:flutter_snaptag_kiosk/presentation/setup/page_print_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/verification/auth_code_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/verification/verify_photo_card_provider.dart';
+import 'dart:math';
 import 'package:intl/intl.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -25,16 +26,9 @@ class PaymentService extends _$PaymentService {
     final orderResponse = await _createOrder().catchError((e) => throw OrderCreationException('Create order fail: $e'));
     ref.read(createOrderInfoProvider.notifier).update(orderResponse);
 
-    final price = ref.read(kioskInfoServiceProvider)!.photoCardPrice;
     try {
-      if (price == 0) {
-        // 3a. 무료 결제 (KSCAT 스킵)
-        await _handleFreePayment();
-      } else {
-        // 3b. 일반 카드 결제
-        final paymentResponse = await _approvePayment();
-        await _handlePaymentResult(paymentResponse);
-      }
+      // 무료 뽑기: 가격과 무관하게 KSCAT 스킵, 서버에 결제 완료 직접 전송
+      await _handleFreePayment();
     } catch (e) {
       // PaymentFailedException은 이미 처리된 예외이므로 그대로 rethrow
       if (e is PaymentFailedException) {
@@ -61,13 +55,62 @@ class PaymentService extends _$PaymentService {
     }
   }
 
+  /// 무료 결제용 mock KSNET 문자열 생성
+  String _buildMockKsnet(String approvalNo) {
+    final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
+    final tradeTime = DateFormat('yyMMddHHmmss').format(DateTime.now());
+    final tradeUniqueNo = (100000000000 + Random().nextInt(900000000)).toString().padLeft(12, '0');
+
+    return 'jsonp200911MI$machineId({'
+        'APPROVALNO: $approvalNo, '
+        'CARDNAME: 무료뽑기, '
+        'CARDTYPE: N, '
+        'CLASSFLAG: 01, '
+        'COMPANYINFO: , '
+        'CORPRESPCODE: 0000, '
+        'DCCDATA: , '
+        'ERRCODE: 00, '
+        'FILLER: 000000000000****, '
+        'ISSUERCODE: 00, '
+        'KSNETRESERVED: , '
+        'MERCHANTNUMBER: 0000000000, '
+        'MESSAGE1: 무료뽑기, '
+        'MESSAGE2: OK: $approvalNo, '
+        'MSG: , '
+        'NOTICE1: , '
+        'NOTICE2: , '
+        'POINT1: 000000000, '
+        'POINT2: 000000000, '
+        'POINT3: 000000000, '
+        'PURCHASECODE: 00, '
+        'PURCHASENAME: 무료뽑기, '
+        'REMAINAMOUNT: 000000000, '
+        'REQ: AP, '
+        'RES: 0000, '
+        'RESERVED: , '
+        'RESPCODE: 0000, '
+        'STATUS: O, '
+        'TELEGRAMFLAG: 0210, '
+        'TELEGRAMNO: 000000000000, '
+        'TERMID: AT0000000A, '
+        'TRADEFLAG: IC, '
+        'TRADETIME: $tradeTime, '
+        'TRADETYPE: N, '
+        'TRADEUNIQUENO: $tradeUniqueNo, '
+        'WORKINGKEY: 0000000000000000, '
+        'WORKINGKEYINDEX: 00})';
+  }
+
   /// 무료 결제 처리 (KSCAT 스킵)
   Future<void> _handleFreePayment() async {
-    const mockResponse = PaymentResponse(
+    final fakeApprovalNo = (10000000 + Random().nextInt(90000000)).toString();
+    final mockKsnet = _buildMockKsnet(fakeApprovalNo);
+    final mockResponse = PaymentResponse(
       res: '0000',
       respCode: '0000',
-      approvalNo: 'FREE',
+      approvalNo: fakeApprovalNo,
       telegramFlag: '0210',
+      ksnet: mockKsnet,
     );
     ref.read(paymentResponseStateProvider.notifier).update(mockResponse);
     await _handleSuccessfulPayment();
@@ -207,77 +250,22 @@ class PaymentService extends _$PaymentService {
   }
 
   Future<void> refund() async {
-    final price = ref.read(kioskInfoServiceProvider)!.photoCardPrice;
-    if (price == 0) {
-      const mockRefund = PaymentResponse(
-        res: '0000',
-        respCode: '0000',
-        approvalNo: 'FREE',
-        telegramFlag: '0430',
-      );
-      ref.read(paymentResponseStateProvider.notifier).update(mockRefund);
-      await _updateOrder(isRefund: true, description: "자동환불");
-      SlackLogService().sendPaymentBroadcastLogToSlak(InfoKey.paymentRefund.key,
-          paymentDescription: "동작로직: 무료결제 자동환불");
-      ref.read(paymentResponseStateProvider.notifier).reset();
-      return;
-    }
-
-    try {
-      final approvalInfo = ref.read(paymentResponseStateProvider);
-      if (approvalInfo == null) {
-        throw Exception('No payment approval info available');
-      }
-      final approvalNo = approvalInfo.approvalNo ?? '';
-      if (approvalNo.trim().isEmpty) {
-        throw Exception('No approval number available');
-      }
-
-      final price = ref.read(kioskInfoServiceProvider)!.photoCardPrice;
-      final paymentResponse = await ref.read(paymentRepositoryProvider).cancel(
-            totalAmount: price,
-            originalApprovalNo: approvalInfo.approvalNo ?? '',
-            originalApprovalDate: approvalInfo.tradeTime?.substring(0, 6) ?? '',
-          );
-      logger.i(
-          'respCode: ${approvalInfo.respCode} \trespCode: ${approvalInfo.respCode} \nORDER STATUS: ${approvalInfo.orderState}');
-      ref.read(paymentResponseStateProvider.notifier).update(paymentResponse);
-    } catch (e) {
-      logger.e('Refund failed', error: e);
-      rethrow;
-    } finally {
-      final approvalInfo = ref.read(paymentResponseStateProvider);
-      final backPhoto = ref.watch(verifyPhotoCardProvider).value;
-      final paymentRes = approvalInfo?.res;
-      if (approvalInfo?.orderState == OrderStatus.refunded) {
-        await _updateOrder(isRefund: true, description: "자동환불");
-        SlackLogService().sendPaymentBroadcastLogToSlak(InfoKey.paymentRefund.key,
-            paymentDescription:
-                "동작로직: 자동환불\n- 인증번호: ${backPhoto?.photoAuthNumber ?? "없음"}\n- 승인번호: ${approvalInfo?.approvalNo ?? "없음"}");
-        ref.read(paymentResponseStateProvider.notifier).reset();
-        SlackLogService().sendLogToSlack('paymentResponseState Reset'); //paymentTestSlack
-      } else {
-        switch (paymentRes) {
-          case '1000':
-            await _updateOrder(isRefund: true, description: "고객취소");
-            SlackLogService().sendPaymentBroadcastLogToSlak(InfoKey.paymentRefundFail.key,
-                paymentDescription:
-                    "동작로직: 자동환불\n- 사유: 사용자가 환불취소 누름\n- 인증번호: ${backPhoto?.photoAuthNumber ?? "없음"}\n- 승인번호: ${approvalInfo?.approvalNo ?? "없음"}");
-            break;
-          case '1004':
-            await _updateOrder(isRefund: true, description: "시간초과");
-            SlackLogService().sendPaymentBroadcastLogToSlak(InfoKey.paymentRefundFail.key,
-                paymentDescription:
-                    "동작로직: 자동환불\n- 사유: 시간초과\n- 인증번호: ${backPhoto?.photoAuthNumber ?? "없음"}\n- 승인번호: ${approvalInfo?.approvalNo ?? "없음"}");
-            break;
-          default:
-            await _updateOrder(isRefund: true, description: "확인필요");
-            SlackLogService().sendPaymentBroadcastLogToSlak(InfoKey.paymentRefundFail.key,
-                paymentDescription:
-                    "동작로직: 자동환불\n- 사유: 확인필요\n- 인증번호: ${backPhoto?.photoAuthNumber ?? "없음"}\n- 승인번호: ${approvalInfo?.approvalNo ?? "없음"}");
-        }
-      }
-    }
+    // 무료 뽑기: 항상 mock 환불 처리 (KSCAT 미호출)
+    final currentApproval = ref.read(paymentResponseStateProvider);
+    final fakeRefundNo = currentApproval?.approvalNo ?? (10000000 + Random().nextInt(90000000)).toString();
+    final mockKsnet = _buildMockKsnet(fakeRefundNo);
+    final mockRefund = PaymentResponse(
+      res: '0000',
+      respCode: '0000',
+      approvalNo: fakeRefundNo,
+      telegramFlag: '0430',
+      ksnet: mockKsnet,
+    );
+    ref.read(paymentResponseStateProvider.notifier).update(mockRefund);
+    await _updateOrder(isRefund: true, description: "자동환불");
+    SlackLogService().sendPaymentBroadcastLogToSlak(InfoKey.paymentRefund.key,
+        paymentDescription: "동작로직: 무료뽑기 자동환불");
+    ref.read(paymentResponseStateProvider.notifier).reset();
   }
 
   Future<bool> error409_refund(OrderErrorEntity order) async {
@@ -392,7 +380,7 @@ class PaymentService extends _$PaymentService {
       approvalNumber: approval?.approvalNo ?? '-',
       purchaseAuthNumber: approval?.approvalNo ?? '-',
       authSeqNumber: approval?.approvalNo ?? '-',
-      detail: approval?.KSNET ?? '{}',
+      detail: approval?.ksnet != null ? approval!.KSNET : '{}',
       description: description,
     );
 
@@ -431,7 +419,7 @@ class PaymentService extends _$PaymentService {
           approvalNumber: '-',
           purchaseAuthNumber: '-',
           authSeqNumber: '-',
-          detail: approval?.KSNET ?? '{}',
+          detail: approval?.ksnet != null ? approval!.KSNET : '{}',
           description: description);
 
       return await ref.read(kioskRepositoryProvider).updateOrderStatus(orderId.toInt(), request);

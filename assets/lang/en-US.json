@@ -60,6 +60,7 @@
   "choice_select_recommended_image": "Please select a recommended image.",
   "choice_upload_my_photo": "Upload my photo",
   "choice_select_and_print": "Select & Print",
+  "choice_btn_print": "Print",
   "choice_step1_qr_upload": "STEP 1. Scan QR & Upload",
   "choice_step2_enter_code_print": "STEP 2. Enter code & Print",
   "choice_select_image": "Select an image",

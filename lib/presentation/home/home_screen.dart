@@ -17,8 +17,6 @@ class HomeScreen extends ConsumerWidget {
     final buttonColor = kiosk?.mainButtonColor.toColor() ?? Colors.black;
     final buttonTextColor = kiosk?.buttonTextColor.toColor(fallback: Colors.white) ?? Colors.white;
     final mainTextColor = kiosk?.mainTextColor.toColor(fallback: Colors.white) ?? Colors.white;
-    String priceValue = NumberFormat.currency(locale: 'ko_KR', symbol: '').format(kiosk?.photoCardPrice);
-
     return DefaultTextStyle(
       style: TextStyle(
         fontFamily: context.locale.languageCode == 'ja' ? 'MPLUSRounded' : 'Cafe24Ssurround2',
@@ -26,24 +24,6 @@ class HomeScreen extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 34.w, vertical: 7.h),
-            decoration: BoxDecoration(
-              color: buttonColor,
-              borderRadius: BorderRadius.circular(30.r),
-            ),
-            child: Text(
-              '1EA | $priceValue${LocaleKeys.currency_won.tr()}',
-              style: isHwe
-                  ? context.typography.vendingBody3B.copyWith(color: buttonTextColor, letterSpacing: 2.4)
-                  : context.typography.kioskBody1B.copyWith(
-                      color: buttonTextColor,
-                      fontSize: 30.sp,
-                      letterSpacing: -0.6,
-                    ),
-            ),
-          ),
-          SizedBox(height: 20.h),
           Text(
             LocaleKeys.choice_select_back_image.tr(),
             style: isHwe
