@@ -1,7 +1,7 @@
 name: flutter_snaptag_kiosk
 description: "A new Flutter project."
 publish_to: "none"
-version: 4.1.6
+version: 4.1.7
 
 environment:
   sdk: ^3.6.0
@@ -97,23 +97,23 @@ flutter:
     - family: MPLUSRounded
       fonts:
         - asset: assets/fonts/MPLUSRounded1c-Bold.ttf
-        - weight: 100
+          weight: 100
         - asset: assets/fonts/MPLUSRounded1c-Bold.ttf
-        - weight: 200
+          weight: 200
         - asset: assets/fonts/MPLUSRounded1c-Bold.ttf
-        - weight: 300
+          weight: 300
         - asset: assets/fonts/MPLUSRounded1c-Bold.ttf
-        - weight: 400
+          weight: 400
         - asset: assets/fonts/MPLUSRounded1c-Bold.ttf
-        - weight: 500
+          weight: 500
         - asset: assets/fonts/MPLUSRounded1c-Bold.ttf
-        - weight: 600
+          weight: 600
         - asset: assets/fonts/MPLUSRounded1c-Bold.ttf
-        - weight: 700
+          weight: 700
         - asset: assets/fonts/MPLUSRounded1c-Bold.ttf
-        - weight: 800
+          weight: 800
         - asset: assets/fonts/MPLUSRounded1c-Bold.ttf
-        - weight: 900
+          weight: 900
     - family: Cafe24Ssurround2
       fonts:
         - asset: assets/fonts/Cafe24Ssurround-v2.0.ttf
