@@ -46,6 +46,7 @@ class PaymentScreen extends ConsumerStatefulWidget {
 }
 
 class _PaymentScreenState extends ConsumerState<PaymentScreen> {
+  bool _isNetworkErrorHandled = false;
   /// 시안 6: 선택되지 않은 카드 크기 축소 + 애니메이션
   Widget _buildVariant6AnimatedScaleOnUnselected({
     required int index,
@@ -206,6 +207,32 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen<NetworkState>(networkStatusNotifierProvider, (previous, next) {
+      if (_isNetworkErrorHandled) return;
+      if (previous?.status == next.status) return;
+
+      final isNetworkDown =
+          next.status == NetworkStatus.disconnected || next.status == NetworkStatus.unstable;
+      if (!isNetworkDown) return;
+      if (!ref.read(photoCardPreviewScreenProviderProvider).isLoading) return;
+
+      _isNetworkErrorHandled = true;
+
+      if (!mounted) return;
+      if (context.loaderOverlay.visible) {
+        context.loaderOverlay.hide();
+      }
+
+      DialogHelper.showKioskDialog(
+        context,
+        title: LocaleKeys.alert_title_network_error.tr(),
+        contentText: LocaleKeys.alert_txt_print_network_error.tr(),
+        confirmButtonText: LocaleKeys.alert_btn_print_failure.tr(),
+      ).then((_) {
+        if (mounted) HomeRouteData().go(context);
+      });
+    });
+
     ref.listen<AsyncValue<void>>(
       photoCardPreviewScreenProviderProvider,
       (previous, next) async {
@@ -227,6 +254,8 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
         // 에러/성공 처리
         await next.when(
           error: (error, stack) async {
+            if (_isNetworkErrorHandled) return;
+
             if (mounted) {
               timeoutNotifier.resumeTimer();
             }

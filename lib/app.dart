@@ -218,6 +218,7 @@ class _ErrorApp extends ConsumerWidget {
 /// 라우트 체크 헬퍼 클래스
 class _RouteChecker {
   static bool isPrintProcessScreen(String location) => location.contains('/print-process');
+  static bool isPreviewScreen(String location) => location.contains('/preview');
   static bool isHomeScreen(String location) => location.contains('/home');
   static bool isKioskRoute(String location) => location.contains('/kiosk');
   static bool shouldListenToTouch(String location) =>
@@ -280,8 +281,10 @@ class _NetworkStatusAlertWrapperState extends ConsumerState<_NetworkStatusAlertW
     final router = widget.ref.read(routerProvider);
     final currentLocation = router.routerDelegate.currentConfiguration.uri.toString();
     final isPrintProcessScreen = _RouteChecker.isPrintProcessScreen(currentLocation);
+    final isPreviewScreen = _RouteChecker.isPreviewScreen(currentLocation);
 
     final shouldShowAlert = !isPrintProcessScreen &&
+        !isPreviewScreen &&
         (networkState.status == NetworkStatus.unstable || networkState.status == NetworkStatus.disconnected);
 
     if (shouldShowAlert && !_isAlertShowing) {
