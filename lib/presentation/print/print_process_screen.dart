@@ -29,7 +29,6 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> with Si
   bool _progressCompleted = false;
   bool _progressFrozen = false;
   bool _networkErrorHandled = false;
-  bool _pendingNetworkError = false;
 
   @override
   void initState() {
@@ -69,10 +68,7 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> with Si
       if (!isNetworkDown) return;
       if (_progressCompleted || _progressFrozen) return;
       // 프린터가 이미 실행 중이면 네트워크 에러 무시 (프린트 완료 후 홈에서 처리)
-      if (ref.read(printerServiceProvider).isLoading) {
-        _pendingNetworkError = true;
-        return;
-      }
+      if (ref.read(printerServiceProvider).isLoading) return;
 
       _networkErrorHandled = true;
       _progressFrozen = true;
@@ -202,14 +198,25 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> with Si
 
             ref.read(paymentResponseStateProvider.notifier).reset();
 
+            final networkStatus = ref.read(networkStatusNotifierProvider).status;
+            final isNetworkDown = networkStatus == NetworkStatus.disconnected ||
+                networkStatus == NetworkStatus.unstable;
+
             await DialogHelper.showPrintCompleteDialog(
               context,
             );
 
-            if (_pendingNetworkError) {
-              final notifier = ref.read(networkStatusNotifierProvider.notifier);
+            if (isNetworkDown) {
               Future.delayed(const Duration(milliseconds: 300), () {
-                notifier.refresh();
+                final rootContext = rootNavigatorKey.currentContext;
+                if (rootContext != null) {
+                  DialogHelper.showKioskDialog(
+                    rootContext,
+                    title: LocaleKeys.alert_title_network_error.tr(),
+                    contentText: LocaleKeys.alert_txt_print_network_error.tr(),
+                    confirmButtonText: LocaleKeys.alert_btn_print_failure.tr(),
+                  );
+                }
               });
             }
           },
