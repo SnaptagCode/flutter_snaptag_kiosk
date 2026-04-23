@@ -28,6 +28,8 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> with Si
   late final AnimationController _progressController;
   bool _progressCompleted = false;
   bool _progressFrozen = false;
+  bool _networkErrorHandled = false;
+  bool _pendingNetworkError = false;
 
   @override
   void initState() {
@@ -57,6 +59,42 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> with Si
     final randomAdImage = getRandomAdImageFilePath(ref);
     final isHwe = ref.read(kioskInfoServiceProvider)?.isHwe == true;
 
+    // 네트워크 끊김 즉시 감지: Dio 타임아웃 없이 바로 에러 처리
+    ref.listen<NetworkState>(networkStatusNotifierProvider, (previous, next) {
+      if (_networkErrorHandled) return;
+      if (previous?.status == next.status) return;
+
+      final isNetworkDown =
+          next.status == NetworkStatus.disconnected || next.status == NetworkStatus.unstable;
+      if (!isNetworkDown) return;
+      if (_progressCompleted || _progressFrozen) return;
+      // 프린터가 이미 실행 중이면 네트워크 에러 무시 (프린트 완료 후 홈에서 처리)
+      if (ref.read(printerServiceProvider).isLoading) {
+        _pendingNetworkError = true;
+        return;
+      }
+
+      _networkErrorHandled = true;
+      _progressFrozen = true;
+      _progressController.stop();
+
+      if (!mounted) return;
+
+      // 프린터 시작 전 네트워크 에러 → 자동 환불 후 에러 다이얼로그
+      refund().then((_) {
+        if (!mounted) return;
+        checkCardSingleCardCount();
+        DialogHelper.showKioskDialog(
+          context,
+          title: LocaleKeys.alert_title_network_error.tr(),
+          contentText: LocaleKeys.alert_txt_print_network_error.tr(),
+          confirmButtonText: LocaleKeys.alert_btn_print_failure.tr(),
+        ).then((_) {
+          if (mounted) HomeRouteData().go(context);
+        });
+      });
+    });
+
     // 실제 프린트 시작 시점 감지: 10% → 99% 애니메이션
     ref.listen(printerServiceProvider, (previous, next) {
       if (next.isLoading && !_progressCompleted && !_progressFrozen) {
@@ -77,6 +115,8 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> with Si
         // 로딩이 아닐 때만 처리
         await next.when(
           error: (error, stack) async {
+            if (_networkErrorHandled) return;
+
             // 오류 발생 시: 현재 진행률에서 멈춤 (요구사항)
             if (!_progressCompleted && !_progressFrozen) {
               _progressFrozen = true;
@@ -166,6 +206,12 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> with Si
               context,
               onButtonPressed: () {
                 HomeRouteData().go(context);
+                if (_pendingNetworkError) {
+                  final notifier = ref.read(networkStatusNotifierProvider.notifier);
+                  Future.delayed(const Duration(milliseconds: 300), () {
+                    notifier.refresh();
+                  });
+                }
               },
             );
           },
