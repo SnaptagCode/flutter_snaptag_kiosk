@@ -204,16 +204,14 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> with Si
 
             await DialogHelper.showPrintCompleteDialog(
               context,
-              onButtonPressed: () {
-                HomeRouteData().go(context);
-                if (_pendingNetworkError) {
-                  final notifier = ref.read(networkStatusNotifierProvider.notifier);
-                  Future.delayed(const Duration(milliseconds: 300), () {
-                    notifier.refresh();
-                  });
-                }
-              },
             );
+
+            if (_pendingNetworkError) {
+              final notifier = ref.read(networkStatusNotifierProvider.notifier);
+              Future.delayed(const Duration(milliseconds: 300), () {
+                notifier.refresh();
+              });
+            }
           },
         );
       }
