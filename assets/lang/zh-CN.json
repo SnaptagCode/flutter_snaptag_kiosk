@@ -68,5 +68,6 @@
   "currency_won": "韩元",
   "common_btn_back": "返回",
   "alert_title_network_error": "Network Connection Error",
-  "alert_txt_network_error": "The network connection is unstable, so the event could not be loaded. Please check your internet connection and run the app again."
+  "alert_txt_network_error": "The network connection is unstable, so the event could not be loaded. Please check your internet connection and run the app again.",
+  "alert_txt_print_network_error": "打印过程中发生网络错误。\n请联系管理员。"
 }

@@ -9,6 +9,7 @@ import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_servic
 import 'package:flutter_snaptag_kiosk/presentation/setup/page_print_provider.dart';
 import 'package:flutter_snaptag_kiosk/core/ui/widget/dialog_helper.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/print_process_screen_provider.dart';
+import 'package:flutter_snaptag_kiosk/presentation/print/card_printer.dart';
 import 'package:flutter_snaptag_kiosk/presentation/payment/payment_response_state.dart';
 
 import 'dart:io';
@@ -34,18 +35,13 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> with Si
 
     _progressController = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 30), // 초기값(단면) - 아래에서 실제 duration 설정
+      duration: const Duration(seconds: 10),
     );
 
-    // 단면(약 30초) / 양면(약 60초) 기준으로 99%까지 부드럽게 증가
-    final pagePrintType = ref.read(pagePrintProvider);
-    final isMetal = ref.read(kioskInfoServiceProvider)?.isMetal ?? false;
-    final seconds = pagePrintType == PagePrintType.double ? (isMetal ? 68 : 60) : (isMetal ? 35 : 30);
-    _progressController.duration = Duration(seconds: seconds);
-
-    // 0% -> 99% (0.99)까지 선형으로 진행
+    // API 호출 단계: 0% → 10% 천천히
     _progressController.animateTo(
-      0.99,
+      0.10,
+      duration: const Duration(seconds: 10),
       curve: Curves.linear,
     );
   }
@@ -60,6 +56,20 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> with Si
   Widget build(BuildContext context) {
     final randomAdImage = getRandomAdImageFilePath(ref);
     final isHwe = ref.read(kioskInfoServiceProvider)?.isHwe == true;
+
+    // 실제 프린트 시작 시점 감지: 10% → 99% 애니메이션
+    ref.listen(printerServiceProvider, (previous, next) {
+      if (next.isLoading && !_progressCompleted && !_progressFrozen) {
+        final pagePrintType = ref.read(pagePrintProvider);
+        final isMetal = ref.read(kioskInfoServiceProvider)?.isMetal ?? false;
+        final seconds = pagePrintType == PagePrintType.double ? (isMetal ? 68 : 60) : (isMetal ? 35 : 30);
+        _progressController.animateTo(
+          0.99,
+          duration: Duration(seconds: seconds),
+          curve: Curves.linear,
+        );
+      }
+    });
 
     // listen 부분에서는 로딩 오버레이 처리를 제거
     ref.listen(printProcessScreenProviderProvider, (previous, next) async {
@@ -93,17 +103,15 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> with Si
             // 네트워크 오류인지 체크
             final isNetworkError = ref.read(networkStatusNotifierProvider.notifier).isNetworkError(error);
 
-            // 네트워크 오류라면 카드 단일 카드 수량 확인 후 완료 알럿 표시
             if (isNetworkError) {
-              // 카드 단일 카드 수량 확인
               checkCardSingleCardCount();
-
-              await DialogHelper.showPrintCompleteDialog(
+              await DialogHelper.showKioskDialog(
                 context,
-                onButtonPressed: () {
-                  HomeRouteData().go(context);
-                },
+                title: LocaleKeys.alert_title_network_error.tr(),
+                contentText: LocaleKeys.alert_txt_print_network_error.tr(),
+                confirmButtonText: LocaleKeys.alert_btn_print_failure.tr(),
               );
+              HomeRouteData().go(context);
               return;
             }
 

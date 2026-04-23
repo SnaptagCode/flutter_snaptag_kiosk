@@ -60,6 +60,8 @@ abstract class LocaleKeys {
 
   static const alert_title_auto_refund_alert = 'alert_title_auto_refund_alert';
   static const alert_txt_auto_refund_alert = 'alert_txt_auto_refund_alert';
+  static const alert_title_network_error = 'alert_title_network_error';
+  static const alert_txt_print_network_error = 'alert_txt_print_network_error';
   static const choice_recommended_images = 'choice_recommended_images';
   static const choice_select_recommended_image = 'choice_select_recommended_image';
   static const choice_upload_my_photo = 'choice_upload_my_photo';
