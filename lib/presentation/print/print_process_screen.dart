@@ -76,18 +76,13 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> with Si
 
       if (!mounted) return;
 
-      // 프린터 시작 전 네트워크 에러 → 자동 환불 후 에러 다이얼로그
-      refund().then((_) {
-        if (!mounted) return;
-        checkCardSingleCardCount();
-        DialogHelper.showKioskDialog(
-          context,
-          title: LocaleKeys.alert_title_network_error.tr(),
-          contentText: LocaleKeys.alert_txt_print_network_error.tr(),
-          confirmButtonText: LocaleKeys.alert_btn_print_failure.tr(),
-        ).then((_) {
-          if (mounted) HomeRouteData().go(context);
-        });
+      DialogHelper.showKioskDialog(
+        context,
+        title: LocaleKeys.alert_title_network_error.tr(),
+        contentText: LocaleKeys.alert_txt_print_network_error.tr(),
+        confirmButtonText: LocaleKeys.alert_btn_print_failure.tr(),
+      ).then((_) {
+        if (mounted) HomeRouteData().go(context);
       });
     });
 
