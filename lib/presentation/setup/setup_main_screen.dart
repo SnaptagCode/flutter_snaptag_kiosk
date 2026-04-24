@@ -1,26 +1,22 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:dio/dio.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_snaptag_kiosk/core/common/launcher/launcher_service.dart';
 import 'package:flutter_snaptag_kiosk/core/common/sound/sound_manager.dart';
-import 'package:flutter_snaptag_kiosk/core/data/models/request/unique_key_request.dart';
+import 'package:flutter_snaptag_kiosk/core/data/datasources/local/id_writer.dart';
+import 'package:flutter_snaptag_kiosk/core/providers/version_notifier.dart';
+import 'package:flutter_snaptag_kiosk/core/ui/widget/dialog_helper.dart';
+import 'package:flutter_snaptag_kiosk/lib.dart';
+import 'package:flutter_snaptag_kiosk/presentation/core/card_count_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/card_printer.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/luca/state/printer_connect_state.dart';
-import 'package:flutter_snaptag_kiosk/lib.dart';
-import 'package:flutter_snaptag_kiosk/presentation/core/card_count_provider.dart';
-import 'package:flutter_snaptag_kiosk/presentation/setup/page_print_provider.dart';
-import 'package:flutter_snaptag_kiosk/presentation/setup/uuid_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/setup/alert_definition_provider.dart';
-import 'package:flutter_snaptag_kiosk/core/ui/widget/dialog_helper.dart';
+import 'package:flutter_snaptag_kiosk/presentation/setup/page_print_provider.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:flutter_snaptag_kiosk/core/providers/version_notifier.dart';
-import 'package:flutter_snaptag_kiosk/core/common/launcher/launcher_service.dart';
-import 'package:flutter_snaptag_kiosk/core/data/datasources/local/id_writer.dart';
 
 class SetupMainScreen extends ConsumerStatefulWidget {
   const SetupMainScreen({super.key});
@@ -82,6 +78,21 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
       return;
     }
 
+    if (pagePrintType == PagePrintType.single) {
+      final cardCountState = ref.read(cardCountProvider);
+      if (cardCountState.currentCount == 0) {
+        if (!context.mounted) return;
+        final confirmed = await DialogHelper.showSetupDialog(
+          context,
+          title: '양면 인쇄 전환',
+          content: '단면 카드 수량이 0장으로 설정되었습니다.\n양면 인쇄로 전환하시겠습니까?',
+          showCancelButton: true,
+        );
+        if (!confirmed) return;
+        ref.read(pagePrintProvider.notifier).set(PagePrintType.double);
+      }
+    }
+
     final isReady = await _validatePrinterReadyAndShowDialogs(context);
 
     if (!isReady) return;
@@ -100,9 +111,7 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
       kioskInfo = ref.read(kioskInfoServiceProvider);
     }
 
-    if (kioskInfo == null ||
-        kioskInfo.kioskEventId == 0 ||
-        kioskInfo.kioskMachineId == 0) {
+    if (kioskInfo == null || kioskInfo.kioskEventId == 0 || kioskInfo.kioskMachineId == 0) {
       if (!context.mounted) return;
       await DialogHelper.showSetupDialog(
         context,

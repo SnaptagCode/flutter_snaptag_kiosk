@@ -47,7 +47,6 @@ app.*.map.json
 /android/app/release
 
 /web/
-/windows/
 
 # 보안
 *.env
