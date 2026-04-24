@@ -70,5 +70,6 @@
   "currency_won": "ウォン",
   "common_btn_back": "戻る",
   "alert_title_network_error": "ネットワーク接続エラー",
-  "alert_txt_network_error": "ネットワークエラーのため\nイベントを読み込めません。\n接続を確認して再試行してください。"
+  "alert_txt_network_error": "ネットワークエラーのため\nイベントを読み込めません。\n接続を確認して再試行してください。",
+  "alert_txt_print_network_error": "印刷中にネットワークエラーが発生しました。\n管理者にお問い合わせください。"
 }

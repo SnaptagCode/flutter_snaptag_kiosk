@@ -70,5 +70,6 @@
   "currency_won": "원",
   "common_btn_back": "뒤로가기",
   "alert_title_network_error": "네트워크 연결 실패",
-  "alert_txt_network_error": "네트워크 오류로 이벤트를 불러올 수 없습니다.\n인터넷 연결을 확인 후 다시 시도해 주세요."
+  "alert_txt_network_error": "네트워크 오류로 이벤트를 불러올 수 없습니다.\n인터넷 연결을 확인 후 다시 시도해 주세요.",
+  "alert_txt_print_network_error": "네트워크 중 문제가 발생했습니다.\n관리자에게 문의해주세요."
 }
