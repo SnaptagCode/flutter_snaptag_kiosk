@@ -10,7 +10,6 @@ import 'package:flutter_snaptag_kiosk/presentation/verification/auth_code_provid
 import 'package:flutter_snaptag_kiosk/presentation/verification/verify_photo_card_provider.dart';
 import 'package:flutter_snaptag_kiosk/core/ui/widget/dialog_helper.dart';
 import 'package:flutter_snaptag_kiosk/presentation/payment/payment_service.dart';
-import 'package:flutter_snaptag_kiosk/presentation/payment/photo_card_preview_screen_provider.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 
 class CodeVerificationScreen extends ConsumerWidget {
@@ -18,34 +17,6 @@ class CodeVerificationScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    ref.listen<AsyncValue<void>>(
-      photoCardPreviewScreenProviderProvider,
-      (previous, next) async {
-        if (next.isLoading) {
-          context.loaderOverlay.show();
-          return;
-        }
-        if (context.loaderOverlay.visible) {
-          context.loaderOverlay.hide();
-        }
-        next.whenOrNull(
-          error: (error, stack) async {
-            if (error.toString().contains('R600')) {
-              await DialogHelper.showPrintErrorDialog(context);
-            } else if (error.toString().contains('Card feeder is empty')) {
-              await DialogHelper.showPrintCardRefillDialog(context);
-            } else {
-              await DialogHelper.showErrorDialog(context);
-              SlackLogService().sendErrorLogToSlack('Free draw failed: $error stacktrace $stack');
-            }
-          },
-          data: (_) {
-            PrintProcessRouteData().go(context);
-          },
-        );
-      },
-    );
-
     ref.listen<AsyncValue<BackPhotoCardResponse?>>(
       verifyPhotoCardProvider,
       (previous, next) {
@@ -70,9 +41,8 @@ class CodeVerificationScreen extends ConsumerWidget {
           },
           data: (response) {
             if (response != null) {
-              // 무료 뽑기: PaymentScreen 없이 자동 결제 처리
-              ref.read(photoCardPreviewScreenProviderProvider.notifier).payment();
               ref.read(authCodeProvider.notifier).clear();
+              PhotoCardPreviewRouteData().go(context);
             }
           },
         );
