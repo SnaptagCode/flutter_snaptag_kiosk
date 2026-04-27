@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_snaptag_kiosk/core/common/launcher/launcher_service.dart';
 import 'package:flutter_snaptag_kiosk/core/common/sound/sound_manager.dart';
 import 'package:flutter_snaptag_kiosk/core/data/datasources/local/id_writer.dart';
 import 'package:flutter_snaptag_kiosk/core/providers/version_notifier.dart';
@@ -239,11 +238,8 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
     final versionState = ref.watch(versionStateProvider);
     final cardCountState = ref.watch(cardCountProvider);
     final currentVersion = versionState.currentVersion;
-    final latestVersion = versionState.latestVersion;
-    final isUpdateAvailable = currentVersion != latestVersion;
     final isConnectedPrinter = ref.watch(printerConnectProvider) == PrinterConnectState.connected;
     final getInfoByKey = ref.watch(kioskInfoServiceProvider.notifier).getInfoByKey;
-    //final isUpdateAvailable = false;
 
     return Theme(
       data: Theme.of(context).copyWith(
@@ -577,34 +573,6 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
                       child: SetupUpdateCard(
                         title: '현재 버전',
                         version: currentVersion,
-                        buttonName: '업데이트',
-                        isActive: isUpdateAvailable,
-                        onUpdatePressed: () async {
-                          final result = await DialogHelper.showKioskDialog(
-                            context,
-                            title: '업데이트 하시겠습니까?',
-                            contentText: '업데이트 시 앱이 재시작 됩니다.',
-                            cancelButtonText: '취소',
-                            confirmButtonText: '완료',
-                          );
-                          if (result) {
-                            try {
-                              final launcherPath = await LauncherPathUtil.getLauncherPath();
-                              await ForceUpdateWriter.writeForceUpdateTrue();
-                              print("Process.start");
-                              await Process.start(
-                                launcherPath,
-                                ['f'],
-                                runInShell: true,
-                                mode: ProcessStartMode.detached,
-                              );
-                              print("Process.start(launcherPath, ['f'])");
-                              exit(0);
-                            } catch (e) {
-                              print("런처 실행 실패: $e");
-                            }
-                          } else {}
-                        },
                       ),
                     ),
                   ),
@@ -632,8 +600,7 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
               SizedBox(
                   width: 820.w, //780
                   height: 88.h,
-                  child:
-                      isUpdateAvailable ? UpdateNoticeBanner(latestVersion: versionState.latestVersion) : SizedBox()),
+                  child: SizedBox()),
             ],
           ),
         ),
@@ -791,17 +758,14 @@ class SetupSubCard<T> extends ConsumerWidget {
 class SetupUpdateCard extends StatelessWidget {
   final String title;
   final String version;
-  final String buttonName;
-  final bool isActive;
-  final VoidCallback? onUpdatePressed;
 
   const SetupUpdateCard({
     super.key,
     required this.title,
     required this.version,
-    required this.buttonName,
-    required this.isActive,
-    this.onUpdatePressed,
+    String? buttonName,
+    bool? isActive,
+    VoidCallback? onUpdatePressed,
   });
 
   @override
@@ -821,6 +785,7 @@ class SetupUpdateCard extends StatelessWidget {
         height: 342.h,
         padding: EdgeInsets.only(top: 63.h),
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             SizedBox(height: 40.w),
             Text(
@@ -832,31 +797,6 @@ class SetupUpdateCard extends StatelessWidget {
             SizedBox(height: 12.w),
             Text(version, style: context.typography.kioskNum2B),
             const Spacer(),
-            SizedBox(
-              width: 216.w,
-              height: 46.h,
-              child: ElevatedButton(
-                onPressed: isActive ? onUpdatePressed : null,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: isActive ? Color(0xFF316FFF) : Color(0xFFD5D5D5),
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-                child: Text(
-                  buttonName,
-                  style: TextStyle(
-                    fontSize: 26.sp,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                    letterSpacing: -0.2,
-                    height: 1.0,
-                  ),
-                ),
-              ),
-            ),
-            SizedBox(height: 24.w),
           ],
         ),
       ),
