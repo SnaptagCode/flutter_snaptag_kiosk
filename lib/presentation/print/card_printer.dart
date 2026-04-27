@@ -22,7 +22,8 @@ class PrinterService extends _$PrinterService {
 
   Future<bool> connectedPrinter() async {
     try {
-      final printerManager = await PrinterManager.getInstance();
+      final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId;
+      final printerManager = await PrinterManager.getInstance(machineId: machineId);
       final isConnected = await printerManager.checkConnectedPrint();
 
       return isConnected;
@@ -33,7 +34,8 @@ class PrinterService extends _$PrinterService {
 
   Future<bool> checkSettingPrinter() async {
     try {
-      final printerManager = await PrinterManager.getInstance();
+      final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId;
+      final printerManager = await PrinterManager.getInstance(machineId: machineId);
       final isSetting = await printerManager.checkSettingPrinter();
 
       return isSetting;
@@ -44,7 +46,8 @@ class PrinterService extends _$PrinterService {
 
   Future<void> checkFeeder() async {
     try {
-      final printerManager = await PrinterManager.getInstance();
+      final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId;
+      final printerManager = await PrinterManager.getInstance(machineId: machineId);
       // await printerManager.initLibrary();
       await printerManager.checkFeeder();
     } catch (e) {
@@ -54,7 +57,8 @@ class PrinterService extends _$PrinterService {
 
   Future<RibbonStatus> getRibbonStatus() async {
     try {
-      final printerManager = await PrinterManager.getInstance();
+      final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId;
+      final printerManager = await PrinterManager.getInstance(machineId: machineId);
       return await printerManager.getRibbonStatus();
     } catch (e) {
       rethrow;
@@ -63,7 +67,8 @@ class PrinterService extends _$PrinterService {
 
   Future<void> printerStateLog() async {
     try {
-      final printerManager = await PrinterManager.getInstance();
+      final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId;
+      final printerManager = await PrinterManager.getInstance(machineId: machineId);
 
       final printerLog = await printerManager.startLog();
 
@@ -98,7 +103,8 @@ class PrinterService extends _$PrinterService {
   }) async {
     try {
       state = const AsyncValue.loading();
-      final printerManager = await PrinterManager.getInstance();
+      final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId;
+      final printerManager = await PrinterManager.getInstance(machineId: machineId);
       final isMetal = ref.read(kioskInfoServiceProvider)?.isMetal == true ? true : false;
 
       final printerLog = await printerManager.startPrint(

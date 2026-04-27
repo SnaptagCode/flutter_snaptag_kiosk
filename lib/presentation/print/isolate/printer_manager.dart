@@ -29,14 +29,16 @@ class PrinterManager {
   static PrinterManager? _instance;
   late SendPort _sendPort;
   String? _metalWatermarkPath;
+  int? _machineId;
 
   PrinterManager._();
 
-  static Future<PrinterManager> getInstance() async {
+  static Future<PrinterManager> getInstance({int? machineId}) async {
     try {
       if (_instance != null) return _instance!;
       logger.i('PrinterManager Initializing PrinterManager...');
       _instance = PrinterManager._();
+      _instance!._machineId = machineId;
       await _instance!._init();
       return _instance!;
     } catch (e) {
@@ -62,6 +64,7 @@ class PrinterManager {
       await Isolate.spawn(_printEntry, {
         'sendPort': printReceivePort.sendPort,
         'metalWatermarkPath': _metalWatermarkPath,
+        'machineId': _machineId,
       });
 
       _sendPort = await printReceivePort.first;
@@ -76,6 +79,7 @@ class PrinterManager {
       logger.i('PrinterManager Print isolate entry point started');
       final SendPort sendPort = initMessage['sendPort'] as SendPort;
       final String? metalWatermarkPath = initMessage['metalWatermarkPath'] as String?;
+      final int? machineId = initMessage['machineId'] as int?;
 
       logger.i('PrinterManager Print isolate entry point started');
       final isolateReceivePort = ReceivePort();
@@ -159,7 +163,7 @@ class PrinterManager {
 
             if (ob is CheckCardPositionMessage) {
               try {
-                _checkCardInPrinter(bindings);
+                _checkCardInPrinter(bindings, machineId: machineId);
                 logger.i('_printEntry CheckCardPositionMessage: Card check passed');
                 replyPort.send({'errorMsg': ''});
               } catch (e) {
@@ -269,7 +273,7 @@ class PrinterManager {
     }
   }
 
-  void _checkCardInPrinter(PrinterBindings bindings) {
+  void _checkCardInPrinter(PrinterBindings bindings, {int? machineId}) {
     try {
       logger.i('Checking card in printer...');
       final isCardInPrinter = bindings.checkCardPosition();
@@ -278,7 +282,7 @@ class PrinterManager {
         bindings.ejectCard();
       }
     } catch (e) {
-      SlackLogService().sendErrorLogToSlack('[PRINTER] _checkCardInPrinter 오류: $e');
+      SlackLogService().sendErrorLogToSlack('[MachineId: $machineId] [PRINTER] _checkCardInPrinter 오류: $e');
       rethrow;
     }
   }
@@ -295,7 +299,7 @@ class PrinterManager {
 
       return isConnected;
     } catch (e) {
-      SlackLogService().sendBroadcastLogToSlack('[PRINTER] checkConnectedPrint 오류: $e');
+      SlackLogService().sendBroadcastLogToSlack('[MachineId: $_machineId] [PRINTER] checkConnectedPrint 오류: $e');
       return false;
     }
   }
@@ -328,7 +332,7 @@ class PrinterManager {
       if (errorMsg.isNotEmpty) throw Exception(errorMsg);
       return isReady;
     } catch (e) {
-      SlackLogService().sendErrorLogToSlack('[PRINTER] checkSettingPrinter 오류: $e');
+      SlackLogService().sendErrorLogToSlack('[MachineId: $_machineId] [PRINTER] checkSettingPrinter 오류: $e');
       return false;
     }
   }
@@ -337,7 +341,7 @@ class PrinterManager {
     try {
       await _sendAndHandleResponse(CheckFeederMessage());
     } catch (e) {
-      SlackLogService().sendErrorLogToSlack('[PRINTER] checkFeeder 오류: $e');
+      SlackLogService().sendErrorLogToSlack('[MachineId: $_machineId] [PRINTER] checkFeeder 오류: $e');
       rethrow;
     }
   }
@@ -509,7 +513,7 @@ class PrinterManager {
       );
 
       if (_metalWatermarkPath == null) {
-        SlackLogService().sendErrorLogToSlack('Failed to prepare metal watermark asset');
+        SlackLogService().sendErrorLogToSlack('[MachineId: $_machineId] Failed to prepare metal watermark asset');
       }
       logger.i('Metal watermark prepared: $_metalWatermarkPath');
     } catch (e) {
@@ -527,7 +531,7 @@ class PrinterManager {
       if (errorMsg.isNotEmpty) throw Exception(errorMsg);
       return printerLog;
     } catch (e) {
-      SlackLogService().sendErrorLogToSlack('[PRINTER] startLog 오류: $e');
+      SlackLogService().sendErrorLogToSlack('[MachineId: $_machineId] [PRINTER] startLog 오류: $e');
       rethrow;
     }
   }
@@ -540,7 +544,7 @@ class PrinterManager {
       if (errorMsg.isNotEmpty) throw Exception(errorMsg);
       return ribbonStatus ?? RibbonStatus(rbnRemaining: 0, filmRemaining: 0);
     } catch (e) {
-      SlackLogService().sendErrorLogToSlack('[PRINTER] getRibbonStatus 오류: $e');
+      SlackLogService().sendErrorLogToSlack('[MachineId: $_machineId] [PRINTER] getRibbonStatus 오류: $e');
       rethrow;
     }
   }
