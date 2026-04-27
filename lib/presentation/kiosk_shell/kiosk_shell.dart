@@ -35,11 +35,20 @@ class _KioskShellState extends ConsumerState<KioskShell> {
     ref.read(kioskInfoServiceProvider);
 
     final exeDir = p.dirname(Platform.resolvedExecutable);
-    final bannerPath = p.join(exeDir, 'image', 'banner.png');
-    final bgPath = p.join(exeDir, 'image', 'background.png');
+    final imageDir = Directory(p.join(exeDir, 'image'));
+    const exts = ['.jpg', '.jpeg', '.png', '.webp'];
 
-    final bannerFile = File(bannerPath);
-    final bgFile = File(bgPath);
+    File? findImage(String baseName) {
+      if (!imageDir.existsSync()) return null;
+      for (final ext in exts) {
+        final f = File(p.join(imageDir.path, '$baseName$ext'));
+        if (f.existsSync()) return f;
+      }
+      return null;
+    }
+
+    final bannerFile = findImage('banner');
+    final bgFile = findImage('background');
 
     return Stack(
       children: [
@@ -49,7 +58,7 @@ class _KioskShellState extends ConsumerState<KioskShell> {
               SizedBox(
                 height: 855.h,
                 width: double.infinity,
-                child: bannerFile.existsSync()
+                child: bannerFile != null
                     ? Image.file(bannerFile, fit: BoxFit.cover)
                     : Image.asset('assets/images/fallback_body.jpg', fit: BoxFit.cover),
               ),
@@ -65,7 +74,7 @@ class _KioskShellState extends ConsumerState<KioskShell> {
                   child: DecoratedBox(
                     decoration: BoxDecoration(
                       image: DecorationImage(
-                        image: bgFile.existsSync()
+                        image: bgFile != null
                             ? FileImage(bgFile) as ImageProvider
                             : const AssetImage('assets/images/fallback_body.jpg'),
                         fit: BoxFit.cover,

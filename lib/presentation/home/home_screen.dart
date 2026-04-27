@@ -20,7 +20,7 @@ class HomeScreen extends ConsumerWidget {
         .whereType<File>()
         .where((f) {
           final lower = f.path.toLowerCase();
-          return lower.endsWith('.jpg') || lower.endsWith('.jpeg') || lower.endsWith('.png');
+          return lower.endsWith('.jpg') || lower.endsWith('.jpeg') || lower.endsWith('.png') || lower.endsWith('.webp');
         })
         .toList()
       ..sort((a, b) => a.path.compareTo(b.path));
@@ -139,7 +139,7 @@ class HomeScreen extends ConsumerWidget {
                             ),
                             alignment: Alignment.center,
                             child: Text(
-                              '시작하기',
+                              LocaleKeys.home_btn_start.tr(),
                               style: isHwe
                                   ? context.typography.vendingBtn3B.copyWith(color: buttonTextColor, fontSize: 32.sp)
                                   : context.typography.kioskBtn1B.copyWith(

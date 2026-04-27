@@ -15,6 +15,7 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter_snaptag_kiosk/presentation/payment/payment_service.dart';
+import 'package:flutter_snaptag_kiosk/core/common/log/app_log_service.dart';
 
 class PrintProcessScreen extends ConsumerStatefulWidget {
   const PrintProcessScreen({super.key});
@@ -73,6 +74,7 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> with Si
               _progressController.stop();
             }
 
+            AppLogService.instance.error('인쇄 실패 - $error');
             final cleanedError = error.toString().replaceFirst('Exception: ', '').trim();
 
             if (cleanedError.contains('Card feeder is empty')) {
@@ -135,6 +137,7 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> with Si
               );
             }
 
+            AppLogService.instance.info('인쇄 완료');
             checkCardSingleCardCount();
 
             ref.read(paymentResponseStateProvider.notifier).reset();
@@ -295,7 +298,7 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> with Si
     final imageFiles = adImageFolder
         .listSync()
         .whereType<File>()
-        .where((f) => f.path.endsWith('.png') || f.path.endsWith('.jpg') || f.path.endsWith('.jpeg'))
+        .where((f) => f.path.endsWith('.png') || f.path.endsWith('.jpg') || f.path.endsWith('.jpeg') || f.path.endsWith('.webp'))
         .toList();
 
     if (imageFiles.isEmpty) {
@@ -338,7 +341,7 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> with Si
     final imageFiles = adImageFolder
         .listSync()
         .whereType<File>()
-        .where((f) => f.path.endsWith('.png') || f.path.endsWith('.jpg') || f.path.endsWith('.jpeg'))
+        .where((f) => f.path.endsWith('.png') || f.path.endsWith('.jpg') || f.path.endsWith('.jpeg') || f.path.endsWith('.webp'))
         .toList();
 
     if (imageFiles.isEmpty) {

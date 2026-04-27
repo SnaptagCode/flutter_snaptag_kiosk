@@ -27,7 +27,7 @@ class FrontPhotoList extends _$FrontPhotoList {
           .whereType<File>()
           .where((f) {
             final lower = f.path.toLowerCase();
-            return lower.endsWith('.jpg') || lower.endsWith('.jpeg') || lower.endsWith('.png');
+            return lower.endsWith('.jpg') || lower.endsWith('.jpeg') || lower.endsWith('.png') || lower.endsWith('.webp');
           })
           .toList()
         ..sort((a, b) => a.path.compareTo(b.path));

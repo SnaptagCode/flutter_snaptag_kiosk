@@ -28,7 +28,7 @@ class PhotoCardPreviewScreenProvider extends _$PhotoCardPreviewScreenProvider {
         .whereType<File>()
         .where((f) {
           final lower = f.path.toLowerCase();
-          return lower.endsWith('.jpg') || lower.endsWith('.jpeg') || lower.endsWith('.png');
+          return lower.endsWith('.jpg') || lower.endsWith('.jpeg') || lower.endsWith('.png') || lower.endsWith('.webp');
         })
         .toList()
       ..sort((a, b) => a.path.compareTo(b.path));
@@ -71,7 +71,7 @@ class PhotoCardPreviewScreenProvider extends _$PhotoCardPreviewScreenProvider {
 
       await ref.read(paymentServiceProvider.notifier).processPayment();
 
-      AppLogService.instance.info('출력 성공');
+      AppLogService.instance.info('결제 완료 - 인쇄 화면으로 이동');
       state = const AsyncValue.data(null);
     } catch (e, stack) {
       AppLogService.instance.error('출력 실패 - $e');

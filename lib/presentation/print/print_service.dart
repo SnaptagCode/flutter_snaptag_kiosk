@@ -8,6 +8,7 @@ import 'package:flutter_snaptag_kiosk/presentation/print/card_printer.dart';
 import 'package:flutter_snaptag_kiosk/presentation/setup/front_photo_list.dart';
 import 'package:flutter_snaptag_kiosk/presentation/setup/page_print_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/verification/verify_photo_card_provider.dart';
+import 'package:path/path.dart' as p;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'print_service.g.dart';
@@ -96,6 +97,19 @@ class PrintService extends _$PrintService {
     required int frontPhotoCardId,
     required int backPhotoCardId,
   }) async {
+    // 로컬 파일 경로가 있으면 API 호출 없이 바로 사용
+    // 원본 파일 보호를 위해 임시 복사본을 만들어 전달 (출력 후 삭제 대상은 복사본)
+    final localBackPath = ref.read(verifyPhotoCardProvider).value?.formattedBackPhotoCardUrl ?? '';
+    if (localBackPath.isNotEmpty) {
+      final localFile = File(localBackPath);
+      if (localFile.existsSync()) {
+        final ext = p.extension(localFile.path);
+        final tempFile = File('${Directory.systemTemp.path}/snaptag_back_${DateTime.now().millisecondsSinceEpoch}$ext');
+        await localFile.copy(tempFile.path);
+        return (printedPhotoCardId: 0, backPhotoFile: tempFile);
+      }
+    }
+
     try {
       final kioskOrderId = ref.read(createOrderInfoProvider)?.orderId ?? 0;
       final request = CreatePrintRequest(
