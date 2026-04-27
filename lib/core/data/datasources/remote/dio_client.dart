@@ -4,6 +4,13 @@ import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
+// Slack 알림을 보낼 API 경로 목록 (startsWith 매칭)
+// - 400 이상: log 채널
+// - 500 이상: error_log 채널
+const _slackMonitoredPaths = [
+  '/v1/order',
+];
+
 final dioProvider = Provider.family<Dio, String>((ref, baseUrl) {
   final dio = Dio()
     ..options.baseUrl = baseUrl
@@ -59,7 +66,12 @@ final dioProvider = Provider.family<Dio, String>((ref, baseUrl) {
       final errorLogger = DioLogger(
         sendHook: (log) {
           if (isSlackAlertRequest) return;
-          final formattedMessage = '*[MachineId : $machineId]*\n$log';
+          final path = err.requestOptions.path;
+          final isMonitored = _slackMonitoredPaths.any((p) => path.startsWith(p));
+          if (!isMonitored) return;
+          final lines = log.split('\n');
+          if (lines.isNotEmpty) lines[0] = '${lines[0]} ║ MachineId: $machineId';
+          final formattedMessage = lines.join('\n');
           if (statusCode >= 400 && statusCode < 500) {
             SlackLogService().sendLogToSlack(formattedMessage);
           } else if (statusCode >= 500) {
