@@ -20,41 +20,21 @@ class FrontImagesAction extends ConsumerWidget {
             ElevatedButton(
               onPressed: () async {
                 try {
-                  await ref.read(frontPhotoListProvider.notifier).fetch();
+                  await ref.read(frontPhotoListProvider.notifier).loadLocal();
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('이미지 저장 성공!')),
+                      const SnackBar(content: Text('이미지 로드 성공!')),
                     );
                   }
                 } catch (e) {
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('이미지 저장 실패: $e')),
+                      SnackBar(content: Text('이미지 로드 실패: $e')),
                     );
                   }
                 }
               },
-              child: const Text('GET'),
-            ),
-            const SizedBox(width: 8),
-            ElevatedButton(
-              onPressed: () async {
-                try {
-                  ref.read(frontPhotoListProvider.notifier).clearDirectory();
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('이미지 삭제 성공!')),
-                    );
-                  }
-                } catch (e) {
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('이미지 삭제 실패: $e')),
-                    );
-                  }
-                }
-              },
-              child: const Text('CLEAR'),
+              child: const Text('LOAD'),
             ),
             FilePathActions(
               directory: DirectoryPaths.frontImages,

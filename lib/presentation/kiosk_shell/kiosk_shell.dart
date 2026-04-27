@@ -1,15 +1,16 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-// import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_snaptag_kiosk/core/ui/widget/back_button.dart';
 import 'package:flutter_snaptag_kiosk/core/ui/widget/kiosk_navigator_button.dart';
 import 'package:flutter_snaptag_kiosk/core/ui/widget/printer_status_badge.dart';
 import 'package:flutter_snaptag_kiosk/core/ui/widget/triple_tap_fab.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
 import 'package:loader_overlay/loader_overlay.dart';
+import 'package:path/path.dart' as p;
 
 class KioskShell extends ConsumerStatefulWidget {
   final Widget child;
@@ -22,16 +23,6 @@ class KioskShell extends ConsumerStatefulWidget {
 
 class _KioskShellState extends ConsumerState<KioskShell> {
   Timer? _periodicTimer;
-  bool _hasNetworkError = false;
-
-  @override
-  void initState() {
-    super.initState();
-
-    // _periodicTimer = Timer.periodic(const Duration(minutes: 30), (timer) {
-    //   SlackLogService().sendPeriodicLogBroadcastLogToSlack();
-    // });
-  }
 
   @override
   void dispose() {
@@ -41,7 +32,14 @@ class _KioskShellState extends ConsumerState<KioskShell> {
 
   @override
   Widget build(BuildContext context) {
-    final settings = ref.read(kioskInfoServiceProvider);
+    ref.read(kioskInfoServiceProvider);
+
+    final exeDir = p.dirname(Platform.resolvedExecutable);
+    final bannerPath = p.join(exeDir, 'image', 'banner.png');
+    final bgPath = p.join(exeDir, 'image', 'background.png');
+
+    final bannerFile = File(bannerPath);
+    final bgFile = File(bgPath);
 
     return Stack(
       children: [
@@ -51,13 +49,9 @@ class _KioskShellState extends ConsumerState<KioskShell> {
               SizedBox(
                 height: 855.h,
                 width: double.infinity,
-                child: Image.network(
-                  settings?.topBannerUrl ?? '',
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return const Center(child: Text('이미지를 찾을 수 없습니다.'));
-                  },
-                ),
+                child: bannerFile.existsSync()
+                    ? Image.file(bannerFile, fit: BoxFit.cover)
+                    : Image.asset('assets/images/fallback_body.jpg', fit: BoxFit.cover),
               ),
               Expanded(
                 child: LoaderOverlay(
@@ -70,22 +64,12 @@ class _KioskShellState extends ConsumerState<KioskShell> {
                   ),
                   child: DecoratedBox(
                     decoration: BoxDecoration(
-                      image: !_hasNetworkError
-                          ? DecorationImage(
-                              image: NetworkImage(settings?.mainImageUrl ?? ''),
-                              onError: (_, __) {
-                                if (mounted) {
-                                  setState(() {
-                                    _hasNetworkError = true;
-                                  });
-                                }
-                              },
-                              fit: BoxFit.cover,
-                            )
-                          : const DecorationImage(
-                              image: AssetImage('assets/images/fallback_body.jpg'),
-                              fit: BoxFit.cover,
-                            ),
+                      image: DecorationImage(
+                        image: bgFile.existsSync()
+                            ? FileImage(bgFile) as ImageProvider
+                            : const AssetImage('assets/images/fallback_body.jpg'),
+                        fit: BoxFit.cover,
+                      ),
                     ),
                     child: Column(
                       children: [

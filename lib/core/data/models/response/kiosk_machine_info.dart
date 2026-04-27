@@ -33,6 +33,7 @@ abstract class KioskMachineInfo with _$KioskMachineInfo {
     @Default([]) List<EventVideo> eventVideos,
     @Default([]) List<NominatedBackPhotoCard> nominatedBackPhotoCardList,
     @Default('') String emblemImageUrl,
+    @Default(0) int singleCardCount,
   }) = _KioskMachineInfo;
 
   factory KioskMachineInfo.fromJson(Map<String, dynamic> json) => _$KioskMachineInfoFromJson(json);

@@ -2,6 +2,7 @@
 import 'dart:io';
 
 // Utf8 사용을 위한 임포트
+import 'package:flutter_snaptag_kiosk/core/common/log/app_log_service.dart';
 import 'package:flutter_snaptag_kiosk/core/common/logger/logger_service.dart';
 import 'package:flutter_snaptag_kiosk/presentation/core/card_count_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/core/printer_log_provider.dart';
@@ -24,9 +25,10 @@ class PrinterService extends _$PrinterService {
     try {
       final printerManager = await PrinterManager.getInstance();
       final isConnected = await printerManager.checkConnectedPrint();
-
+      AppLogService.instance.device('프린터 연결 확인: $isConnected');
       return isConnected;
     } catch (e) {
+      AppLogService.instance.device('프린터 연결 확인 실패: $e');
       return false;
     }
   }
@@ -35,9 +37,10 @@ class PrinterService extends _$PrinterService {
     try {
       final printerManager = await PrinterManager.getInstance();
       final isSetting = await printerManager.checkSettingPrinter();
-
+      AppLogService.instance.device('프린터 설정 확인: $isSetting');
       return isSetting;
     } catch (e) {
+      AppLogService.instance.device('프린터 설정 확인 실패: $e');
       return false;
     }
   }
@@ -45,9 +48,11 @@ class PrinterService extends _$PrinterService {
   Future<void> checkFeeder() async {
     try {
       final printerManager = await PrinterManager.getInstance();
-      // await printerManager.initLibrary();
+      AppLogService.instance.device('피더 체크 시작');
       await printerManager.checkFeeder();
+      AppLogService.instance.device('피더 체크 완료');
     } catch (e) {
+      AppLogService.instance.device('피더 체크 실패: $e');
       rethrow;
     }
   }
@@ -98,6 +103,9 @@ class PrinterService extends _$PrinterService {
   }) async {
     try {
       state = const AsyncValue.loading();
+      final frontName = frontFile != null ? frontFile.path.split(RegExp(r'[/\\]')).last : 'null';
+      final backName = embeddedFile != null ? embeddedFile.path.split(RegExp(r'[/\\]')).last : 'null';
+      AppLogService.instance.device('인쇄 시작: mode=${isSingleMode ? "단면" : "양면"} front=$frontName back=$backName');
       final printerManager = await PrinterManager.getInstance();
       final isMetal = ref.read(kioskInfoServiceProvider)?.isMetal == true ? true : false;
 
@@ -105,10 +113,11 @@ class PrinterService extends _$PrinterService {
           isSingleMode: isSingleMode, frontFile: frontFile, embeddedFile: embeddedFile, isMetal: isMetal);
 
       await _updatePrintStatusAndCheckKioskAlive(printerLog);
+      AppLogService.instance.device('인쇄 완료');
       // 프린트 성공 시 상태를 완료로 변경
       state = const AsyncValue.data(null);
     } catch (e, stackTrace) {
-      // 프린트 실패 시 에러 상태로 변경
+      AppLogService.instance.device('프린터 오류: $e');
       state = AsyncValue.error(e, stackTrace);
       rethrow;
     }

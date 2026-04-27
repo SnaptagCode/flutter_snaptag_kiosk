@@ -2,6 +2,21 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:path/path.dart' as p;
 
+Future<void> updateConfigSingleCardCount(int count) async {
+  final configFile = File(p.join(p.dirname(Platform.resolvedExecutable), 'config.json'));
+  if (!configFile.existsSync()) return;
+
+  try {
+    final raw = await configFile.readAsString();
+    final json = jsonDecode(raw) as Map<String, dynamic>;
+    json['singleCardCount'] = count;
+    final tmp = File('${configFile.path}.tmp');
+    await tmp.writeAsString(const JsonEncoder.withIndent('  ').convert(json), flush: true);
+    if (await configFile.exists()) await configFile.delete();
+    await tmp.rename(configFile.path);
+  } catch (_) {}
+}
+
 Future<File> writePhotocodeId(String id, String eventId, String singleCardCount, String companyname, String version) async {
   final home = Platform.environment['USERPROFILE']!;
   final dir = Directory(p.join(home, 'Snaptag', 'runtime'));

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_snaptag_kiosk/core/common/launcher/launcher_service.dart';
+import 'package:flutter_snaptag_kiosk/core/common/log/app_log_service.dart';
 import 'package:flutter_snaptag_kiosk/core/common/sound/sound_manager.dart';
 import 'package:flutter_snaptag_kiosk/core/data/datasources/local/id_writer.dart';
 import 'package:flutter_snaptag_kiosk/core/providers/version_notifier.dart';
@@ -89,6 +90,7 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
           showCancelButton: true,
         );
         if (!confirmed) return;
+        AppLogService.instance.info('단면 카드 수량 0 - 양면 인쇄로 전환');
         ref.read(pagePrintProvider.notifier).set(PagePrintType.double);
       }
     }
@@ -115,12 +117,6 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
         title: "이벤트를 실행하려면\n키오스크 기기번호를 입력해 주세요.",
       );
       return;
-    }
-
-    // 유료 결제인 경우만 KSCAT 리더기 점검
-    if (kioskInfo.photoCardPrice > 0) {
-      final isPaymentDeviceReady = await _checkPaymentDevice();
-      if (!isPaymentDeviceReady) return;
     }
 
     await _writePhotocodeMeta();
@@ -183,53 +179,13 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
   }
 
   Future<void> _startEventFlow(BuildContext context) async {
-    final versionState = ref.read(versionStateProvider);
-    final currentVersion = versionState.currentVersion;
-    final latestVersion = versionState.latestVersion;
-    final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
-    final kioskEventId = ref.read(kioskInfoServiceProvider)?.kioskEventId ?? 0;
-    final cardCountState = ref.read(cardCountProvider);
-
     try {
       await ref.read(printerServiceProvider.notifier).printerStateLog();
     } catch (e) {
       SlackLogService().sendErrorLogToSlack("Printer State Log: $e");
     }
 
-    try {
-      await ref.read(kioskRepositoryProvider).deleteEndMark(
-            kioskEventId: kioskEventId,
-            machineId: machineId,
-            remainingSingleSidedCount: cardCountState.remainingSingleSidedCount,
-          );
-    } catch (e) {
-      SlackLogService().sendErrorLogToSlack("Delete End Mark: $e");
-    }
-
-    SlackLogService()
-        .sendLogToSlack('machineId:$machineId, currentVersion:$currentVersion, latestVersion:$latestVersion');
-
     HomeRouteData().go(context);
-
-    SlackLogService().sendInspectionEndBroadcastLogToSlack(InfoKey.inspectionEnd.key);
-  }
-
-  Future<bool> _checkPaymentDevice() async {
-    try {
-      final response = await ref.read(paymentRepositoryProvider).check();
-      SlackLogService().sendLogToSlack("Payment Device check: $response");
-
-      return true;
-    } catch (e) {
-      SlackLogService().sendErrorLogToSlack("Payment Device check: $e");
-
-      DialogHelper.showSetupDialog(
-        context,
-        title: '리더기 점검',
-        content: '리더기 응답이 없습니다.\n연결 상태를 확인한 뒤 다시 시도해 주세요.',
-      );
-      return false;
-    }
   }
 
   @override
@@ -268,17 +224,7 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
                   showCancelButton: true,
                 );
                 if (result) {
-                  try {
-                    await ref.read(kioskRepositoryProvider).endKioskApplication(
-                          kioskEventId: ref.read(kioskInfoServiceProvider)?.kioskEventId ?? 0,
-                          machineId: ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0,
-                          remainingSingleSidedCount: cardCountState.remainingSingleSidedCount,
-                        );
-                  } catch (e) {
-                    SlackLogService().sendErrorLogToSlack("End Kiosk Application: $e");
-                  }
-
-                  // 종료
+                  AppLogService.instance.info('앱 종료');
                   exit(0);
                 }
               },
@@ -396,6 +342,7 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
 
                           if (value == null || value.isEmpty) return; // 값이 없으면 종료
                           int cardNumber = int.parse(value);
+                          AppLogService.instance.info('단면 카드 수량 수동 설정: $cardNumber');
                           ref.read(cardCountProvider.notifier).update(cardNumber);
                           if (cardNumber <= 0) {
                             ref.read(pagePrintProvider.notifier).set(PagePrintType.double);

@@ -1,3 +1,4 @@
+import 'package:flutter_snaptag_kiosk/core/common/log/app_log_service.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_snaptag_kiosk/presentation/core/card_count_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
@@ -19,12 +20,15 @@ class PaymentService extends _$PaymentService {
   FutureOr<void> build() => null;
 
   Future<void> processPayment() async {
+    AppLogService.instance.info('결제 프로세스 시작');
     // 1. 사전 검증
     _validatePreconditions();
 
-    // 2. 주문 생성
-    final orderResponse = await _createOrder().catchError((e) => throw OrderCreationException('Create order fail: $e'));
-    ref.read(createOrderInfoProvider.notifier).update(orderResponse);
+    // 2. 주문 생성 (오프라인 시 스킵)
+    try {
+      final orderResponse = await _createOrder();
+      ref.read(createOrderInfoProvider.notifier).update(orderResponse);
+    } catch (_) {}
 
     try {
       // 무료 뽑기: 가격과 무관하게 KSCAT 스킵, 서버에 결제 완료 직접 전송
@@ -103,6 +107,7 @@ class PaymentService extends _$PaymentService {
 
   /// 무료 결제 처리 (KSCAT 스킵)
   Future<void> _handleFreePayment() async {
+    AppLogService.instance.info('무료 결제 시작');
     final fakeApprovalNo = (10000000 + Random().nextInt(90000000)).toString();
     final mockKsnet = _buildMockKsnet(fakeApprovalNo);
     final mockResponse = PaymentResponse(
@@ -114,6 +119,7 @@ class PaymentService extends _$PaymentService {
     );
     ref.read(paymentResponseStateProvider.notifier).update(mockResponse);
     await _handleSuccessfulPayment();
+    AppLogService.instance.info('무료 결제 완료');
     SlackLogService().sendLogToSlack("freePayment: completed");
   }
 
@@ -205,9 +211,10 @@ class PaymentService extends _$PaymentService {
 
   /// 성공적인 결제 처리
   Future<void> _handleSuccessfulPayment() async {
-    final response = await _updateOrder(isRefund: false);
+    try {
+      await _updateOrder(isRefund: false);
+    } catch (_) {}
     await ref.read(cardCountProvider.notifier).decrease();
-    SlackLogService().sendLogToSlack("paymentResponse0000 : $response");
   }
 
   /// 시간 초과 결제 처리
@@ -250,6 +257,7 @@ class PaymentService extends _$PaymentService {
   }
 
   Future<void> refund() async {
+    AppLogService.instance.info('환불 시작');
     // 무료 뽑기: 항상 mock 환불 처리 (KSCAT 미호출)
     final currentApproval = ref.read(paymentResponseStateProvider);
     final fakeRefundNo = currentApproval?.approvalNo ?? (10000000 + Random().nextInt(90000000)).toString();

@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_snaptag_kiosk/core/common/log/app_log_service.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -19,6 +20,7 @@ void main() async {
   } else {
     F.appFlavor = Flavor.prod;
   }
+  AppLogService.instance.info('앱 시작');
   await dotenv.load(fileName: "assets/.env");
   final slackCall = SlackLogService();
 

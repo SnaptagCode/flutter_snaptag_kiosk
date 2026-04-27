@@ -1,3 +1,4 @@
+import 'package:flutter_snaptag_kiosk/core/common/log/app_log_service.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:flutter_snaptag_kiosk/core/data/datasources/local/id_writer.dart';
 
@@ -47,10 +48,11 @@ class CardCount extends _$CardCount {
   Future<void> increase([int step = 1]) async {
     final next = state.currentCount + step;
     state = state.copyWith(currentCount: next);
+    AppLogService.instance.info('단면 카드 수량 증가: $next / ${state.initialCount}');
     try {
       await writeSingleCardCount("${next.toString()} / ${state.initialCount}");
     } catch (e) {
-      // print('writeSingleCardCount failed: $e');
+      // ignore
     }
   }
 
@@ -58,10 +60,16 @@ class CardCount extends _$CardCount {
     final next = state.currentCount - step;
     final clamped = next < 0 ? 0 : next;
     state = state.copyWith(currentCount: clamped);
+    AppLogService.instance.info('단면 카드 수량 감소: $clamped / ${state.initialCount}');
     try {
       await writeSingleCardCount("${clamped.toString()} / ${state.initialCount}");
     } catch (e) {
-      // print('writeSingleCardCount failed: $e');
+      // ignore
+    }
+    try {
+      await updateConfigSingleCardCount(clamped);
+    } catch (e) {
+      // ignore
     }
   }
 }

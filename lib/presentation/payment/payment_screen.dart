@@ -1,4 +1,6 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
+import 'dart:io';
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,11 +11,10 @@ import 'package:flutter_snaptag_kiosk/presentation/payment/payment_failed_type.d
 import 'package:flutter_snaptag_kiosk/presentation/home/back_photo_type_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/home_timeout_provider.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
-import 'package:flutter_snaptag_kiosk/presentation/verification/verify_photo_card_provider.dart';
 import 'package:flutter_snaptag_kiosk/core/ui/widget/dialog_helper.dart';
-import 'package:flutter_snaptag_kiosk/core/ui/widget/general_error_widget.dart';
 import 'package:flutter_snaptag_kiosk/presentation/payment/photo_card_preview_screen_provider.dart';
 import 'package:loader_overlay/loader_overlay.dart';
+import 'package:path/path.dart' as p;
 
 /// 카드 선택 효과 시안 타입
 enum SelectionDesignVariant {
@@ -49,14 +50,13 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
   Widget _buildVariant6AnimatedScaleOnUnselected({
     required int index,
     required int? selectedIndex,
-    required String? imageUrl,
+    required File? file,
     required VoidCallback onTap,
   }) {
     final isSelected = selectedIndex == index;
     final kioskColors = Theme.of(context).extension<KioskColors>();
     final buttonColor = kioskColors?.buttonColor ?? const Color(0xFF1B5E4F);
 
-    // 선택되지 않은 경우 크기를 0.85배로 축소
     final scale = selectedIndex == null ? 1.0 : (isSelected ? 1.0 : 0.85);
     final opacity = selectedIndex == null ? 1.0 : (isSelected ? 1.0 : 0.6);
 
@@ -87,16 +87,30 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
                       offset: Offset(0, 2.h),
                     ),
                   ],
-            imageUrl: imageUrl,
+            file: file,
           ),
         ),
       ),
     );
   }
 
+  static List<File> _getLocalBackPhotos() {
+    final dir = Directory(p.join(p.dirname(Platform.resolvedExecutable), 'image', 'back_photos'));
+    if (!dir.existsSync()) return [];
+    return dir
+        .listSync()
+        .whereType<File>()
+        .where((f) {
+          final lower = f.path.toLowerCase();
+          return lower.endsWith('.jpg') || lower.endsWith('.jpeg') || lower.endsWith('.png');
+        })
+        .toList()
+      ..sort((a, b) => a.path.compareTo(b.path));
+  }
+
   Widget _buildFixedBackPhotoCard({
     required List<BoxShadow>? boxShadow,
-    required String? imageUrl,
+    required File? file,
   }) {
     return Container(
       width: 226.w,
@@ -104,42 +118,12 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10.r),
-        border: null,
         boxShadow: boxShadow,
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(10.r),
-        child: imageUrl != null && imageUrl.isNotEmpty ? _buildNetworkImage(imageUrl) : _buildEmptyImagePlaceholder(),
+        child: file != null ? Image.file(file, fit: BoxFit.fitHeight) : _buildEmptyImagePlaceholder(),
       ),
-    );
-  }
-
-  /// 네트워크 이미지 위젯 빌더 (공통 빌더 포함)
-  Widget _buildNetworkImage(String imageUrl) {
-    return Image.network(
-      imageUrl,
-      fit: BoxFit.fitHeight,
-      alignment: Alignment.center,
-      frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
-        if (wasSynchronouslyLoaded) return child;
-        return AnimatedOpacity(
-          opacity: frame == null ? 0 : 1,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOut,
-          child: child,
-        );
-      },
-      loadingBuilder: (context, child, loadingProgress) {
-        if (loadingProgress == null) return child;
-        return Center(
-          child: CircularProgressIndicator(
-            value: loadingProgress.expectedTotalBytes != null
-                ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
-                : null,
-          ),
-        );
-      },
-      errorBuilder: (context, error, stackTrace) => _buildEmptyImagePlaceholder(),
     );
   }
 
@@ -153,54 +137,27 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
     );
   }
 
-  Widget _buildFixedBackPhotoCardList({
-    required KioskMachineInfo? kiosk,
-    required bool isFixed,
-    required int? selectedIndex,
-  }) {
-    final nominatedBackPhotoCardList = kiosk?.nominatedBackPhotoCardList ?? [];
-    if (kiosk == null || nominatedBackPhotoCardList.isEmpty) return _buildEmptyImagePlaceholder();
+  Widget _buildLocalBackPhotoCardList({required int? selectedIndex}) {
+    final files = _getLocalBackPhotos();
+    if (files.isEmpty) return _buildEmptyImagePlaceholder();
 
-    return isFixed
-        ? Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              if (nominatedBackPhotoCardList.length == 1)
-                _buildFixedBackPhotoCard(boxShadow: null, imageUrl: nominatedBackPhotoCardList[0].originUrl)
-              else
-                _buildVariant6AnimatedScaleOnUnselected(
-                  index: 0,
-                  selectedIndex: selectedIndex,
-                  imageUrl: nominatedBackPhotoCardList[0].originUrl,
-                  onTap: () {
-                    ref.read(backPhotoTypeProvider.notifier).selectFixed(0);
-                  },
-                ),
-              if (nominatedBackPhotoCardList.length > 1) SizedBox(width: 100.w),
-              if (nominatedBackPhotoCardList.length > 1)
-                _buildVariant6AnimatedScaleOnUnselected(
-                  index: 1,
-                  selectedIndex: selectedIndex,
-                  imageUrl: nominatedBackPhotoCardList[1].originUrl,
-                  onTap: () {
-                    ref.read(backPhotoTypeProvider.notifier).selectFixed(1);
-                  },
-                ),
-            ],
-          )
-        : ref.watch(verifyPhotoCardProvider).when(
-              data: (data) {
-                final imageUrl = data?.formattedBackPhotoCardUrl ?? '';
-                return imageUrl.isNotEmpty
-                    ? _buildFixedBackPhotoCard(boxShadow: null, imageUrl: imageUrl)
-                    : _buildEmptyImagePlaceholder();
-              },
-              loading: () => const CircularProgressIndicator(),
-              error: (error, stack) => GeneralErrorWidget(
-                exception: error as Exception,
-                onRetry: () => ref.refresh(verifyPhotoCardProvider),
-              ),
-            );
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          for (int i = 0; i < files.length; i++) ...[
+            if (i > 0) SizedBox(width: 40.w),
+            _buildVariant6AnimatedScaleOnUnselected(
+              index: i,
+              selectedIndex: selectedIndex,
+              file: files[i],
+              onTap: () => ref.read(backPhotoTypeProvider.notifier).selectFixed(i),
+            ),
+          ],
+        ],
+      ),
+    );
   }
 
   @override
@@ -318,7 +275,7 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
                       : context.typography.kioskBtn1B.copyWith(fontSize: 53.sp, color: mainTextColor),
                 ),
                 SizedBox(height: 50.h),
-                _buildFixedBackPhotoCardList(kiosk: kiosk, isFixed: isFixed, selectedIndex: selectedIndex),
+                _buildLocalBackPhotoCardList(selectedIndex: selectedIndex),
                 SizedBox(height: 50.h),
                 Consumer(
                   builder: (context, ref, child) {
