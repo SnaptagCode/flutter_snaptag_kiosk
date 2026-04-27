@@ -177,7 +177,8 @@ class _KioskRepository {
             .toJson(),
       );
     } catch (e) {
-      SlackLogService().sendErrorLogToSlack('KioskRepository.updatePrintLog failure: $e');
+      final machineId = request.kioskMachineId;
+      SlackLogService().sendErrorLogToSlack('*[MachineId : $machineId]* KioskRepository.updatePrintLog failure: $e');
       logger.e('KioskRepository.updatePrintLog failure', error: e);
     }
   }

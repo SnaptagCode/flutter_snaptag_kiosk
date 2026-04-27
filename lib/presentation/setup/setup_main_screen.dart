@@ -190,7 +190,7 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
     try {
       await ref.read(printerServiceProvider.notifier).printerStateLog();
     } catch (e) {
-      SlackLogService().sendErrorLogToSlack("Printer State Log: $e");
+      SlackLogService().sendErrorLogToSlack('*[MachineId : $machineId]* Printer State Log: $e');
     }
 
     try {
@@ -200,7 +200,7 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
             remainingSingleSidedCount: cardCountState.remainingSingleSidedCount,
           );
     } catch (e) {
-      SlackLogService().sendErrorLogToSlack("Delete End Mark: $e");
+      SlackLogService().sendErrorLogToSlack('*[MachineId : $machineId]* Delete End Mark: $e');
     }
 
     SlackLogService()
@@ -218,7 +218,8 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
 
       return true;
     } catch (e) {
-      SlackLogService().sendErrorLogToSlack("Payment Device check: $e");
+      final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
+      SlackLogService().sendErrorLogToSlack('*[MachineId : $machineId]* Payment Device check: $e');
 
       DialogHelper.showSetupDialog(
         context,
@@ -272,7 +273,7 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
                           remainingSingleSidedCount: cardCountState.remainingSingleSidedCount,
                         );
                   } catch (e) {
-                    SlackLogService().sendErrorLogToSlack("End Kiosk Application: $e");
+                    SlackLogService().sendErrorLogToSlack('*[MachineId : $machineId]* End Kiosk Application: $e');
                   }
 
                   // 종료

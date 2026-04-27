@@ -138,13 +138,14 @@ class PrinterService extends _$PrinterService {
                   remainingSingleSidedCount: cardCountState.remainingSingleSidedCount,
                 );
           } catch (e) {
-            SlackLogService().sendErrorLogToSlack('CardPrinter.printImage checkKioskAlive failure: $e');
+            SlackLogService().sendErrorLogToSlack('*[MachineId : $machineId]* CardPrinter.printImage checkKioskAlive failure: $e');
             logger.e('CardPrinter.printImage checkKioskAlive failure', error: e);
           }
         }
       }
     } catch (e) {
-      SlackLogService().sendErrorLogToSlack('CardPrinter.printImage _updatePrintStatusAndCheckKioskAlive failure: $e');
+      final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
+      SlackLogService().sendErrorLogToSlack('*[MachineId : $machineId]* CardPrinter.printImage _updatePrintStatusAndCheckKioskAlive failure: $e');
       logger.e('CardPrinter.printImage _updatePrintStatusAndCheckKioskAlive failure', error: e);
     }
   }

@@ -61,7 +61,7 @@ final dioProvider = Provider.family<Dio, String>((ref, baseUrl) {
           if (isSlackAlertRequest) return;
           final formattedMessage = '*[MachineId : $machineId]*\n$log';
           if (statusCode >= 400 && statusCode < 500) {
-            SlackLogService().sendErrorLogToSlack(formattedMessage);
+            SlackLogService().sendLogToSlack(formattedMessage);
           } else if (statusCode >= 500) {
             SlackLogService().sendErrorLogToSlack(formattedMessage);
           }
