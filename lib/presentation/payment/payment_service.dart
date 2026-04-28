@@ -24,11 +24,6 @@ class PaymentService extends _$PaymentService {
     // 1. 사전 검증
     _validatePreconditions();
 
-    // 2. 주문 생성 (오프라인 시 스킵)
-    try {
-      final orderResponse = await _createOrder();
-      ref.read(createOrderInfoProvider.notifier).update(orderResponse);
-    } catch (_) {}
 
     try {
       // 무료 뽑기: 가격과 무관하게 KSCAT 스킵, 서버에 결제 완료 직접 전송

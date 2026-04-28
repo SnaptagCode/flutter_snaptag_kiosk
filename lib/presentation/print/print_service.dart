@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
-import 'package:flutter_snaptag_kiosk/presentation/payment/create_order_info_state.dart';
 import 'package:flutter_snaptag_kiosk/presentation/payment/payment_response_state.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/card_printer.dart';
 import 'package:flutter_snaptag_kiosk/presentation/setup/front_photo_list.dart';
@@ -50,24 +49,25 @@ class PrintService extends _$PrintService {
 
   Future<void> _executePrintJob(int printedPhotoCardId, File frontPhoto, File embedded) async {
     try {
-      // 프린트 상태 시작
-      await _updatePrintStatus(printedPhotoCardId, PrintedStatus.started);
+      if (printedPhotoCardId != 0) {
+        await _updatePrintStatus(printedPhotoCardId, PrintedStatus.started);
+      }
 
-      // 실제 프린트 실행
-      //await _executePrint(frontPhoto: frontPhoto, embedded: embedded);
       final isSingleSidedMode = ref.read(pagePrintProvider) == PagePrintType.single;
       if (isSingleSidedMode) {
-        final tempFront = null;
-        await _executePrint(frontPhoto: tempFront, embedded: embedded);
+        await _executePrint(frontPhoto: null, embedded: embedded);
       } else {
         await _executePrint(frontPhoto: frontPhoto, embedded: embedded);
       }
 
-      // 프린트 상태 완료
-      await _updatePrintStatus(printedPhotoCardId, PrintedStatus.completed);
+      if (printedPhotoCardId != 0) {
+        await _updatePrintStatus(printedPhotoCardId, PrintedStatus.completed);
+      }
     } catch (e, stack) {
       logger.e('PrintService._executePrintJob failure', error: e, stackTrace: stack);
-      await _updatePrintStatus(printedPhotoCardId, PrintedStatus.failed);
+      if (printedPhotoCardId != 0) {
+        await _updatePrintStatus(printedPhotoCardId, PrintedStatus.failed);
+      }
       rethrow;
     }
   }
@@ -110,24 +110,7 @@ class PrintService extends _$PrintService {
       }
     }
 
-    try {
-      final kioskOrderId = ref.read(createOrderInfoProvider)?.orderId ?? 0;
-      final request = CreatePrintRequest(
-        kioskMachineId: ref.read(kioskInfoServiceProvider)!.kioskMachineId,
-        kioskEventId: ref.read(kioskInfoServiceProvider)!.kioskEventId,
-        frontPhotoCardId: frontPhotoCardId,
-        backPhotoCardId: backPhotoCardId,
-        kioskOrderId: kioskOrderId,
-      );
-
-      final response = await ref.read(kioskRepositoryProvider).createPrintStatus(request: request);
-
-      final backPhotoFile = await ImageHelper().convertImageUrlToFile(response.formattedImageUrl);
-
-      return (printedPhotoCardId: response.printedPhotoCardId, backPhotoFile: backPhotoFile);
-    } catch (e) {
-      rethrow;
-    }
+    throw Exception('No local back photo file available');
   }
 
   Future<void> _updatePrintStatus(int printedPhotoCardId, PrintedStatus status) async {

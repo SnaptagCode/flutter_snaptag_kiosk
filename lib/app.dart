@@ -275,20 +275,7 @@ class _NetworkStatusAlertWrapperState extends ConsumerState<_NetworkStatusAlertW
   }
 
   void _checkAndShowAlert(NetworkState networkState) {
-    if (!mounted) return;
-
-    final router = widget.ref.read(routerProvider);
-    final currentLocation = router.routerDelegate.currentConfiguration.uri.toString();
-    final isPrintProcessScreen = _RouteChecker.isPrintProcessScreen(currentLocation);
-
-    final shouldShowAlert = !isPrintProcessScreen &&
-        (networkState.status == NetworkStatus.unstable || networkState.status == NetworkStatus.disconnected);
-
-    if (shouldShowAlert && !_isAlertShowing) {
-      _showNetworkAlert();
-    } else if (networkState.status == NetworkStatus.connected && _isAlertShowing) {
-      _closeNetworkAlert();
-    }
+    // 오프라인 모드로 운영 - 네트워크 상태 알럿 비활성화
   }
 
   void _showNetworkAlert() {

@@ -252,6 +252,7 @@ class DialogHelper {
     VoidCallback? onButtonPressed,
   }) async {
     Future.delayed(const Duration(seconds: 5), () {
+      if (!context.mounted) return;
       if (Navigator.of(context, rootNavigator: true).canPop()) {
         HomeRouteData().go(context);
         Navigator.of(context, rootNavigator: true).pop();

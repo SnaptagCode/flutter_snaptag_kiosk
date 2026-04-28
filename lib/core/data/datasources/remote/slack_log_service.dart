@@ -1,12 +1,10 @@
-import 'dart:developer';
-
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_snaptag_kiosk/core/common/log/app_log_service.dart';
 import 'package:flutter_snaptag_kiosk/core/data/models/entities/slack_log_template.dart';
 import 'package:flutter_snaptag_kiosk/core/providers/version_notifier.dart';
-import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_snaptag_kiosk/presentation/core/card_count_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/core/printer_log_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
@@ -33,18 +31,8 @@ class SlackLogService {
   }
 
   Future<void> sendLog(String type, String message) async {
-    if (message.isEmpty) {
-      log("❌ Slack 알림 메시지가 없습니다.");
-      return;
-    }
-    try {
-      final kioskInfo = _container.read(kioskInfoServiceProvider);
-      final machineId = kioskInfo?.kioskMachineId ?? 0;
-
-      await _container.read(kioskRepositoryProvider).sendSlackAlert(machineId, type, message);
-    } catch (e) {
-      log("❌ Slack 알림 API 오류: $e");
-    }
+    if (message.isEmpty) return;
+    AppLogService.instance.info('[SLACK:$type] $message');
   }
 
   Future<void> sendErrorLogToSlack(String message) async {
