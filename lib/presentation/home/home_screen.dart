@@ -12,19 +12,10 @@ import 'package:path/path.dart' as p;
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
-  static File? _getFirstBackPhoto() {
-    final dir = Directory(p.join(p.dirname(Platform.resolvedExecutable), 'image', 'back_photos'));
-    if (!dir.existsSync()) return null;
-    final files = dir
-        .listSync()
-        .whereType<File>()
-        .where((f) {
-          final lower = f.path.toLowerCase();
-          return lower.endsWith('.jpg') || lower.endsWith('.jpeg') || lower.endsWith('.png') || lower.endsWith('.webp');
-        })
-        .toList()
-      ..sort((a, b) => a.path.compareTo(b.path));
-    return files.isEmpty ? null : files.first;
+  static File? _getEmblemFile() {
+    final path = p.join(p.dirname(Platform.resolvedExecutable), 'assets', 'emblem', 'HanwhaEmblem.png');
+    final file = File(path);
+    return file.existsSync() ? file : null;
   }
 
   @override
@@ -35,7 +26,7 @@ class HomeScreen extends ConsumerWidget {
     final buttonTextColor = kiosk?.buttonTextColor.toColor(fallback: Colors.white) ?? Colors.white;
     final mainTextColor = kiosk?.mainTextColor.toColor(fallback: Colors.white) ?? Colors.white;
 
-    final imageFile = _getFirstBackPhoto();
+    final imageFile = _getEmblemFile();
 
     return DefaultTextStyle(
       style: TextStyle(
