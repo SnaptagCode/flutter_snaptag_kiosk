@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_snaptag_kiosk/presentation/verification/code_verification_screen.dart';
+import 'package:flutter_snaptag_kiosk/presentation/verification/roots/verification_root.dart';
 import 'package:flutter_snaptag_kiosk/presentation/global_shell.dart';
 import 'package:flutter_snaptag_kiosk/presentation/setup/kiosk_components_screen.dart';
 import 'package:flutter_snaptag_kiosk/presentation/setup/kiosk_info_screen.dart';
@@ -146,8 +146,8 @@ class CodeVerificationRouteData extends GoRouteData with _$CodeVerificationRoute
 
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) {
-    return NoTransitionPage(
-      child: CodeVerificationScreen(),
+    return const NoTransitionPage(
+      child: VerificationRoot(),
     );
   }
 }
