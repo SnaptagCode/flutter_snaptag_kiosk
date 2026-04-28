@@ -1,20 +1,18 @@
+import 'dart:io';
+import 'dart:math';
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_snaptag_kiosk/core/providers/version_notifier.dart';
+import 'package:flutter_snaptag_kiosk/core/ui/widget/dialog_helper.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_snaptag_kiosk/presentation/core/card_count_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
-import 'package:flutter_snaptag_kiosk/presentation/setup/page_print_provider.dart';
-import 'package:flutter_snaptag_kiosk/core/ui/widget/dialog_helper.dart';
-import 'package:flutter_snaptag_kiosk/presentation/print/print_process_screen_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/payment/payment_response_state.dart';
-
-import 'dart:io';
-import 'dart:math';
-
 import 'package:flutter_snaptag_kiosk/presentation/payment/payment_service.dart';
+import 'package:flutter_snaptag_kiosk/presentation/print/print_process_screen_provider.dart';
+import 'package:flutter_snaptag_kiosk/presentation/setup/page_print_provider.dart';
 
 class PrintProcessScreen extends ConsumerStatefulWidget {
   const PrintProcessScreen({super.key});
@@ -275,7 +273,8 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> with Si
 
   /// 최종: 랜덤 이미지 파일 경로 반환
   String? getRandomAdImagePath(WidgetRef ref) {
-    final version = ref.read(versionStateProvider).currentVersion;
+    // final version = ref.read(versionStateProvider).currentVersion;
+    const version = 'free-draw';
     final userDir = getUserDirectorySync();
 
     if (userDir == null) {
@@ -315,7 +314,8 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> with Si
       return 'assets/adImages/hanwha/printing_img.png';
     }
 
-    final version = ref.read(versionStateProvider).currentVersion;
+    // final version = ref.read(versionStateProvider).currentVersion;
+    final version = 'free-draw'; // 고정값으로 변경 (2024.09.17)
     final userDir = getUserDirectorySync();
     final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
     if (userDir == null) {

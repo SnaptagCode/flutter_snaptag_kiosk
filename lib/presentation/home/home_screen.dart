@@ -6,7 +6,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_snaptag_kiosk/presentation/home/back_photo_type_provider.dart';
-import 'package:flutter_snaptag_kiosk/core/providers/version_notifier.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
@@ -54,7 +53,7 @@ class HomeScreen extends ConsumerWidget {
                   borderRadius: BorderRadius.circular(10.r),
                   child: emblemLocalPath != null
                       ? Image.file(File(emblemLocalPath), width: 264.w, height: 264.h, fit: BoxFit.contain)
-                      : Image.network(kiosk?.emblemImageUrl ?? '', width: 264.w, height: 264.h, fit: BoxFit.contain),
+                      : SizedBox(width: 264.w, height: 264.h),
                 ),
                 onTap: () async {
                   ref.read(backPhotoTypeProvider.notifier).selectFixed(0);
@@ -100,10 +99,9 @@ class HomeScreen extends ConsumerWidget {
   }
 
   String? _getEmblemFilePath(WidgetRef ref) {
-    final version = ref.read(versionStateProvider).currentVersion;
     final userDir = Platform.environment['USERPROFILE'];
     if (userDir == null) return null;
-    final path = '$userDir\\Snaptag\\$version\\assets\\emblem\\HanwhaEmblem.png';
+    final path = '$userDir\\Snaptag\\free-draw\\assets\\emblem\\HanwhaEmblem.png';
     return File(path).existsSync() ? path : null;
   }
 
