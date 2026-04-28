@@ -1,9 +1,12 @@
+import 'dart:io';
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_snaptag_kiosk/presentation/home/back_photo_type_provider.dart';
+import 'package:flutter_snaptag_kiosk/core/providers/version_notifier.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
@@ -15,6 +18,7 @@ class HomeScreen extends ConsumerWidget {
     final kiosk = ref.watch(kioskInfoServiceProvider);
     final isHwe = kiosk?.isHwe ?? false;
     final buttonColor = kiosk?.mainButtonColor.toColor() ?? Colors.black;
+    final emblemLocalPath = _getEmblemFilePath(ref);
     final buttonTextColor = kiosk?.buttonTextColor.toColor(fallback: Colors.white) ?? Colors.white;
     final mainTextColor = kiosk?.mainTextColor.toColor(fallback: Colors.white) ?? Colors.white;
     return DefaultTextStyle(
@@ -48,7 +52,9 @@ class HomeScreen extends ConsumerWidget {
                 mainTextColor: mainTextColor,
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(10.r),
-                  child: Image.network(kiosk?.emblemImageUrl ?? '', width: 264.w, height: 264.h, fit: BoxFit.contain),
+                  child: emblemLocalPath != null
+                      ? Image.file(File(emblemLocalPath), width: 264.w, height: 264.h, fit: BoxFit.contain)
+                      : Image.network(kiosk?.emblemImageUrl ?? '', width: 264.w, height: 264.h, fit: BoxFit.contain),
                 ),
                 onTap: () async {
                   ref.read(backPhotoTypeProvider.notifier).selectFixed(0);
@@ -91,6 +97,14 @@ class HomeScreen extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  String? _getEmblemFilePath(WidgetRef ref) {
+    final version = ref.read(versionStateProvider).currentVersion;
+    final userDir = Platform.environment['USERPROFILE'];
+    if (userDir == null) return null;
+    final path = '$userDir\\Snaptag\\$version\\assets\\emblem\\HanwhaEmblem.png';
+    return File(path).existsSync() ? path : null;
   }
 
   /// 추천 이미지 카드 위젯 빌드

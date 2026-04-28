@@ -52,7 +52,7 @@ class KioskInfoService extends _$KioskInfoService {
 
       SlackLogService().sendLogToSlack("getKioskMachineInfo: cached: $cached");
       if (cached != null && cached.kioskMachineId != 0) {
-        state = cached;
+        state = cached.copyWith(eventType: 'HWEG');
         _cachedMachineId = cached.kioskMachineId;
         _cachedKioskEventId = cached.kioskEventId;
         ref.read(frontPhotoListProvider.notifier).fetch();
@@ -62,14 +62,14 @@ class KioskInfoService extends _$KioskInfoService {
         ref.read(getInfoByKeyProvider.notifier).state = true;
 
         SlackLogService().sendLogToSlack("getKioskMachineInfo: $cached");
-        return cached;
+        return state;
       }
 
       final kioskRepo = ref.read(kioskRepositoryProvider);
       final deviceUUID = await ref.read(deviceUuidProvider.future);
       final response = await kioskRepo.getKioskMachineInfoByKey(deviceUUID);
 
-      state = response;
+      state = response.copyWith(eventType: 'HWEG');
 
       ref.read(frontPhotoListProvider.notifier).fetch();
 
@@ -83,7 +83,7 @@ class KioskInfoService extends _$KioskInfoService {
       _getInfoByKey = true;
       _isLoading = false;
 
-      return response;
+      return state;
     } catch (e) {
       _getInfoByKey = false;
       _isLoading = false;
@@ -105,7 +105,7 @@ class KioskInfoService extends _$KioskInfoService {
         machineId,
       );
 
-      state = response;
+      state = response.copyWith(eventType: 'HWEG');
 
       ref.read(frontPhotoListProvider.notifier).fetch();
 
@@ -119,7 +119,7 @@ class KioskInfoService extends _$KioskInfoService {
       _getInfoByKey = true;
       ref.read(getInfoByKeyProvider.notifier).state = true;
 
-      return response;
+      return state!;
     } catch (e) {
       _getInfoByKey = false;
       ref.read(getInfoByKeyProvider.notifier).state = false;
