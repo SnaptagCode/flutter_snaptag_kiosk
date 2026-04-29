@@ -41,8 +41,13 @@ class CardCount extends _$CardCount {
     state = state.copyWith(currentCount: newCount);
   }
 
-  void update(int value) {
+  Future<void> update(int value) async {
     state = state.copyWith(initialCount: value, currentCount: value);
+    try {
+      await updateConfigSingleCardCount(value);
+    } catch (e) {
+      // ignore
+    }
   }
 
   Future<void> increase([int step = 1]) async {

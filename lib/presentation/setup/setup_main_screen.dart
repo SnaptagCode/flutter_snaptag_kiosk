@@ -94,9 +94,9 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
       }
     }
 
-    final isReady = await _validatePrinterReadyAndShowDialogs(context);
+    // final isReady = await _validatePrinterReadyAndShowDialogs(context);
 
-    if (!isReady) return;
+    // if (!isReady) return;
 
     var kioskInfo = ref.read(kioskInfoServiceProvider);
 
@@ -339,7 +339,7 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
                           if (value == null || value.isEmpty) return; // 값이 없으면 종료
                           int cardNumber = int.parse(value);
                           AppLogService.instance.info('단면 카드 수량 수동 설정: $cardNumber');
-                          ref.read(cardCountProvider.notifier).update(cardNumber);
+                          await ref.read(cardCountProvider.notifier).update(cardNumber);
                           if (cardNumber <= 0) {
                             ref.read(pagePrintProvider.notifier).set(PagePrintType.double);
                           } else {

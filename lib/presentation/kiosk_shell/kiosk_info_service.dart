@@ -46,7 +46,7 @@ class KioskInfoService extends _$KioskInfoService {
     ref.read(frontPhotoListProvider.notifier).loadLocal();
     final count = state?.singleCardCount ?? 0;
     if (count > 0) {
-      ref.read(cardCountProvider.notifier).update(count);
+      await ref.read(cardCountProvider.notifier).update(count);
       AppLogService.instance.info('단면 카드 수량 로드: $count');
     }
     _getInfoByKey = true;
