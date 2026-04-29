@@ -88,7 +88,9 @@ class PaymentApiClient {
     final decode = cp949.decodeString(broken);
     final trim = trimValues(json.decode(decode));
     final paymentResponse = trim..addAll({'KSNET': '$callback($trim)'});
-    logger.i(paymentResponse.toString());
+    final machineId = RegExp(r'MI(\d+)$').firstMatch(callback)?.group(1) ?? 'unknown';
+    SlackLogService().sendLogToSlack(
+        '*[MachineId: $machineId | KSCAT paymentResponse]*\n ${PaymentResponse.fromJson(paymentResponse)}');
     return PaymentResponse.fromJson(paymentResponse);
   }
 
