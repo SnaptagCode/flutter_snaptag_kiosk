@@ -412,7 +412,6 @@ class PrinterManager {
 
       await _sendAndHandleResponse(
         PrintMessage(isSingleMode: isSingleMode, printPath: buffer),
-        timeout: const Duration(seconds: 120),
       );
 
       logger.i('13. Printing completed');
@@ -432,13 +431,11 @@ class PrinterManager {
     }
   }
 
-  Future<Map<String, dynamic>> _sendAndResponse(
-    Object object, {
-    Duration timeout = const Duration(seconds: 30),
-  }) async {
+  Future<Map<String, dynamic>> _sendAndResponse(Object object) async {
     try {
       final responsePort = ReceivePort();
       _sendPort.send({'object': object, 'replyPort': responsePort.sendPort});
+      final timeout = object is PrintMessage ? const Duration(minutes: 5) : const Duration(minutes: 1);
       final response = await responsePort.first.timeout(timeout) as Map<String, dynamic>;
       return response;
     } catch (e) {
@@ -446,8 +443,8 @@ class PrinterManager {
     }
   }
 
-  Future<String?> _imageBufferResponse(Object object, {Duration timeout = const Duration(seconds: 30)}) async {
-    final response = await _sendAndResponse(object, timeout: timeout);
+  Future<String?> _imageBufferResponse(Object object) async {
+    final response = await _sendAndResponse(object);
     final errorMsg = response['errorMsg'] as String;
     final imageBuffer = response['imageBuffer'] as String?;
 
@@ -458,8 +455,8 @@ class PrinterManager {
     return imageBuffer;
   }
 
-  Future<void> _sendAndHandleResponse(Object object, {Duration timeout = const Duration(seconds: 30)}) async {
-    final response = await _sendAndResponse(object, timeout: timeout);
+  Future<void> _sendAndHandleResponse(Object object) async {
+    final response = await _sendAndResponse(object);
     final errorMsg = response['errorMsg'] as String;
 
     if (errorMsg.isNotEmpty) {
