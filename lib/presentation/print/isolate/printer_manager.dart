@@ -437,7 +437,7 @@ class PrinterManager {
     try {
       final responsePort = ReceivePort();
       _sendPort.send({'object': object, 'replyPort': responsePort.sendPort});
-      final timeout = object is PrintMessage ? const Duration(seconds: 90) : const Duration(seconds: 30);
+      final timeout = object is PrintMessage ? const Duration(minutes: 5) : const Duration(minutes: 1);
       final response = await responsePort.first.timeout(timeout) as Map<String, dynamic>;
       return response;
     } catch (e) {
