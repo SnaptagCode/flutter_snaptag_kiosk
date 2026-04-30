@@ -166,7 +166,14 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               if (nominatedBackPhotoCardList.length == 1)
-                _buildFixedBackPhotoCard(boxShadow: null, imageUrl: nominatedBackPhotoCardList[0].originUrl)
+                _buildVariant6AnimatedScaleOnUnselected(
+                  index: 0,
+                  selectedIndex: 0,
+                  imageUrl: nominatedBackPhotoCardList[0].originUrl,
+                  onTap: () {
+                    ref.read(backPhotoTypeProvider.notifier).selectFixed(0);
+                  },
+                )
               else
                 _buildVariant6AnimatedScaleOnUnselected(
                   index: 0,
