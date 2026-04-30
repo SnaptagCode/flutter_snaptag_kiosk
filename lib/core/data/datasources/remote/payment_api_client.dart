@@ -67,6 +67,76 @@ class PaymentApiClient {
     return map;
   }
 
+  static Future<void> ensureLogLevel(int level) async {
+    try {
+      final file = File(_configPath);
+      final content = await file.readAsString();
+      final current = _parseIniSectionStatic(content, 'log')['level'];
+      if (current?.trim() == level.toString()) {
+        SlackLogService().sendLogToSlack('KSCAT config.ini [log] level already $level, skipping');
+        return;
+      }
+      final updated = _replaceIniValue(content, 'log', 'level', level.toString());
+      await file.writeAsString(updated);
+      SlackLogService().sendLogToSlack('KSCAT config.ini [log] level → $level');
+    } catch (e) {
+      SlackLogService().sendLogToSlack('Failed to update KSCAT log level: $e');
+    }
+  }
+
+  static Map<String, String> _parseIniSectionStatic(String ini, String sectionName) {
+    final target = sectionName.trim().toLowerCase();
+    final map = <String, String>{};
+    String? currentSection;
+    for (final rawLine in const LineSplitter().convert(ini)) {
+      final line = rawLine.trim();
+      if (line.isEmpty || line.startsWith(';') || line.startsWith('#')) continue;
+      if (line.startsWith('[') && line.endsWith(']')) {
+        currentSection = line.substring(1, line.length - 1).trim().toLowerCase();
+        continue;
+      }
+      if (currentSection != target) continue;
+      final idx = line.indexOf('=');
+      if (idx <= 0) continue;
+      map[line.substring(0, idx).trim().toLowerCase()] = line.substring(idx + 1).trim();
+    }
+    return map;
+  }
+
+  static String _replaceIniValue(String ini, String section, String key, String value) {
+    final lineEnding = ini.contains('\r\n') ? '\r\n' : '\n';
+    final lines = const LineSplitter().convert(ini);
+    final targetSection = section.toLowerCase();
+    final targetKey = key.toLowerCase();
+    bool inSection = false;
+    bool replaced = false;
+
+    final updated = lines.map((rawLine) {
+      final line = rawLine.trim();
+
+      if (line.startsWith('[') && line.endsWith(']')) {
+        inSection = line.substring(1, line.length - 1).trim().toLowerCase() == targetSection;
+        return rawLine;
+      }
+
+      if (inSection && !replaced && !line.startsWith(';') && !line.startsWith('#')) {
+        final idx = line.indexOf('=');
+        if (idx > 0 && line.substring(0, idx).trim().toLowerCase() == targetKey) {
+          replaced = true;
+          return '$key=$value';
+        }
+      }
+
+      return rawLine;
+    }).toList();
+
+    if (!replaced) {
+      SlackLogService().sendLogToSlack('KSCAT config.ini: [$section] $key not found, skipping update');
+    }
+
+    return updated.join(lineEnding);
+  }
+
   Future<PaymentResponse> requestPayment(String callback, String request) async {
     // URL을 직접 구성 - 인코딩 없이
     final baseUrl = await _resolveBaseUrl();

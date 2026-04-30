@@ -30,6 +30,7 @@ void main() async {
       // WindowManager 초기화만 수행 (설정은 App에서)
       if (Platform.isWindows) {
         await windowManager.ensureInitialized();
+        await PaymentApiClient.ensureLogLevel(2);
       }
 
       // ✅ FlutterError 로그 자동 감지
