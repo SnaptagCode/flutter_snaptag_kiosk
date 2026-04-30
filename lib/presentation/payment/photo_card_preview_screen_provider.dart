@@ -28,10 +28,19 @@ class PhotoCardPreviewScreenProvider extends _$PhotoCardPreviewScreenProvider {
         .whereType<File>()
         .where((f) {
           final lower = f.path.toLowerCase();
-          return lower.endsWith('.jpg') || lower.endsWith('.jpeg') || lower.endsWith('.png') || lower.endsWith('.webp');
+          final name = p.basename(lower);
+          return !name.startsWith('embed_') &&
+              (lower.endsWith('.jpg') || lower.endsWith('.jpeg') || lower.endsWith('.png') || lower.endsWith('.webp'));
         })
         .toList()
       ..sort((a, b) => a.path.compareTo(b.path));
+  }
+
+  static String _getEmbedFilePath(File uiFile) {
+    final dir = p.dirname(uiFile.path);
+    final baseName = p.basename(uiFile.path);
+    final embedFile = File(p.join(dir, 'embed_$baseName'));
+    return embedFile.existsSync() ? embedFile.path : uiFile.path;
   }
 
   Future<void> payment() async {
@@ -54,13 +63,14 @@ class PhotoCardPreviewScreenProvider extends _$PhotoCardPreviewScreenProvider {
       final files = _getLocalBackPhotos();
       final localFile = files.isNotEmpty && selectedIndex < files.length ? files[selectedIndex] : null;
       final localPath = localFile?.path ?? '';
+      final embedPath = localFile != null ? _getEmbedFilePath(localFile) : localPath;
 
       ref.read(verifyPhotoCardProvider.notifier).updateState(BackPhotoCardResponse(
             kioskEventId: kiosk?.kioskEventId ?? 1,
             backPhotoCardId: selectedIndex,
             backPhotoCardOriginUrl: localPath,
             photoAuthNumber: 'LOCAL',
-            formattedBackPhotoCardUrl: localPath,
+            formattedBackPhotoCardUrl: embedPath,
           ));
 
       final backName = localFile != null ? p.basename(localFile.path) : '-';
