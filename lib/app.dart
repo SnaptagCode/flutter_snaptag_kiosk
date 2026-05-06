@@ -48,7 +48,8 @@ class _AppState extends ConsumerState<App> with WindowListener {
       try {
         await ref.read(alertDefinitionProvider.notifier).load();
       } catch (error) {
-        SlackLogService().sendErrorLogToSlack('Alert definition load failed: $error');
+        final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
+        SlackLogService().sendErrorLogToSlack('*[MachineId : $machineId]* Alert definition load failed: $error');
       }
 
       // 이미 데이터가 있으면 API 호출하지 않음
@@ -57,7 +58,8 @@ class _AppState extends ConsumerState<App> with WindowListener {
         try {
           await ref.read(kioskInfoServiceProvider.notifier).getKioskMachineInfo();
         } catch (error) {
-          SlackLogService().sendErrorLogToSlack('Kiosk info load failed at app startup: $error');
+          final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
+          SlackLogService().sendErrorLogToSlack('*[MachineId : $machineId]* Kiosk info load failed at app startup: $error');
         }
       }
     });
