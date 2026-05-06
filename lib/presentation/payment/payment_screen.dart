@@ -99,6 +99,7 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
   Widget _buildFixedBackPhotoCard({
     required List<BoxShadow>? boxShadow,
     required String? imageUrl,
+    bool hasBorder = false,
   }) {
     return Container(
       width: 226.w,
@@ -106,8 +107,26 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10.r),
-        border: null,
-        boxShadow: boxShadow,
+        border: hasBorder ? Border.all(color: Colors.white, width: 1.w) : null,
+        boxShadow: hasBorder
+            ? [
+                BoxShadow(
+                  color: Colors.white.withValues(alpha: 0.8),
+                  blurRadius: 4.r,
+                  spreadRadius: 1.r,
+                ),
+                BoxShadow(
+                  color: Colors.white.withValues(alpha: 0.4),
+                  blurRadius: 12.r,
+                  spreadRadius: 3.r,
+                ),
+                BoxShadow(
+                  color: Colors.white.withValues(alpha: 0.2),
+                  blurRadius: 28.r,
+                  spreadRadius: 6.r,
+                ),
+              ]
+            : boxShadow,
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(10.r),
@@ -168,7 +187,11 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               if (nominatedBackPhotoCardList.length == 1)
-                _buildFixedBackPhotoCard(boxShadow: null, imageUrl: nominatedBackPhotoCardList[0].originUrl)
+                _buildFixedBackPhotoCard(
+                  boxShadow: null,
+                  imageUrl: nominatedBackPhotoCardList[0].originUrl,
+                  hasBorder: true,
+                )
               else
                 _buildVariant6AnimatedScaleOnUnselected(
                   index: 0,
