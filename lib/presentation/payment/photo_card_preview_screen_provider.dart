@@ -5,6 +5,7 @@ import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/home_timeout_prov
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
 import 'package:flutter_snaptag_kiosk/presentation/payment/payment_failed_type.dart';
 import 'package:flutter_snaptag_kiosk/presentation/payment/payment_service.dart';
+import 'package:flutter_snaptag_kiosk/presentation/print/card_printer.dart';
 import 'package:flutter_snaptag_kiosk/presentation/setup/page_print_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/verification/verify_photo_card_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -26,7 +27,7 @@ class PhotoCardPreviewScreenProvider extends _$PhotoCardPreviewScreenProvider {
 
     // 결제 전 카드 피더 체크 - 카드가 없으면 결제 시도 없이 즉시 에러 처리
     try {
-      // await ref.read(printerServiceProvider.notifier).checkFeeder();
+      await ref.read(printerServiceProvider.notifier).checkFeeder();
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
       return;
