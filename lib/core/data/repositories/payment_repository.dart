@@ -40,6 +40,9 @@ class PaymentRepository {
       supplyAmount: invoice.supplyAmount.toString(),
     );
 
+    final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 'unknown';
+    SlackLogService().sendLogToSlack('*[MachineId: $machineId | KSCAT PaymentRequest]*\n ${request.serialize()}');
+
     return _request(request);
   }
 

@@ -4,6 +4,7 @@ import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
+
 final dioProvider = Provider.family<Dio, String>((ref, baseUrl) {
   final dio = Dio()
     ..options.baseUrl = baseUrl
@@ -59,11 +60,20 @@ final dioProvider = Provider.family<Dio, String>((ref, baseUrl) {
       final errorLogger = DioLogger(
         sendHook: (log) {
           if (isSlackAlertRequest) return;
-          final formattedMessage = '*[MachineId : $machineId]*\n$log';
-          if (statusCode >= 400 && statusCode < 500) {
-            SlackLogService().sendErrorLogToSlack(formattedMessage);
-          } else if (statusCode >= 500) {
-            SlackLogService().sendErrorLogToSlack(formattedMessage);
+          final path = err.requestOptions.path;
+          final lines = log.split('\n');
+          if (lines.isNotEmpty) lines[0] = '${lines[0]} ║ MachineId: $machineId';
+          final formattedMessage = lines.join('\n');
+          if (path.startsWith('/v1/order')) {
+            if (statusCode >= 400 && statusCode < 500) {
+              SlackLogService().sendLogToSlack(formattedMessage);
+            } else if (statusCode >= 500) {
+              SlackLogService().sendErrorLogToSlack(formattedMessage);
+            }
+          } else {
+            if (statusCode >= 500) {
+              SlackLogService().sendErrorLogToSlack(formattedMessage);
+            }
           }
         },
         request: false,

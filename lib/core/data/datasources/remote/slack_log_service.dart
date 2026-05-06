@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_snaptag_kiosk/core/data/models/entities/slack_log_template.dart';
@@ -18,6 +19,29 @@ class SlackLogService {
   SlackLogService._internal();
 
   late ProviderContainer _container;
+
+  List<String>? _excludedPaymentKeywords;
+
+  Future<List<String>> _loadExcludedKeywords() async {
+    if (_excludedPaymentKeywords != null) return _excludedPaymentKeywords!;
+    try {
+      final content = await rootBundle.loadString('assets/config/payment_broadcast_exclusions.txt');
+      _excludedPaymentKeywords = content
+          .split('\n')
+          .map((line) => line.trim())
+          .where((line) => line.isNotEmpty && !line.startsWith('#'))
+          .toList();
+    } catch (e) {
+      log('❌ payment_broadcast_exclusions.txt 로드 실패: $e');
+      _excludedPaymentKeywords = [];
+    }
+    return _excludedPaymentKeywords!;
+  }
+
+  Future<bool> _isPaymentDescriptionExcluded(String description) async {
+    final keywords = await _loadExcludedKeywords();
+    return keywords.any((keyword) => description.contains(keyword));
+  }
 
   final slackWebhookUrl = dotenv.env['SLACK_WEBHOOK_URL'];
 
@@ -144,6 +168,8 @@ ${slackLogTemplate.description}
   }
 
   Future<void> sendPaymentBroadcastLogToSlak(String errorKey, {required String paymentDescription}) async {
+    if (await _isPaymentDescriptionExcluded(paymentDescription)) return;
+
     final slackLogTemplate = await createSlackLogTemplate(errorKey);
 
     if (slackLogTemplate.category.isNotEmpty) {
