@@ -1,15 +1,16 @@
 import 'dart:io';
 
+import 'package:collection/collection.dart';
 import 'package:flutter_snaptag_kiosk/core/common/log/app_log_service.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_snaptag_kiosk/presentation/core/card_count_provider.dart';
-import 'package:flutter_snaptag_kiosk/presentation/home/back_photo_type_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/home_timeout_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
 import 'package:flutter_snaptag_kiosk/presentation/setup/page_print_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/payment/payment_service.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/card_printer.dart';
 import 'package:flutter_snaptag_kiosk/presentation/verification/verify_photo_card_provider.dart';
+import 'package:intl/intl.dart';
 import 'package:path/path.dart' as p;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -20,20 +21,14 @@ class PhotoCardPreviewScreenProvider extends _$PhotoCardPreviewScreenProvider {
   @override
   AsyncValue<void> build() => const AsyncValue.data(null);
 
-  static List<File> _getLocalBackPhotos() {
+  static File? _getBackPhotoForToday() {
     final dir = Directory(p.join(p.dirname(Platform.resolvedExecutable), 'image', 'back_photos'));
-    if (!dir.existsSync()) return [];
-    return dir
-        .listSync()
-        .whereType<File>()
-        .where((f) {
-          final lower = f.path.toLowerCase();
-          final name = p.basename(lower);
-          return !name.startsWith('embed_') &&
-              (lower.endsWith('.jpg') || lower.endsWith('.jpeg') || lower.endsWith('.png') || lower.endsWith('.webp'));
-        })
-        .toList()
-      ..sort((a, b) => a.path.compareTo(b.path));
+    if (!dir.existsSync()) return null;
+    final dateStr = DateFormat('yyMMdd').format(DateTime.now());
+    return dir.listSync().whereType<File>().firstWhereOrNull((f) {
+      final name = p.basenameWithoutExtension(f.path.toLowerCase());
+      return name == dateStr;
+    });
   }
 
   static String _getEmbedFilePath(File uiFile) {
@@ -56,24 +51,26 @@ class PhotoCardPreviewScreenProvider extends _$PhotoCardPreviewScreenProvider {
     }
 
     try {
-      final selection = ref.read(backPhotoTypeProvider);
-      final selectedIndex = selection?.fixedIndex ?? 0;
       final kiosk = ref.read(kioskInfoServiceProvider);
 
-      final files = _getLocalBackPhotos();
-      final localFile = files.isNotEmpty && selectedIndex < files.length ? files[selectedIndex] : null;
-      final localPath = localFile?.path ?? '';
-      final embedPath = localFile != null ? _getEmbedFilePath(localFile) : localPath;
+      final localFile = _getBackPhotoForToday();
+      if (localFile == null) {
+        state = AsyncValue.error(BackPhotoNotFoundException(), StackTrace.current);
+        return;
+      }
+
+      final localPath = localFile.path;
+      final embedPath = _getEmbedFilePath(localFile);
 
       ref.read(verifyPhotoCardProvider.notifier).updateState(BackPhotoCardResponse(
             kioskEventId: kiosk?.kioskEventId ?? 1,
-            backPhotoCardId: selectedIndex,
+            backPhotoCardId: 0,
             backPhotoCardOriginUrl: localPath,
             photoAuthNumber: 'LOCAL',
             formattedBackPhotoCardUrl: embedPath,
           ));
 
-      final backName = localFile != null ? p.basename(localFile.path) : '-';
+      final backName = p.basename(localFile.path);
       AppLogService.instance.info('출력 시작 - back: $backName');
 
       final timeoutNotifier = ref.read(homeTimeoutNotifierProvider.notifier);
@@ -100,3 +97,5 @@ class PhotoCardPreviewScreenProvider extends _$PhotoCardPreviewScreenProvider {
     }
   }
 }
+
+class BackPhotoNotFoundException implements Exception {}

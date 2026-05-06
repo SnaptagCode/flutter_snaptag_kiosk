@@ -24,7 +24,7 @@ class KioskBackButton extends ConsumerWidget {
     final isKioskRoute = currentPath.contains('/kiosk');
 
     final selection = ref.watch(backPhotoTypeProvider);
-    final isFixed = selection?.type == BackPhotoType.fixed;
+    final isCustom = selection?.type == BackPhotoType.custom;
 
     logger.i(
         'KioskBackButton: currentPath: $currentPath isHomeScreen: $isHomeScreen isPrintProcessScreen: $isPrintProcessScreen isKioskRoute: $isKioskRoute');
@@ -40,7 +40,7 @@ class KioskBackButton extends ConsumerWidget {
       ),
       child: InkWell(
         onTap: () {
-          _navigateBack(context, currentPath, isFixed);
+          _navigateBack(context, currentPath, isCustom);
         },
         child: Container(
           decoration: BoxDecoration(
@@ -79,17 +79,14 @@ class KioskBackButton extends ConsumerWidget {
     );
   }
 
-  void _navigateBack(BuildContext context, String currentPath, bool isFixed) {
+  void _navigateBack(BuildContext context, String currentPath, bool isCustom) {
     // 현재 경로에 따라 이전 화면으로 명시적으로 이동
     if (currentPath == CodeVerificationRouteData().location) {
       // /kiosk/qr → /kiosk/home
       const HomeRouteData().go(context);
-    } else if (currentPath == CodeVerificationRouteData().location) {
-      // /kiosk/code-verification → /kiosk/qr
-      HomeRouteData().go(context);
     } else if (currentPath == PhotoCardPreviewRouteData().location) {
-      // /kiosk/preview → /kiosk/code-verification
-      isFixed ? HomeRouteData().go(context) : CodeVerificationRouteData().go(context);
+      // /kiosk/preview → custom이면 인증화면, 아니면 홈
+      isCustom ? CodeVerificationRouteData().go(context) : HomeRouteData().go(context);
     } else {
       // 기본적으로 pop 시도, 실패 시 홈으로
       if (context.canPop()) {

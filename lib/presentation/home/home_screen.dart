@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
-import 'package:flutter_snaptag_kiosk/presentation/home/back_photo_type_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
 import 'package:path/path.dart' as p;
 
@@ -44,10 +43,7 @@ class HomeScreen extends ConsumerWidget {
           ),
           SizedBox(height: 15.h),
           GestureDetector(
-            onTap: () {
-              ref.read(backPhotoTypeProvider.notifier).selectFixed(0);
-              PhotoCardPreviewRouteData().go(context);
-            },
+            onTap: () => PhotoCardPreviewRouteData().go(context),
             child: Container(
               width: 423.w,
               height: 649.h,

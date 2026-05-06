@@ -1,11 +1,11 @@
 import 'dart:io';
 
+import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
-import 'package:flutter_snaptag_kiosk/presentation/home/back_photo_type_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
 import 'package:path/path.dart' as p;
 
@@ -15,17 +15,13 @@ class BackPhotoSelectionScreen extends ConsumerWidget {
   static Directory get _backPhotosDir =>
       Directory(p.join(p.dirname(Platform.resolvedExecutable), 'image', 'back_photos'));
 
-  List<File> _getBackPhotoFiles() {
-    if (!_backPhotosDir.existsSync()) return [];
-    return _backPhotosDir
-        .listSync()
-        .whereType<File>()
-        .where((f) {
-          final lower = f.path.toLowerCase();
-          return lower.endsWith('.jpg') || lower.endsWith('.jpeg') || lower.endsWith('.png') || lower.endsWith('.webp');
-        })
-        .toList()
-      ..sort((a, b) => a.path.compareTo(b.path));
+  static File? _getBackPhotoForToday() {
+    if (!_backPhotosDir.existsSync()) return null;
+    final dateStr = DateFormat('yyMMdd').format(DateTime.now());
+    return _backPhotosDir.listSync().whereType<File>().firstWhereOrNull((f) {
+      final name = p.basenameWithoutExtension(f.path.toLowerCase());
+      return name == dateStr;
+    });
   }
 
   @override
@@ -36,7 +32,7 @@ class BackPhotoSelectionScreen extends ConsumerWidget {
     final buttonTextColor = kiosk?.buttonTextColor.toColor(fallback: Colors.white) ?? Colors.white;
     final mainTextColor = kiosk?.mainTextColor.toColor(fallback: Colors.white) ?? Colors.white;
 
-    final files = _getBackPhotoFiles();
+    final file = _getBackPhotoForToday();
 
     return DefaultTextStyle(
       style: TextStyle(
@@ -53,73 +49,31 @@ class BackPhotoSelectionScreen extends ConsumerWidget {
             textAlign: TextAlign.center,
           ),
           SizedBox(height: 15.h),
-          ..._buildPhotoRows(context, ref,
-              files: files,
-              isHwe: isHwe,
-              buttonColor: buttonColor,
-              buttonTextColor: buttonTextColor,
-              mainTextColor: mainTextColor),
+          if (file != null)
+            _buildPhotoCard(context,
+                file: file,
+                isHwe: isHwe,
+                buttonColor: buttonColor,
+                buttonTextColor: buttonTextColor,
+                mainTextColor: mainTextColor)
+          else
+            const SizedBox.shrink(),
           SizedBox(height: 60.h),
         ],
       ),
     );
   }
 
-  List<Widget> _buildPhotoRows(
-    BuildContext context,
-    WidgetRef ref, {
-    required List<File> files,
-    required bool isHwe,
-    required Color buttonColor,
-    required Color buttonTextColor,
-    required Color mainTextColor,
-  }) {
-    if (files.isEmpty) return [const SizedBox.shrink()];
-
-    final rows = <Widget>[];
-    for (int i = 0; i < files.length; i += 2) {
-      if (i > 0) rows.add(SizedBox(height: 20.h));
-      rows.add(Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          _buildPhotoCard(context, ref,
-              file: files[i],
-              index: i,
-              isHwe: isHwe,
-              buttonColor: buttonColor,
-              buttonTextColor: buttonTextColor,
-              mainTextColor: mainTextColor),
-          if (i + 1 < files.length) ...[
-            SizedBox(width: 40.w),
-            _buildPhotoCard(context, ref,
-                file: files[i + 1],
-                index: i + 1,
-                isHwe: isHwe,
-                buttonColor: buttonColor,
-                buttonTextColor: buttonTextColor,
-                mainTextColor: mainTextColor),
-          ],
-        ],
-      ));
-    }
-    return rows;
-  }
-
   Widget _buildPhotoCard(
-    BuildContext context,
-    WidgetRef ref, {
+    BuildContext context, {
     required File file,
-    required int index,
     required bool isHwe,
     required Color buttonColor,
     required Color buttonTextColor,
     required Color mainTextColor,
   }) {
     return GestureDetector(
-      onTap: () {
-        ref.read(backPhotoTypeProvider.notifier).selectFixed(index);
-        PhotoCardPreviewRouteData().go(context);
-      },
+      onTap: () => PhotoCardPreviewRouteData().go(context),
       child: Container(
         width: 423.w,
         height: 649.h,
