@@ -91,6 +91,7 @@ flutter:
     - assets/adImages/ansan/
     - assets/adImages/hanwha/printing_img.png
     - assets/.env.version
+    - assets/config/
 
   fonts:
     - family: MPLUSRounded
