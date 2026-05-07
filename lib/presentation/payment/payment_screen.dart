@@ -53,8 +53,6 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
     required VoidCallback onTap,
   }) {
     final isSelected = selectedIndex == index;
-    final kioskColors = Theme.of(context).extension<KioskColors>();
-    final buttonColor = kioskColors?.buttonColor ?? const Color(0xFF1B5E4F);
 
     // 선택되지 않은 경우 크기를 0.85배로 축소
     final scale = selectedIndex == null ? 1.0 : (isSelected ? 1.0 : 0.85);
@@ -71,22 +69,14 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeOutCubic,
           child: _buildFixedBackPhotoCard(
-            boxShadow: isSelected
-                ? [
-                    BoxShadow(
-                      color: buttonColor.withOpacity(0.4),
-                      blurRadius: 12.r,
-                      spreadRadius: 2.r,
-                      offset: Offset(0, 4.h),
-                    ),
-                  ]
-                : [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 4.r,
-                      offset: Offset(0, 2.h),
-                    ),
-                  ],
+            hasBorder: isSelected,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.1),
+                blurRadius: 4.r,
+                offset: Offset(0, 2.h),
+              ),
+            ],
             imageUrl: imageUrl,
           ),
         ),
@@ -97,6 +87,7 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
   Widget _buildFixedBackPhotoCard({
     required List<BoxShadow>? boxShadow,
     required String? imageUrl,
+    bool hasBorder = false,
   }) {
     return Container(
       width: 226.w,
@@ -104,8 +95,26 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10.r),
-        border: null,
-        boxShadow: boxShadow,
+        border: hasBorder ? Border.all(color: Colors.white, width: 1.w) : null,
+        boxShadow: hasBorder
+            ? [
+                BoxShadow(
+                  color: Colors.white.withValues(alpha: 0.8),
+                  blurRadius: 4.r,
+                  spreadRadius: 1.r,
+                ),
+                BoxShadow(
+                  color: Colors.white.withValues(alpha: 0.4),
+                  blurRadius: 12.r,
+                  spreadRadius: 3.r,
+                ),
+                BoxShadow(
+                  color: Colors.white.withValues(alpha: 0.2),
+                  blurRadius: 28.r,
+                  spreadRadius: 6.r,
+                ),
+              ]
+            : boxShadow,
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(10.r),

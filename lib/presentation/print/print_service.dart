@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter_snaptag_kiosk/lib.dart';
+import 'package:flutter_snaptag_kiosk/presentation/home/back_photo_type_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
 import 'package:flutter_snaptag_kiosk/presentation/payment/create_order_info_state.dart';
 import 'package:flutter_snaptag_kiosk/presentation/payment/payment_response_state.dart';
@@ -108,7 +109,13 @@ class PrintService extends _$PrintService {
 
       final response = await ref.read(kioskRepositoryProvider).createPrintStatus(request: request);
 
-      final backPhotoFile = await _loadLocalBackPhoto(response.formattedImageUrl);
+      final backPhotoType = ref.read(backPhotoTypeProvider)?.type;
+      final File backPhotoFile;
+      if (backPhotoType == BackPhotoType.fixed) {
+        backPhotoFile = await _loadLocalBackPhoto(response.formattedImageUrl);
+      } else {
+        backPhotoFile = await ImageHelper().convertImageUrlToFile(response.formattedImageUrl);
+      }
 
       return (printedPhotoCardId: response.printedPhotoCardId, backPhotoFile: backPhotoFile);
     } catch (e) {
