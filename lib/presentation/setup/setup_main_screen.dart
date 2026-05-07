@@ -92,9 +92,9 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
       }
     }
 
-    // final isReady = await _validatePrinterReadyAndShowDialogs(context);
+    final isReady = await _validatePrinterReadyAndShowDialogs(context);
 
-    // if (!isReady) return;
+    if (!isReady) return;
 
     var kioskInfo = ref.read(kioskInfoServiceProvider);
 
@@ -214,21 +214,7 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
   }
 
   Future<bool> _checkPaymentDevice() async {
-    try {
-      final response = await ref.read(paymentRepositoryProvider).check();
-      SlackLogService().sendLogToSlack("Payment Device check: $response");
-
-      return true;
-    } catch (e) {
-      SlackLogService().sendErrorLogToSlack("Payment Device check: $e");
-
-      DialogHelper.showSetupDialog(
-        context,
-        title: '리더기 점검',
-        content: '리더기 응답이 없습니다.\n연결 상태를 확인한 뒤 다시 시도해 주세요.',
-      );
-      return false;
-    }
+    return true;
   }
 
   @override
