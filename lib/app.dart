@@ -129,6 +129,8 @@ class _AppState extends ConsumerState<App> with WindowListener {
             ref.watch(kioskColorsNotifierProvider),
             KioskTypography.color(
               colors: ref.watch(kioskColorsNotifierProvider),
+              vendingFontFamily: context.locale.languageCode == 'ja' ? 'PretendardJP' : 'Hanwha',
+              isJapanese: context.locale.languageCode == 'ja',
             ),
           ],
         ),

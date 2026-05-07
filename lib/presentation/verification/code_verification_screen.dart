@@ -55,7 +55,7 @@ class CodeVerificationScreen extends ConsumerWidget {
 
     return DefaultTextStyle(
       style: TextStyle(
-        fontFamily: context.locale.languageCode == 'ja' ? 'MPLUSRounded' : 'Cafe24Ssurround2',
+        fontFamily: context.locale.languageCode == 'ja' ? 'PretendardJP' : 'Cafe24Ssurround2',
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
@@ -153,7 +153,7 @@ class _InputDisplay extends ConsumerWidget {
     final keypadState = ref.watch(authCodeProvider);
     return DefaultTextStyle(
       style: TextStyle(
-        fontFamily: context.locale.languageCode == 'ja' ? 'MPLUSRounded' : 'Cafe24Ssurround2',
+        fontFamily: context.locale.languageCode == 'ja' ? 'PretendardJP' : 'Cafe24Ssurround2',
       ),
       child: Container(
         width: 478.w,
@@ -200,7 +200,7 @@ class _NumericPad extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return DefaultTextStyle(
       style: TextStyle(
-        fontFamily: context.locale.languageCode == 'ja' ? 'MPLUSRounded' : 'Cafe24Ssurround2',
+        fontFamily: context.locale.languageCode == 'ja' ? 'PretendardJP' : 'Cafe24Ssurround2',
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,

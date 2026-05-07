@@ -313,7 +313,7 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
 
     return DefaultTextStyle(
       style: TextStyle(
-        fontFamily: context.locale.languageCode == 'ja' ? 'MPLUSRounded' : 'Cafe24Ssurround2',
+        fontFamily: context.locale.languageCode == 'ja' ? 'PretendardJP' : 'Cafe24Ssurround2',
       ),
       child: Stack(
         children: [

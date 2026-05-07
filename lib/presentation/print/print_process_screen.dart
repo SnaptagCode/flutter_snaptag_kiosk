@@ -153,7 +153,7 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> with Si
 
     return DefaultTextStyle(
       style: TextStyle(
-        fontFamily: context.locale.languageCode == 'ja' ? 'MPLUSRounded' : 'Cafe24Ssurround2',
+        fontFamily: context.locale.languageCode == 'ja' ? 'PretendardJP' : 'Cafe24Ssurround2',
       ),
       child: Center(
         child: Column(

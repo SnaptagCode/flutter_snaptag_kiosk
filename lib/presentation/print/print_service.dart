@@ -174,10 +174,16 @@ class PrintService extends _$PrintService {
       logger.i('Back photo loaded from local: embed_$dateStr.png');
       sourceFile = dateFile;
     } else {
-      final originFile = File('$backPhotosDir${sep}origin_photo.png');
-      if (await originFile.exists()) {
-        logger.w('No back photo for $dateStr, using origin_photo.png');
-        sourceFile = originFile;
+      final fallbackEmbedFile = File('$backPhotosDir${sep}embed_260617.png');
+      if (await fallbackEmbedFile.exists()) {
+        logger.w('No back photo for $dateStr, using embed_260617.png');
+        sourceFile = fallbackEmbedFile;
+      } else {
+        final originFile = File('$backPhotosDir${sep}origin_photo.png');
+        if (await originFile.exists()) {
+          logger.w('No back photo for $dateStr, using origin_photo.png');
+          sourceFile = originFile;
+        }
       }
     }
 
