@@ -244,7 +244,7 @@ class PrinterManager {
   Future<void> _initLibrary(PrinterBindings bindings) async {
     try {
       logger.i('1. Initializing printer library...');
-      bindings.clearLibrary();
+      // bindings.clearLibrary();
       bindings.initLibrary();
     } catch (e) {
       rethrow;
@@ -472,7 +472,7 @@ class PrinterManager {
 
       logger.i('2. Initializing printer library...');
 
-      bindings.clearLibrary();
+      // bindings.clearLibrary();
 
       logger.i('3. Printer library initialized');
       bindings.initLibrary();
