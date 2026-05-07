@@ -53,11 +53,19 @@ class HomeScreen extends ConsumerWidget {
                 mainButtonColor: buttonColor,
                 buttonTextColor: buttonTextColor,
                 mainTextColor: mainTextColor,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(10.r),
-                  child: emblemLocalPath != null
-                      ? Image.file(File(emblemLocalPath), width: 264.w, height: 264.h, fit: BoxFit.contain)
-                      : SizedBox(width: 264.w, height: 264.h),
+                child: Container(
+                  width: 264.w,
+                  height: 264.h,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20.r),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(20.r),
+                    child: emblemLocalPath != null
+                        ? Image.file(File(emblemLocalPath), width: 264.w, height: 264.h, fit: BoxFit.contain)
+                        : SizedBox(width: 264.w, height: 264.h),
+                  ),
                 ),
                 onTap: () async {
                   ref.read(backPhotoTypeProvider.notifier).selectFixed(0);
