@@ -60,6 +60,7 @@ class HomeScreen extends ConsumerWidget {
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(20.r),
                   ),
+                  padding: EdgeInsets.all(20.r),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(20.r),
                     child: emblemLocalPath != null
