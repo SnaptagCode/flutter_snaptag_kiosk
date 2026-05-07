@@ -38,6 +38,11 @@ class PhotoCardPreviewScreenProvider extends _$PhotoCardPreviewScreenProvider {
     return embedFile.existsSync() ? embedFile.path : uiFile.path;
   }
 
+  static String _getOriginPhotoPath(String backPhotosDir) {
+    final file = File(p.join(backPhotosDir, 'origin_photo.png'));
+    return file.existsSync() ? file.path : '';
+  }
+
   Future<void> payment() async {
     if (state.isLoading) return;
 
@@ -59,13 +64,14 @@ class PhotoCardPreviewScreenProvider extends _$PhotoCardPreviewScreenProvider {
         return;
       }
 
-      final localPath = localFile.path;
+      final originPath = _getOriginPhotoPath(p.dirname(localFile.path));
+      final displayPath = originPath.isNotEmpty ? originPath : localFile.path;
       final embedPath = _getEmbedFilePath(localFile);
 
       ref.read(verifyPhotoCardProvider.notifier).updateState(BackPhotoCardResponse(
             kioskEventId: kiosk?.kioskEventId ?? 1,
             backPhotoCardId: 0,
-            backPhotoCardOriginUrl: localPath,
+            backPhotoCardOriginUrl: displayPath,
             photoAuthNumber: 'LOCAL',
             formattedBackPhotoCardUrl: embedPath,
           ));

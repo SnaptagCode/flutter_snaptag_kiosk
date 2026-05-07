@@ -25,9 +25,11 @@ class PaymentScreen extends ConsumerStatefulWidget {
 }
 
 class _PaymentScreenState extends ConsumerState<PaymentScreen> {
-  static File? _getBackPhotoForToday() {
+  static File? _getDisplayPhoto() {
     final dir = Directory(p.join(p.dirname(Platform.resolvedExecutable), 'image', 'back_photos'));
     if (!dir.existsSync()) return null;
+    final originFile = File(p.join(dir.path, 'origin_photo.png'));
+    if (originFile.existsSync()) return originFile;
     final dateStr = DateFormat('yyMMdd').format(DateTime.now());
     return dir.listSync().whereType<File>().firstWhereOrNull((f) {
       final name = p.basenameWithoutExtension(f.path.toLowerCase());
@@ -184,7 +186,7 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
                 SizedBox(height: 50.h),
                 _buildFixedBackPhotoCard(
                   boxShadow: null,
-                  file: _getBackPhotoForToday(),
+                  file: _getDisplayPhoto(),
                   hasBorder: true,
                 ),
                 SizedBox(height: 50.h),

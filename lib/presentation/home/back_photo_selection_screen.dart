@@ -24,6 +24,11 @@ class BackPhotoSelectionScreen extends ConsumerWidget {
     });
   }
 
+  static File? _getOriginPhoto() {
+    final file = File(p.join(_backPhotosDir.path, 'origin_photo.png'));
+    return file.existsSync() ? file : null;
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final kiosk = ref.watch(kioskInfoServiceProvider);
@@ -32,7 +37,8 @@ class BackPhotoSelectionScreen extends ConsumerWidget {
     final buttonTextColor = kiosk?.buttonTextColor.toColor(fallback: Colors.white) ?? Colors.white;
     final mainTextColor = kiosk?.mainTextColor.toColor(fallback: Colors.white) ?? Colors.white;
 
-    final file = _getBackPhotoForToday();
+    final dateFile = _getBackPhotoForToday();
+    final displayFile = _getOriginPhoto() ?? dateFile;
 
     return DefaultTextStyle(
       style: TextStyle(
@@ -49,9 +55,9 @@ class BackPhotoSelectionScreen extends ConsumerWidget {
             textAlign: TextAlign.center,
           ),
           SizedBox(height: 15.h),
-          if (file != null)
+          if (dateFile != null && displayFile != null)
             _buildPhotoCard(context,
-                file: file,
+                file: displayFile,
                 isHwe: isHwe,
                 buttonColor: buttonColor,
                 buttonTextColor: buttonTextColor,
