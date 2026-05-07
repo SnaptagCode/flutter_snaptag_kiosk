@@ -29,7 +29,7 @@ class HomeScreen extends ConsumerWidget {
 
     return DefaultTextStyle(
       style: TextStyle(
-        fontFamily: context.locale.languageCode == 'ja' ? 'MPLUSRounded' : 'Cafe24Ssurround2',
+        fontFamily: context.locale.languageCode == 'ja' ? 'PretendardJP' : 'Cafe24Ssurround2',
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -38,7 +38,11 @@ class HomeScreen extends ConsumerWidget {
             LocaleKeys.choice_select_back_image.tr(),
             style: isHwe
                 ? context.typography.vendingTitle1B.copyWith(color: mainTextColor)
-                : context.typography.kioskBtn1B.copyWith(fontSize: 53.sp, color: mainTextColor),
+                : context.typography.kioskBtn1B.copyWith(
+                    fontSize: 53.sp,
+                    color: mainTextColor,
+                    fontFamily: context.locale.languageCode == 'ja' ? 'PretendardJP' : null,
+                  ),
             textAlign: TextAlign.center,
           ),
           SizedBox(height: 15.h),
@@ -80,6 +84,7 @@ class HomeScreen extends ConsumerWidget {
                                   : context.typography.kioskBtn1B.copyWith(
                                       fontSize: context.locale.languageCode == 'en' ? 32.sp : 45.sp,
                                       color: buttonColor,
+                                      fontFamily: context.locale.languageCode == 'ja' ? 'PretendardJP' : null,
                                     ),
                               textAlign: TextAlign.center,
                             ),
@@ -89,10 +94,12 @@ class HomeScreen extends ConsumerWidget {
                                 child: Text(
                                   LocaleKeys.choice_select_and_print.tr(),
                                   style: isHwe
-                                      ? context.typography.vendingBody4B
-                                          .copyWith(color: mainTextColor, fontSize: 25.sp)
-                                      : context.typography.kioskBtn1B
-                                          .copyWith(fontSize: 25.sp, color: mainTextColor),
+                                      ? context.typography.vendingBody4B.copyWith(color: mainTextColor, fontSize: 25.sp)
+                                      : context.typography.kioskBtn1B.copyWith(
+                                          fontSize: 25.sp,
+                                          color: mainTextColor,
+                                          fontFamily: context.locale.languageCode == 'ja' ? 'PretendardJP' : null,
+                                        ),
                                 ),
                               ),
                             ),
@@ -104,16 +111,17 @@ class HomeScreen extends ConsumerWidget {
                         children: [
                           SizedBox(height: 40.h),
                           Center(
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(10.r),
+                            child: Container(
+                              width: 264.w,
+                              height: 264.h,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(10.r),
+                              ),
+                              padding: EdgeInsets.all(20.r),
                               child: imageFile != null
-                                  ? Image.file(imageFile, width: 264.w, height: 264.h, fit: BoxFit.contain)
-                                  : Container(
-                                      width: 264.w,
-                                      height: 264.h,
-                                      color: Colors.grey[200],
-                                      child: Icon(Icons.image, size: 60.sp, color: Colors.grey[400]),
-                                    ),
+                                  ? Image.file(imageFile, fit: BoxFit.contain)
+                                  : Icon(Icons.image, size: 60.sp, color: Colors.grey[400]),
                             ),
                           ),
                           SizedBox(height: 40.h),
@@ -132,6 +140,7 @@ class HomeScreen extends ConsumerWidget {
                                   : context.typography.kioskBtn1B.copyWith(
                                       fontSize: context.locale.languageCode == 'en' ? 25.sp : 30.sp,
                                       color: buttonTextColor,
+                                      fontFamily: context.locale.languageCode == 'ja' ? 'PretendardJP' : null,
                                     ),
                               textAlign: TextAlign.center,
                             ),

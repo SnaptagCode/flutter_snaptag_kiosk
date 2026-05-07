@@ -28,8 +28,22 @@ class PhotoCardPreviewScreenProvider extends _$PhotoCardPreviewScreenProvider {
     final dir = _getBackPhotosDir();
     if (!dir.existsSync()) return null;
     final dateStr = DateFormat('yyMMdd').format(DateTime.now());
-    final file = File(p.join(dir.path, 'embed_$dateStr.png'));
-    return file.existsSync() ? file : null;
+    final dateFile = File(p.join(dir.path, 'embed_$dateStr.png'));
+    if (dateFile.existsSync()) {
+      logger.i('Back photo loaded from local: embed_$dateStr.png');
+      return dateFile;
+    }
+    final fallbackEmbedFile = File(p.join(dir.path, 'embed_260617.png'));
+    if (fallbackEmbedFile.existsSync()) {
+      logger.w('No back photo for $dateStr, using embed_260617.png');
+      return fallbackEmbedFile;
+    }
+    final originFile = File(p.join(dir.path, 'origin_photo.png'));
+    if (originFile.existsSync()) {
+      logger.w('No back photo for $dateStr, using origin_photo.png');
+      return originFile;
+    }
+    return null;
   }
 
   static String _getOriginPhotoPath() {

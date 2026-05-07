@@ -25,7 +25,7 @@ class DialogHelper {
       builder: (BuildContext context) {
         return DefaultTextStyle(
           style: TextStyle(
-            fontFamily: context.locale.languageCode == 'ja' ? 'MPLUSRounded' : 'Cafe24Ssurround2',
+            fontFamily: context.locale.languageCode == 'ja' ? 'PretendardJP' : 'Cafe24Ssurround2',
           ),
           child: Center(
             child: SizedBox(
@@ -70,7 +70,7 @@ class DialogHelper {
       builder: (BuildContext context) {
         return DefaultTextStyle(
           style: TextStyle(
-            fontFamily: context.locale.languageCode == 'ja' ? 'MPLUSRounded' : 'Cafe24Ssurround2',
+            fontFamily: context.locale.languageCode == 'ja' ? 'PretendardJP' : 'Cafe24Ssurround2',
           ),
           child: Center(
             child: SizedBox(
@@ -128,7 +128,7 @@ class DialogHelper {
 
         return DefaultTextStyle(
           style: TextStyle(
-            fontFamily: context.locale.languageCode == 'ja' ? 'MPLUSRounded' : 'Cafe24Ssurround2',
+            fontFamily: context.locale.languageCode == 'ja' ? 'PretendardJP' : 'Cafe24Ssurround2',
           ),
           child: Dialog(
             backgroundColor: Colors.white,
@@ -418,7 +418,7 @@ class DialogHelper {
       builder: (BuildContext context) {
         return DefaultTextStyle(
           style: TextStyle(
-            fontFamily: context.locale.languageCode == 'ja' ? 'MPLUSRounded' : 'Cafe24Ssurround2',
+            fontFamily: context.locale.languageCode == 'ja' ? 'PretendardJP' : 'Cafe24Ssurround2',
           ),
           child: AlertDialog(
             backgroundColor: Colors.white,
@@ -518,7 +518,7 @@ class _TimeoutDialogWidgetState extends State<_TimeoutDialogWidget> {
     // showTwoButtonKioskDialog와 동일한 구조 사용
     return DefaultTextStyle(
       style: TextStyle(
-        fontFamily: context.locale.languageCode == 'ja' ? 'MPLUSRounded' : 'Cafe24Ssurround2',
+        fontFamily: context.locale.languageCode == 'ja' ? 'PretendardJP' : 'Cafe24Ssurround2',
       ),
       child: Center(
         child: SizedBox(

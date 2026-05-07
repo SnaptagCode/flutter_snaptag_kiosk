@@ -49,73 +49,81 @@ class KioskTypography extends ThemeExtension<KioskTypography> {
   final TextStyle kioskInput2B;
   final TextStyle kioskInput3B;
 
-  factory KioskTypography.color({KioskColors colors = KioskColors.basic}) => KioskTypography(
+  factory KioskTypography.color({
+    KioskColors colors = KioskColors.basic,
+    String vendingFontFamily = 'Hanwha',
+    bool isJapanese = false,
+  }) {
+    double vfs(double base) => isJapanese ? (base - 8).sp : base.sp;
+    double vls(double base) => isJapanese ? -0.3 : base;
+    FontWeight vtitleFw() => isJapanese ? FontWeight.w700 : FontWeight.w400;
+    return KioskTypography(
         vendingBtn1B: TextStyle(
-          fontSize: 48.sp,
+          fontSize: vfs(48),
           fontWeight: FontWeight.w400,
-          fontFamily: 'Hanwha',
+          fontFamily: vendingFontFamily,
           color: Colors.black,
         ),
         vendingBtn2B: TextStyle(
-          fontSize: 40.sp,
+          fontSize: vfs(40),
           fontWeight: FontWeight.w400,
-          fontFamily: 'Hanwha',
+          fontFamily: vendingFontFamily,
           color: Colors.black,
         ),
         vendingBtn3B: TextStyle(
-          fontSize: 32.sp,
+          fontSize: vfs(32),
           fontWeight: FontWeight.w400,
-          fontFamily: 'Hanwha',
+          fontFamily: vendingFontFamily,
           color: Colors.black,
         ),
         vendingTitle1B: TextStyle(
-          fontSize: 60.sp,
-          fontWeight: FontWeight.w400,
-          fontFamily: 'Hanwha',
+          fontSize: vfs(60),
+          fontWeight: vtitleFw(),
+          fontFamily: vendingFontFamily,
           color: Colors.black,
-          letterSpacing: 0.7,
+          letterSpacing: vls(0.7),
         ),
         vendingTitle2B: TextStyle(
-          fontSize: 52.sp,
-          fontWeight: FontWeight.w400,
-          fontFamily: 'Hanwha',
+          fontSize: vfs(52),
+          fontWeight: vtitleFw(),
+          fontFamily: vendingFontFamily,
           color: Colors.black,
-          letterSpacing: 2.08,
+          letterSpacing: vls(2.08),
           height: 1.0,
         ),
         vendingBody1B: TextStyle(
-          fontSize: 40.sp,
+          fontSize: vfs(40),
           fontWeight: FontWeight.w400,
-          fontFamily: 'Hanwha',
+          fontFamily: vendingFontFamily,
           color: Colors.black,
-          letterSpacing: 3.84,
+          letterSpacing: vls(3.84),
         ),
         vendingBody2B: TextStyle(
-          fontSize: 32.sp,
+          fontSize: vfs(32),
           fontWeight: FontWeight.w400,
-          fontFamily: 'Hanwha',
+          fontFamily: vendingFontFamily,
           color: Colors.black,
         ),
         vendingBody3B: TextStyle(
-          fontSize: 30.sp,
+          fontSize: vfs(30),
           fontWeight: FontWeight.w600,
-          fontFamily: 'HanwhaGothic',
+          fontFamily: vendingFontFamily,
           color: Colors.black,
-          letterSpacing: 0.56,
+          letterSpacing: vls(0.56),
         ),
         vendingBody4B: TextStyle(
-          fontSize: 26.sp,
+          fontSize: vfs(26),
           fontWeight: FontWeight.w600,
-          fontFamily: 'HanwhaGothic',
+          fontFamily: vendingFontFamily,
           color: Colors.black,
-          letterSpacing: 1.08,
+          letterSpacing: vls(1.08),
         ),
         vendingAlert1B: TextStyle(
-          fontSize: 52.sp,
-          fontWeight: FontWeight.w400,
-          fontFamily: 'Hanwha',
+          fontSize: vfs(52),
+          fontWeight: vtitleFw(),
+          fontFamily: vendingFontFamily,
           color: Colors.black,
-          letterSpacing: 1.04,
+          letterSpacing: vls(1.04),
           height: 1.3,
         ),
         kioskBtn1B: TextStyle(
@@ -207,6 +215,7 @@ class KioskTypography extends ThemeExtension<KioskTypography> {
           height: 1.0,
         ),
       );
+  }
 
   @override
   KioskTypography copyWith({
