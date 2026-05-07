@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:collection/collection.dart';
 import 'package:flutter_snaptag_kiosk/core/common/log/app_log_service.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_snaptag_kiosk/presentation/core/card_count_provider.dart';
@@ -21,25 +20,21 @@ class PhotoCardPreviewScreenProvider extends _$PhotoCardPreviewScreenProvider {
   @override
   AsyncValue<void> build() => const AsyncValue.data(null);
 
-  static File? _getBackPhotoForToday() {
-    final dir = Directory(p.join(p.dirname(Platform.resolvedExecutable), 'image', 'back_photos'));
+  static Directory _getBackPhotosDir() {
+    return Directory(p.join(p.dirname(Platform.resolvedExecutable), 'image', 'back_photos'));
+  }
+
+  static File? _getEmbedFileForToday() {
+    final dir = _getBackPhotosDir();
     if (!dir.existsSync()) return null;
     final dateStr = DateFormat('yyMMdd').format(DateTime.now());
-    return dir.listSync().whereType<File>().firstWhereOrNull((f) {
-      final name = p.basenameWithoutExtension(f.path.toLowerCase());
-      return name == dateStr;
-    });
+    final file = File(p.join(dir.path, 'embed_$dateStr.png'));
+    return file.existsSync() ? file : null;
   }
 
-  static String _getEmbedFilePath(File uiFile) {
-    final dir = p.dirname(uiFile.path);
-    final baseName = p.basename(uiFile.path);
-    final embedFile = File(p.join(dir, 'embed_$baseName'));
-    return embedFile.existsSync() ? embedFile.path : uiFile.path;
-  }
-
-  static String _getOriginPhotoPath(String backPhotosDir) {
-    final file = File(p.join(backPhotosDir, 'origin_photo.png'));
+  static String _getOriginPhotoPath() {
+    final dir = _getBackPhotosDir();
+    final file = File(p.join(dir.path, 'origin_photo.png'));
     return file.existsSync() ? file.path : '';
   }
 
@@ -58,25 +53,24 @@ class PhotoCardPreviewScreenProvider extends _$PhotoCardPreviewScreenProvider {
     try {
       final kiosk = ref.read(kioskInfoServiceProvider);
 
-      final localFile = _getBackPhotoForToday();
-      if (localFile == null) {
+      final embedFile = _getEmbedFileForToday();
+      if (embedFile == null) {
         state = AsyncValue.error(BackPhotoNotFoundException(), StackTrace.current);
         return;
       }
 
-      final originPath = _getOriginPhotoPath(p.dirname(localFile.path));
-      final displayPath = originPath.isNotEmpty ? originPath : localFile.path;
-      final embedPath = _getEmbedFilePath(localFile);
+      final originPath = _getOriginPhotoPath();
+      final displayPath = originPath.isNotEmpty ? originPath : embedFile.path;
 
       ref.read(verifyPhotoCardProvider.notifier).updateState(BackPhotoCardResponse(
             kioskEventId: kiosk?.kioskEventId ?? 1,
             backPhotoCardId: 0,
             backPhotoCardOriginUrl: displayPath,
             photoAuthNumber: 'LOCAL',
-            formattedBackPhotoCardUrl: embedPath,
+            formattedBackPhotoCardUrl: embedFile.path,
           ));
 
-      final backName = p.basename(localFile.path);
+      final backName = p.basename(embedFile.path);
       AppLogService.instance.info('출력 시작 - back: $backName');
 
       final timeoutNotifier = ref.read(homeTimeoutNotifierProvider.notifier);

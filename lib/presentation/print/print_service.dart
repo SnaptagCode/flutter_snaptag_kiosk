@@ -30,24 +30,32 @@ class PrintService extends _$PrintService {
     // 1. 사전 검증
     _validatePrintRequirements();
 
-    // 2. 프론트 이미지 준비
-    final frontPhotoInfo = await _prepareFrontPhoto();
+    final isSingleSidedMode = ref.read(pagePrintProvider) == PagePrintType.single;
 
-    // 3. 프린트 작업 생성 및 백 이미지 준비
+    // 2. 프린트 작업 생성 및 백 이미지 준비
     final printJobInfo = await _createPrintJobWithEmbeddingBackImage(
-      frontPhotoCardId: frontPhotoInfo.id,
+      frontPhotoCardId: 0,
       backPhotoCardId: ref.read(verifyPhotoCardProvider).value?.backPhotoCardId ?? 0,
     );
 
-    // 4. 프린트 진행 및 상태 업데이트
-    await _executePrintJob(
-      printJobInfo.printedPhotoCardId,
-      frontPhotoInfo.safeEmbedImage,
-      printJobInfo.backPhotoFile,
-    );
+    // 3. 단면 모드: front 이미지 불필요, 양면 모드: front 이미지 준비
+    if (isSingleSidedMode) {
+      await _executePrintJob(
+        printJobInfo.printedPhotoCardId,
+        null,
+        printJobInfo.backPhotoFile,
+      );
+    } else {
+      final frontPhotoInfo = await _prepareFrontPhoto();
+      await _executePrintJob(
+        printJobInfo.printedPhotoCardId,
+        frontPhotoInfo.safeEmbedImage,
+        printJobInfo.backPhotoFile,
+      );
+    }
   }
 
-  Future<void> _executePrintJob(int printedPhotoCardId, File frontPhoto, File embedded) async {
+  Future<void> _executePrintJob(int printedPhotoCardId, File? frontPhoto, File embedded) async {
     try {
       if (printedPhotoCardId != 0) {
         await _updatePrintStatus(printedPhotoCardId, PrintedStatus.started);
