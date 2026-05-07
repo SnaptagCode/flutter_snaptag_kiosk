@@ -108,7 +108,7 @@ class PrintService extends _$PrintService {
 
       final response = await ref.read(kioskRepositoryProvider).createPrintStatus(request: request);
 
-      final backPhotoFile = await ImageHelper().convertImageUrlToFile(response.formattedImageUrl);
+      final backPhotoFile = await _loadLocalBackPhoto(response.formattedImageUrl);
 
       return (printedPhotoCardId: response.printedPhotoCardId, backPhotoFile: backPhotoFile);
     } catch (e) {
@@ -148,6 +148,43 @@ class PrintService extends _$PrintService {
         await Future.delayed(const Duration(milliseconds: 300));
       }
     }
+  }
+
+  Future<File> _loadLocalBackPhoto(String fallbackUrl) async {
+    final now = DateTime.now();
+    final yy = (now.year % 100).toString().padLeft(2, '0');
+    final mm = now.month.toString().padLeft(2, '0');
+    final dd = now.day.toString().padLeft(2, '0');
+    final dateStr = '$yy$mm$dd';
+
+    final exeDir = File(Platform.resolvedExecutable).parent.path;
+    final sep = Platform.pathSeparator;
+    final backPhotosDir = '$exeDir${sep}image${sep}back_photos';
+
+    File? sourceFile;
+    final dateFile = File('$backPhotosDir${sep}embed_$dateStr.png');
+    if (await dateFile.exists()) {
+      logger.i('Back photo loaded from local: embed_$dateStr.png');
+      sourceFile = dateFile;
+    } else {
+      final originFile = File('$backPhotosDir${sep}origin_photo.png');
+      if (await originFile.exists()) {
+        logger.w('No back photo for $dateStr, using origin_photo.png');
+        sourceFile = originFile;
+      }
+    }
+
+    if (sourceFile == null) {
+      logger.w('No local back photo found, downloading from API URL');
+      return ImageHelper().convertImageUrlToFile(fallbackUrl);
+    }
+
+    // _executePrint 이후 삭제되므로 원본 보호를 위해 임시 복사본 생성
+    final outputDir = DirectoryPaths.output.buildPath;
+    final tempDir = Directory(outputDir);
+    if (!await tempDir.exists()) await tempDir.create(recursive: true);
+    final tempPath = '$outputDir$sep${now.millisecondsSinceEpoch}_back.png';
+    return sourceFile.copy(tempPath);
   }
 
   Future<void> _executePrint({
