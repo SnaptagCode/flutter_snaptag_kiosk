@@ -7,11 +7,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_snaptag_kiosk/core/common/sound/sound_manager.dart';
+import 'package:flutter_snaptag_kiosk/core/ui/widget/dialog_helper.dart';
+import 'package:flutter_snaptag_kiosk/lib.dart';
+import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/home_timeout_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
 import 'package:flutter_snaptag_kiosk/presentation/payment/payment_failed_type.dart';
-import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/home_timeout_provider.dart';
-import 'package:flutter_snaptag_kiosk/lib.dart';
-import 'package:flutter_snaptag_kiosk/core/ui/widget/dialog_helper.dart';
 import 'package:flutter_snaptag_kiosk/presentation/payment/photo_card_preview_screen_provider.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:path/path.dart' as p;
@@ -206,11 +206,20 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
                               await ref.read(photoCardPreviewScreenProviderProvider.notifier).payment();
                             },
                       child: Text(LocaleKeys.choice_btn_print.tr(),
-                          style: isHwe
-                              ? context.typography.vendingBtn2B
-                                  .copyWith(color: (kiosk?.buttonTextColor ?? '').toColor(fallback: Colors.white))
-                              : context.typography.kioskBtn1B
-                                  .copyWith(color: (kiosk?.buttonTextColor ?? '').toColor(fallback: Colors.white))),
+                          style: context.locale.languageCode == 'ja'
+                              ? TextStyle(
+                                  fontSize: 30.sp,
+                                  fontFamily: 'PretendardJP',
+                                  color: (kiosk?.buttonTextColor ?? '').toColor(fallback: Colors.white),
+                                  letterSpacing: -0.34,
+                                  height: 1.0,
+                                  fontWeight: FontWeight.bold,
+                                )
+                              : isHwe
+                                  ? context.typography.vendingBtn2B
+                                      .copyWith(color: (kiosk?.buttonTextColor ?? '').toColor(fallback: Colors.white))
+                                  : context.typography.kioskBtn1B
+                                      .copyWith(color: (kiosk?.buttonTextColor ?? '').toColor(fallback: Colors.white))),
                     );
                   },
                 ),
