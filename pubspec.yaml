@@ -150,6 +150,12 @@ flutter:
           weight: 800
         - asset: assets/fonts/PretendardJP-Black.ttf
           weight: 900
+    - family: PretendardJP-Regular
+      fonts:
+        - asset: assets/fonts/PretendardJP-Regular.ttf
+    - family: PretendardJP-Bold
+      fonts:
+        - asset: assets/fonts/PretendardJP-Bold.ttf
     - family: Pretendard
       fonts:
         - asset: assets/fonts/Pretendard-Thin.ttf
