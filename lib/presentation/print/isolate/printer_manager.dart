@@ -8,6 +8,7 @@ import 'package:ffi/ffi.dart'; // Utf8 사용을 위한 임포트
 import 'package:flutter/services.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/isolate/model/check_card_position_message.dart';
+import 'package:flutter_snaptag_kiosk/presentation/print/isolate/model/clear_library_message.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/isolate/model/check_feeder_message.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/isolate/model/connect_message.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/isolate/model/draw_image_message.dart';
@@ -17,6 +18,8 @@ import 'package:flutter_snaptag_kiosk/presentation/print/isolate/model/inject_me
 import 'package:flutter_snaptag_kiosk/presentation/print/isolate/model/print_message.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/isolate/model/print_ribbon_status_message.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/isolate/model/print_state_message.dart';
+import 'package:flutter_snaptag_kiosk/presentation/print/isolate/model/reset_printer_message.dart';
+import 'package:flutter_snaptag_kiosk/presentation/print/isolate/model/restart_printer_message.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/isolate/model/setting_printer_message.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/isolate/print_path.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/luca/binding/printer_bindings.dart';
@@ -49,6 +52,12 @@ class PrinterManager {
       logger.i('PrinterManager Starting PrinterManager initialization...');
       await _prepareMetalWatermarkAsset();
       await _initPrintIsolate();
+      // await checkConnectedPrint();
+      // try {
+      //   await resetPrinter();
+      // } catch (e) {
+      //   logger.w('resetPrinter failed on init: $e');
+      // }
     } catch (e) {
       rethrow;
     }
@@ -161,6 +170,39 @@ class PrinterManager {
               try {
                 _checkCardInPrinter(bindings);
                 logger.i('_printEntry CheckCardPositionMessage: Card check passed');
+                replyPort.send({'errorMsg': ''});
+              } catch (e) {
+                replyPort.send({'errorMsg': e.toString()});
+              }
+              return;
+            }
+
+            if (ob is ClearLibraryMessage) {
+              try {
+                bindings.clearLibrary();
+                logger.i('_printEntry ClearLibraryMessage: Library cleared');
+                replyPort.send({'errorMsg': ''});
+              } catch (e) {
+                replyPort.send({'errorMsg': e.toString()});
+              }
+              return;
+            }
+
+            if (ob is ResetPrinterMessage) {
+              try {
+                bindings.resetPrinter();
+                logger.i('_printEntry ResetPrinterMessage: Printer reset');
+                replyPort.send({'errorMsg': ''});
+              } catch (e) {
+                replyPort.send({'errorMsg': e.toString()});
+              }
+              return;
+            }
+
+            if (ob is RestartPrinterMessage) {
+              try {
+                bindings.restartPrinter();
+                logger.i('_printEntry RestartPrinterMessage: Printer restarted (cache cleared)');
                 replyPort.send({'errorMsg': ''});
               } catch (e) {
                 replyPort.send({'errorMsg': e.toString()});
@@ -475,6 +517,9 @@ class PrinterManager {
       logger.i('3. Printer library initialized');
       bindings.initLibrary();
 
+      // Duration(seconds: 3);
+      // bindings.restartPrinter();
+
       // 2. 프린터 밝기 설정 변경
       logger.i('4. Image brightness set to 0');
 
@@ -497,6 +542,32 @@ class PrinterManager {
         throw Exception('Failed to initialize printer library: $errorMsg');
       }
     } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> clearLibrary() async {
+    try {
+      await _sendAndHandleResponse(ClearLibraryMessage());
+    } catch (e) {
+      logger.w('clearLibrary 오류: $e');
+    }
+  }
+
+  Future<void> resetPrinter() async {
+    try {
+      await _sendAndHandleResponse(ResetPrinterMessage());
+    } catch (e) {
+      SlackLogService().sendErrorLogToSlack('[PRINTER] resetPrinter 오류: $e');
+      rethrow;
+    }
+  }
+
+  Future<void> restartPrinter() async {
+    try {
+      await _sendAndHandleResponse(RestartPrinterMessage());
+    } catch (e) {
+      SlackLogService().sendErrorLogToSlack('[PRINTER] restartPrinter 오류: $e');
       rethrow;
     }
   }

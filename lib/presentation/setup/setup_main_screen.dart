@@ -221,6 +221,18 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
                 );
                 if (result) {
                   AppLogService.instance.info('앱 종료');
+                  try {
+                    await ref.read(printerServiceProvider.notifier).clearLibrary();
+                    // await ref.read(kioskRepositoryProvider).endKioskApplication(
+                    //       kioskEventId: ref.read(kioskInfoServiceProvider)?.kioskEventId ?? 0,
+                    //       machineId: ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0,
+                    //       remainingSingleSidedCount: cardCountState.remainingSingleSidedCount,
+                    //     );
+                  } catch (e) {
+                    AppLogService.instance.error("End Kiosk Application: $e");
+                  }
+
+                  // 종료
                   exit(0);
                 }
               },

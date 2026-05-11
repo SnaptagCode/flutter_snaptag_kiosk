@@ -84,6 +84,7 @@ class PrinterBindings {
 
   void initLibrary() {
     final result = _libInit();
+    print('asd');
     if (result != 0) {
       final error = getErrorInfo(result);
       throw Exception('[R600LibInit] 라이브러리 초기화 실패: $error (code: $result)');
