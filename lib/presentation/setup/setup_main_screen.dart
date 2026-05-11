@@ -251,6 +251,7 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
                 );
                 if (result) {
                   try {
+                    await ref.read(printerServiceProvider.notifier).clearLibrary();
                     await ref.read(kioskRepositoryProvider).endKioskApplication(
                           kioskEventId: ref.read(kioskInfoServiceProvider)?.kioskEventId ?? 0,
                           machineId: ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0,
