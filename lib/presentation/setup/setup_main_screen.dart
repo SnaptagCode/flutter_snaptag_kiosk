@@ -93,9 +93,9 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
       }
     }
 
-    final isReady = await _validatePrinterReadyAndShowDialogs(context);
+    // final isReady = await _validatePrinterReadyAndShowDialogs(context);
 
-    if (!isReady) return;
+    // if (!isReady) return;
 
     final isPaymentDeviceReady = await _checkPaymentDevice();
     if (!isPaymentDeviceReady) return;
@@ -267,6 +267,7 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
                 );
                 if (result) {
                   try {
+                    await ref.read(printerServiceProvider.notifier).clearLibrary();
                     await ref.read(kioskRepositoryProvider).endKioskApplication(
                           kioskEventId: ref.read(kioskInfoServiceProvider)?.kioskEventId ?? 0,
                           machineId: ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0,
@@ -275,8 +276,6 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
                   } catch (e) {
                     SlackLogService().sendErrorLogToSlack('*[MachineId : $machineId]* End Kiosk Application: $e');
                   }
-
-                  // 종료
                   exit(0);
                 }
               },
