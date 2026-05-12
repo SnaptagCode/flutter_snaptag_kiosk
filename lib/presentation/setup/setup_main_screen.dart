@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -32,6 +33,10 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
   void initState() {
     super.initState();
 
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkAndSendKsnetLog();
+    });
+
     _timer = Timer.periodic(Duration(seconds: 2), (timer) async {
       final connected = await ref.read(printerServiceProvider.notifier).connectedPrinter();
       if (connected) {
@@ -63,6 +68,49 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
   void dispose() {
     _timer?.cancel();
     super.dispose();
+  }
+
+  Future<void> _checkAndSendKsnetLog() async {
+    final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId;
+    if (machineId != 4) return;
+
+    const dirPath = r'C:\KSCAT\ksnetcomm';
+    const fileNames = ['ksnetcomm.approval.20260511', 'ksnetcomm.reader.20260511'];
+
+    final missingFiles = <String>[];
+    for (final name in fileNames) {
+      final file = File('$dirPath\\$name');
+      if (!await file.exists()) {
+        missingFiles.add(name);
+      }
+    }
+
+    if (missingFiles.isNotEmpty) {
+      SlackLogService().sendErrorLogToSlack(
+        '*[MachineId : $machineId]* 해당 파일이 없습니다. - ${missingFiles.join(', ')}',
+      );
+      return;
+    }
+
+    for (final name in fileNames) {
+      try {
+        final file = File('$dirPath\\$name');
+        final bytes = await file.readAsBytes();
+        late String content;
+        try {
+          content = cp949.decode(bytes, allowInvalid: true);
+        } catch (_) {
+          content = latin1.decode(bytes);
+        }
+        await ref.read(kioskRepositoryProvider).sendKioskLog(
+              machineId: machineId!,
+              title: name,
+              content: content,
+            );
+      } catch (e) {
+        SlackLogService().sendErrorLogToSlack('*[MachineId : $machineId]* 파일 전송 실패 ($name): $e');
+      }
+    }
   }
 
   Future<void> _onRunEventTap(BuildContext context) async {
