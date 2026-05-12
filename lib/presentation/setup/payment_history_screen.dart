@@ -1,9 +1,12 @@
+import 'dart:io';
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_snaptag_kiosk/core/common/sound/sound_manager.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
+import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
 import 'package:flutter_snaptag_kiosk/presentation/setup/payment_history_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/setup/setup_refund_process_provider.dart';
 import 'package:flutter_snaptag_kiosk/core/ui/widget/dialog_helper.dart';
@@ -76,6 +79,11 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
             ),
             title: const Text('출력 내역'),
             actions: [
+              IconButton(
+                icon: Icon(Icons.description_outlined, size: 24.sp),
+                tooltip: '단말기 로그 전송',
+                onPressed: _showLogFileDialog,
+              ),
               //키오스크에서 실행시켜보고 사이즈 조절 필요시 SizedBox로
               IconButton(
                 padding: EdgeInsets.only(left: 30.w),
@@ -267,6 +275,66 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
       case OrderStatus.refunded_failed:
       case OrderStatus.refunded_failed_before_printed:
         return '결제 완료';
+    }
+  }
+
+  Future<void> _showLogFileDialog() async {
+    final dir = Directory(r'C:\KSCAT\ksnetcomm');
+    if (!await dir.exists()) {
+      if (!mounted) return;
+      await DialogHelper.showSetupDialog(
+        context,
+        title: '로그 경로를 찾을 수 없습니다.\nC:\\KSCAT\\ksnetcomm',
+      );
+      return;
+    }
+
+    final files = dir
+        .listSync()
+        .whereType<File>()
+        .toList()
+      ..sort((a, b) => b.lastModifiedSync().compareTo(a.lastModifiedSync()));
+
+    if (!mounted) return;
+
+    if (files.isEmpty) {
+      await DialogHelper.showSetupDialog(context, title: 'txt 로그 파일이 없습니다.');
+      return;
+    }
+
+    final selectedFile = await showDialog<File>(
+      context: context,
+      builder: (ctx) => _LogFileListDialog(files: files),
+    );
+    if (selectedFile == null) return;
+
+    if (!mounted) return;
+    final fileName = selectedFile.uri.pathSegments.last;
+    final confirm = await DialogHelper.showSetupDialog(
+      context,
+      title: '$fileName\n파일을 서버로 전송합니다.',
+      showCancelButton: true,
+    );
+    if (!confirm) return;
+
+    if (!mounted) return;
+    context.loaderOverlay.show();
+    try {
+      final bytes = await selectedFile.readAsBytes();
+      final content = cp949.decode(bytes, allowInvalid: true);
+      final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
+      await ref.read(kioskRepositoryProvider).sendKioskLog(
+            machineId: machineId,
+            title: fileName,
+            content: content,
+          );
+      if (!mounted) return;
+      context.loaderOverlay.hide();
+      await DialogHelper.showSetupDialog(context, title: '로그 전송이 완료되었습니다.');
+    } catch (e) {
+      if (!mounted) return;
+      context.loaderOverlay.hide();
+      await DialogHelper.showSetupDialog(context, title: '로그 전송에 실패했습니다.\n$e');
     }
   }
 
@@ -516,6 +584,42 @@ class PaginationControls extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _LogFileListDialog extends StatelessWidget {
+  final List<File> files;
+  const _LogFileListDialog({required this.files});
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text('로그 파일 선택', style: TextStyle(fontSize: 20.sp)),
+      content: SizedBox(
+        width: 500.w,
+        child: ListView.separated(
+          shrinkWrap: true,
+          itemCount: files.length,
+          separatorBuilder: (_, __) => const Divider(height: 1),
+          itemBuilder: (ctx, i) {
+            final file = files[i];
+            final name = file.uri.pathSegments.last;
+            final modified = DateFormat('yyyy.MM.dd HH:mm').format(file.lastModifiedSync());
+            return ListTile(
+              title: Text(name, style: TextStyle(fontSize: 16.sp)),
+              subtitle: Text(modified, style: TextStyle(fontSize: 13.sp, color: Colors.grey)),
+              onTap: () => Navigator.pop(ctx, file),
+            );
+          },
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text('취소', style: TextStyle(fontSize: 16.sp)),
+        ),
+      ],
     );
   }
 }
