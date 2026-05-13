@@ -344,7 +344,7 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> with Si
 
   /// 최종: 랜덤 이미지 파일 경로 반환
   String? getRandomAdImagePath(WidgetRef ref) {
-    final version = ref.read(versionStateProvider).currentVersion;
+    final version = ref.read(versionNotifierProvider).currentVersion;
     final userDir = getUserDirectorySync();
 
     if (userDir == null) {
@@ -384,7 +384,7 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> with Si
       return 'assets/adImages/hanwha/printing_img.png';
     }
 
-    final version = ref.read(versionStateProvider).currentVersion;
+    final version = ref.read(versionNotifierProvider).currentVersion;
     final userDir = getUserDirectorySync();
     final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
     if (userDir == null) {

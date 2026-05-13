@@ -71,7 +71,7 @@ class HomeScreen extends ConsumerWidget {
                   child: Image.network(kiosk?.emblemImageUrl ?? '', width: 264.w, height: 264.h, fit: BoxFit.contain),
                 ),
                 onTap: () async {
-                  ref.read(backPhotoTypeProvider.notifier).selectFixed(0);
+                  ref.read(backPhotoTypeNotifierProvider.notifier).selectFixed(0);
                   PhotoCardPreviewRouteData().go(context);
                 },
               ),
@@ -101,7 +101,7 @@ class HomeScreen extends ConsumerWidget {
                   ),
                 ),
                 onTap: () async {
-                  ref.read(backPhotoTypeProvider.notifier).selectCustom();
+                  ref.read(backPhotoTypeNotifierProvider.notifier).selectCustom();
                   CodeVerificationRouteData().go(context);
                 },
               ),

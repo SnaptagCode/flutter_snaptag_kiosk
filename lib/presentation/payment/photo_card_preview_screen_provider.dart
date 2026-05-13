@@ -34,7 +34,7 @@ class PhotoCardPreviewScreenProvider extends _$PhotoCardPreviewScreenProvider {
 
     try {
       // // 선택된 뒷면 이미지 타입 확인
-      final selection = ref.read(backPhotoTypeProvider);
+      final selection = ref.read(backPhotoTypeNotifierProvider);
 
       if (selection?.type == BackPhotoType.fixed && selection?.fixedIndex != null) {
         // 고정 뒷면 이미지 결제 처리

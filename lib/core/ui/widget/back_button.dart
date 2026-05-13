@@ -23,7 +23,7 @@ class KioskBackButton extends ConsumerWidget {
     final isPrintProcessScreen = currentPath == PrintProcessRouteData().location;
     final isKioskRoute = currentPath.contains('/kiosk');
 
-    final selection = ref.watch(backPhotoTypeProvider);
+    final selection = ref.watch(backPhotoTypeNotifierProvider);
     final isFixed = selection?.type == BackPhotoType.fixed;
 
     logger.i(

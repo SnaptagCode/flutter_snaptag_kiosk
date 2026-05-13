@@ -175,7 +175,7 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
                   selectedIndex: selectedIndex,
                   imageUrl: nominatedBackPhotoCardList[0].originUrl,
                   onTap: () {
-                    ref.read(backPhotoTypeProvider.notifier).selectFixed(0);
+                    ref.read(backPhotoTypeNotifierProvider.notifier).selectFixed(0);
                   },
                 ),
               if (nominatedBackPhotoCardList.length > 1) SizedBox(width: 100.w),
@@ -185,7 +185,7 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
                   selectedIndex: selectedIndex,
                   imageUrl: nominatedBackPhotoCardList[1].originUrl,
                   onTap: () {
-                    ref.read(backPhotoTypeProvider.notifier).selectFixed(1);
+                    ref.read(backPhotoTypeNotifierProvider.notifier).selectFixed(1);
                   },
                 ),
             ],
@@ -316,7 +316,7 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
       },
     );
     final kiosk = ref.watch(kioskInfoServiceProvider);
-    final selection = ref.watch(backPhotoTypeProvider);
+    final selection = ref.watch(backPhotoTypeNotifierProvider);
     final isHwe = kiosk?.isHwe ?? false;
     final isFixed = selection?.type == BackPhotoType.fixed;
     final selectedIndex = selection?.fixedIndex;

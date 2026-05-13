@@ -1,30 +1,27 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_snaptag_kiosk/core/data/repositories/version_repository.dart';
 import 'package:flutter_snaptag_kiosk/core/data/models/entities/version_state.dart';
+import 'package:flutter_snaptag_kiosk/core/data/repositories/version_repository.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-final versionRepositoryProvider = Provider((ref) => VersionRepository());
+part 'version_notifier.g.dart';
 
-final versionStateProvider = StateNotifierProvider<VersionNotifier, VersionState>(
-  (ref) => VersionNotifier(ref.read(versionRepositoryProvider)),
-);
+@riverpod
+VersionRepository versionRepository(Ref ref) => VersionRepository();
 
-class VersionNotifier extends StateNotifier<VersionState> {
-  final VersionRepository _repo;
-
-  VersionNotifier(this._repo)
-      : super(VersionState(currentVersion: 'v2.4.9', latestVersion: 'v2.4.9', isLoading: true)) {
+@Riverpod(keepAlive: true)
+class VersionNotifier extends _$VersionNotifier {
+  @override
+  VersionState build() {
     loadVersions();
+    return VersionState(currentVersion: 'v2.4.9', latestVersion: 'v2.4.9', isLoading: true);
   }
 
   Future<void> loadVersions() async {
     try {
-      final current = await _repo.getCurrentVersion();
-      final latest = await _repo.getLatestVersionFromGitHub();
-      state = state.copyWith(
-        currentVersion: current,
-        latestVersion: latest,
-        isLoading: false,
-      );
+      final repo = ref.read(versionRepositoryProvider);
+      final current = await repo.getCurrentVersion();
+      final latest = await repo.getLatestVersionFromGitHub();
+      state = state.copyWith(currentVersion: current, latestVersion: latest, isLoading: false);
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
     }

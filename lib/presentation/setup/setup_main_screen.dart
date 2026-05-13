@@ -167,7 +167,7 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
     final eventType = ref.read(kioskInfoServiceProvider)?.eventType ?? '-';
     final serviceName = serviceNameMap[eventType] ?? '-';
 
-    final versionState = ref.read(versionStateProvider);
+    final versionState = ref.read(versionNotifierProvider);
     final currentVersion = versionState.currentVersion;
 
     await writePhotocodeId(
@@ -180,7 +180,7 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
   }
 
   Future<void> _startEventFlow(BuildContext context) async {
-    final versionState = ref.read(versionStateProvider);
+    final versionState = ref.read(versionNotifierProvider);
     final currentVersion = versionState.currentVersion;
     final latestVersion = versionState.latestVersion;
     final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
@@ -233,7 +233,7 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
   Widget build(BuildContext context) {
     ref.read(alertDefinitionProvider);
     final machineId = ref.watch(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
-    final versionState = ref.watch(versionStateProvider);
+    final versionState = ref.watch(versionNotifierProvider);
     final cardCountState = ref.watch(cardCountProvider);
     final currentVersion = versionState.currentVersion;
     final latestVersion = versionState.latestVersion;

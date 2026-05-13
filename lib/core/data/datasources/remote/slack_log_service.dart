@@ -75,7 +75,7 @@ class SlackLogService {
     final definitions = _container.read(alertDefinitionProvider);
     final def = definitions.firstWhereOrNull((e) => e.key == errorKey);
     final kioskInfo = _container.read(kioskInfoServiceProvider);
-    final version = _container.read(versionStateProvider).currentVersion;
+    final version = _container.read(versionNotifierProvider).currentVersion;
     final eventType = kioskInfo?.eventType ?? "-";
 
     final serviceNameMap = {
