@@ -1,12 +1,9 @@
-sealed class VerificationAction {
-  const VerificationAction();
-}
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-final class VerificationActionSubmit extends VerificationAction {
-  final String code;
-  const VerificationActionSubmit(this.code);
-}
+part 'verification_action.freezed.dart';
 
-final class VerificationActionCancel extends VerificationAction {
-  const VerificationActionCancel();
+@freezed
+sealed class VerificationAction with _$VerificationAction {
+  const factory VerificationAction.submit(String code) = VerificationActionSubmit;
+  const factory VerificationAction.cancel() = VerificationActionCancel;
 }
