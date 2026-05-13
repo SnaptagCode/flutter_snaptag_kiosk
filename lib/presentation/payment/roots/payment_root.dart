@@ -5,7 +5,7 @@ import 'package:flutter_snaptag_kiosk/core/ui/widget/dialog_helper.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/home_timeout_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/payment/payment_failed_type.dart';
-import 'package:flutter_snaptag_kiosk/presentation/payment/payment_screen.dart';
+import 'package:flutter_snaptag_kiosk/presentation/payment/screens/payment_screen.dart';
 import 'package:flutter_snaptag_kiosk/presentation/payment/photo_card_preview_screen_provider.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 

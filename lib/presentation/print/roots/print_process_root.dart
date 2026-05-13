@@ -12,7 +12,7 @@ import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_servic
 import 'package:flutter_snaptag_kiosk/presentation/payment/payment_response_state.dart';
 import 'package:flutter_snaptag_kiosk/presentation/payment/payment_service.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/card_printer.dart';
-import 'package:flutter_snaptag_kiosk/presentation/print/print_process_screen.dart';
+import 'package:flutter_snaptag_kiosk/presentation/print/screens/print_process_screen.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/print_process_screen_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/setup/page_print_provider.dart';
 
