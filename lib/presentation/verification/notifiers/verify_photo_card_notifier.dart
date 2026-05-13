@@ -1,9 +1,9 @@
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
-import 'package:flutter_snaptag_kiosk/presentation/verification/auth_code_provider.dart';
+import 'package:flutter_snaptag_kiosk/presentation/verification/notifiers/auth_code_notifier.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-part 'verify_photo_card_provider.g.dart';
+part 'verify_photo_card_notifier.g.dart';
 
 @Riverpod(keepAlive: true)
 class VerifyPhotoCard extends _$VerifyPhotoCard {

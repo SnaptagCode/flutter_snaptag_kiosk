@@ -5,7 +5,7 @@ import 'package:flutter_snaptag_kiosk/core/ui/widget/dialog_helper.dart';
 import 'package:flutter_snaptag_kiosk/domain/models/verification/verification_failure.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_snaptag_kiosk/presentation/payment/payment_service.dart';
-import 'package:flutter_snaptag_kiosk/presentation/verification/auth_code_provider.dart';
+import 'package:flutter_snaptag_kiosk/presentation/verification/notifiers/auth_code_notifier.dart';
 import 'package:flutter_snaptag_kiosk/presentation/verification/notifiers/verification_action.dart';
 import 'package:flutter_snaptag_kiosk/presentation/verification/notifiers/verification_notifier.dart';
 import 'package:flutter_snaptag_kiosk/presentation/verification/notifiers/verification_state.dart';

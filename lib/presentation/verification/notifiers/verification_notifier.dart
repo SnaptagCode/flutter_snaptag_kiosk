@@ -3,7 +3,7 @@ import 'package:flutter_snaptag_kiosk/domain/models/verification/verification_fa
 import 'package:flutter_snaptag_kiosk/domain/usecases/verification/verify_photo_code_usecase.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
 import 'package:flutter_snaptag_kiosk/presentation/verification/notifiers/verification_state.dart';
-import 'package:flutter_snaptag_kiosk/presentation/verification/verify_photo_card_provider.dart';
+import 'package:flutter_snaptag_kiosk/presentation/verification/notifiers/verify_photo_card_notifier.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'verification_notifier.g.dart';

@@ -1,6 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-part 'auth_code_provider.g.dart';
+part 'auth_code_notifier.g.dart';
 
 @riverpod
 class AuthCode extends _$AuthCode {
