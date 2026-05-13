@@ -45,7 +45,7 @@ class PaymentService extends _$PaymentService {
   /// 사전 조건 검증
   void _validatePreconditions() {
     final settings = ref.read(kioskInfoServiceProvider);
-    final backPhoto = ref.watch(verifyPhotoCardProvider).value;
+    final backPhoto = ref.read(verifyPhotoCardProvider).value;
 
     if (settings == null) {
       throw PreconditionFailedException('No kiosk settings available');
@@ -103,7 +103,7 @@ class PaymentService extends _$PaymentService {
 
   /// 승인번호가 없는 결제 처리
   Future<void> _handleEmptyApprovalNumber(PaymentResponse paymentResponse, String machineId) async {
-    final backPhoto = ref.watch(verifyPhotoCardProvider).value!;
+    final backPhoto = ref.read(verifyPhotoCardProvider).value!;
 
     // await ref.read(kioskRepositoryProvider).updateBackPhotoStatus(UpdateBackPhotoRequest(
     //       photoAuthNumber: backPhoto.photoAuthNumber,
@@ -122,7 +122,7 @@ class PaymentService extends _$PaymentService {
 
   /// 결제 응답 처리
   Future<void> _handlePaymentResponse(PaymentResponse paymentResponse) async {
-    final backPhoto = ref.watch(verifyPhotoCardProvider).value!;
+    final backPhoto = ref.read(verifyPhotoCardProvider).value!;
 
     SlackLogService().sendLogToSlack("paymentResponse : $paymentResponse");
 
@@ -212,7 +212,7 @@ class PaymentService extends _$PaymentService {
       rethrow;
     } finally {
       final approvalInfo = ref.read(paymentResponseStateProvider);
-      final backPhoto = ref.watch(verifyPhotoCardProvider).value;
+      final backPhoto = ref.read(verifyPhotoCardProvider).value;
       final paymentRes = approvalInfo?.res;
       if (approvalInfo?.orderState == OrderStatus.refunded) {
         await _updateOrder(isRefund: true, description: "자동환불");
@@ -314,7 +314,7 @@ class PaymentService extends _$PaymentService {
 
   Future<CreateOrderResponse> _createOrder() async {
     final settings = ref.read(kioskInfoServiceProvider);
-    final backPhoto = ref.watch(verifyPhotoCardProvider).value;
+    final backPhoto = ref.read(verifyPhotoCardProvider).value;
     final isSingleSided = ref.read(pagePrintProvider) == PagePrintType.single;
 
     final request = CreateOrderRequest(
@@ -378,9 +378,9 @@ class PaymentService extends _$PaymentService {
   Future<UpdateOrderResponse> _updateFailOrder({required String description}) async {
     try {
       final settings = ref.read(kioskInfoServiceProvider);
-      final backPhoto = ref.watch(verifyPhotoCardProvider).value;
-      final approval = ref.watch(paymentResponseStateProvider);
-      final orderId = ref.watch(createOrderInfoProvider)?.orderId;
+      final backPhoto = ref.read(verifyPhotoCardProvider).value;
+      final approval = ref.read(paymentResponseStateProvider);
+      final orderId = ref.read(createOrderInfoProvider)?.orderId;
       if (orderId == null) {
         throw Exception('No order id available');
       }
@@ -405,20 +405,3 @@ class PaymentService extends _$PaymentService {
   }
 }
 
-class OrderCreationException implements Exception {
-  final String message;
-
-  OrderCreationException(this.message);
-
-  @override
-  String toString() => 'OrderCreationException: $message';
-}
-
-class PreconditionFailedException implements Exception {
-  final String message;
-
-  PreconditionFailedException(this.message);
-
-  @override
-  String toString() => 'PreconditionFailedExption: $message';
-}

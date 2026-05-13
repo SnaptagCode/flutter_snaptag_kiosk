@@ -4,6 +4,7 @@ import 'package:flutter_snaptag_kiosk/presentation/home/back_photo_type_provider
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/home_timeout_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
 import 'package:flutter_snaptag_kiosk/presentation/setup/page_print_provider.dart';
+import 'package:flutter_snaptag_kiosk/presentation/payment/payment_failed_type.dart';
 import 'package:flutter_snaptag_kiosk/presentation/payment/payment_service.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/card_printer.dart';
 import 'package:flutter_snaptag_kiosk/presentation/verification/verify_photo_card_provider.dart';
