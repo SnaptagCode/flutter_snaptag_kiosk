@@ -7,7 +7,7 @@ import 'package:flutter_snaptag_kiosk/presentation/payment/payment_response_stat
 import 'package:flutter_snaptag_kiosk/presentation/print/card_printer.dart';
 import 'package:flutter_snaptag_kiosk/presentation/setup/front_photo_list.dart';
 import 'package:flutter_snaptag_kiosk/presentation/setup/page_print_provider.dart';
-import 'package:flutter_snaptag_kiosk/presentation/verification/notifiers/verify_photo_card_notifier.dart';
+import 'package:flutter_snaptag_kiosk/presentation/verification/notifiers/back_photo_session_notifier.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'print_service.g.dart';
@@ -36,7 +36,7 @@ class PrintService extends _$PrintService {
     // 3. 프린트 작업 생성 및 백 이미지 준비
     final printJobInfo = await _createPrintJobWithEmbeddingBackImage(
       frontPhotoCardId: frontPhotoInfo.id,
-      backPhotoCardId: ref.read(verifyPhotoCardProvider).value?.backPhotoCardId ?? 0,
+      backPhotoCardId: ref.read(backPhotoSessionProvider).value?.backPhotoCardId ?? 0,
     );
 
     // 4. 프린트 진행 및 상태 업데이트
@@ -79,7 +79,7 @@ class PrintService extends _$PrintService {
   }
 
   void _validatePrintRequirements() {
-    final backPhotoCardResponseInfo = ref.read(verifyPhotoCardProvider).value;
+    final backPhotoCardResponseInfo = ref.read(backPhotoSessionProvider).value;
     final approvalInfo = ref.read(paymentResponseStateProvider);
     final printerState = ref.read(printerServiceProvider);
 

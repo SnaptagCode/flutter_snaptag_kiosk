@@ -6,7 +6,7 @@ import 'package:flutter_snaptag_kiosk/presentation/payment/payment_failed_type.d
 import 'package:flutter_snaptag_kiosk/presentation/payment/payment_response_state.dart';
 import 'package:flutter_snaptag_kiosk/presentation/setup/page_print_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/verification/notifiers/auth_code_notifier.dart';
-import 'package:flutter_snaptag_kiosk/presentation/verification/notifiers/verify_photo_card_notifier.dart';
+import 'package:flutter_snaptag_kiosk/presentation/verification/notifiers/back_photo_session_notifier.dart';
 import 'package:intl/intl.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -45,7 +45,7 @@ class PaymentService extends _$PaymentService {
   /// 사전 조건 검증
   void _validatePreconditions() {
     final settings = ref.read(kioskInfoServiceProvider);
-    final backPhoto = ref.read(verifyPhotoCardProvider).value;
+    final backPhoto = ref.read(backPhotoSessionProvider).value;
 
     if (settings == null) {
       throw PreconditionFailedException('No kiosk settings available');
@@ -103,7 +103,7 @@ class PaymentService extends _$PaymentService {
 
   /// 승인번호가 없는 결제 처리
   Future<void> _handleEmptyApprovalNumber(PaymentResponse paymentResponse, String machineId) async {
-    final backPhoto = ref.read(verifyPhotoCardProvider).value!;
+    final backPhoto = ref.read(backPhotoSessionProvider).value!;
 
     // await ref.read(kioskRepositoryProvider).updateBackPhotoStatus(UpdateBackPhotoRequest(
     //       photoAuthNumber: backPhoto.photoAuthNumber,
@@ -122,7 +122,7 @@ class PaymentService extends _$PaymentService {
 
   /// 결제 응답 처리
   Future<void> _handlePaymentResponse(PaymentResponse paymentResponse) async {
-    final backPhoto = ref.read(verifyPhotoCardProvider).value!;
+    final backPhoto = ref.read(backPhotoSessionProvider).value!;
 
     SlackLogService().sendLogToSlack("paymentResponse : $paymentResponse");
 
@@ -212,7 +212,7 @@ class PaymentService extends _$PaymentService {
       rethrow;
     } finally {
       final approvalInfo = ref.read(paymentResponseStateProvider);
-      final backPhoto = ref.read(verifyPhotoCardProvider).value;
+      final backPhoto = ref.read(backPhotoSessionProvider).value;
       final paymentRes = approvalInfo?.res;
       if (approvalInfo?.orderState == OrderStatus.refunded) {
         await _updateOrder(isRefund: true, description: "자동환불");
@@ -314,7 +314,7 @@ class PaymentService extends _$PaymentService {
 
   Future<CreateOrderResponse> _createOrder() async {
     final settings = ref.read(kioskInfoServiceProvider);
-    final backPhoto = ref.read(verifyPhotoCardProvider).value;
+    final backPhoto = ref.read(backPhotoSessionProvider).value;
     final isSingleSided = ref.read(pagePrintProvider) == PagePrintType.single;
 
     final request = CreateOrderRequest(
@@ -335,7 +335,7 @@ class PaymentService extends _$PaymentService {
     const retryDelay = Duration(milliseconds: 500);
 
     final settings = ref.read(kioskInfoServiceProvider);
-    final backPhotoAuthNumber = photoAuthNumber ?? ref.read(verifyPhotoCardProvider).value?.photoAuthNumber; //여기서 예외
+    final backPhotoAuthNumber = photoAuthNumber ?? ref.read(backPhotoSessionProvider).value?.photoAuthNumber; //여기서 예외
     final approval = ref.read(paymentResponseStateProvider);
     final orderId = orderid ?? ref.read(createOrderInfoProvider)?.orderId;
     if (orderId == null) {
@@ -378,7 +378,7 @@ class PaymentService extends _$PaymentService {
   Future<UpdateOrderResponse> _updateFailOrder({required String description}) async {
     try {
       final settings = ref.read(kioskInfoServiceProvider);
-      final backPhoto = ref.read(verifyPhotoCardProvider).value;
+      final backPhoto = ref.read(backPhotoSessionProvider).value;
       final approval = ref.read(paymentResponseStateProvider);
       final orderId = ref.read(createOrderInfoProvider)?.orderId;
       if (orderId == null) {

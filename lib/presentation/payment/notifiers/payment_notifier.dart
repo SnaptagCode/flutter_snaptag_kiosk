@@ -8,7 +8,7 @@ import 'package:flutter_snaptag_kiosk/presentation/payment/payment_failed_type.d
 import 'package:flutter_snaptag_kiosk/presentation/payment/payment_service.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/card_printer.dart';
 import 'package:flutter_snaptag_kiosk/presentation/setup/page_print_provider.dart';
-import 'package:flutter_snaptag_kiosk/presentation/verification/notifiers/verify_photo_card_notifier.dart';
+import 'package:flutter_snaptag_kiosk/presentation/verification/notifiers/back_photo_session_notifier.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'payment_notifier.g.dart';
@@ -47,7 +47,7 @@ class PaymentNotifier extends _$PaymentNotifier {
                   nominatedBackPhotoCardId: selectedCard.id,
                 ),
               );
-          ref.read(verifyPhotoCardProvider.notifier).updateState(BackPhotoCardResponse(
+          ref.read(backPhotoSessionProvider.notifier).updateState(BackPhotoCardResponse(
                 kioskEventId: kiosk.kioskEventId,
                 backPhotoCardId: response.backPhotoCardId,
                 backPhotoCardOriginUrl: selectedCard.originUrl,
