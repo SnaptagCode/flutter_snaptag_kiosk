@@ -10,7 +10,7 @@ import 'package:flutter_snaptag_kiosk/presentation/setup/payment_history_screen.
 import 'package:flutter_snaptag_kiosk/presentation/setup/setup_main_screen.dart';
 import 'package:flutter_snaptag_kiosk/presentation/test/unit_test_screen.dart';
 import 'package:flutter_snaptag_kiosk/presentation/payment/roots/payment_root.dart';
-import 'package:flutter_snaptag_kiosk/presentation/print/print_process_screen.dart';
+import 'package:flutter_snaptag_kiosk/presentation/print/roots/print_process_root.dart';
 import 'package:go_router/go_router.dart';
 
 part 'router.g.dart';
@@ -169,7 +169,7 @@ class PrintProcessRouteData extends GoRouteData with _$PrintProcessRouteData {
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) {
     return NoTransitionPage(
-      child: const PrintProcessScreen(),
+      child: const PrintProcessRoot(),
     );
   }
 }
