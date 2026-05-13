@@ -1,4 +1,4 @@
-import 'package:flutter_snaptag_kiosk/presentation/setup/main/notifiers/page_print_notifier.dart';
+import 'package:flutter_snaptag_kiosk/presentation/setup/main/notifiers/page_print_notifier.dart'; // TODO: page_print_notifier 이동 후 경로 업데이트
 
 enum SetupValidationResult { ok, noPrintTypeSelected, noKioskInfo }
 

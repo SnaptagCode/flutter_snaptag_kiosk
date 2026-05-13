@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_snaptag_kiosk/presentation/verification/roots/verification_root.dart';
 import 'package:flutter_snaptag_kiosk/presentation/global_shell.dart';
-import 'package:flutter_snaptag_kiosk/presentation/setup/kiosk_components/screens/kiosk_components_screen.dart';
-import 'package:flutter_snaptag_kiosk/presentation/setup/kiosk_info/screens/kiosk_info_screen.dart';
+import 'package:flutter_snaptag_kiosk/setup/presentation/kiosk_components/screens/kiosk_components_screen.dart';
+import 'package:flutter_snaptag_kiosk/setup/presentation/event_preview/screens/event_preview_screen.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_shell.dart';
-import 'package:flutter_snaptag_kiosk/presentation/setup/maintenance/screens/maintenance_screen.dart';
+import 'package:flutter_snaptag_kiosk/setup/presentation/maintenance/screens/maintenance_screen.dart';
 import 'package:flutter_snaptag_kiosk/presentation/home/roots/home_root.dart';
-import 'package:flutter_snaptag_kiosk/presentation/setup/payment_history/screens/payment_history_screen.dart';
+import 'package:flutter_snaptag_kiosk/setup/presentation/payment_history/screen_root/payment_history_root.dart';
 import 'package:flutter_snaptag_kiosk/setup/presentation/main/screen_root/setup_main_root.dart';
 import 'package:flutter_snaptag_kiosk/presentation/test/unit_test_screen.dart';
 import 'package:flutter_snaptag_kiosk/presentation/payment/roots/payment_root.dart';
@@ -24,7 +24,7 @@ final GlobalKey<NavigatorState> globalNavigatorKey = GlobalKey<NavigatorState>(d
     TypedGoRoute<SetupMainRouteData>(
       path: '/setup',
       routes: [
-        TypedGoRoute<KioskInfoRouteData>(path: 'kiosk-info'),
+        TypedGoRoute<EventPreviewRouteData>(path: 'event-preview'),
         TypedGoRoute<PaymentHistoryRouteData>(path: 'payment-history'),
         TypedGoRoute<UnitTestRouteData>(path: 'unit-test'),
         TypedGoRoute<KioskComponentsRouteData>(path: 'kiosk-components'),
@@ -80,8 +80,8 @@ class PaymentHistoryRouteData extends GoRouteData with _$PaymentHistoryRouteData
 
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) {
-    return NoTransitionPage(
-      child: PaymentHistoryScreen(),
+    return const NoTransitionPage(
+      child: PaymentHistoryRoot(),
     );
   }
 }
@@ -108,13 +108,13 @@ class KioskComponentsRouteData extends GoRouteData with _$KioskComponentsRouteDa
   }
 }
 
-class KioskInfoRouteData extends GoRouteData with _$KioskInfoRouteData {
-  const KioskInfoRouteData();
+class EventPreviewRouteData extends GoRouteData with _$EventPreviewRouteData {
+  const EventPreviewRouteData();
 
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) {
     return NoTransitionPage(
-      child: const KioskInfoScreen(),
+      child: const EventPreviewScreen(),
     );
   }
 }

@@ -19,10 +19,10 @@ import 'package:flutter_snaptag_kiosk/core/ui/widget/code_keypad.dart';
 ///
 
 class DialogHelper {
-  static Future<bool> showRefundFailDialog(
+  static Future<void> showRefundFailDialog(
     BuildContext context,
   ) async {
-    return await showDialog(
+    await showDialog<void>(
       context: context,
       builder: (BuildContext context) {
         return DefaultTextStyle(

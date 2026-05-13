@@ -7,6 +7,7 @@ import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_servic
 import 'package:flutter_snaptag_kiosk/presentation/print/card_printer.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/luca/state/printer_connect_state.dart';
 import 'package:flutter_snaptag_kiosk/presentation/setup/main/notifiers/page_print_notifier.dart';
+import 'package:flutter_snaptag_kiosk/setup/domain/usecase/end_kiosk_application_use_case.dart';
 import 'package:flutter_snaptag_kiosk/setup/domain/usecase/start_kiosk_event_use_case.dart';
 import 'package:flutter_snaptag_kiosk/setup/module/setup_di.dart';
 import 'package:flutter_snaptag_kiosk/setup/presentation/main/notifier/setup_main_action.dart';
@@ -17,10 +18,17 @@ part 'setup_main_notifier.g.dart';
 
 @riverpod
 class SetupMainNotifier extends _$SetupMainNotifier {
+  late final StartKioskEventUseCase _startKioskEventUseCase;
+  late final EndKioskApplicationUseCase _endKioskApplicationUseCase;
+
   @override
   SetupMainState build() {
+    _startKioskEventUseCase = ref.watch(startKioskEventUseCaseProvider);
+    _endKioskApplicationUseCase = ref.watch(endKioskApplicationUseCaseProvider);
+
     final timer = Timer.periodic(const Duration(seconds: 2), (_) => _pollPrinterStatus());
     ref.onDispose(timer.cancel);
+
     return const SetupMainState.initial();
   }
 
@@ -38,6 +46,7 @@ class SetupMainNotifier extends _$SetupMainNotifier {
     switch (action) {
       case SetupMainActionSelectPrintType(:final type):
         ref.read(pagePrintProvider.notifier).set(type);
+
       case SetupMainActionUpdateCardCount(:final count):
         ref.read(cardCountProvider.notifier).update(count);
         if (count <= 0) {
@@ -49,14 +58,19 @@ class SetupMainNotifier extends _$SetupMainNotifier {
             SlackLogService().sendBroadcastLogToSlackWithKey(InfoKey.cardPrintModeSwitchSingle.key);
           }
         }
+
       case SetupMainActionRequestEventStart():
         await _validateAndAwaitConfirmation();
+
       case SetupMainActionConfirmEventStart():
         await _executeEventStart();
+
       case SetupMainActionCancelEventStart():
         state = const SetupMainState.initial();
+
       case SetupMainActionRequestExitApp():
         await _handleExitApp();
+
       default:
         break;
     }
@@ -65,8 +79,7 @@ class SetupMainNotifier extends _$SetupMainNotifier {
   Future<void> _validateAndAwaitConfirmation() async {
     state = const SetupMainState.loading();
 
-    final useCase = ref.read(startKioskEventUseCaseProvider);
-    final result = await useCase.validate();
+    final result = await _startKioskEventUseCase.validate();
 
     state = switch (result) {
       StartEventValidationOk() => const SetupMainState.awaitingEventConfirmation(),
@@ -87,8 +100,7 @@ class SetupMainNotifier extends _$SetupMainNotifier {
     state = const SetupMainState.loading();
 
     try {
-      final useCase = ref.read(startKioskEventUseCaseProvider);
-      await useCase.execute();
+      await _startKioskEventUseCase.execute();
       state = const SetupMainState.eventStartSuccess();
     } catch (e) {
       state = SetupMainState.failure(SetupMainFailure.eventStartFailed(e));
@@ -96,8 +108,7 @@ class SetupMainNotifier extends _$SetupMainNotifier {
   }
 
   Future<void> _handleExitApp() async {
-    final useCase = ref.read(endKioskApplicationUseCaseProvider);
-    await useCase.call();
+    await _endKioskApplicationUseCase.call();
     state = const SetupMainState.exitAppSuccess();
   }
 }

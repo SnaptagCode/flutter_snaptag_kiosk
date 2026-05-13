@@ -9,8 +9,8 @@ import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_servic
 import 'package:flutter_snaptag_kiosk/presentation/setup/uuid_provider.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-class KioskInfoScreen extends ConsumerWidget {
-  const KioskInfoScreen({super.key});
+class EventPreviewScreen extends ConsumerWidget {
+  const EventPreviewScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -48,7 +48,7 @@ class KioskInfoScreen extends ConsumerWidget {
 
               String? value = await DialogHelper.showKeypadDialog(context, mode: ModeType.event);
 
-              if (value == null || value.isEmpty) return; // 값이 없으면 종료
+              if (value == null || value.isEmpty) return;
 
               final result =
                   await DialogHelper.showSetupDialog(context, title: '최신 이벤트로 새로고침 됩니다.', showCancelButton: true);
@@ -68,9 +68,7 @@ class KioskInfoScreen extends ConsumerWidget {
                 SlackLogService().sendBroadcastLogToSlackWithKey(InfoKey.inspectionStart.key);
               }
             },
-            icon: SvgPicture.asset(
-              'assets/icons/refresh.svg',
-            ),
+            icon: SvgPicture.asset('assets/icons/refresh.svg'),
           ),
         ],
       ),
@@ -96,9 +94,7 @@ class KioskInfoScreen extends ConsumerWidget {
               info.topBannerUrl,
               errorBuilder: (context, error, stackTrace) {
                 return Flexible(
-                  child: Center(
-                    child: const CircularProgressIndicator(),
-                  ),
+                  child: Center(child: const CircularProgressIndicator()),
                 );
               },
             ),

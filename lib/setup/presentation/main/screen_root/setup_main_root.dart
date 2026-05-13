@@ -92,7 +92,7 @@ class _SetupMainRootState extends ConsumerState<SetupMainRoot> {
             if (ref.read(cardCountProvider).currentCount < 1) {
               ref.read(pagePrintProvider.notifier).set(PagePrintType.double);
             }
-            KioskInfoRouteData().go(context);
+            EventPreviewRouteData().go(context);
           case SetupMainActionRequestPaymentHistory():
             PaymentHistoryRouteData().go(context);
           case SetupMainActionRequestMaintenance():
