@@ -7,7 +7,7 @@ import 'package:flutter_snaptag_kiosk/presentation/payment/notifiers/payment_sta
 import 'package:flutter_snaptag_kiosk/presentation/payment/payment_failed_type.dart';
 import 'package:flutter_snaptag_kiosk/presentation/payment/payment_service.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/card_printer.dart';
-import 'package:flutter_snaptag_kiosk/presentation/setup/page_print_provider.dart';
+import 'package:flutter_snaptag_kiosk/presentation/setup/main/notifiers/page_print_notifier.dart';
 import 'package:flutter_snaptag_kiosk/domain/models/verification/back_photo_card.dart';
 import 'package:flutter_snaptag_kiosk/presentation/core/back_photo_session_notifier.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';

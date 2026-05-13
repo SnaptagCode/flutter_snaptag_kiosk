@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_snaptag_kiosk/presentation/verification/roots/verification_root.dart';
 import 'package:flutter_snaptag_kiosk/presentation/global_shell.dart';
-import 'package:flutter_snaptag_kiosk/presentation/setup/kiosk_components_screen.dart';
-import 'package:flutter_snaptag_kiosk/presentation/setup/kiosk_info_screen.dart';
+import 'package:flutter_snaptag_kiosk/presentation/setup/kiosk_components/screens/kiosk_components_screen.dart';
+import 'package:flutter_snaptag_kiosk/presentation/setup/kiosk_info/screens/kiosk_info_screen.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_shell.dart';
-import 'package:flutter_snaptag_kiosk/presentation/setup/maintenance_screen.dart';
-import 'package:flutter_snaptag_kiosk/presentation/home/home_screen.dart';
-import 'package:flutter_snaptag_kiosk/presentation/setup/payment_history_screen.dart';
-import 'package:flutter_snaptag_kiosk/presentation/setup/setup_main_screen.dart';
+import 'package:flutter_snaptag_kiosk/presentation/setup/maintenance/screens/maintenance_screen.dart';
+import 'package:flutter_snaptag_kiosk/presentation/home/roots/home_root.dart';
+import 'package:flutter_snaptag_kiosk/presentation/setup/payment_history/screens/payment_history_screen.dart';
+import 'package:flutter_snaptag_kiosk/setup/presentation/main/screen_root/setup_main_root.dart';
 import 'package:flutter_snaptag_kiosk/presentation/test/unit_test_screen.dart';
 import 'package:flutter_snaptag_kiosk/presentation/payment/roots/payment_root.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/roots/print_process_root.dart';
@@ -69,8 +69,8 @@ class SetupMainRouteData extends GoRouteData with _$SetupMainRouteData {
 
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) {
-    return NoTransitionPage(
-      child: SetupMainScreen(),
+    return const NoTransitionPage(
+      child: SetupMainRoot(),
     );
   }
 }
@@ -136,7 +136,7 @@ class HomeRouteData extends GoRouteData with _$HomeRouteData {
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) {
     return NoTransitionPage(
-      child: HomeScreen(),
+      child: const HomeRoot(),
     );
   }
 }

@@ -2,12 +2,12 @@ import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_servic
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 
-part 'page_print_provider.g.dart';
+part 'page_print_notifier.g.dart';
 
 @Riverpod(keepAlive: true)
 class PagePrint extends _$PagePrint {
   @override
-  PagePrintType build() => PagePrintType.none; //단면_양면 기능 적용시 none
+  PagePrintType build() => PagePrintType.none;
 
   void switchType() {
     state = state == PagePrintType.double ? PagePrintType.single : PagePrintType.double;

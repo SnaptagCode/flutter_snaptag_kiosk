@@ -10,7 +10,7 @@ import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_snaptag_kiosk/presentation/core/card_count_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/core/printer_log_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
-import 'package:flutter_snaptag_kiosk/presentation/setup/alert_definition_provider.dart';
+import 'package:flutter_snaptag_kiosk/presentation/setup/main/notifiers/alert_definition_notifier.dart';
 
 class SlackLogService {
   static final SlackLogService _instance = SlackLogService._internal();

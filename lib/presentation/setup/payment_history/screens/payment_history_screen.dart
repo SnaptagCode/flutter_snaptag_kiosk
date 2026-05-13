@@ -4,8 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_snaptag_kiosk/core/common/sound/sound_manager.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
-import 'package:flutter_snaptag_kiosk/presentation/setup/payment_history_provider.dart';
-import 'package:flutter_snaptag_kiosk/presentation/setup/setup_refund_process_provider.dart';
+import 'package:flutter_snaptag_kiosk/presentation/setup/payment_history/notifiers/payment_history_notifier.dart';
+import 'package:flutter_snaptag_kiosk/presentation/setup/payment_history/notifiers/setup_refund_process_notifier.dart';
 import 'package:flutter_snaptag_kiosk/core/ui/widget/dialog_helper.dart';
 import 'package:flutter_snaptag_kiosk/core/ui/widget/general_error_widget.dart';
 import 'package:flutter_svg/svg.dart';
@@ -76,7 +76,6 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
             ),
             title: const Text('출력 내역'),
             actions: [
-              //키오스크에서 실행시켜보고 사이즈 조절 필요시 SizedBox로
               IconButton(
                 padding: EdgeInsets.only(left: 30.w),
                 icon: SvgPicture.asset(SnaptagSvg.home),
@@ -203,45 +202,19 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
 
   List<DataColumn> get columns {
     return const [
-      DataColumn(
-        label: Text('일자'),
-        headingRowAlignment: MainAxisAlignment.center,
-      ),
-      DataColumn(
-        label: Text('이벤트명'),
-        headingRowAlignment: MainAxisAlignment.center,
-      ),
-      DataColumn(
-        label: Text('결제 금액'),
-        headingRowAlignment: MainAxisAlignment.center,
-      ),
-      DataColumn(
-        label: Text('결제 상태'),
-        headingRowAlignment: MainAxisAlignment.center,
-      ),
-      DataColumn(
-        label: Text('환불 상태'),
-        headingRowAlignment: MainAxisAlignment.center,
-      ),
-      DataColumn(
-        label: Text('출력 상태'),
-        headingRowAlignment: MainAxisAlignment.center,
-      ),
-      DataColumn(
-        label: Text('인증번호'),
-        headingRowAlignment: MainAxisAlignment.center,
-      ),
-      DataColumn(
-        label: Text('결제 승인번호'),
-        headingRowAlignment: MainAxisAlignment.center,
-      ),
+      DataColumn(label: Text('일자'), headingRowAlignment: MainAxisAlignment.center),
+      DataColumn(label: Text('이벤트명'), headingRowAlignment: MainAxisAlignment.center),
+      DataColumn(label: Text('결제 금액'), headingRowAlignment: MainAxisAlignment.center),
+      DataColumn(label: Text('결제 상태'), headingRowAlignment: MainAxisAlignment.center),
+      DataColumn(label: Text('환불 상태'), headingRowAlignment: MainAxisAlignment.center),
+      DataColumn(label: Text('출력 상태'), headingRowAlignment: MainAxisAlignment.center),
+      DataColumn(label: Text('인증번호'), headingRowAlignment: MainAxisAlignment.center),
+      DataColumn(label: Text('결제 승인번호'), headingRowAlignment: MainAxisAlignment.center),
     ];
   }
 
   bool isPrinted(PrintedStatus? printed) {
-    if (printed == null) {
-      return false;
-    }
+    if (printed == null) return false;
     switch (printed) {
       case PrintedStatus.pending:
       case PrintedStatus.started:
@@ -276,13 +249,7 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
       case OrderStatus.failed:
         return TextButton(
           onPressed: null,
-          child: Text(
-            '-',
-            style: TextStyle(
-              color: Color(0xFF414448),
-              fontSize: 16.sp,
-            ),
-          ),
+          child: Text('-', style: TextStyle(color: Color(0xFF414448), fontSize: 16.sp)),
         );
       default:
         switch (order.printedStatus) {
@@ -290,40 +257,18 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
           case PrintedStatus.refunded_before_printed:
             return TextButton(
               onPressed: null,
-              child: Text(
-                '환불 완료',
-                style: TextStyle(
-                  color: Color(0xFF414448),
-                  fontSize: 16.sp,
-                ),
-              ),
+              child: Text('환불 완료', style: TextStyle(color: Color(0xFF414448), fontSize: 16.sp)),
             );
           case PrintedStatus.refunded_failed_after_printed:
           case PrintedStatus.refunded_failed_before_printed:
             return TextButton(
               child: Container(
-                decoration: BoxDecoration(
-                  border: Border(
-                    bottom: BorderSide(
-                      color: Color(0xFFFF333F),
-                    ),
-                  ),
-                ),
-                child: Text(
-                  '환불 실패',
-                  style: TextStyle(
-                    color: Color(0xFFFF333F),
-                    fontSize: 16.sp,
-                  ),
-                ),
+                decoration: BoxDecoration(border: Border(bottom: BorderSide(color: Color(0xFFFF333F)))),
+                child: Text('환불 실패', style: TextStyle(color: Color(0xFFFF333F), fontSize: 16.sp)),
               ),
               onPressed: () async {
                 context.loaderOverlay.show();
-                final result1 = await DialogHelper.showSetupDialog(
-                  context,
-                  title: '환불을 진행합니다.',
-                  showCancelButton: true,
-                );
+                final result1 = await DialogHelper.showSetupDialog(context, title: '환불을 진행합니다.', showCancelButton: true);
                 if (!result1) {
                   context.loaderOverlay.hide();
                   return;
@@ -346,29 +291,13 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
           default:
             return TextButton(
               child: Container(
-                decoration: BoxDecoration(
-                  border: Border(
-                    bottom: BorderSide(
-                      color: Color(0xFF9D9D9D),
-                    ),
-                  ),
-                ),
-                child: Text(
-                  '환불',
-                  style: TextStyle(
-                    color: Color(0xFF9D9D9D),
-                    fontSize: 16.sp,
-                  ),
-                ),
+                decoration: BoxDecoration(border: Border(bottom: BorderSide(color: Color(0xFF9D9D9D)))),
+                child: Text('환불', style: TextStyle(color: Color(0xFF9D9D9D), fontSize: 16.sp)),
               ),
               onPressed: () async {
                 context.loaderOverlay.show();
                 await SoundManager().playSound();
-                final result1 = await DialogHelper.showSetupDialog(
-                  context,
-                  title: '환불을 진행합니다.',
-                  showCancelButton: true,
-                );
+                final result1 = await DialogHelper.showSetupDialog(context, title: '환불을 진행합니다.', showCancelButton: true);
                 if (!result1) {
                   context.loaderOverlay.hide();
                   return;
@@ -394,9 +323,7 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
 }
 
 class DateWidget extends StatelessWidget {
-  const DateWidget({
-    super.key,
-  });
+  const DateWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -408,36 +335,20 @@ class DateWidget extends StatelessWidget {
         Text(
           DateFormat('yyyy.MM.dd').format(DateTime.now().subtract(const Duration(days: 14))),
           textAlign: TextAlign.center,
-          style: TextStyle(
-            color: Color(0xFF1C1C1C),
-            fontSize: 32.sp,
-            fontWeight: FontWeight.w700,
-          ),
+          style: TextStyle(color: Color(0xFF1C1C1C), fontSize: 32.sp, fontWeight: FontWeight.w700),
         ),
-        Text(
-          '-',
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            color: Color(0xFF1C1C1C),
-            fontSize: 32.sp,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
+        Text('-', textAlign: TextAlign.center,
+            style: TextStyle(color: Color(0xFF1C1C1C), fontSize: 32.sp, fontWeight: FontWeight.w700)),
         Text(
           DateFormat('yyyy.MM.dd').format(DateTime.now()),
           textAlign: TextAlign.center,
-          style: TextStyle(
-            color: Color(0xFF1C1C1C),
-            fontSize: 32.sp,
-            fontWeight: FontWeight.w700,
-          ),
+          style: TextStyle(color: Color(0xFF1C1C1C), fontSize: 32.sp, fontWeight: FontWeight.w700),
         ),
       ],
     );
   }
 }
 
-// PaginationControls 위젯은 이전과 동일
 class PaginationControls extends StatelessWidget {
   final int currentPage;
   final int totalPages;
@@ -462,13 +373,8 @@ class PaginationControls extends StatelessWidget {
           ActionChip(
             padding: EdgeInsets.symmetric(horizontal: 10, vertical: 0),
             labelPadding: EdgeInsets.zero,
-            label: Text(
-              i.toString(),
-              style: TextStyle(
-                color: i == currentPage ? Colors.white : Colors.black,
-                fontSize: 14,
-              ),
-            ),
+            label: Text(i.toString(),
+                style: TextStyle(color: i == currentPage ? Colors.white : Colors.black, fontSize: 14)),
             backgroundColor: i == currentPage ? Color(0xFFA671EA) : Color(0xFFF2F2F2),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(4),
@@ -487,32 +393,19 @@ class PaginationControls extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // First page button
-            InkWell(
-              onTap: currentPage > 1 ? () => onPageChanged(1) : null,
-              child: const Icon(Icons.keyboard_double_arrow_left_sharp),
-            ),
+            InkWell(onTap: currentPage > 1 ? () => onPageChanged(1) : null,
+                child: const Icon(Icons.keyboard_double_arrow_left_sharp)),
             const SizedBox(width: 8),
-            // Previous page button
-            InkWell(
-              onTap: currentPage > 1 ? () => onPageChanged(currentPage - 1) : null,
-              child: const Icon(Icons.chevron_left),
-            ),
+            InkWell(onTap: currentPage > 1 ? () => onPageChanged(currentPage - 1) : null,
+                child: const Icon(Icons.chevron_left)),
             const SizedBox(width: 8),
-            // Page buttons
             ...pageButtons(),
             const SizedBox(width: 8),
-            // Next page button
-            InkWell(
-              onTap: currentPage < totalPages ? () => onPageChanged(currentPage + 1) : null,
-              child: const Icon(Icons.chevron_right),
-            ),
+            InkWell(onTap: currentPage < totalPages ? () => onPageChanged(currentPage + 1) : null,
+                child: const Icon(Icons.chevron_right)),
             const SizedBox(width: 8),
-            // Last page button
-            InkWell(
-              onTap: currentPage < totalPages ? () => onPageChanged(totalPages) : null,
-              child: const Icon(Icons.keyboard_double_arrow_right_sharp),
-            ),
+            InkWell(onTap: currentPage < totalPages ? () => onPageChanged(totalPages) : null,
+                child: const Icon(Icons.keyboard_double_arrow_right_sharp)),
           ],
         ),
       ),

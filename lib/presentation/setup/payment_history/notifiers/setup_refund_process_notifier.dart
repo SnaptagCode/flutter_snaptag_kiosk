@@ -1,10 +1,10 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
-import 'package:flutter_snaptag_kiosk/presentation/setup/payment_history_provider.dart';
+import 'package:flutter_snaptag_kiosk/presentation/setup/payment_history/notifiers/payment_history_notifier.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-part 'setup_refund_process_provider.g.dart';
+part 'setup_refund_process_notifier.g.dart';
 
 @riverpod
 class SetupRefundProcess extends _$SetupRefundProcess {
@@ -32,7 +32,6 @@ class SetupRefundProcess extends _$SetupRefundProcess {
 
       state = AsyncValue.data(response);
       await _updateOrderStatus(order);
-      // 현재 페이지 정보를 가져와서 동일한 페이지로 새로고침
       final currentPage = ref.read(ordersPageProvider()).requireValue.paging.currentPage;
       ref.read(ordersPageProvider().notifier).goToPage(currentPage);
     } catch (e) {
@@ -61,7 +60,6 @@ class SetupRefundProcess extends _$SetupRefundProcess {
     );
 
     if (payment?.respCode == '7001') {
-      // 이미 취소된 거래
       await ref.read(kioskRepositoryProvider).updateOrderStatus(
             order.orderId.toInt(),
             request.copyWith(status: OrderStatus.refunded_failed, description: "기취소된 거래"),

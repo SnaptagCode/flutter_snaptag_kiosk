@@ -15,7 +15,7 @@ import 'package:flutter_snaptag_kiosk/presentation/print/card_printer.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/notifiers/print_notifier.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/notifiers/print_state.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/screens/print_process_screen.dart';
-import 'package:flutter_snaptag_kiosk/presentation/setup/page_print_provider.dart';
+import 'package:flutter_snaptag_kiosk/presentation/setup/main/notifiers/page_print_notifier.dart';
 
 class PrintProcessRoot extends ConsumerStatefulWidget {
   const PrintProcessRoot({super.key});

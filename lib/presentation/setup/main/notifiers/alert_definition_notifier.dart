@@ -2,7 +2,7 @@ import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:collection/collection.dart';
 
-part 'alert_definition_provider.g.dart';
+part 'alert_definition_notifier.g.dart';
 
 @Riverpod(keepAlive: true)
 class AlertDefinition extends _$AlertDefinition {

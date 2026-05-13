@@ -1,13 +1,12 @@
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
-import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-part 'payment_history_provider.g.dart';
+part 'payment_history_notifier.g.dart';
 
 @riverpod
 class OrdersPage extends _$OrdersPage {
-  final int _pageSize = 15; //과거 20
+  final int _pageSize = 15;
   int get kioskEventId => ref.read(kioskInfoServiceProvider)?.kioskEventId ?? 0;
   int get kioskMachineId => ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
 

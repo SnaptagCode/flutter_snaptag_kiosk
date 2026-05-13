@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_snaptag_kiosk/presentation/setup/page_print_provider.dart';
+import 'package:flutter_snaptag_kiosk/presentation/setup/main/notifiers/page_print_notifier.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class FloatingPrinterStatusBadge extends ConsumerWidget {

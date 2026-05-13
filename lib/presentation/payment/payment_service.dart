@@ -1,10 +1,11 @@
+import 'package:flutter_snaptag_kiosk/domain/models/verification/back_photo_card.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_snaptag_kiosk/presentation/core/card_count_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
 import 'package:flutter_snaptag_kiosk/presentation/payment/create_order_info_state.dart';
 import 'package:flutter_snaptag_kiosk/presentation/payment/payment_failed_type.dart';
 import 'package:flutter_snaptag_kiosk/presentation/payment/payment_response_state.dart';
-import 'package:flutter_snaptag_kiosk/presentation/setup/page_print_provider.dart';
+import 'package:flutter_snaptag_kiosk/presentation/setup/main/notifiers/page_print_notifier.dart';
 import 'package:flutter_snaptag_kiosk/presentation/verification/notifiers/auth_code_notifier.dart';
 import 'package:flutter_snaptag_kiosk/presentation/core/back_photo_session_notifier.dart';
 import 'package:intl/intl.dart';
@@ -149,7 +150,7 @@ class PaymentService extends _$PaymentService {
   }
 
   /// 시간 초과 결제 처리
-  Future<void> _handleTimeoutPayment(BackPhotoCardResponse backPhoto, PaymentResponse paymentResponse) async {
+  Future<void> _handleTimeoutPayment(BackPhotoCard backPhoto, PaymentResponse paymentResponse) async {
     final response = await _updateOrder(isRefund: false, description: "시간초과");
     SlackLogService().sendLogToSlack("paymentResponse1004 : $response");
 
@@ -162,7 +163,7 @@ class PaymentService extends _$PaymentService {
   }
 
   /// 취소된 결제 처리
-  Future<void> _handleCancelledPayment(BackPhotoCardResponse backPhoto, PaymentResponse paymentResponse) async {
+  Future<void> _handleCancelledPayment(BackPhotoCard backPhoto, PaymentResponse paymentResponse) async {
     await _updateOrder(isRefund: false, description: "고객취소");
     // SlackLogService().sendLogToSlack("paymentResponse1000 : $response");
 
