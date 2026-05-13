@@ -6,7 +6,7 @@ import 'package:flutter_snaptag_kiosk/presentation/payment/payment_failed_type.d
 import 'package:flutter_snaptag_kiosk/presentation/payment/payment_response_state.dart';
 import 'package:flutter_snaptag_kiosk/presentation/setup/page_print_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/verification/notifiers/auth_code_notifier.dart';
-import 'package:flutter_snaptag_kiosk/presentation/verification/notifiers/back_photo_session_notifier.dart';
+import 'package:flutter_snaptag_kiosk/presentation/core/back_photo_session_notifier.dart';
 import 'package:intl/intl.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 

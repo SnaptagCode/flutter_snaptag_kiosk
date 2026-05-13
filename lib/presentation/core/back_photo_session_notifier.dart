@@ -1,4 +1,4 @@
-import 'package:flutter_snaptag_kiosk/lib.dart';
+import 'package:flutter_snaptag_kiosk/domain/models/verification/back_photo_card.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'back_photo_session_notifier.g.dart';
@@ -6,12 +6,12 @@ part 'back_photo_session_notifier.g.dart';
 @Riverpod(keepAlive: true)
 class BackPhotoSession extends _$BackPhotoSession {
   @override
-  AsyncValue<BackPhotoCardResponse?> build() {
+  AsyncValue<BackPhotoCard?> build() {
     return const AsyncValue.data(null);
   }
 
-  void updateState(BackPhotoCardResponse? response) {
-    state = AsyncValue.data(response);
+  void updateState(BackPhotoCard? card) {
+    state = AsyncValue.data(card);
   }
 
   void reset() {
