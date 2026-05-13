@@ -40,13 +40,7 @@ class VerificationRoot extends ConsumerWidget {
   }
 
   void _handleAction(BuildContext context, WidgetRef ref, VerificationAction action) {
-    switch (action) {
-      case VerificationActionSubmit(:final code):
-        ref.read(verificationNotifierProvider.notifier).verifyCode(code);
-      case VerificationActionCancel():
-        ref.read(authCodeProvider.notifier).clear();
-        ref.read(verificationNotifierProvider.notifier).reset();
-    }
+    ref.read(verificationNotifierProvider.notifier).onAction(action);
   }
 
   Future<void> _handleFailure(

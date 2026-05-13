@@ -2,18 +2,35 @@ import 'package:flutter_snaptag_kiosk/data/mappers/verification_mapper.dart';
 import 'package:flutter_snaptag_kiosk/domain/models/verification/verification_failure.dart';
 import 'package:flutter_snaptag_kiosk/domain/usecases/verification/verify_photo_code_usecase.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
-import 'package:flutter_snaptag_kiosk/presentation/verification/notifiers/verification_state.dart';
+import 'package:flutter_snaptag_kiosk/presentation/verification/notifiers/auth_code_notifier.dart';
 import 'package:flutter_snaptag_kiosk/presentation/verification/notifiers/back_photo_session_notifier.dart';
+import 'package:flutter_snaptag_kiosk/presentation/verification/notifiers/verification_action.dart';
+import 'package:flutter_snaptag_kiosk/presentation/verification/notifiers/verification_state.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'verification_notifier.g.dart';
 
 @Riverpod(keepAlive: true)
 class VerificationNotifier extends _$VerificationNotifier {
-  @override
-  VerificationState build() => const VerificationState.initial();
+  late final VerifyPhotoCodeUseCase _verifyPhotoCodeUseCase;
 
-  Future<void> verifyCode(String code) async {
+  @override
+  VerificationState build() {
+    _verifyPhotoCodeUseCase = ref.watch(verifyPhotoCodeUseCaseProvider);
+    return const VerificationState.initial();
+  }
+
+  Future<void> onAction(VerificationAction action) async {
+    switch (action) {
+      case VerificationActionSubmit(:final code):
+        await _verifyCode(code);
+      case VerificationActionCancel():
+        ref.read(authCodeProvider.notifier).clear();
+        state = const VerificationState.initial();
+    }
+  }
+
+  Future<void> _verifyCode(String code) async {
     final kioskEventId = ref.read(kioskInfoServiceProvider)?.kioskEventId;
     if (kioskEventId == null) {
       state = const VerificationState.failure(
@@ -24,13 +41,12 @@ class VerificationNotifier extends _$VerificationNotifier {
 
     state = const VerificationState.loading();
 
-    final result = await ref.read(verifyPhotoCodeUseCaseProvider)(
+    final result = await _verifyPhotoCodeUseCase(
       VerifyPhotoCodeParams(kioskEventId: kioskEventId, authCode: code),
     );
 
     state = result.when(
       data: (card) {
-        // Bridge: Phase 3/4 리팩토링 전까지 결제·프린트 레이어가 기존 provider를 사용
         ref.read(backPhotoSessionProvider.notifier).updateState(card.toResponse());
         return VerificationState.success(card);
       },
