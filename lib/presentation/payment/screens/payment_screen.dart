@@ -10,7 +10,8 @@ import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_snaptag_kiosk/presentation/verification/verify_photo_card_provider.dart';
 import 'package:flutter_snaptag_kiosk/core/ui/widget/general_error_widget.dart';
 import 'package:flutter_snaptag_kiosk/core/ui/widget/price_box.dart';
-import 'package:flutter_snaptag_kiosk/presentation/payment/photo_card_preview_screen_provider.dart';
+import 'package:flutter_snaptag_kiosk/presentation/payment/notifiers/payment_notifier.dart';
+import 'package:flutter_snaptag_kiosk/presentation/payment/notifiers/payment_state.dart';
 
 /// 카드 선택 효과 시안 타입
 enum SelectionDesignVariant {
@@ -240,8 +241,7 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
                     SizedBox(width: 20.w),
                     Consumer(
                       builder: (context, ref, child) {
-                        final paymentState = ref.watch(photoCardPreviewScreenProviderProvider);
-                        final isLoading = paymentState.isLoading;
+                        final isLoading = ref.watch(paymentNotifierProvider) is PaymentStateLoading;
 
                         return ElevatedButton(
                           style: context.paymentButtonStyle,
@@ -249,7 +249,7 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
                               ? null
                               : () async {
                                   await SoundManager().playSound();
-                                  await ref.read(photoCardPreviewScreenProviderProvider.notifier).payment();
+                                  ref.read(paymentNotifierProvider.notifier).pay();
                                 },
                           child: Text(LocaleKeys.sub02_btn_pay.tr(),
                               style: isHwe

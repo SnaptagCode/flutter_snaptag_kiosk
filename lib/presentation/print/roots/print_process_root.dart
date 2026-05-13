@@ -12,8 +12,9 @@ import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_servic
 import 'package:flutter_snaptag_kiosk/presentation/payment/payment_response_state.dart';
 import 'package:flutter_snaptag_kiosk/presentation/payment/payment_service.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/card_printer.dart';
+import 'package:flutter_snaptag_kiosk/presentation/print/notifiers/print_notifier.dart';
+import 'package:flutter_snaptag_kiosk/presentation/print/notifiers/print_state.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/screens/print_process_screen.dart';
-import 'package:flutter_snaptag_kiosk/presentation/print/print_process_screen_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/setup/page_print_provider.dart';
 
 class PrintProcessRoot extends ConsumerStatefulWidget {
@@ -94,11 +95,46 @@ class _PrintProcessRootState extends ConsumerState<PrintProcessRoot> with Single
     });
 
     // 프린트 완료/오류 처리
-    ref.listen(printProcessScreenProviderProvider, (previous, next) async {
-      if (next.isLoading) return;
+    ref.listen<PrintState>(printNotifierProvider, (previous, next) async {
+      switch (next) {
+        case PrintStateInitial():
+          break;
+        case PrintStateLoading():
+          break;
+        case PrintStateSuccess():
+          if (!_progressCompleted) {
+            setState(() => _progressCompleted = true);
+            await _progressController.animateTo(
+              1.0,
+              duration: const Duration(milliseconds: 450),
+              curve: Curves.easeOutCubic,
+            );
+          }
 
-      await next.when(
-        error: (error, stack) async {
+          _checkCardSingleCardCount();
+          ref.read(paymentResponseStateProvider.notifier).reset();
+
+          final networkStatus = ref.read(networkStatusNotifierProvider).status;
+          final isNetworkDown =
+              networkStatus == NetworkStatus.disconnected || networkStatus == NetworkStatus.unstable;
+
+          if (!context.mounted) return;
+          await DialogHelper.showPrintCompleteDialog(context);
+
+          if (isNetworkDown) {
+            await Future.delayed(const Duration(milliseconds: 300));
+            final rootContext = rootNavigatorKey.currentContext;
+            if (rootContext != null && rootContext.mounted) {
+              DialogHelper.showKioskDialog(
+                rootContext,
+                title: LocaleKeys.alert_title_network_error.tr(),
+                contentText: LocaleKeys.alert_txt_print_network_error.tr(),
+                confirmButtonText: LocaleKeys.alert_btn_print_failure.tr(),
+              );
+            }
+          }
+
+        case PrintStateFailure(:final error, :final stackTrace):
           if (_networkErrorHandled) return;
 
           if (!_progressCompleted && !_progressFrozen) {
@@ -117,12 +153,12 @@ class _PrintProcessRootState extends ConsumerState<PrintProcessRoot> with Single
             SlackLogService().sendBroadcastLogToSlackWithKey(ErrorKey.printerPrintFail.key);
           }
 
-          _errorLogging(error.toString(), stack);
+          _errorLogging(error.toString(), stackTrace);
 
           final isNetworkError = ref.read(networkStatusNotifierProvider.notifier).isNetworkError(error);
           if (isNetworkError) {
             _checkCardSingleCardCount();
-            if (!mounted) return;
+            if (!context.mounted) return;
             await DialogHelper.showKioskDialog(
               context,
               title: LocaleKeys.alert_title_network_error.tr(),
@@ -133,7 +169,7 @@ class _PrintProcessRootState extends ConsumerState<PrintProcessRoot> with Single
             return;
           }
 
-          if (!mounted) return;
+          if (!context.mounted) return;
           final confirmed = await DialogHelper.showKioskDialog(
             context,
             title: LocaleKeys.alert_title_auto_refund_alert.tr(),
@@ -156,43 +192,7 @@ class _PrintProcessRootState extends ConsumerState<PrintProcessRoot> with Single
               if (shouldGoHome) HomeRouteData().go(context);
             }
           }
-        },
-        loading: () => null,
-        data: (_) async {
-          if (!_progressCompleted) {
-            setState(() => _progressCompleted = true);
-            await _progressController.animateTo(
-              1.0,
-              duration: const Duration(milliseconds: 450),
-              curve: Curves.easeOutCubic,
-            );
-          }
-
-          _checkCardSingleCardCount();
-          ref.read(paymentResponseStateProvider.notifier).reset();
-
-          final networkStatus = ref.read(networkStatusNotifierProvider).status;
-          final isNetworkDown =
-              networkStatus == NetworkStatus.disconnected || networkStatus == NetworkStatus.unstable;
-
-          if (!context.mounted) return;
-          await DialogHelper.showPrintCompleteDialog(context);
-
-          if (isNetworkDown) {
-            Future.delayed(const Duration(milliseconds: 300), () {
-              final rootContext = rootNavigatorKey.currentContext;
-              if (rootContext != null) {
-                DialogHelper.showKioskDialog(
-                  rootContext,
-                  title: LocaleKeys.alert_title_network_error.tr(),
-                  contentText: LocaleKeys.alert_txt_print_network_error.tr(),
-                  confirmButtonText: LocaleKeys.alert_btn_print_failure.tr(),
-                );
-              }
-            });
-          }
-        },
-      );
+      }
     });
 
     return PrintProcessScreen(
