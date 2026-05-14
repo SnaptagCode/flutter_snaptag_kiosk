@@ -1,4 +1,4 @@
-import 'package:flutter_snaptag_kiosk/setup/domain/usecase/refresh_event_preview_use_case.dart';
+﻿import 'package:flutter_snaptag_kiosk/domain/usecases/setup/refresh_event_preview_use_case.dart';
 import 'package:flutter_snaptag_kiosk/setup/module/setup_di.dart';
 import 'package:flutter_snaptag_kiosk/setup/presentation/event_preview/notifier/event_preview_action.dart';
 import 'package:flutter_snaptag_kiosk/setup/presentation/event_preview/notifier/event_preview_state.dart';

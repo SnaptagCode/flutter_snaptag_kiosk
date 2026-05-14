@@ -1,7 +1,7 @@
 {
   "tool_name": "Bash",
-  "tool_input_preview": "{\"command\":\"ls c:\\\\Users\\\\Administrator\\\\Desktop\\\\jiyoung\\\\workspace\\\\flutter_snaptag_kiosk\\\\lib\\\\core\\\\data\\\\ 2>&1\",\"description\":\"List core/data directory structure\"}",
-  "error": "Exit code 2\nls: cannot access 'c:UsersAdministratorDesktopjiyoungworkspaceflutter_snaptag_kiosklibcoredata 2': No such file or directory",
-  "timestamp": "2026-05-14T08:10:09.722Z",
+  "tool_input_preview": "{\"command\":\"cd \\\"c:\\\\Users\\\\Administrator\\\\Desktop\\\\jiyoung\\\\workspace\\\\flutter_snaptag_kiosk\\\" && Get-ChildItem -Path \\\"lib/payment/domain\\\" -Recurse -Filter \\\"*.dart\\\" | Select-Object FullName\",\"des...",
+  "error": "Exit code 127\n/usr/bin/bash: line 1: Get-ChildItem: command not found\n/usr/bin/bash: line 1: Select-Object: command not found",
+  "timestamp": "2026-05-14T08:19:33.512Z",
   "retry_count": 1
 }

@@ -1,8 +1,8 @@
-import 'package:easy_localization/easy_localization.dart';
+﻿import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
-import 'package:flutter_snaptag_kiosk/setup/domain/repository/i_payment_history_repository.dart';
+import 'package:flutter_snaptag_kiosk/domain/repositories/i_payment_history_repository.dart';
 
 class RefundOrderUseCase {
   final Ref _ref;

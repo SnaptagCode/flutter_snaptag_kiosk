@@ -1,7 +1,7 @@
-import 'package:flutter_snaptag_kiosk/domain/models/verification/verification_failure.dart';
+﻿import 'package:flutter_snaptag_kiosk/domain/models/verification/verification_failure.dart';
 import 'package:flutter_snaptag_kiosk/presentation/core/back_photo_session_notifier.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
-import 'package:flutter_snaptag_kiosk/verification/domain/usecase/verify_photo_code_use_case.dart';
+import 'package:flutter_snaptag_kiosk/domain/usecases/verification/verify_photo_code_use_case.dart';
 import 'package:flutter_snaptag_kiosk/verification/module/verification_di.dart';
 import 'package:flutter_snaptag_kiosk/verification/presentation/notifier/auth_code_notifier.dart';
 import 'package:flutter_snaptag_kiosk/verification/presentation/notifier/verification_action.dart';

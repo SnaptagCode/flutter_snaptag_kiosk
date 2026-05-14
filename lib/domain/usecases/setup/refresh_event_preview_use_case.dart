@@ -4,7 +4,7 @@ import 'package:flutter_snaptag_kiosk/data/datasources/remote/slack_log_service.
 import 'package:flutter_snaptag_kiosk/data/models/request/unique_key_request.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
 import 'package:flutter_snaptag_kiosk/presentation/setup/uuid_provider.dart';
-import 'package:flutter_snaptag_kiosk/setup/domain/repository/i_event_preview_repository.dart';
+import 'package:flutter_snaptag_kiosk/domain/repositories/i_event_preview_repository.dart';
 
 class RefreshEventPreviewUseCase {
   final Ref _ref;

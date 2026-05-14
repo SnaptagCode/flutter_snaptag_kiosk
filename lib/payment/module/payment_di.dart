@@ -1,14 +1,14 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+﻿import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_snaptag_kiosk/payment/data/datasource/i_payment_datasource.dart';
 import 'package:flutter_snaptag_kiosk/payment/data/datasource/payment_datasource_impl.dart';
 import 'package:flutter_snaptag_kiosk/payment/data/repository_impl/payment_repository_impl.dart';
-import 'package:flutter_snaptag_kiosk/payment/domain/repository/i_payment_repository.dart';
-import 'package:flutter_snaptag_kiosk/payment/domain/usecase/approve_payment_use_case.dart';
-import 'package:flutter_snaptag_kiosk/payment/domain/usecase/cancel_payment_use_case.dart';
-import 'package:flutter_snaptag_kiosk/payment/domain/usecase/check_payment_device_use_case.dart';
-import 'package:flutter_snaptag_kiosk/payment/domain/usecase/process_payment_use_case.dart';
-import 'package:flutter_snaptag_kiosk/payment/domain/usecase/refund_payment_use_case.dart';
-import 'package:flutter_snaptag_kiosk/payment/domain/usecase/error409_refund_use_case.dart';
+import 'package:flutter_snaptag_kiosk/domain/repositories/i_payment_repository.dart';
+import 'package:flutter_snaptag_kiosk/domain/usecases/payment/approve_payment_use_case.dart';
+import 'package:flutter_snaptag_kiosk/domain/usecases/payment/cancel_payment_use_case.dart';
+import 'package:flutter_snaptag_kiosk/domain/usecases/payment/check_payment_device_use_case.dart';
+import 'package:flutter_snaptag_kiosk/domain/usecases/payment/process_payment_use_case.dart';
+import 'package:flutter_snaptag_kiosk/domain/usecases/payment/refund_payment_use_case.dart';
+import 'package:flutter_snaptag_kiosk/domain/usecases/payment/error409_refund_use_case.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'payment_di.g.dart';

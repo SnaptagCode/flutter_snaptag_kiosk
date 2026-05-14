@@ -1,7 +1,7 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+﻿import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_snaptag_kiosk/core/usecase/usecase.dart';
 import 'package:flutter_snaptag_kiosk/domain/models/verification/back_photo_card.dart';
-import 'package:flutter_snaptag_kiosk/verification/domain/repository/i_verification_repository.dart';
+import 'package:flutter_snaptag_kiosk/domain/repositories/i_verification_repository.dart';
 
 class VerifyPhotoCodeParams {
   final int kioskEventId;

@@ -1,5 +1,5 @@
-import 'package:flutter_snaptag_kiosk/lib.dart';
-import 'package:flutter_snaptag_kiosk/setup/domain/repository/i_payment_history_repository.dart';
+﻿import 'package:flutter_snaptag_kiosk/lib.dart';
+import 'package:flutter_snaptag_kiosk/domain/repositories/i_payment_history_repository.dart';
 
 class GetOrdersUseCase {
   final IPaymentHistoryRepository _repository;

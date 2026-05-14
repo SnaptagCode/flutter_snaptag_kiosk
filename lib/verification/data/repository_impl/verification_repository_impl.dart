@@ -5,7 +5,7 @@ import 'package:flutter_snaptag_kiosk/domain/models/verification/back_photo_card
 import 'package:flutter_snaptag_kiosk/domain/models/verification/verification_failure.dart';
 import 'package:flutter_snaptag_kiosk/verification/data/data_source/i_verification_remote_data_source.dart';
 import 'package:flutter_snaptag_kiosk/verification/data/mapper/verification_mapper.dart';
-import 'package:flutter_snaptag_kiosk/verification/domain/repository/i_verification_repository.dart';
+import 'package:flutter_snaptag_kiosk/domain/repositories/i_verification_repository.dart';
 
 class VerificationRepositoryImpl implements IVerificationRepository {
   final IVerificationRemoteDataSource _dataSource;

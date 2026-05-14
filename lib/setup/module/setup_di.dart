@@ -1,4 +1,4 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+﻿import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_snaptag_kiosk/setup/data/data_source/event_preview_remote_data_source_impl.dart';
 import 'package:flutter_snaptag_kiosk/setup/data/data_source/i_event_preview_remote_data_source.dart';
@@ -9,14 +9,14 @@ import 'package:flutter_snaptag_kiosk/setup/data/data_source/setup_remote_data_s
 import 'package:flutter_snaptag_kiosk/setup/data/repository_impl/event_preview_repository_impl.dart';
 import 'package:flutter_snaptag_kiosk/setup/data/repository_impl/payment_history_repository_impl.dart';
 import 'package:flutter_snaptag_kiosk/setup/data/repository_impl/setup_repository_impl.dart';
-import 'package:flutter_snaptag_kiosk/setup/domain/repository/i_event_preview_repository.dart';
-import 'package:flutter_snaptag_kiosk/setup/domain/repository/i_payment_history_repository.dart';
-import 'package:flutter_snaptag_kiosk/setup/domain/repository/i_setup_repository.dart';
-import 'package:flutter_snaptag_kiosk/setup/domain/usecase/end_kiosk_application_use_case.dart';
-import 'package:flutter_snaptag_kiosk/setup/domain/usecase/get_orders_use_case.dart';
-import 'package:flutter_snaptag_kiosk/setup/domain/usecase/refund_order_use_case.dart';
-import 'package:flutter_snaptag_kiosk/setup/domain/usecase/refresh_event_preview_use_case.dart';
-import 'package:flutter_snaptag_kiosk/setup/domain/usecase/start_kiosk_event_use_case.dart';
+import 'package:flutter_snaptag_kiosk/domain/repositories/i_event_preview_repository.dart';
+import 'package:flutter_snaptag_kiosk/domain/repositories/i_payment_history_repository.dart';
+import 'package:flutter_snaptag_kiosk/domain/repositories/i_setup_repository.dart';
+import 'package:flutter_snaptag_kiosk/domain/usecases/setup/end_kiosk_application_use_case.dart';
+import 'package:flutter_snaptag_kiosk/domain/usecases/setup/get_orders_use_case.dart';
+import 'package:flutter_snaptag_kiosk/domain/usecases/setup/refund_order_use_case.dart';
+import 'package:flutter_snaptag_kiosk/domain/usecases/setup/refresh_event_preview_use_case.dart';
+import 'package:flutter_snaptag_kiosk/domain/usecases/setup/start_kiosk_event_use_case.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'setup_di.g.dart';

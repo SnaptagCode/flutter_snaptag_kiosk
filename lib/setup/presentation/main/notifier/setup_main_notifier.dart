@@ -7,8 +7,8 @@ import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_servic
 import 'package:flutter_snaptag_kiosk/presentation/print/card_printer.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/luca/state/printer_connect_state.dart';
 import 'package:flutter_snaptag_kiosk/presentation/setup/main/notifiers/page_print_notifier.dart';
-import 'package:flutter_snaptag_kiosk/setup/domain/usecase/end_kiosk_application_use_case.dart';
-import 'package:flutter_snaptag_kiosk/setup/domain/usecase/start_kiosk_event_use_case.dart';
+import 'package:flutter_snaptag_kiosk/domain/usecases/setup/end_kiosk_application_use_case.dart';
+import 'package:flutter_snaptag_kiosk/domain/usecases/setup/start_kiosk_event_use_case.dart';
 import 'package:flutter_snaptag_kiosk/setup/module/setup_di.dart';
 import 'package:flutter_snaptag_kiosk/setup/presentation/main/notifier/setup_main_action.dart';
 import 'package:flutter_snaptag_kiosk/setup/presentation/main/notifier/setup_main_state.dart';

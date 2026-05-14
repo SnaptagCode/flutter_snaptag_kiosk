@@ -1,7 +1,7 @@
-import 'package:flutter_snaptag_kiosk/lib.dart';
+﻿import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
-import 'package:flutter_snaptag_kiosk/setup/domain/usecase/get_orders_use_case.dart';
-import 'package:flutter_snaptag_kiosk/setup/domain/usecase/refund_order_use_case.dart';
+import 'package:flutter_snaptag_kiosk/domain/usecases/setup/get_orders_use_case.dart';
+import 'package:flutter_snaptag_kiosk/domain/usecases/setup/refund_order_use_case.dart';
 import 'package:flutter_snaptag_kiosk/setup/module/setup_di.dart';
 import 'package:flutter_snaptag_kiosk/setup/presentation/payment_history/notifier/payment_history_action.dart';
 import 'package:flutter_snaptag_kiosk/setup/presentation/payment_history/notifier/payment_history_state.dart';

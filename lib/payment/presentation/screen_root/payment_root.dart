@@ -1,10 +1,10 @@
-import 'package:easy_localization/easy_localization.dart';
+﻿import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_snaptag_kiosk/core/ui/widget/dialog_helper.dart';
 import 'package:flutter_snaptag_kiosk/home/presentation/notifier/home_back_photo_type_notifier.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
-import 'package:flutter_snaptag_kiosk/payment/domain/failure/payment_failure.dart';
+import 'package:flutter_snaptag_kiosk/domain/failures/payment_failure.dart';
 import 'package:flutter_snaptag_kiosk/payment/presentation/notifier/payment_action.dart';
 import 'package:flutter_snaptag_kiosk/payment/presentation/notifier/payment_notifier.dart';
 import 'package:flutter_snaptag_kiosk/payment/presentation/notifier/payment_state.dart';
