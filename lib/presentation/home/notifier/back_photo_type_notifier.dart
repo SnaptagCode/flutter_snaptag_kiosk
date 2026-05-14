@@ -1,6 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-part 'back_photo_type_provider.g.dart';
+part 'back_photo_type_notifier.g.dart';
 
 enum BackPhotoType {
   fixed,
