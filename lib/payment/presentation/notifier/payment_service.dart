@@ -59,7 +59,7 @@ class PaymentService extends _$PaymentService {
   /// 결제 승인 처리
   Future<PaymentResponse> _approvePayment() async {
     final price = ref.read(kioskInfoServiceProvider)!.photoCardPrice;
-    final paymentResponse = await ref.read(paymentRepositoryProvider).approve(
+    final paymentResponse = await ref.read(approvePaymentUseCaseProvider).call(
           totalAmount: price,
         );
     ref.read(paymentResponseStateProvider.notifier).update(paymentResponse);
@@ -179,7 +179,7 @@ class PaymentService extends _$PaymentService {
       }
 
       final price = ref.read(kioskInfoServiceProvider)!.photoCardPrice;
-      final paymentResponse = await ref.read(paymentRepositoryProvider).cancel(
+      final paymentResponse = await ref.read(cancelPaymentUseCaseProvider).call(
             totalAmount: price,
             originalApprovalNo: approvalInfo.approvalNo ?? '',
             originalApprovalDate: approvalInfo.tradeTime?.substring(0, 6) ?? '',
@@ -238,7 +238,7 @@ class PaymentService extends _$PaymentService {
       }
 
       final price = ref.read(kioskInfoServiceProvider)!.photoCardPrice;
-      final paymentResponse = await ref.read(paymentRepositoryProvider).cancel(
+      final paymentResponse = await ref.read(cancelPaymentUseCaseProvider).call(
             totalAmount: price,
             originalApprovalNo: approvalInfo.authSeqNumber ?? '',
             originalApprovalDate: DateFormat('yyMMdd').format(approvalInfo.completedAt!),

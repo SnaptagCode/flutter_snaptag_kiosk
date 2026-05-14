@@ -3,6 +3,9 @@ import 'package:flutter_snaptag_kiosk/payment/data/datasource/i_payment_datasour
 import 'package:flutter_snaptag_kiosk/payment/data/datasource/payment_datasource_impl.dart';
 import 'package:flutter_snaptag_kiosk/payment/data/repository_impl/payment_repository_impl.dart';
 import 'package:flutter_snaptag_kiosk/payment/domain/repository/i_payment_repository.dart';
+import 'package:flutter_snaptag_kiosk/payment/domain/usecase/approve_payment_use_case.dart';
+import 'package:flutter_snaptag_kiosk/payment/domain/usecase/cancel_payment_use_case.dart';
+import 'package:flutter_snaptag_kiosk/payment/domain/usecase/check_payment_device_use_case.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'payment_di.g.dart';
@@ -18,4 +21,19 @@ IPaymentRepository paymentRepository(Ref ref) {
     ref.watch(paymentDatasourceProvider),
     ref,
   );
+}
+
+@riverpod
+ApprovePaymentUseCase approvePaymentUseCase(Ref ref) {
+  return ApprovePaymentUseCase(ref.watch(paymentRepositoryProvider));
+}
+
+@riverpod
+CancelPaymentUseCase cancelPaymentUseCase(Ref ref) {
+  return CancelPaymentUseCase(ref.watch(paymentRepositoryProvider));
+}
+
+@riverpod
+CheckPaymentDeviceUseCase checkPaymentDeviceUseCase(Ref ref) {
+  return CheckPaymentDeviceUseCase(ref.watch(paymentRepositoryProvider));
 }
