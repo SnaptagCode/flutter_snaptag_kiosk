@@ -13,8 +13,10 @@ Future<({String name, String mac})> getWindowsMacAddress() async {
     if (cols.length < 3) continue;
 
     final connectionName = cols[0].replaceAll('"', '').trim();
-    final mac = macRegex.firstMatch(cols[2])?.group(0);
-    if (mac == null) continue;
+    final rawMac = macRegex.firstMatch(cols[2])?.group(0);
+    if (rawMac == null) continue;
+    // encryptMacAddressWithChaCha20 is sensitive to delimiter — always normalize to uppercase dashes
+    final mac = rawMac.replaceAll(':', '-').toUpperCase();
 
     final nameLower = connectionName.toLowerCase();
     if (nameLower.contains('이더넷') || nameLower.contains('ethernet')) {
