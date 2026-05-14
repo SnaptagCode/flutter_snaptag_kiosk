@@ -9,6 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/isolate/model/check_card_position_message.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/isolate/model/check_feeder_message.dart';
+import 'package:flutter_snaptag_kiosk/presentation/print/isolate/model/clear_library_message.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/isolate/model/connect_message.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/isolate/model/draw_image_message.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/isolate/model/eject_message.dart';
@@ -104,6 +105,17 @@ class PrinterManager {
               } catch (e) {
                 replyPort.send({'errorMsg': e.toString()});
               }
+            }
+
+            if (ob is ClearLibraryMessage) {
+              try {
+                bindings.clearLibrary();
+                logger.i('_printEntry ClearLibraryMessage: Library cleared');
+                replyPort.send({'errorMsg': ''});
+              } catch (e) {
+                replyPort.send({'errorMsg': e.toString()});
+              }
+              return;
             }
 
             if (ob is ConnectMessage) {
@@ -500,6 +512,18 @@ class PrinterManager {
       }
     } catch (e) {
       rethrow;
+    }
+  }
+
+  Future<void> clearLibrary() async {
+    try {
+      final response = await _sendAndResponse(ClearLibraryMessage());
+      final errorMsg = response['errorMsg'] as String? ?? '';
+      if (errorMsg.isNotEmpty) {
+        logger.w('PrinterManager.clearLibrary: $errorMsg');
+      }
+    } catch (e) {
+      logger.w('PrinterManager.clearLibrary failed: $e');
     }
   }
 

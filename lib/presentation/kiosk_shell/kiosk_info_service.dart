@@ -67,6 +67,10 @@ class KioskInfoService extends _$KioskInfoService {
 
       final kioskRepo = ref.read(kioskRepositoryProvider);
       final deviceUUID = await ref.read(deviceUuidProvider.future);
+      final macInfo = await ref.read(macAddressProvider.future);
+      SlackLogService().sendLogToSlack(
+        '*[MAC Info]*\nAdapter: ${macInfo.name}\nMAC: ${macInfo.mac}\nuniqueKey: $deviceUUID',
+      );
       final response = await kioskRepo.getKioskMachineInfoByKey(deviceUUID);
 
       state = response;

@@ -3,11 +3,11 @@ import 'dart:io';
 
 // Utf8 사용을 위한 임포트
 import 'package:flutter_snaptag_kiosk/core/common/logger/logger_service.dart';
+import 'package:flutter_snaptag_kiosk/core/data/datasources/remote/slack_log_service.dart';
+import 'package:flutter_snaptag_kiosk/core/data/repositories/kiosk_repository.dart';
 import 'package:flutter_snaptag_kiosk/presentation/core/card_count_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/core/printer_log_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
-import 'package:flutter_snaptag_kiosk/core/data/datasources/remote/slack_log_service.dart';
-import 'package:flutter_snaptag_kiosk/core/data/repositories/kiosk_repository.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/isolate/printer_manager.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/luca/state/printer_log.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/luca/state/ribbon_status.dart';
@@ -96,6 +96,18 @@ class PrinterService extends _$PrinterService {
     }
   }
 
+  Future<void> clearLibrary() async {
+    try {
+      final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId;
+      final printerManager = await PrinterManager.getInstance(machineId: machineId);
+      await printerManager.clearLibrary();
+      final machineIdForLog = machineId ?? 0;
+      SlackLogService().sendLogToSlack('*[MachineId : $machineIdForLog]* printer clearLibrary completed');
+    } catch (e) {
+      logger.w('PrinterService.clearLibrary failed: $e');
+    }
+  }
+
   Future<void> printImage({
     required File? frontFile,
     required File? embeddedFile,
@@ -138,14 +150,16 @@ class PrinterService extends _$PrinterService {
                   remainingSingleSidedCount: cardCountState.remainingSingleSidedCount,
                 );
           } catch (e) {
-            SlackLogService().sendErrorLogToSlack('*[MachineId : $machineId]* CardPrinter.printImage checkKioskAlive failure: $e');
+            SlackLogService()
+                .sendErrorLogToSlack('*[MachineId : $machineId]* CardPrinter.printImage checkKioskAlive failure: $e');
             logger.e('CardPrinter.printImage checkKioskAlive failure', error: e);
           }
         }
       }
     } catch (e) {
       final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
-      SlackLogService().sendErrorLogToSlack('*[MachineId : $machineId]* CardPrinter.printImage _updatePrintStatusAndCheckKioskAlive failure: $e');
+      SlackLogService().sendErrorLogToSlack(
+          '*[MachineId : $machineId]* CardPrinter.printImage _updatePrintStatusAndCheckKioskAlive failure: $e');
       logger.e('CardPrinter.printImage _updatePrintStatusAndCheckKioskAlive failure', error: e);
     }
   }
