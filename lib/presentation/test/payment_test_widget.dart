@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
-import 'package:flutter_snaptag_kiosk/presentation/payment/payment_response_state.dart';
+import 'package:flutter_snaptag_kiosk/payment/presentation/notifier/payment_response_notifier.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'payment_test_widget.g.dart';

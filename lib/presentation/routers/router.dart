@@ -9,7 +9,7 @@ import 'package:flutter_snaptag_kiosk/home/presentation/screen_root/home_root.da
 import 'package:flutter_snaptag_kiosk/setup/presentation/payment_history/screen_root/payment_history_root.dart';
 import 'package:flutter_snaptag_kiosk/setup/presentation/main/screen_root/setup_main_root.dart';
 import 'package:flutter_snaptag_kiosk/presentation/test/unit_test_screen.dart';
-import 'package:flutter_snaptag_kiosk/presentation/payment/roots/payment_root.dart';
+import 'package:flutter_snaptag_kiosk/payment/presentation/screen_root/payment_root.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/roots/print_process_root.dart';
 import 'package:go_router/go_router.dart';
 

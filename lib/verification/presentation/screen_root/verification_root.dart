@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_snaptag_kiosk/core/ui/widget/dialog_helper.dart';
 import 'package:flutter_snaptag_kiosk/domain/models/verification/verification_failure.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
-import 'package:flutter_snaptag_kiosk/presentation/payment/payment_service.dart';
+import 'package:flutter_snaptag_kiosk/payment/presentation/notifier/payment_service.dart';
 import 'package:flutter_snaptag_kiosk/verification/presentation/notifier/auth_code_notifier.dart';
 import 'package:flutter_snaptag_kiosk/verification/presentation/notifier/verification_action.dart';
 import 'package:flutter_snaptag_kiosk/verification/presentation/notifier/verification_notifier.dart';
