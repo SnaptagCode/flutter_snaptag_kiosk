@@ -49,6 +49,22 @@ class _KioskRepository {
     }
   }
 
+  Future<void> sendKioskLog({
+    required int machineId,
+    required String title,
+    required String content,
+  }) async {
+    try {
+      await _apiClient.sendKioskLog(body: {
+        'machineId': machineId,
+        'title': title,
+        'content': content,
+      });
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   // Slack Alert definitions
   Future<List<AlertDefinitionResponse>> getAlertDefinition() async {
     try {

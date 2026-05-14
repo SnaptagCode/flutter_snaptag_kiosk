@@ -14,6 +14,11 @@ abstract class KioskApiClient {
     @Body() required Map<String, dynamic> body,
   });
 
+  @POST('/v1/internal/slack/kiosk-log')
+  Future<void> sendKioskLog({
+    @Body() required Map<String, dynamic> body,
+  });
+
   // Health Check
   @GET('/v1/health-check')
   Future<String> healthCheck();
