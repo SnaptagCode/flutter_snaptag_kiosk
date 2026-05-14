@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_snaptag_kiosk/core/common/sound/sound_manager.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
-import 'package:flutter_snaptag_kiosk/home/presentation/notifier/back_photo_type_notifier.dart';
+import 'package:flutter_snaptag_kiosk/home/presentation/notifier/home_back_photo_type_notifier.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_snaptag_kiosk/presentation/core/back_photo_session_notifier.dart';
 import 'package:flutter_snaptag_kiosk/core/ui/widget/general_error_widget.dart';

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_snaptag_kiosk/home/presentation/notifier/back_photo_type_notifier.dart';
+import 'package:flutter_snaptag_kiosk/home/presentation/notifier/home_back_photo_type_notifier.dart';
 import 'package:flutter_snaptag_kiosk/home/presentation/screen/home_screen.dart';
 import 'package:flutter_snaptag_kiosk/presentation/routers/router.dart';
 

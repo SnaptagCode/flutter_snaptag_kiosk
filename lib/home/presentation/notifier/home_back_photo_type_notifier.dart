@@ -1,6 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-part 'back_photo_type_notifier.g.dart';
+part 'home_back_photo_type_notifier.g.dart';
 
 enum BackPhotoType {
   fixed,
@@ -13,11 +13,11 @@ class BackPhotoSelection {
 
   const BackPhotoSelection({required this.type, this.fixedIndex});
 
-  factory BackPhotoSelection.fixed(int index) =>
-      BackPhotoSelection(type: BackPhotoType.fixed, fixedIndex: index);
+  // 추천 이미지 선택
+  factory BackPhotoSelection.fixed(int index) => BackPhotoSelection(type: BackPhotoType.fixed, fixedIndex: index);
 
-  factory BackPhotoSelection.custom() =>
-      BackPhotoSelection(type: BackPhotoType.custom);
+  // 내 사진 업로드(QR -> 인증번호 입력)
+  factory BackPhotoSelection.custom() => BackPhotoSelection(type: BackPhotoType.custom);
 }
 
 @Riverpod(keepAlive: true)
