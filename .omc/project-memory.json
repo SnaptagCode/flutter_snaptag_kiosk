@@ -138,14 +138,20 @@
   "hotPaths": [
     {
       "path": "lib",
-      "accessCount": 18,
-      "lastAccessed": 1778746546196,
+      "accessCount": 24,
+      "lastAccessed": 1778749152846,
       "type": "directory"
     },
     {
       "path": "lib\\lib.dart",
-      "accessCount": 12,
-      "lastAccessed": 1778747323785,
+      "accessCount": 19,
+      "lastAccessed": 1778749839127,
+      "type": "file"
+    },
+    {
+      "path": "lib\\payment\\payment.dart",
+      "accessCount": 13,
+      "lastAccessed": 1778749802753,
       "type": "file"
     },
     {
@@ -155,9 +161,9 @@
       "type": "file"
     },
     {
-      "path": "lib\\payment\\payment.dart",
-      "accessCount": 7,
-      "lastAccessed": 1778747217934,
+      "path": "lib\\verification\\verification.dart",
+      "accessCount": 9,
+      "lastAccessed": 1778749803076,
       "type": "file"
     },
     {
@@ -176,12 +182,6 @@
       "path": "lib\\payment\\module\\payment_di.dart",
       "accessCount": 4,
       "lastAccessed": 1778746082903,
-      "type": "file"
-    },
-    {
-      "path": "lib\\verification\\verification.dart",
-      "accessCount": 4,
-      "lastAccessed": 1778747222938,
       "type": "file"
     },
     {
@@ -212,6 +212,12 @@
       "path": "lib\\presentation\\print\\isolate\\printer_manager.dart",
       "accessCount": 3,
       "lastAccessed": 1778736672025,
+      "type": "file"
+    },
+    {
+      "path": "lib\\home\\home.dart",
+      "accessCount": 3,
+      "lastAccessed": 1778748518689,
       "type": "file"
     },
     {
@@ -284,12 +290,6 @@
       "path": "lib\\payment\\presentation\\notifier\\update_order_info_notifier.dart",
       "accessCount": 1,
       "lastAccessed": 1778734489741,
-      "type": "file"
-    },
-    {
-      "path": "lib\\home\\home.dart",
-      "accessCount": 1,
-      "lastAccessed": 1778734954869,
       "type": "file"
     },
     {

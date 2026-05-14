@@ -1,7 +1,7 @@
 {
-  "tool_name": "Bash",
-  "tool_input_preview": "{\"command\":\"cd \\\"c:\\\\Users\\\\Administrator\\\\Desktop\\\\jiyoung\\\\workspace\\\\flutter_snaptag_kiosk\\\" && Get-ChildItem -Path \\\"lib/payment/domain\\\" -Recurse -Filter \\\"*.dart\\\" | Select-Object FullName\",\"des...",
-  "error": "Exit code 127\n/usr/bin/bash: line 1: Get-ChildItem: command not found\n/usr/bin/bash: line 1: Select-Object: command not found",
-  "timestamp": "2026-05-14T08:19:33.512Z",
+  "tool_name": "Read",
+  "tool_input_preview": "{\"file_path\":\"C:\\\\Users\\\\ADMINI~1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-Administrator-Desktop-jiyoung-workspace-flutter-snaptag-kiosk\\\\bdd0cbce-6198-46d3-a68b-5c5771a80560\\\\tasks\\\\bed2edd7p.output\"}",
+  "error": "File content (38108 tokens) exceeds maximum allowed tokens (25000). Use offset and limit parameters to read specific portions of the file, or search for specific content instead of reading the whole file.",
+  "timestamp": "2026-05-14T09:00:13.048Z",
   "retry_count": 1
 }
