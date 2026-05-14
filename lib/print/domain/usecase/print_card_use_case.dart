@@ -1,45 +1,36 @@
 import 'dart:io';
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
+import 'package:flutter_snaptag_kiosk/presentation/core/back_photo_session_notifier.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
-import 'package:flutter_snaptag_kiosk/payment/presentation/notifier/create_order_info_notifier.dart';
-import 'package:flutter_snaptag_kiosk/payment/presentation/notifier/payment_response_notifier.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/card_printer.dart';
 import 'package:flutter_snaptag_kiosk/presentation/setup/front_photo_list.dart';
 import 'package:flutter_snaptag_kiosk/presentation/setup/main/notifiers/page_print_notifier.dart';
-import 'package:flutter_snaptag_kiosk/presentation/core/back_photo_session_notifier.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-part 'print_service.g.dart';
+class PrintCardUseCase {
+  PrintCardUseCase(this._ref);
+  final Ref _ref;
 
-@riverpod
-class PrintService extends _$PrintService {
-  @override
-  FutureOr<void> build() => null;
-
-  Future<void> printCard() async {
+  Future<void> call() async {
     try {
       await _handlePrintProcess();
     } catch (e, stack) {
-      logger.e('PrintService.print failure', error: e, stackTrace: stack);
+      logger.e('PrintCardUseCase failure', error: e, stackTrace: stack);
       rethrow;
     }
   }
 
   Future<void> _handlePrintProcess() async {
-    // 1. 사전 검증
     _validatePrintRequirements();
 
-    // 2. 프론트 이미지 준비
     final frontPhotoInfo = await _prepareFrontPhoto();
 
-    // 3. 프린트 작업 생성 및 백 이미지 준비
     final printJobInfo = await _createPrintJobWithEmbeddingBackImage(
       frontPhotoCardId: frontPhotoInfo.id,
-      backPhotoCardId: ref.read(backPhotoSessionProvider).value?.backPhotoCardId ?? 0,
+      backPhotoCardId: _ref.read(backPhotoSessionProvider).value?.backPhotoCardId ?? 0,
     );
 
-    // 4. 프린트 진행 및 상태 업데이트
     await _executePrintJob(
       printJobInfo.printedPhotoCardId,
       frontPhotoInfo.safeEmbedImage,
@@ -49,65 +40,51 @@ class PrintService extends _$PrintService {
 
   Future<void> _executePrintJob(int printedPhotoCardId, File frontPhoto, File embedded) async {
     try {
-      // 프린트 상태 시작
       await _updatePrintStatus(printedPhotoCardId, PrintedStatus.started);
 
-      // 실제 프린트 실행
-      //await _executePrint(frontPhoto: frontPhoto, embedded: embedded);
-      final isSingleSidedMode = ref.read(pagePrintProvider) == PagePrintType.single;
+      final isSingleSidedMode = _ref.read(pagePrintProvider) == PagePrintType.single;
       if (isSingleSidedMode) {
-        final tempFront = null;
-        await _executePrint(frontPhoto: tempFront, embedded: embedded);
+        await _executePrint(frontPhoto: null, embedded: embedded);
       } else {
         await _executePrint(frontPhoto: frontPhoto, embedded: embedded);
       }
 
-      // 프린트 상태 완료
       await _updatePrintStatus(printedPhotoCardId, PrintedStatus.completed);
     } catch (e, stack) {
-      logger.e('PrintService._executePrintJob failure', error: e, stackTrace: stack);
+      logger.e('PrintCardUseCase._executePrintJob failure', error: e, stackTrace: stack);
       await _updatePrintStatus(printedPhotoCardId, PrintedStatus.failed);
       rethrow;
     }
   }
 
   Future<NominatedPhoto> _prepareFrontPhoto() async {
-    final frontPhotoList = ref.read(frontPhotoListProvider.notifier);
-    final randomPhoto = await frontPhotoList.getRandomPhoto();
-
-    return randomPhoto;
+    final frontPhotoList = _ref.read(frontPhotoListProvider.notifier);
+    return await frontPhotoList.getRandomPhoto();
   }
 
   void _validatePrintRequirements() {
-    final backPhotoCardResponseInfo = ref.read(backPhotoSessionProvider).value;
-    final approvalInfo = ref.read(paymentResponseStateProvider);
-    final printerState = ref.read(printerServiceProvider);
+    final backPhotoCardResponseInfo = _ref.read(backPhotoSessionProvider).value;
+    final approvalInfo = _ref.read(paymentResponseStateProvider);
 
     if (backPhotoCardResponseInfo == null) throw Exception('No back photo card response info available');
     if (approvalInfo == null) throw Exception('No payment approval info available');
-    // if (printerState.hasError) throw Exception('Printer is not ready');
   }
 
-  Future<
-      ({
-        int printedPhotoCardId,
-        File backPhotoFile,
-      })> _createPrintJobWithEmbeddingBackImage({
+  Future<({int printedPhotoCardId, File backPhotoFile})> _createPrintJobWithEmbeddingBackImage({
     required int frontPhotoCardId,
     required int backPhotoCardId,
   }) async {
     try {
-      final kioskOrderId = ref.read(createOrderInfoProvider)?.orderId ?? 0;
+      final kioskOrderId = _ref.read(createOrderInfoProvider)?.orderId ?? 0;
       final request = CreatePrintRequest(
-        kioskMachineId: ref.read(kioskInfoServiceProvider)!.kioskMachineId,
-        kioskEventId: ref.read(kioskInfoServiceProvider)!.kioskEventId,
+        kioskMachineId: _ref.read(kioskInfoServiceProvider)!.kioskMachineId,
+        kioskEventId: _ref.read(kioskInfoServiceProvider)!.kioskEventId,
         frontPhotoCardId: frontPhotoCardId,
         backPhotoCardId: backPhotoCardId,
         kioskOrderId: kioskOrderId,
       );
 
-      final response = await ref.read(kioskRepositoryProvider).createPrintStatus(request: request);
-
+      final response = await _ref.read(kioskRepositoryProvider).createPrintStatus(request: request);
       final backPhotoFile = await ImageHelper().convertImageUrlToFile(response.formattedImageUrl);
 
       return (printedPhotoCardId: response.printedPhotoCardId, backPhotoFile: backPhotoFile);
@@ -123,26 +100,26 @@ class PrintService extends _$PrintService {
     while (attempt < maxRetries) {
       try {
         final request = UpdatePrintRequest(
-          kioskMachineId: ref.read(kioskInfoServiceProvider)!.kioskMachineId,
-          kioskEventId: ref.read(kioskInfoServiceProvider)!.kioskEventId,
+          kioskMachineId: _ref.read(kioskInfoServiceProvider)!.kioskMachineId,
+          kioskEventId: _ref.read(kioskInfoServiceProvider)!.kioskEventId,
           status: status,
         );
 
-        await ref
-            .read(kioskRepositoryProvider)
-            .updatePrintStatus(printedPhotoCardId: printedPhotoCardId, request: request);
+        await _ref.read(kioskRepositoryProvider).updatePrintStatus(
+              printedPhotoCardId: printedPhotoCardId,
+              request: request,
+            );
         return;
       } catch (e) {
         attempt++;
-        // logger.w('PrintService._updatePrintStatus attempt $attempt/$maxRetries failure', error: e);
 
         if (attempt >= maxRetries) {
-          final kioskInfo = ref.read(kioskInfoServiceProvider);
+          final kioskInfo = _ref.read(kioskInfoServiceProvider);
           final machineId = kioskInfo?.kioskMachineId ?? 0;
           final machineName = kioskInfo?.kioskMachineName ?? '';
           SlackLogService().sendErrorLogToSlack(
-              '[MACHINE_NAME: $machineName (MACHINE_ID: $machineId)] PrintService._updatePrintStatus failure after $maxRetries retries: $e');
-          logger.e('PrintService._updatePrintStatus failure', error: e);
+              '[MACHINE_NAME: $machineName (MACHINE_ID: $machineId)] PrintCardUseCase._updatePrintStatus failure after $maxRetries retries: $e');
+          logger.e('PrintCardUseCase._updatePrintStatus failure', error: e);
           return;
         }
         await Future.delayed(const Duration(milliseconds: 300));
@@ -155,10 +132,10 @@ class PrintService extends _$PrintService {
     required File embedded,
   }) async {
     try {
-      await ref.read(printerServiceProvider.notifier).printImage(
+      await _ref.read(printerServiceProvider.notifier).printImage(
             frontFile: frontPhoto,
             embeddedFile: embedded,
-            isSingleMode: ref.read(pagePrintProvider) == PagePrintType.single,
+            isSingleMode: _ref.read(pagePrintProvider) == PagePrintType.single,
           );
     } catch (e) {
       rethrow;

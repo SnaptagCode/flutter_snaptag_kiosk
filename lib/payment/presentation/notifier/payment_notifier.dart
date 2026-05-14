@@ -6,7 +6,9 @@ import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_servic
 import 'package:flutter_snaptag_kiosk/payment/presentation/notifier/payment_action.dart';
 import 'package:flutter_snaptag_kiosk/payment/presentation/notifier/payment_state.dart';
 import 'package:flutter_snaptag_kiosk/payment/domain/failure/payment_failure.dart';
-import 'package:flutter_snaptag_kiosk/payment/presentation/notifier/payment_service.dart';
+import 'package:flutter_snaptag_kiosk/payment/module/payment_di.dart';
+import 'package:flutter_snaptag_kiosk/payment/domain/usecase/process_payment_use_case.dart';
+import 'package:flutter_snaptag_kiosk/payment/domain/usecase/refund_payment_use_case.dart';
 import 'package:flutter_snaptag_kiosk/presentation/setup/main/notifiers/page_print_notifier.dart';
 import 'package:flutter_snaptag_kiosk/domain/models/verification/back_photo_card.dart';
 import 'package:flutter_snaptag_kiosk/presentation/core/back_photo_session_notifier.dart';
@@ -16,8 +18,15 @@ part 'payment_notifier.g.dart';
 
 @riverpod
 class PaymentNotifier extends _$PaymentNotifier {
+  late final ProcessPaymentUseCase _processPaymentUseCase;
+  late final RefundPaymentUseCase _refundPaymentUseCase;
+
   @override
-  PaymentState build() => const PaymentState.initial();
+  PaymentState build() {
+    _processPaymentUseCase = ref.watch(processPaymentUseCaseProvider);
+    _refundPaymentUseCase = ref.watch(refundPaymentUseCaseProvider);
+    return const PaymentState.initial();
+  }
 
   Future<void> onAction(PaymentAction action) async {
     switch (action) {
@@ -71,13 +80,13 @@ class PaymentNotifier extends _$PaymentNotifier {
 
       ref.read(homeTimeoutNotifierProvider.notifier).cancelTimerWithCallback();
 
-      await ref.read(paymentServiceProvider.notifier).processPayment();
+      await _processPaymentUseCase.call();
 
       state = const PaymentState.success();
     } catch (e, stack) {
       if (e is! OrderCreationException && e is! PreconditionFailedException) {
         try {
-          await ref.read(paymentServiceProvider.notifier).refund();
+          await _refundPaymentUseCase.call();
           if (ref.read(pagePrintProvider) == PagePrintType.single) {
             await ref.read(cardCountProvider.notifier).increase();
           }

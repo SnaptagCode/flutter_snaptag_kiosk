@@ -10,11 +10,11 @@ import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_snaptag_kiosk/presentation/core/card_count_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
 import 'package:flutter_snaptag_kiosk/payment/presentation/notifier/payment_response_notifier.dart';
-import 'package:flutter_snaptag_kiosk/payment/presentation/notifier/payment_service.dart';
+import 'package:flutter_snaptag_kiosk/payment/module/payment_di.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/card_printer.dart';
-import 'package:flutter_snaptag_kiosk/presentation/print/notifiers/print_notifier.dart';
-import 'package:flutter_snaptag_kiosk/presentation/print/notifiers/print_state.dart';
-import 'package:flutter_snaptag_kiosk/presentation/print/screens/print_process_screen.dart';
+import 'package:flutter_snaptag_kiosk/print/presentation/notifier/print_notifier.dart';
+import 'package:flutter_snaptag_kiosk/print/presentation/notifier/print_state.dart';
+import 'package:flutter_snaptag_kiosk/print/presentation/screen/print_process_screen.dart';
 import 'package:flutter_snaptag_kiosk/presentation/setup/main/notifiers/page_print_notifier.dart';
 
 class PrintProcessRoot extends ConsumerStatefulWidget {
@@ -228,7 +228,7 @@ class _PrintProcessRootState extends ConsumerState<PrintProcessRoot> with Single
   Future<void> _refund() async {
     final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
     try {
-      await ref.read(paymentServiceProvider.notifier).refund();
+      await ref.read(refundPaymentUseCaseProvider).call();
       if (ref.read(pagePrintProvider) == PagePrintType.single) {
         await ref.read(cardCountProvider.notifier).increase();
       }
