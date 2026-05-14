@@ -1,8 +1,8 @@
 ﻿import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
-import 'package:flutter_snaptag_kiosk/verification/data/data_source/i_verification_remote_data_source.dart';
-import 'package:flutter_snaptag_kiosk/verification/data/data_source/verification_remote_data_source_impl.dart';
-import 'package:flutter_snaptag_kiosk/verification/data/repository_impl/verification_repository_impl.dart';
+import 'package:flutter_snaptag_kiosk/data/datasources/remote/i_verification_remote_data_source.dart';
+import 'package:flutter_snaptag_kiosk/data/datasources/remote/verification_remote_data_source_impl.dart';
+import 'package:flutter_snaptag_kiosk/data/repositories/verification_repository_impl.dart';
 import 'package:flutter_snaptag_kiosk/domain/repositories/i_verification_repository.dart';
 import 'package:flutter_snaptag_kiosk/domain/usecases/verification/verify_photo_code_use_case.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';

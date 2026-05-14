@@ -1,4 +1,4 @@
-﻿import 'package:flutter_snaptag_kiosk/setup/data/data_source/i_setup_remote_data_source.dart';
+import 'package:flutter_snaptag_kiosk/data/datasources/remote/i_setup_remote_data_source.dart';
 import 'package:flutter_snaptag_kiosk/domain/repositories/i_setup_repository.dart';
 
 class SetupRepositoryImpl implements ISetupRepository {

@@ -1,7 +1,7 @@
 ﻿import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_snaptag_kiosk/payment/data/datasource/i_payment_datasource.dart';
-import 'package:flutter_snaptag_kiosk/payment/data/datasource/payment_datasource_impl.dart';
-import 'package:flutter_snaptag_kiosk/payment/data/repository_impl/payment_repository_impl.dart';
+import 'package:flutter_snaptag_kiosk/data/datasources/remote/i_payment_datasource.dart';
+import 'package:flutter_snaptag_kiosk/data/datasources/remote/payment_datasource_impl.dart';
+import 'package:flutter_snaptag_kiosk/data/repositories/payment_repository_impl.dart';
 import 'package:flutter_snaptag_kiosk/domain/repositories/i_payment_repository.dart';
 import 'package:flutter_snaptag_kiosk/domain/usecases/payment/approve_payment_use_case.dart';
 import 'package:flutter_snaptag_kiosk/domain/usecases/payment/cancel_payment_use_case.dart';

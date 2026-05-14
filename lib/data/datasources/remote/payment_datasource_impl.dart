@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_snaptag_kiosk/lib.dart';
-import 'package:flutter_snaptag_kiosk/payment/data/datasource/i_payment_datasource.dart';
+import 'package:flutter_snaptag_kiosk/data/datasources/remote/i_payment_datasource.dart';
 import 'package:http/http.dart' as http;
 
 class PaymentApiClient implements IPaymentDatasource {

@@ -1,5 +1,5 @@
-﻿import 'package:flutter_snaptag_kiosk/data/datasources/remote/kiosk_api_client.dart';
-import 'package:flutter_snaptag_kiosk/setup/data/data_source/i_setup_remote_data_source.dart';
+import 'package:flutter_snaptag_kiosk/data/datasources/remote/kiosk_api_client.dart';
+import 'package:flutter_snaptag_kiosk/data/datasources/remote/i_setup_remote_data_source.dart';
 
 class SetupRemoteDataSourceImpl implements ISetupRemoteDataSource {
   final KioskApiClient _apiClient;
