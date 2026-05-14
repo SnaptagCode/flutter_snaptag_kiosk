@@ -18,6 +18,12 @@ final class VerificationFailureRefundRequired extends VerificationFailure {
   String get message => '환불이 필요한 코드입니다.';
 }
 
+final class VerificationFailureInvalidCode extends VerificationFailure {
+  const VerificationFailureInvalidCode();
+  @override
+  String get message => '인증번호를 찾을 수 없습니다.';
+}
+
 final class VerificationFailureNetwork extends VerificationFailure {
   const VerificationFailureNetwork();
   @override

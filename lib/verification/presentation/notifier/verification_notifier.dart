@@ -1,10 +1,11 @@
 import 'package:flutter_snaptag_kiosk/domain/models/verification/verification_failure.dart';
-import 'package:flutter_snaptag_kiosk/domain/usecases/verification/verify_photo_code_usecase.dart';
 import 'package:flutter_snaptag_kiosk/presentation/core/back_photo_session_notifier.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
-import 'package:flutter_snaptag_kiosk/presentation/verification/notifiers/auth_code_notifier.dart';
-import 'package:flutter_snaptag_kiosk/presentation/verification/notifiers/verification_action.dart';
-import 'package:flutter_snaptag_kiosk/presentation/verification/notifiers/verification_state.dart';
+import 'package:flutter_snaptag_kiosk/verification/domain/usecase/verify_photo_code_use_case.dart';
+import 'package:flutter_snaptag_kiosk/verification/module/verification_di.dart';
+import 'package:flutter_snaptag_kiosk/verification/presentation/notifier/auth_code_notifier.dart';
+import 'package:flutter_snaptag_kiosk/verification/presentation/notifier/verification_action.dart';
+import 'package:flutter_snaptag_kiosk/verification/presentation/notifier/verification_state.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'verification_notifier.g.dart';
@@ -40,18 +41,24 @@ class VerificationNotifier extends _$VerificationNotifier {
 
     state = const VerificationState.loading();
 
-    final result = await _verifyPhotoCodeUseCase(
-      VerifyPhotoCodeParams(kioskEventId: kioskEventId, authCode: code),
-    );
+    try {
+      final result = await _verifyPhotoCodeUseCase(
+        VerifyPhotoCodeParams(kioskEventId: kioskEventId, authCode: code),
+      );
 
-    state = result.when(
-      data: (card) {
-        ref.read(backPhotoSessionProvider.notifier).updateState(card);
-        return VerificationState.success(card);
-      },
-      error: (e, _) => VerificationState.failure(e as VerificationFailure),
-      loading: () => const VerificationState.loading(),
-    );
+      state = result.when(
+        data: (card) {
+          ref.read(backPhotoSessionProvider.notifier).updateState(card);
+          return VerificationState.success(card);
+        },
+        error: (e, _) => VerificationState.failure(
+          e is VerificationFailure ? e : VerificationFailureUnknown(e.toString()),
+        ),
+        loading: () => const VerificationState.loading(),
+      );
+    } catch (e) {
+      state = VerificationState.failure(VerificationFailureUnknown(e.toString()));
+    }
   }
 
   void reset() => state = const VerificationState.initial();

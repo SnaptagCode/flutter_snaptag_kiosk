@@ -1,24 +1,16 @@
 import 'package:dio/dio.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_snaptag_kiosk/data/mappers/verification_mapper.dart';
+import 'package:flutter_snaptag_kiosk/core/data/models/entities/order_error_entity.dart';
+import 'package:flutter_snaptag_kiosk/core/result/result.dart';
 import 'package:flutter_snaptag_kiosk/domain/models/verification/back_photo_card.dart';
 import 'package:flutter_snaptag_kiosk/domain/models/verification/verification_failure.dart';
-import 'package:flutter_snaptag_kiosk/domain/repositories/verification_repository.dart';
-import 'package:flutter_snaptag_kiosk/lib.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:flutter_snaptag_kiosk/verification/data/data_source/i_verification_remote_data_source.dart';
+import 'package:flutter_snaptag_kiosk/verification/data/mapper/verification_mapper.dart';
+import 'package:flutter_snaptag_kiosk/verification/domain/repository/i_verification_repository.dart';
 
-part 'verification_repository_impl.g.dart';
+class VerificationRepositoryImpl implements IVerificationRepository {
+  final IVerificationRemoteDataSource _dataSource;
 
-@riverpod
-VerificationRepository verificationRepository(Ref ref) {
-  final dio = ref.watch(dioProvider(F.kioskBaseUrl));
-  return VerificationRepositoryImpl(KioskApiClient(dio));
-}
-
-class VerificationRepositoryImpl implements VerificationRepository {
-  final KioskApiClient _apiClient;
-
-  VerificationRepositoryImpl(this._apiClient);
+  VerificationRepositoryImpl(this._dataSource);
 
   @override
   Future<Result<BackPhotoCard, VerificationFailure>> verifyCode({
@@ -26,7 +18,7 @@ class VerificationRepositoryImpl implements VerificationRepository {
     required String authCode,
   }) async {
     try {
-      final dto = await _apiClient.getBackPhotoCard(
+      final dto = await _dataSource.getBackPhotoCard(
         kioskEventId: kioskEventId,
         photoAuthNumber: authCode,
       );
@@ -43,10 +35,11 @@ class VerificationRepositoryImpl implements VerificationRepository {
     final data = e.response?.data as Map<String, dynamic>?;
 
     return switch (statusCode) {
-      410 => const Failure(VerificationFailureExpired()),
+      404 => const Failure(VerificationFailureInvalidCode()),
       409 => Failure(VerificationFailureRefundRequired(
           order: _parseOrder(data?['res']?['order']),
         )),
+      410 => const Failure(VerificationFailureExpired()),
       _ => const Failure(VerificationFailureNetwork()),
     };
   }

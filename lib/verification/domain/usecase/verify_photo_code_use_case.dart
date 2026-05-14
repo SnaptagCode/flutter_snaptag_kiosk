@@ -1,11 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_snaptag_kiosk/core/usecase/usecase.dart';
-import 'package:flutter_snaptag_kiosk/data/repositories/verification_repository_impl.dart';
 import 'package:flutter_snaptag_kiosk/domain/models/verification/back_photo_card.dart';
-import 'package:flutter_snaptag_kiosk/domain/repositories/verification_repository.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
-
-part 'verify_photo_code_usecase.g.dart';
+import 'package:flutter_snaptag_kiosk/verification/domain/repository/i_verification_repository.dart';
 
 class VerifyPhotoCodeParams {
   final int kioskEventId;
@@ -14,7 +10,7 @@ class VerifyPhotoCodeParams {
 }
 
 class VerifyPhotoCodeUseCase implements UseCase<BackPhotoCard, VerifyPhotoCodeParams> {
-  final VerificationRepository _repository;
+  final IVerificationRepository _repository;
 
   VerifyPhotoCodeUseCase(this._repository);
 
@@ -29,9 +25,4 @@ class VerifyPhotoCodeUseCase implements UseCase<BackPhotoCard, VerifyPhotoCodePa
       failure: (failure) => AsyncValue.error(failure, StackTrace.current),
     );
   }
-}
-
-@riverpod
-VerifyPhotoCodeUseCase verifyPhotoCodeUseCase(Ref ref) {
-  return VerifyPhotoCodeUseCase(ref.watch(verificationRepositoryProvider));
 }

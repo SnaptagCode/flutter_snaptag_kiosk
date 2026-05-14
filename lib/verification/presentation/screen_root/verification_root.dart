@@ -5,11 +5,11 @@ import 'package:flutter_snaptag_kiosk/core/ui/widget/dialog_helper.dart';
 import 'package:flutter_snaptag_kiosk/domain/models/verification/verification_failure.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_snaptag_kiosk/presentation/payment/payment_service.dart';
-import 'package:flutter_snaptag_kiosk/presentation/verification/notifiers/auth_code_notifier.dart';
-import 'package:flutter_snaptag_kiosk/presentation/verification/notifiers/verification_action.dart';
-import 'package:flutter_snaptag_kiosk/presentation/verification/notifiers/verification_notifier.dart';
-import 'package:flutter_snaptag_kiosk/presentation/verification/notifiers/verification_state.dart';
-import 'package:flutter_snaptag_kiosk/presentation/verification/screens/verification_screen.dart';
+import 'package:flutter_snaptag_kiosk/verification/presentation/notifier/auth_code_notifier.dart';
+import 'package:flutter_snaptag_kiosk/verification/presentation/notifier/verification_action.dart';
+import 'package:flutter_snaptag_kiosk/verification/presentation/notifier/verification_notifier.dart';
+import 'package:flutter_snaptag_kiosk/verification/presentation/notifier/verification_state.dart';
+import 'package:flutter_snaptag_kiosk/verification/presentation/screen/verification_screen.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 
 class VerificationRoot extends ConsumerWidget {
@@ -70,6 +70,8 @@ class VerificationRoot extends ConsumerWidget {
             if (context.mounted) await DialogHelper.showAuthNumReissueFailureDialog(context);
           }
         }
+      case VerificationFailureInvalidCode():
+        await DialogHelper.showErrorDialog(context);
       case VerificationFailureExpired():
         await DialogHelper.showVerificationCodeExpriedDialog(context);
       case VerificationFailureNetwork():

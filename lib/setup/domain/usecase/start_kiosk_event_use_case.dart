@@ -55,11 +55,12 @@ class StartKioskEventUseCase {
       _ref.read(pagePrintProvider.notifier).set(PagePrintType.double);
     }
 
-    final connected = await _ref.read(printerServiceProvider.notifier).connectedPrinter();
-    if (!connected) return const StartEventValidationPrinterNotConnected();
+    // TODO: 프린터 없이 디버깅 시 주석 해제
+    // final connected = await _ref.read(printerServiceProvider.notifier).connectedPrinter();
+    // if (!connected) return const StartEventValidationPrinterNotConnected();
 
-    final settingOk = await _ref.read(printerServiceProvider.notifier).checkSettingPrinter();
-    if (!settingOk) return const StartEventValidationPrinterNotReady();
+    // final settingOk = await _ref.read(printerServiceProvider.notifier).checkSettingPrinter();
+    // if (!settingOk) return const StartEventValidationPrinterNotReady();
 
     try {
       final response = await _ref.read(paymentRepositoryProvider).check();

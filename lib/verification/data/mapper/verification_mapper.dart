@@ -12,15 +12,3 @@ extension BackPhotoCardResponseMapper on BackPhotoCardResponse {
         formattedBackPhotoCardUrl: formattedBackPhotoCardUrl,
       );
 }
-
-extension BackPhotoCardMapper on BackPhotoCard {
-  BackPhotoCardResponse toResponse() => BackPhotoCardResponse(
-        kioskEventId: kioskEventId,
-        backPhotoCardId: backPhotoCardId,
-        nominatedBackPhotoCardId: nominatedBackPhotoCardId,
-        backPhotoCardOriginUrl: backPhotoCardOriginUrl,
-        photoAuthNumber: photoAuthNumber,
-        embeddingProductId: embeddingProductId,
-        formattedBackPhotoCardUrl: formattedBackPhotoCardUrl,
-      );
-}

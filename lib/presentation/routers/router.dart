@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_snaptag_kiosk/presentation/verification/roots/verification_root.dart';
+import 'package:flutter_snaptag_kiosk/verification/presentation/screen_root/verification_root.dart';
 import 'package:flutter_snaptag_kiosk/presentation/global_shell.dart';
 import 'package:flutter_snaptag_kiosk/setup/presentation/kiosk_components/screen_root/kiosk_components_root.dart';
 import 'package:flutter_snaptag_kiosk/setup/presentation/event_preview/screen_root/event_preview_root.dart';
