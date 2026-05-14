@@ -2,11 +2,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_snaptag_kiosk/core/common/constants/default.dart';
 import 'package:flutter_snaptag_kiosk/core/data/models/request/kscat_device_request.dart';
 import 'package:flutter_snaptag_kiosk/core/data/models/response/kscat_device_response.dart';
-import 'package:flutter_snaptag_kiosk/lib.dart';
+import 'package:flutter_snaptag_kiosk/lib.dart' hide PaymentApiClient;
+import 'package:flutter_snaptag_kiosk/payment/data/datasource/payment_datasource_impl.dart';
+import 'package:flutter_snaptag_kiosk/payment/domain/repository/i_payment_repository.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-part 'payment_repository.g.dart';
+part 'payment_repository_impl.g.dart';
 
 @riverpod
 PaymentRepository paymentRepository(Ref ref) {
@@ -16,7 +18,7 @@ PaymentRepository paymentRepository(Ref ref) {
   );
 }
 
-class PaymentRepository {
+class PaymentRepository implements IPaymentRepository {
   PaymentRepository(this._client, this.ref);
 
   final PaymentApiClient _client;
@@ -28,6 +30,7 @@ class PaymentRepository {
     return 'jsonp200911MI$formattedMachineId';
   }
 
+  @override
   Future<PaymentResponse> approve({
     required int totalAmount,
   }) async {
@@ -43,14 +46,13 @@ class PaymentRepository {
     return _request(request);
   }
 
+  @override
   Future<KscatDeviceResponse> check() async {
-    final request = KscatDeviceRequest(
-      req: 'C0',
-    );
-
+    final request = KscatDeviceRequest(req: 'C0');
     return _deviceRequest(request);
   }
 
+  @override
   Future<PaymentResponse> cancel({
     required int totalAmount,
     required String originalApprovalNo,
@@ -72,12 +74,10 @@ class PaymentRepository {
 
   Future<PaymentResponse> _request(PaymentRequest request) async {
     try {
-      final response = await _client.requestPayment(
+      return await _client.requestPayment(
         _getCallback(),
         request.serialize(),
       );
-
-      return response;
     } catch (e) {
       rethrow;
     }
@@ -85,12 +85,10 @@ class PaymentRepository {
 
   Future<KscatDeviceResponse> _deviceRequest(KscatDeviceRequest request) async {
     try {
-      final response = await _client.requestDeivce(
+      return await _client.requestDevice(
         _getCallback(),
         request.serialize(),
       );
-
-      return response;
     } catch (e) {
       rethrow;
     }

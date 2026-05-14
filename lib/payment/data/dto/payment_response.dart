@@ -8,7 +8,7 @@ part 'payment_response.g.dart';
 
 @freezed
 class PaymentResponse with _$PaymentResponse {
-  const PaymentResponse._(); // freezed에서 메서드를 추가하기 위한 private constructor
+  const PaymentResponse._();
 
   const factory PaymentResponse({
     @JsonKey(name: 'APPROVALNO') String? approvalNo,
@@ -33,7 +33,6 @@ class PaymentResponse with _$PaymentResponse {
 }
 
 extension PaymentResponseExtension on PaymentResponse {
-  /// 이미 취소된 거래
   bool get isAlreadyCanceled => respCode == '7001';
 
   bool get isSuccess => res == '0000' && respCode == '0000';
@@ -42,23 +41,16 @@ extension PaymentResponseExtension on PaymentResponse {
     Map<String, dynamic> data = {"KSNET": ksnet};
     return jsonEncode(data);
   }
+
   bool get isApprovalNoEmpty => approvalNo == null || approvalNo!.trim().isEmpty;
-  ///
-  /// 0: 실패
-  ///
-  /// 1: 성공
-  ///
-  /// 2: 기타 오류
-  ///
+
   int get code {
-    // RES 코드 체크 (주요 오류 상태)
     switch (res) {
       case '1000':
       case '1003':
       case '1004':
         return 0;
       case '0000':
-        // RES가 정상이면 RESPCODE 확인
         switch (respCode) {
           case '0000':
             if (isApprovalNoEmpty) {
@@ -66,7 +58,6 @@ extension PaymentResponseExtension on PaymentResponse {
             } else {
               return 1;
             }
-            return 1;
           case '7001':
           case '7002':
           case '7003':
@@ -88,21 +79,6 @@ extension PaymentResponseExtension on PaymentResponse {
     }
   }
 
-  ///
-  /// `0210`: 결제 요청 Response
-  ///
-  ///   -> return 1
-  ///
-  /// `0430`: 취소 요청 Response
-  ///
-  ///   -> return 2
-  ///
-  /// `0450`: 망취소 Response (승인 번호 없음)
-  ///
-  /// `0470`: 망취소 Response (승인 번호 있음)
-  ///
-  ///   -> return 0
-  ///
   int get requestType {
     switch (telegramFlag) {
       case '0210':

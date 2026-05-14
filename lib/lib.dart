@@ -5,4 +5,5 @@ export 'core/domain/domain.dart';
 export 'flavors.dart';
 export 'locale_keys.dart';
 export 'main.dart';
+export 'payment/payment.dart';
 export 'presentation/routers/routers.dart';

@@ -17,8 +17,6 @@ class PaymentRequest with _$PaymentRequest {
     required String transactionForm,
 
     /// 단말기 ID
-    /// TEST ID : DPT0TEST03
-    /// PROD ID : AT0416146A
     required String terminalId,
     required String companyInfo,
     required String seqNo,

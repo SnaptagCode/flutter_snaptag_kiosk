@@ -1,11 +1,11 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:flutter_snaptag_kiosk/core/data/models/response/kscat_device_response.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
+import 'package:flutter_snaptag_kiosk/payment/data/datasource/i_payment_datasource.dart';
 import 'package:http/http.dart' as http;
 
-class PaymentApiClient {
+class PaymentApiClient implements IPaymentDatasource {
   PaymentApiClient();
 
   static const int _defaultWebPort = 27098;
@@ -14,14 +14,12 @@ class PaymentApiClient {
   static String? _cachedBaseUrl;
 
   Future<String> _resolveBaseUrl() async {
-    // Cache to avoid reading/parsing the INI on every request.
     if (_cachedBaseUrl != null) return _cachedBaseUrl!;
 
     try {
       final ini = await File(_configPath).readAsString();
       final daemon = _parseIniSection(ini, 'daemon');
 
-      // Prefer webport when present. If missing, fall back to default.
       final webPort = int.tryParse((daemon['webport'] ?? '').trim()) ?? _defaultWebPort;
       final baseUrl = 'http://127.0.0.1:$webPort';
 
@@ -36,9 +34,6 @@ class PaymentApiClient {
     }
   }
 
-  /// Minimal INI parser (key=value) for a single section like [daemon].
-  /// - Ignores blank lines and comment-like lines starting with ';' or '#'
-  /// - Case-insensitive section name & keys
   Map<String, String> _parseIniSection(String ini, String sectionName) {
     final target = sectionName.trim().toLowerCase();
     final map = <String, String>{};
@@ -67,8 +62,8 @@ class PaymentApiClient {
     return map;
   }
 
+  @override
   Future<PaymentResponse> requestPayment(String callback, String request) async {
-    // URL을 직접 구성 - 인코딩 없이
     final baseUrl = await _resolveBaseUrl();
     final url = '$baseUrl?callback=$callback&REQ=$request';
     logger.i('\n=== Raw Payment Request URL ===\n$url');
@@ -80,11 +75,10 @@ class PaymentApiClient {
 
     final body = response.body;
     final broken = body.substring(
-      callback.length + 1, // callback( 제거
-      body.length - 1, // ) 제거
+      callback.length + 1,
+      body.length - 1,
     );
 
-    // EUC-KR 디코딩
     final decode = cp949.decodeString(broken);
     final trim = trimValues(json.decode(decode));
     final paymentResponse = trim..addAll({'KSNET': '$callback($trim)'});
@@ -92,8 +86,8 @@ class PaymentApiClient {
     return PaymentResponse.fromJson(paymentResponse);
   }
 
-  Future<KscatDeviceResponse> requestDeivce(String callback, String request) async {
-    // URL을 직접 구성 - 인코딩 없이
+  @override
+  Future<KscatDeviceResponse> requestDevice(String callback, String request) async {
     final baseUrl = await _resolveBaseUrl();
     final url = '$baseUrl?callback=$callback&REQ=$request';
     logger.i('\n=== Raw KscatDevice Request URL ===\n$url');
@@ -105,11 +99,10 @@ class PaymentApiClient {
 
     final body = response.body;
     final broken = body.substring(
-      callback.length + 1, // callback( 제거
-      body.length - 1, // ) 제거
+      callback.length + 1,
+      body.length - 1,
     );
 
-    // EUC-KR 디코딩
     final decode = cp949.decodeString(broken);
     final trim = trimValues(json.decode(decode));
     final kscatDeviceResponse = trim..addAll({'KSNET': '$callback($trim)'});
@@ -117,7 +110,6 @@ class PaymentApiClient {
     return KscatDeviceResponse.fromJson(kscatDeviceResponse);
   }
 
-  // 모든 String 값의 공백을 trim
   Map<String, dynamic> trimValues(Map<String, dynamic> json) {
     return json.map((key, value) {
       if (value is String) {
