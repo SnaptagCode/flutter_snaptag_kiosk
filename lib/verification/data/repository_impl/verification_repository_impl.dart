@@ -1,5 +1,5 @@
-import 'package:dio/dio.dart';
-import 'package:flutter_snaptag_kiosk/core/data/models/entities/order_error_entity.dart';
+﻿import 'package:dio/dio.dart';
+import 'package:flutter_snaptag_kiosk/data/models/entities/order_error_entity.dart';
 import 'package:flutter_snaptag_kiosk/core/result/result.dart';
 import 'package:flutter_snaptag_kiosk/domain/models/verification/back_photo_card.dart';
 import 'package:flutter_snaptag_kiosk/domain/models/verification/verification_failure.dart';

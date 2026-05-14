@@ -1,5 +1,5 @@
-import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:flutter_snaptag_kiosk/core/data/datasources/local/id_writer.dart';
+﻿import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:flutter_snaptag_kiosk/data/datasources/local/id_writer.dart';
 
 part 'card_count_provider.g.dart';
 

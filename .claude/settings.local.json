@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/Users/Administrator/Desktop/jiyoung/workspace/flutter_snaptag_kiosk/**)",
+      "Read(//c/Users/Administrator/Desktop/jiyoung/workspace/flutter_snaptag_kiosk/lib/**)",
+      "Read(//c/Users/Administrator/Desktop/jiyoung/workspace/flutter_snaptag_kiosk/lib/presentation/**)",
+      "Read(//c/Users/Administrator/Desktop/jiyoung/workspace/flutter_snaptag_kiosk/lib/presentation/payment/**)",
+      "Read(//c/Users/Administrator/Desktop/jiyoung/workspace/flutter_snaptag_kiosk/lib/core/data/models/enums/**)",
+      "Read(//c/Users/Administrator/Desktop/jiyoung/workspace/flutter_snaptag_kiosk/lib/presentation/print/**)",
+      "mcp__claude_ai_Notion__notion-fetch",
+      "mcp__claude_ai_Notion__notion-update-page"
+    ]
+  }
+}

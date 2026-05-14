@@ -1,6 +1,6 @@
 export 'app.dart';
 export 'core/core.dart';
-export 'core/data/data.dart';
+export 'data/data.dart';
 export 'core/domain/domain.dart';
 export 'flavors.dart';
 export 'home/home.dart';

@@ -1,5 +1,5 @@
-import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
-import 'package:flutter_snaptag_kiosk/core/data/datasources/remote/slack_log_service.dart';
+﻿import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
+import 'package:flutter_snaptag_kiosk/data/datasources/remote/slack_log_service.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'printer_connect_state.g.dart';

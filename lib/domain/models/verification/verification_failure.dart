@@ -1,4 +1,4 @@
-import 'package:flutter_snaptag_kiosk/core/data/models/entities/order_error_entity.dart';
+﻿import 'package:flutter_snaptag_kiosk/data/models/entities/order_error_entity.dart';
 
 sealed class VerificationFailure {
   const VerificationFailure();

@@ -1,0 +1,441 @@
+{
+  "version": "1.0.0",
+  "lastScanned": 1778732948101,
+  "projectRoot": "c:\\Users\\Administrator\\Desktop\\jiyoung\\workspace\\flutter_snaptag_kiosk",
+  "techStack": {
+    "languages": [],
+    "frameworks": [],
+    "packageManager": null,
+    "runtime": null
+  },
+  "build": {
+    "buildCommand": null,
+    "testCommand": null,
+    "lintCommand": null,
+    "devCommand": null,
+    "scripts": {}
+  },
+  "conventions": {
+    "namingStyle": null,
+    "importStyle": null,
+    "testPattern": null,
+    "fileOrganization": null
+  },
+  "structure": {
+    "isMonorepo": false,
+    "workspaces": [],
+    "mainDirectories": [
+      "assets",
+      "docs",
+      "lib",
+      "test"
+    ],
+    "gitBranches": {
+      "defaultBranch": "main",
+      "branchingStrategy": null
+    }
+  },
+  "customNotes": [],
+  "directoryMap": {
+    "assets": {
+      "path": "assets",
+      "purpose": "Static assets",
+      "fileCount": 2,
+      "lastAccessed": 1778732948090,
+      "keyFiles": []
+    },
+    "build": {
+      "path": "build",
+      "purpose": "Build output",
+      "fileCount": 2,
+      "lastAccessed": 1778732948090,
+      "keyFiles": [
+        "892b637c16d52470fb7b14b9d9897587.cache.dill.track.dill"
+      ]
+    },
+    "docs": {
+      "path": "docs",
+      "purpose": "Documentation",
+      "fileCount": 3,
+      "lastAccessed": 1778732948090,
+      "keyFiles": [
+        "GUIDE.md",
+        "isolate_flow_notion.md",
+        "setup_main_refactoring.md"
+      ]
+    },
+    "embeddings": {
+      "path": "embeddings",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1778732948090,
+      "keyFiles": []
+    },
+    "lib": {
+      "path": "lib",
+      "purpose": "Library code",
+      "fileCount": 5,
+      "lastAccessed": 1778732948091,
+      "keyFiles": [
+        "app.dart",
+        "flavors.dart",
+        "lib.dart",
+        "locale_keys.dart",
+        "main.dart"
+      ]
+    },
+    "macos": {
+      "path": "macos",
+      "purpose": null,
+      "fileCount": 3,
+      "lastAccessed": 1778732948091,
+      "keyFiles": [
+        "Podfile",
+        "Podfile.lock"
+      ]
+    },
+    "packages": {
+      "path": "packages",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1778732948091,
+      "keyFiles": []
+    },
+    "settings": {
+      "path": "settings",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1778732948091,
+      "keyFiles": []
+    },
+    "test": {
+      "path": "test",
+      "purpose": "Test files",
+      "fileCount": 2,
+      "lastAccessed": 1778732948092,
+      "keyFiles": [
+        "random_test.dart",
+        "ribbon_warning_provider_test.dart"
+      ]
+    },
+    "windows": {
+      "path": "windows",
+      "purpose": null,
+      "fileCount": 2,
+      "lastAccessed": 1778732948092,
+      "keyFiles": [
+        "CMakeLists.txt"
+      ]
+    },
+    "lib\\data": {
+      "path": "lib\\data",
+      "purpose": "Data files",
+      "fileCount": 0,
+      "lastAccessed": 1778732948092,
+      "keyFiles": []
+    }
+  },
+  "hotPaths": [
+    {
+      "path": "lib",
+      "accessCount": 18,
+      "lastAccessed": 1778746546196,
+      "type": "directory"
+    },
+    {
+      "path": "lib\\payment\\presentation\\notifier\\payment_notifier.dart",
+      "accessCount": 11,
+      "lastAccessed": 1778733856356,
+      "type": "file"
+    },
+    {
+      "path": "lib\\lib.dart",
+      "accessCount": 8,
+      "lastAccessed": 1778746389484,
+      "type": "file"
+    },
+    {
+      "path": "lib\\presentation\\print\\roots\\print_process_root.dart",
+      "accessCount": 6,
+      "lastAccessed": 1778735318675,
+      "type": "file"
+    },
+    {
+      "path": "lib\\verification\\presentation\\screen_root\\verification_root.dart",
+      "accessCount": 4,
+      "lastAccessed": 1778733888650,
+      "type": "file"
+    },
+    {
+      "path": "lib\\payment\\payment.dart",
+      "accessCount": 4,
+      "lastAccessed": 1778734708976,
+      "type": "file"
+    },
+    {
+      "path": "lib\\payment\\module\\payment_di.dart",
+      "accessCount": 4,
+      "lastAccessed": 1778746082903,
+      "type": "file"
+    },
+    {
+      "path": "lib\\presentation\\print\\print_service.dart",
+      "accessCount": 3,
+      "lastAccessed": 1778735314080,
+      "type": "file"
+    },
+    {
+      "path": "lib\\presentation\\print\\notifiers\\print_notifier.dart",
+      "accessCount": 3,
+      "lastAccessed": 1778735314309,
+      "type": "file"
+    },
+    {
+      "path": "lib\\presentation\\print\\notifiers\\print_state.dart",
+      "accessCount": 3,
+      "lastAccessed": 1778735317555,
+      "type": "file"
+    },
+    {
+      "path": "lib\\presentation\\print\\card_printer.dart",
+      "accessCount": 3,
+      "lastAccessed": 1778736636666,
+      "type": "file"
+    },
+    {
+      "path": "lib\\presentation\\print\\isolate\\printer_manager.dart",
+      "accessCount": 3,
+      "lastAccessed": 1778736672025,
+      "type": "file"
+    },
+    {
+      "path": "lib\\presentation\\print\\screens\\print_process_screen.dart",
+      "accessCount": 2,
+      "lastAccessed": 1778735318304,
+      "type": "file"
+    },
+    {
+      "path": "lib\\presentation\\print\\luca\\binding\\printer_bindings.dart",
+      "accessCount": 2,
+      "lastAccessed": 1778736678378,
+      "type": "file"
+    },
+    {
+      "path": "lib\\core\\core.dart",
+      "accessCount": 2,
+      "lastAccessed": 1778746053528,
+      "type": "file"
+    },
+    {
+      "path": "lib\\core\\data\\models\\enums\\printed_status.dart",
+      "accessCount": 2,
+      "lastAccessed": 1778746072469,
+      "type": "file"
+    },
+    {
+      "path": "lib\\setup\\presentation\\main\\notifier\\setup_main_notifier.dart",
+      "accessCount": 1,
+      "lastAccessed": 1778733059965,
+      "type": "file"
+    },
+    {
+      "path": "lib\\payment\\presentation\\notifier\\payment_service.dart",
+      "accessCount": 1,
+      "lastAccessed": 1778733653544,
+      "type": "file"
+    },
+    {
+      "path": "lib\\payment\\domain\\usecase\\process_payment_use_case.dart",
+      "accessCount": 1,
+      "lastAccessed": 1778733709739,
+      "type": "file"
+    },
+    {
+      "path": "lib\\payment\\domain\\usecase\\refund_payment_use_case.dart",
+      "accessCount": 1,
+      "lastAccessed": 1778733747033,
+      "type": "file"
+    },
+    {
+      "path": "lib\\payment\\domain\\usecase\\error409_refund_use_case.dart",
+      "accessCount": 1,
+      "lastAccessed": 1778733785101,
+      "type": "file"
+    },
+    {
+      "path": "lib\\payment\\presentation\\notifier\\create_order_info_notifier.dart",
+      "accessCount": 1,
+      "lastAccessed": 1778734477080,
+      "type": "file"
+    },
+    {
+      "path": "lib\\payment\\presentation\\notifier\\payment_response_notifier.dart",
+      "accessCount": 1,
+      "lastAccessed": 1778734489454,
+      "type": "file"
+    },
+    {
+      "path": "lib\\payment\\presentation\\notifier\\update_order_info_notifier.dart",
+      "accessCount": 1,
+      "lastAccessed": 1778734489741,
+      "type": "file"
+    },
+    {
+      "path": "lib\\verification\\verification.dart",
+      "accessCount": 1,
+      "lastAccessed": 1778734953741,
+      "type": "file"
+    },
+    {
+      "path": "lib\\home\\home.dart",
+      "accessCount": 1,
+      "lastAccessed": 1778734954869,
+      "type": "file"
+    },
+    {
+      "path": "lib\\presentation\\print\\luca\\state\\printer_status.dart",
+      "accessCount": 1,
+      "lastAccessed": 1778735081649,
+      "type": "file"
+    },
+    {
+      "path": "lib\\presentation\\print\\luca\\state\\printer_log.dart",
+      "accessCount": 1,
+      "lastAccessed": 1778735081854,
+      "type": "file"
+    },
+    {
+      "path": "lib\\presentation\\print\\luca\\state\\ribbon_status.dart",
+      "accessCount": 1,
+      "lastAccessed": 1778735082028,
+      "type": "file"
+    },
+    {
+      "path": "lib\\core\\data\\models\\request\\create_print_request.dart",
+      "accessCount": 1,
+      "lastAccessed": 1778735082869,
+      "type": "file"
+    },
+    {
+      "path": "lib\\core\\data\\models\\response\\create_print_response.dart",
+      "accessCount": 1,
+      "lastAccessed": 1778735085726,
+      "type": "file"
+    },
+    {
+      "path": "lib\\core\\data\\models\\request\\update_print_request.dart",
+      "accessCount": 1,
+      "lastAccessed": 1778735085941,
+      "type": "file"
+    },
+    {
+      "path": "lib\\core\\data\\models\\entities\\back_photo_for_print.dart",
+      "accessCount": 1,
+      "lastAccessed": 1778735086355,
+      "type": "file"
+    },
+    {
+      "path": "lib\\presentation\\print\\labcurity\\labcurity_service.dart",
+      "accessCount": 1,
+      "lastAccessed": 1778735087036,
+      "type": "file"
+    },
+    {
+      "path": "lib\\presentation\\print\\isolate\\model\\print_message.dart",
+      "accessCount": 1,
+      "lastAccessed": 1778735090522,
+      "type": "file"
+    },
+    {
+      "path": "lib\\presentation\\print\\isolate\\model\\print_state_message.dart",
+      "accessCount": 1,
+      "lastAccessed": 1778735090948,
+      "type": "file"
+    },
+    {
+      "path": "lib\\presentation\\print\\isolate\\print_path.dart",
+      "accessCount": 1,
+      "lastAccessed": 1778735091161,
+      "type": "file"
+    },
+    {
+      "path": "lib\\presentation\\print\\luca\\state\\ribbon_warning_provider.dart",
+      "accessCount": 1,
+      "lastAccessed": 1778735091596,
+      "type": "file"
+    },
+    {
+      "path": "lib\\presentation\\print\\luca\\state\\printer_connect_state.dart",
+      "accessCount": 1,
+      "lastAccessed": 1778735091901,
+      "type": "file"
+    },
+    {
+      "path": "lib\\presentation\\print\\isolate\\model\\check_feeder_message.dart",
+      "accessCount": 1,
+      "lastAccessed": 1778735094712,
+      "type": "file"
+    },
+    {
+      "path": "lib\\presentation\\print\\isolate\\model\\inject_message.dart",
+      "accessCount": 1,
+      "lastAccessed": 1778735095133,
+      "type": "file"
+    },
+    {
+      "path": "lib\\presentation\\print\\isolate\\model\\eject_message.dart",
+      "accessCount": 1,
+      "lastAccessed": 1778735095349,
+      "type": "file"
+    },
+    {
+      "path": "lib\\presentation\\print\\isolate\\model\\draw_image_message.dart",
+      "accessCount": 1,
+      "lastAccessed": 1778735095573,
+      "type": "file"
+    },
+    {
+      "path": "lib\\presentation\\print\\isolate\\model\\connect_message.dart",
+      "accessCount": 1,
+      "lastAccessed": 1778735095854,
+      "type": "file"
+    },
+    {
+      "path": "lib\\presentation\\print\\isolate\\model\\setting_printer_message.dart",
+      "accessCount": 1,
+      "lastAccessed": 1778735098485,
+      "type": "file"
+    },
+    {
+      "path": "lib\\presentation\\print\\isolate\\model\\print_ribbon_status_message.dart",
+      "accessCount": 1,
+      "lastAccessed": 1778735098911,
+      "type": "file"
+    },
+    {
+      "path": "lib\\presentation\\print\\isolate\\model\\initLibrary.dart",
+      "accessCount": 1,
+      "lastAccessed": 1778735099124,
+      "type": "file"
+    },
+    {
+      "path": "lib\\presentation\\print\\isolate\\model\\check_card_position_message.dart",
+      "accessCount": 1,
+      "lastAccessed": 1778735099713,
+      "type": "file"
+    },
+    {
+      "path": "lib\\presentation\\print\\isolate\\model\\print_reply.dart",
+      "accessCount": 1,
+      "lastAccessed": 1778735104461,
+      "type": "file"
+    },
+    {
+      "path": "lib\\presentation\\print\\isolate\\model\\connect_reply.dart",
+      "accessCount": 1,
+      "lastAccessed": 1778735104668,
+      "type": "file"
+    }
+  ],
+  "userDirectives": []
+}

@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_snaptag_kiosk/core/common/constants/constants.dart';
-import 'package:flutter_snaptag_kiosk/core/data/data.dart';
+import 'package:flutter_snaptag_kiosk/data/data.dart';
 
 class FilePathActions extends StatelessWidget {
   const FilePathActions({

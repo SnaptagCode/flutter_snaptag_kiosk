@@ -1,0 +1,4 @@
+{"t":0,"agent":"system","event":"skill_invoked","skill_name":"oh-my-claudecode:code-review"}
+{"t":0,"agent":"a855c9c","agent_type":"code-reviewer","event":"agent_start","parent_mode":"none"}
+{"t":0,"agent":"a855c9c","agent_type":"code-reviewer","event":"agent_stop","success":true,"duration_ms":151222}
+{"t":0,"agent":"system","event":"skill_activated","skill_name":"create-pr","skill_source":"project"}

@@ -1,6 +1,6 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_snaptag_kiosk/core/data/models/entities/version_state.dart';
-import 'package:flutter_snaptag_kiosk/core/data/repositories/version_repository.dart';
+﻿import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_snaptag_kiosk/data/models/entities/version_state.dart';
+import 'package:flutter_snaptag_kiosk/data/repositories/version_repository.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'version_notifier.g.dart';

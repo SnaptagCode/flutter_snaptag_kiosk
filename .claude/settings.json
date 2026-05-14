@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git checkout *)",
+      "Bash(git push *)",
+      "Read(//c/Users/Administrator/Desktop/jiyoung/workspace/flutter_snaptag_kiosk/lib/**)",
+      "Bash(xargs -I {} bash -c \"echo '=== {} ===' && ls -la {}\")",
+      "Read(//c/Users/Administrator/Desktop/jiyoung/workspace/flutter_snaptag_kiosk/lib/core/data/models/**)",
+      "mcp__google-sheets__sheets_get_values",
+      "Bash(git remote *)",
+      "Bash(flutter analyze *)"
+    ]
+  }
+}

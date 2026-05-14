@@ -1,4 +1,4 @@
-import 'package:flutter_snaptag_kiosk/core/data/models/request/unique_key_request.dart';
+﻿import 'package:flutter_snaptag_kiosk/data/models/request/unique_key_request.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_snaptag_kiosk/setup/data/data_source/i_event_preview_remote_data_source.dart';
 
