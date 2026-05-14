@@ -1,10 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_snaptag_kiosk/core/common/constants/default.dart';
-import 'package:flutter_snaptag_kiosk/core/data/models/request/kscat_device_request.dart';
-import 'package:flutter_snaptag_kiosk/core/data/models/response/kscat_device_response.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart' hide PaymentApiClient;
 import 'package:flutter_snaptag_kiosk/payment/data/datasource/payment_datasource_impl.dart';
-import 'package:flutter_snaptag_kiosk/payment/domain/repository/i_payment_repository.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 

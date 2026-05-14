@@ -1,5 +1,6 @@
 export 'back_photo_card_response.dart';
 export 'back_photo_status_response.dart';
+export 'kscat_device_response.dart';
 export 'create_order_response.dart';
 export 'create_print_response.dart';
 export 'error_response.dart';
