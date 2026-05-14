@@ -1,24 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_snaptag_kiosk/core/common/constants/default.dart';
-import 'package:flutter_snaptag_kiosk/lib.dart' hide PaymentApiClient;
-import 'package:flutter_snaptag_kiosk/payment/data/datasource/payment_datasource_impl.dart';
+import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
-
-part 'payment_repository_impl.g.dart';
-
-@riverpod
-PaymentRepository paymentRepository(Ref ref) {
-  return PaymentRepository(
-    PaymentApiClient(),
-    ref,
-  );
-}
 
 class PaymentRepository implements IPaymentRepository {
   PaymentRepository(this._client, this.ref);
 
-  final PaymentApiClient _client;
+  final IPaymentDatasource _client;
   final Ref ref;
 
   String _getCallback() {

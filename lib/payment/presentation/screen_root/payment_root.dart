@@ -2,12 +2,17 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_snaptag_kiosk/core/ui/widget/dialog_helper.dart';
+import 'package:flutter_snaptag_kiosk/home/presentation/notifier/home_back_photo_type_notifier.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
-import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/home_timeout_provider.dart';
+import 'package:flutter_snaptag_kiosk/payment/domain/failure/payment_failure.dart';
+import 'package:flutter_snaptag_kiosk/payment/presentation/notifier/payment_action.dart';
 import 'package:flutter_snaptag_kiosk/payment/presentation/notifier/payment_notifier.dart';
 import 'package:flutter_snaptag_kiosk/payment/presentation/notifier/payment_state.dart';
-import 'package:flutter_snaptag_kiosk/payment/domain/failure/payment_failure.dart';
 import 'package:flutter_snaptag_kiosk/payment/presentation/screen/payment_screen.dart';
+import 'package:flutter_snaptag_kiosk/payment/presentation/screen/payment_screen_state.dart';
+import 'package:flutter_snaptag_kiosk/presentation/core/back_photo_session_notifier.dart';
+import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/home_timeout_provider.dart';
+import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 
 class PaymentRoot extends ConsumerStatefulWidget {
@@ -22,6 +27,19 @@ class _PaymentRootState extends ConsumerState<PaymentRoot> {
 
   @override
   Widget build(BuildContext context) {
+    final notifier = ref.read(paymentNotifierProvider.notifier);
+    final paymentState = ref.watch(paymentNotifierProvider);
+    final backPhotoSession = ref.watch(backPhotoSessionProvider);
+
+    final screenState = PaymentScreenState(
+      isLoading: paymentState is PaymentStateLoading,
+      kiosk: ref.watch(kioskInfoServiceProvider),
+      selection: ref.watch(backPhotoTypeNotifierProvider),
+      backPhotoUrl: backPhotoSession.valueOrNull?.formattedBackPhotoCardUrl,
+      isBackPhotoLoading: backPhotoSession.isLoading,
+      backPhotoError: backPhotoSession.error,
+    );
+
     ref.listen<NetworkState>(networkStatusNotifierProvider, (previous, next) async {
       if (_isNetworkErrorHandled) return;
       if (previous?.status == next.status) return;
@@ -94,6 +112,18 @@ class _PaymentRootState extends ConsumerState<PaymentRoot> {
       }
     });
 
-    return const PaymentScreen();
+    return PaymentScreen(
+      state: screenState,
+      onAction: (action) {
+        switch (action) {
+          case PaymentActionSelectFixed(:final index):
+            ref.read(backPhotoTypeNotifierProvider.notifier).selectFixed(index);
+          case PaymentActionRefreshBackPhoto():
+            ref.invalidate(backPhotoSessionProvider);
+          default:
+            notifier.onAction(action);
+        }
+      },
+    );
   }
 }

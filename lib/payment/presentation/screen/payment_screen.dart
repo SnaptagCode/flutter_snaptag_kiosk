@@ -1,50 +1,35 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_snaptag_kiosk/core/common/sound/sound_manager.dart';
-import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
-import 'package:flutter_snaptag_kiosk/home/presentation/notifier/home_back_photo_type_notifier.dart';
-import 'package:flutter_snaptag_kiosk/lib.dart';
-import 'package:flutter_snaptag_kiosk/presentation/core/back_photo_session_notifier.dart';
 import 'package:flutter_snaptag_kiosk/core/ui/widget/general_error_widget.dart';
 import 'package:flutter_snaptag_kiosk/core/ui/widget/price_box.dart';
-import 'package:flutter_snaptag_kiosk/payment/presentation/notifier/payment_notifier.dart';
-import 'package:flutter_snaptag_kiosk/payment/presentation/notifier/payment_state.dart';
+import 'package:flutter_snaptag_kiosk/home/presentation/notifier/home_back_photo_type_notifier.dart';
+import 'package:flutter_snaptag_kiosk/lib.dart';
+import 'package:flutter_snaptag_kiosk/payment/presentation/notifier/payment_action.dart';
+import 'package:flutter_snaptag_kiosk/payment/presentation/screen/payment_screen_state.dart';
 
-/// 카드 선택 효과 시안 타입
 enum SelectionDesignVariant {
-  /// 시안 1: 투명도 + 카드 아래 체크 라디오 버튼
   opacityWithBottomRadio,
-
-  /// 시안 2: 투명도 + 카드 위 우측 상단 체크 아이콘
   opacityWithTopRightCheck,
-
-  /// 시안 3: 투명도 + 두꺼운 테두리 강조
   opacityWithBoldBorder,
-
-  /// 시안 4: 투명도 + 중앙 오버레이 + 체크 아이콘
   opacityWithCenterOverlay,
-
-  /// 시안 5: 투명도 + 카드 위 체크 아이콘 + 카드 아래 체크 라디오 버튼
   opacityWithTopCheckAndBottomRadio,
-
-  /// 시안 6: 선택되지 않은 카드 크기 축소 + 애니메이션
   animatedScaleOnUnselected,
 }
 
-class PaymentScreen extends ConsumerStatefulWidget {
+class PaymentScreen extends StatelessWidget {
   const PaymentScreen({
     super.key,
+    required this.state,
+    required this.onAction,
   });
-  @override
-  ConsumerState<PaymentScreen> createState() => _PaymentScreenState();
-}
 
-class _PaymentScreenState extends ConsumerState<PaymentScreen> {
-  /// 시안 6: 선택되지 않은 카드 크기 축소 + 애니메이션
+  final PaymentScreenState state;
+  final void Function(PaymentAction) onAction;
+
   Widget _buildVariant6AnimatedScaleOnUnselected({
+    required BuildContext context,
     required int index,
     required int? selectedIndex,
     required String? imageUrl,
@@ -54,7 +39,6 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
     final kioskColors = Theme.of(context).extension<KioskColors>();
     final buttonColor = kioskColors?.buttonColor ?? const Color(0xFF1B5E4F);
 
-    // 선택되지 않은 경우 크기를 0.85배로 축소
     final scale = selectedIndex == null ? 1.0 : (isSelected ? 1.0 : 0.85);
     final opacity = selectedIndex == null ? 1.0 : (isSelected ? 1.0 : 0.6);
 
@@ -102,12 +86,13 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10.r),
-        border: null,
         boxShadow: boxShadow,
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(10.r),
-        child: imageUrl != null && imageUrl.isNotEmpty ? _buildNetworkImage(imageUrl) : _buildEmptyImagePlaceholder(),
+        child: imageUrl != null && imageUrl.isNotEmpty
+            ? _buildNetworkImage(imageUrl)
+            : _buildEmptyImagePlaceholder(),
       ),
     );
   }
@@ -149,63 +134,58 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
     );
   }
 
-  Widget _buildFixedBackPhotoCardList({
-    required KioskMachineInfo? kiosk,
-    required bool isFixed,
-    required int? selectedIndex,
-  }) {
-    final nominatedBackPhotoCardList = kiosk?.nominatedBackPhotoCardList ?? [];
-    if (kiosk == null || nominatedBackPhotoCardList.isEmpty) return _buildEmptyImagePlaceholder();
+  Widget _buildBackPhotoArea(BuildContext context) {
+    final isFixed = state.selection?.type == BackPhotoType.fixed;
+    final selectedIndex = state.selection?.fixedIndex;
+    final nominatedList = state.kiosk?.nominatedBackPhotoCardList ?? [];
 
-    return isFixed
-        ? Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              if (nominatedBackPhotoCardList.length == 1)
-                _buildFixedBackPhotoCard(boxShadow: null, imageUrl: nominatedBackPhotoCardList[0].originUrl)
-              else
-                _buildVariant6AnimatedScaleOnUnselected(
-                  index: 0,
-                  selectedIndex: selectedIndex,
-                  imageUrl: nominatedBackPhotoCardList[0].originUrl,
-                  onTap: () {
-                    ref.read(backPhotoTypeNotifierProvider.notifier).selectFixed(0);
-                  },
-                ),
-              if (nominatedBackPhotoCardList.length > 1) SizedBox(width: 100.w),
-              if (nominatedBackPhotoCardList.length > 1)
-                _buildVariant6AnimatedScaleOnUnselected(
-                  index: 1,
-                  selectedIndex: selectedIndex,
-                  imageUrl: nominatedBackPhotoCardList[1].originUrl,
-                  onTap: () {
-                    ref.read(backPhotoTypeNotifierProvider.notifier).selectFixed(1);
-                  },
-                ),
-            ],
-          )
-        : ref.watch(backPhotoSessionProvider).when(
-              data: (data) {
-                final imageUrl = data?.formattedBackPhotoCardUrl ?? '';
-                return imageUrl.isNotEmpty
-                    ? _buildFixedBackPhotoCard(boxShadow: null, imageUrl: imageUrl)
-                    : _buildEmptyImagePlaceholder();
-              },
-              loading: () => const CircularProgressIndicator(),
-              error: (error, stack) => GeneralErrorWidget(
-                exception: error as Exception,
-                onRetry: () => ref.refresh(backPhotoSessionProvider),
-              ),
-            );
+    if (!isFixed) {
+      if (state.isBackPhotoLoading) return const CircularProgressIndicator();
+      if (state.backPhotoError != null) {
+        return GeneralErrorWidget(
+          exception: state.backPhotoError as Exception,
+          onRetry: () => onAction(const PaymentAction.refreshBackPhoto()),
+        );
+      }
+      final imageUrl = state.backPhotoUrl ?? '';
+      return imageUrl.isNotEmpty
+          ? _buildFixedBackPhotoCard(boxShadow: null, imageUrl: imageUrl)
+          : _buildEmptyImagePlaceholder();
+    }
+
+    if (nominatedList.isEmpty) return _buildEmptyImagePlaceholder();
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        if (nominatedList.length == 1)
+          _buildFixedBackPhotoCard(boxShadow: null, imageUrl: nominatedList[0].originUrl)
+        else
+          _buildVariant6AnimatedScaleOnUnselected(
+            context: context,
+            index: 0,
+            selectedIndex: selectedIndex,
+            imageUrl: nominatedList[0].originUrl,
+            onTap: () => onAction(const PaymentAction.selectFixed(0)),
+          ),
+        if (nominatedList.length > 1) SizedBox(width: 100.w),
+        if (nominatedList.length > 1)
+          _buildVariant6AnimatedScaleOnUnselected(
+            context: context,
+            index: 1,
+            selectedIndex: selectedIndex,
+            imageUrl: nominatedList[1].originUrl,
+            onTap: () => onAction(const PaymentAction.selectFixed(1)),
+          ),
+      ],
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final kiosk = ref.watch(kioskInfoServiceProvider);
-    final selection = ref.watch(backPhotoTypeNotifierProvider);
+    final kiosk = state.kiosk;
     final isHwe = kiosk?.isHwe ?? false;
-    final isFixed = selection?.type == BackPhotoType.fixed;
-    final selectedIndex = selection?.fixedIndex;
+    final isFixed = state.selection?.type == BackPhotoType.fixed;
     final mainTextColor = kiosk?.mainTextColor.toColor(fallback: Colors.white) ?? Colors.white;
 
     return DefaultTextStyle(
@@ -220,9 +200,7 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Text(
-                  isFixed &&
-                          kiosk?.nominatedBackPhotoCardList.length != null &&
-                          kiosk!.nominatedBackPhotoCardList.length > 1
+                  isFixed && (kiosk?.nominatedBackPhotoCardList.length ?? 0) > 1
                       ? LocaleKeys.choice_select_recommended_image.tr()
                       : LocaleKeys.sub02_txt_02.tr(),
                   textAlign: TextAlign.center,
@@ -231,7 +209,7 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
                       : context.typography.kioskBtn1B.copyWith(fontSize: 53.sp, color: mainTextColor),
                 ),
                 SizedBox(height: 50.h),
-                _buildFixedBackPhotoCardList(kiosk: kiosk, isFixed: isFixed, selectedIndex: selectedIndex),
+                _buildBackPhotoArea(context),
                 SizedBox(height: 50.h),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -239,26 +217,22 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
                   children: [
                     const PriceBox(),
                     SizedBox(width: 20.w),
-                    Consumer(
-                      builder: (context, ref, child) {
-                        final isLoading = ref.watch(paymentNotifierProvider) is PaymentStateLoading;
-
-                        return ElevatedButton(
-                          style: context.paymentButtonStyle,
-                          onPressed: isLoading
-                              ? null
-                              : () async {
-                                  await SoundManager().playSound();
-                                  ref.read(paymentNotifierProvider.notifier).pay();
-                                },
-                          child: Text(LocaleKeys.sub02_btn_pay.tr(),
-                              style: isHwe
-                                  ? context.typography.vendingBtn2B
-                                      .copyWith(color: (kiosk?.buttonTextColor ?? '').toColor(fallback: Colors.white))
-                                  : context.typography.kioskBtn1B
-                                      .copyWith(color: (kiosk?.buttonTextColor ?? '').toColor(fallback: Colors.white))),
-                        );
-                      },
+                    ElevatedButton(
+                      style: context.paymentButtonStyle,
+                      onPressed: state.isLoading
+                          ? null
+                          : () async {
+                              await SoundManager().playSound();
+                              onAction(const PaymentAction.pay());
+                            },
+                      child: Text(
+                        LocaleKeys.sub02_btn_pay.tr(),
+                        style: isHwe
+                            ? context.typography.vendingBtn2B.copyWith(
+                                color: (kiosk?.buttonTextColor ?? '').toColor(fallback: Colors.white))
+                            : context.typography.kioskBtn1B.copyWith(
+                                color: (kiosk?.buttonTextColor ?? '').toColor(fallback: Colors.white)),
+                      ),
                     ),
                   ],
                 ),
