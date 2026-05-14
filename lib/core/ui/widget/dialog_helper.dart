@@ -2,11 +2,9 @@ import 'dart:async';
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_snaptag_kiosk/core/common/sound/sound_manager.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
-import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_snaptag_kiosk/core/ui/widget/code_keypad.dart';
 
@@ -122,15 +120,20 @@ class DialogHelper {
     TextStyle? cancelTextStyle,
     TextStyle? confirmTextStyle,
   }) async {
+    // showDialog 호출 전에 미리 읽어둠 — builder는 비동기로 실행되므로
+    // 이 시점에 outer context가 이미 deactivate됐을 수 있음
+    final isHwe = context.isHwe;
+    final languageCode = context.locale.languageCode;
+    final alertStyle1 = context.typography.kioskAlert1B;
+    final alertStyle2 = context.typography.kioskAlert2M;
+
     final result = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext dialogContext) {
-        final isHwe = context.isHwe;
-
         return DefaultTextStyle(
           style: TextStyle(
-            fontFamily: context.locale.languageCode == 'ja' ? 'MPLUSRounded' : 'Cafe24Ssurround2',
+            fontFamily: languageCode == 'ja' ? 'MPLUSRounded' : 'Cafe24Ssurround2',
           ),
           child: Dialog(
             backgroundColor: Colors.white,
@@ -148,7 +151,7 @@ class DialogHelper {
                     child: Text(
                       title,
                       textAlign: TextAlign.center,
-                      style: context.typography.kioskAlert1B.copyWith(
+                      style: alertStyle1.copyWith(
                         fontFamily: isHwe ? 'Hanwha' : 'Pretendard',
                         color: Colors.black,
                         fontSize: isHwe ? 52.sp : 42.sp,
@@ -162,7 +165,7 @@ class DialogHelper {
                     child: Text(
                       content,
                       textAlign: TextAlign.center,
-                      style: context.typography.kioskAlert2M.copyWith(
+                      style: alertStyle2.copyWith(
                         color: Colors.black,
                         fontFamily: 'Pretendard',
                       ),
