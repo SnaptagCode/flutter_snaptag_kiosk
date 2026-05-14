@@ -5,7 +5,7 @@ import 'package:flutter_snaptag_kiosk/setup/presentation/kiosk_components/screen
 import 'package:flutter_snaptag_kiosk/setup/presentation/event_preview/screen_root/event_preview_root.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_shell.dart';
 import 'package:flutter_snaptag_kiosk/setup/presentation/maintenance/screen_root/maintenance_root.dart';
-import 'package:flutter_snaptag_kiosk/presentation/home/screen_root/home_root.dart';
+import 'package:flutter_snaptag_kiosk/home/presentation/screen_root/home_root.dart';
 import 'package:flutter_snaptag_kiosk/setup/presentation/payment_history/screen_root/payment_history_root.dart';
 import 'package:flutter_snaptag_kiosk/setup/presentation/main/screen_root/setup_main_root.dart';
 import 'package:flutter_snaptag_kiosk/presentation/test/unit_test_screen.dart';

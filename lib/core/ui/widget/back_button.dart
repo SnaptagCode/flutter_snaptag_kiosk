@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
-import 'package:flutter_snaptag_kiosk/presentation/home/back_photo_type_provider.dart';
+import 'package:flutter_snaptag_kiosk/home/presentation/notifier/back_photo_type_notifier.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 
