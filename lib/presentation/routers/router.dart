@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_snaptag_kiosk/presentation/verification/roots/verification_root.dart';
 import 'package:flutter_snaptag_kiosk/presentation/global_shell.dart';
 import 'package:flutter_snaptag_kiosk/setup/presentation/kiosk_components/screens/kiosk_components_screen.dart';
-import 'package:flutter_snaptag_kiosk/setup/presentation/event_preview/screens/event_preview_screen.dart';
+import 'package:flutter_snaptag_kiosk/setup/presentation/event_preview/screen_root/event_preview_root.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_shell.dart';
 import 'package:flutter_snaptag_kiosk/setup/presentation/maintenance/screens/maintenance_screen.dart';
 import 'package:flutter_snaptag_kiosk/presentation/home/roots/home_root.dart';
@@ -114,7 +114,7 @@ class EventPreviewRouteData extends GoRouteData with _$EventPreviewRouteData {
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) {
     return NoTransitionPage(
-      child: const EventPreviewScreen(),
+      child: const EventPreviewRoot(),
     );
   }
 }
