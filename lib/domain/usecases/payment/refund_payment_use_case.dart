@@ -1,8 +1,8 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+﻿import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
-import 'package:flutter_snaptag_kiosk/payment/module/payment_di.dart';
-import 'package:flutter_snaptag_kiosk/payment/presentation/notifier/create_order_info_notifier.dart';
-import 'package:flutter_snaptag_kiosk/payment/presentation/notifier/payment_response_notifier.dart';
+import 'package:flutter_snaptag_kiosk/presentation/payment/di/payment_di.dart';
+import 'package:flutter_snaptag_kiosk/presentation/payment/notifier/create_order_info_notifier.dart';
+import 'package:flutter_snaptag_kiosk/presentation/payment/notifier/payment_response_notifier.dart';
 import 'package:flutter_snaptag_kiosk/presentation/core/back_photo_session_notifier.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
 

@@ -1,10 +1,3 @@
 export 'data/data_source/i_verification_remote_data_source.dart';
 export 'data/data_source/verification_remote_data_source_impl.dart';
 export 'data/repository_impl/verification_repository_impl.dart';
-export 'module/verification_di.dart';
-export 'presentation/notifier/auth_code_notifier.dart';
-export 'presentation/notifier/verification_action.dart';
-export 'presentation/notifier/verification_notifier.dart';
-export 'presentation/notifier/verification_state.dart';
-export 'presentation/screen/verification_screen.dart';
-export 'presentation/screen_root/verification_root.dart';

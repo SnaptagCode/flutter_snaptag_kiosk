@@ -1,16 +1,16 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_snaptag_kiosk/verification/presentation/screen_root/verification_root.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:flutter_snaptag_kiosk/presentation/verification/screen_root/verification_root.dart';
 import 'package:flutter_snaptag_kiosk/presentation/global_shell.dart';
-import 'package:flutter_snaptag_kiosk/setup/presentation/kiosk_components/screen_root/kiosk_components_root.dart';
-import 'package:flutter_snaptag_kiosk/setup/presentation/event_preview/screen_root/event_preview_root.dart';
+import 'package:flutter_snaptag_kiosk/presentation/setup/kiosk_components/screen_root/kiosk_components_root.dart';
+import 'package:flutter_snaptag_kiosk/presentation/setup/event_preview/screen_root/event_preview_root.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_shell.dart';
-import 'package:flutter_snaptag_kiosk/setup/presentation/maintenance/screen_root/maintenance_root.dart';
-import 'package:flutter_snaptag_kiosk/home/presentation/screen_root/home_root.dart';
-import 'package:flutter_snaptag_kiosk/setup/presentation/payment_history/screen_root/payment_history_root.dart';
-import 'package:flutter_snaptag_kiosk/setup/presentation/main/screen_root/setup_main_root.dart';
+import 'package:flutter_snaptag_kiosk/presentation/setup/maintenance/screen_root/maintenance_root.dart';
+import 'package:flutter_snaptag_kiosk/presentation/home/screen_root/home_root.dart';
+import 'package:flutter_snaptag_kiosk/presentation/setup/payment_history/screen_root/payment_history_root.dart';
+import 'package:flutter_snaptag_kiosk/presentation/setup/main/screen_root/setup_main_root.dart';
 import 'package:flutter_snaptag_kiosk/presentation/test/unit_test_screen.dart';
-import 'package:flutter_snaptag_kiosk/payment/presentation/screen_root/payment_root.dart';
-import 'package:flutter_snaptag_kiosk/print/presentation/screen_root/print_process_root.dart';
+import 'package:flutter_snaptag_kiosk/presentation/payment/screen_root/payment_root.dart';
+import 'package:flutter_snaptag_kiosk/presentation/print/screen_root/print_process_root.dart';
 import 'package:go_router/go_router.dart';
 
 part 'router.g.dart';

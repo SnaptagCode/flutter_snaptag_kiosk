@@ -3,12 +3,12 @@ import 'package:flutter_snaptag_kiosk/core/common/constants/alert_key.dart';
 import 'package:flutter_snaptag_kiosk/data/datasources/local/id_writer.dart';
 import 'package:flutter_snaptag_kiosk/data/datasources/remote/slack_log_service.dart';
 import 'package:flutter_snaptag_kiosk/core/providers/version_notifier.dart';
-import 'package:flutter_snaptag_kiosk/payment/module/payment_di.dart';
+import 'package:flutter_snaptag_kiosk/presentation/payment/di/payment_di.dart';
 import 'package:flutter_snaptag_kiosk/presentation/core/card_count_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/card_printer.dart';
 import 'package:flutter_snaptag_kiosk/presentation/setup/main/notifiers/page_print_notifier.dart';
-import 'package:flutter_snaptag_kiosk/setup/module/setup_di.dart';
+import 'package:flutter_snaptag_kiosk/presentation/setup/di/setup_di.dart';
 
 sealed class StartEventValidationResult {
   const StartEventValidationResult();

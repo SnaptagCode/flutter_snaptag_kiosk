@@ -2,7 +2,7 @@
 import 'package:flutter_snaptag_kiosk/data/datasources/remote/slack_log_service.dart';
 import 'package:flutter_snaptag_kiosk/presentation/core/card_count_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
-import 'package:flutter_snaptag_kiosk/setup/module/setup_di.dart';
+import 'package:flutter_snaptag_kiosk/presentation/setup/di/setup_di.dart';
 
 class EndKioskApplicationUseCase {
   final Ref _ref;
