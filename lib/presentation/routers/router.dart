@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_snaptag_kiosk/presentation/verification/roots/verification_root.dart';
 import 'package:flutter_snaptag_kiosk/presentation/global_shell.dart';
-import 'package:flutter_snaptag_kiosk/setup/presentation/kiosk_components/screens/kiosk_components_screen.dart';
+import 'package:flutter_snaptag_kiosk/setup/presentation/kiosk_components/screen_root/kiosk_components_root.dart';
 import 'package:flutter_snaptag_kiosk/setup/presentation/event_preview/screen_root/event_preview_root.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_shell.dart';
-import 'package:flutter_snaptag_kiosk/setup/presentation/maintenance/screens/maintenance_screen.dart';
+import 'package:flutter_snaptag_kiosk/setup/presentation/maintenance/screen_root/maintenance_root.dart';
 import 'package:flutter_snaptag_kiosk/presentation/home/roots/home_root.dart';
 import 'package:flutter_snaptag_kiosk/setup/presentation/payment_history/screen_root/payment_history_root.dart';
 import 'package:flutter_snaptag_kiosk/setup/presentation/main/screen_root/setup_main_root.dart';
@@ -103,7 +103,7 @@ class KioskComponentsRouteData extends GoRouteData with _$KioskComponentsRouteDa
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) {
     return NoTransitionPage(
-      child: const KioskComponentsScreen(),
+      child: const KioskComponentsRoot(),
     );
   }
 }
@@ -180,7 +180,7 @@ class MaintenanceRouteData extends GoRouteData with _$MaintenanceRouteData {
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) {
     return NoTransitionPage(
-      child: const MaintenanceScreen(),
+      child: const MaintenanceRoot(),
     );
   }
 }
