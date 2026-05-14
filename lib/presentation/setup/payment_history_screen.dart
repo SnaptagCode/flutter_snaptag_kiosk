@@ -5,11 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_snaptag_kiosk/core/common/sound/sound_manager.dart';
-import 'package:flutter_snaptag_kiosk/core/ui/widget/dialog_helper.dart';
-import 'package:flutter_snaptag_kiosk/core/ui/widget/general_error_widget.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
+import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
 import 'package:flutter_snaptag_kiosk/presentation/setup/payment_history_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/setup/setup_refund_process_provider.dart';
+import 'package:flutter_snaptag_kiosk/core/ui/widget/dialog_helper.dart';
+import 'package:flutter_snaptag_kiosk/core/ui/widget/general_error_widget.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 
@@ -78,11 +79,11 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
             ),
             title: const Text('출력 내역'),
             actions: [
-              // IconButton(
-              //   icon: Icon(Icons.description_outlined, size: 24.sp),
-              //   tooltip: '단말기 로그 전송',
-              //   onPressed: _showLogFileDialog,
-              // ),
+              IconButton(
+                icon: Icon(Icons.description_outlined, size: 24.sp),
+                tooltip: '단말기 로그 전송',
+                onPressed: _showLogFileDialog,
+              ),
               //키오스크에서 실행시켜보고 사이즈 조절 필요시 SizedBox로
               IconButton(
                 padding: EdgeInsets.only(left: 30.w),
@@ -277,65 +278,65 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
     }
   }
 
-  // Future<void> _showLogFileDialog() async {
-  //   final dir = Directory(r'C:\KSCAT\ksnetcomm');
-  //   if (!await dir.exists()) {
-  //     if (!mounted) return;
-  //     await DialogHelper.showSetupDialog(
-  //       context,
-  //       title: '로그 경로를 찾을 수 없습니다.\nC:\\KSCAT\\ksnetcomm',
-  //     );
-  //     return;
-  //   }
+  Future<void> _showLogFileDialog() async {
+    final dir = Directory(r'C:\KSCAT\ksnetcomm');
+    if (!await dir.exists()) {
+      if (!mounted) return;
+      await DialogHelper.showSetupDialog(
+        context,
+        title: '로그 경로를 찾을 수 없습니다.\nC:\\KSCAT\\ksnetcomm',
+      );
+      return;
+    }
 
-  //   final files = dir
-  //       .listSync()
-  //       .whereType<File>()
-  //       .toList()
-  //     ..sort((a, b) => b.lastModifiedSync().compareTo(a.lastModifiedSync()));
+    final files = dir
+        .listSync()
+        .whereType<File>()
+        .toList()
+      ..sort((a, b) => b.lastModifiedSync().compareTo(a.lastModifiedSync()));
 
-  //   if (!mounted) return;
+    if (!mounted) return;
 
-  //   if (files.isEmpty) {
-  //     await DialogHelper.showSetupDialog(context, title: 'txt 로그 파일이 없습니다.');
-  //     return;
-  //   }
+    if (files.isEmpty) {
+      await DialogHelper.showSetupDialog(context, title: 'txt 로그 파일이 없습니다.');
+      return;
+    }
 
-  //   final selectedFile = await showDialog<File>(
-  //     context: context,
-  //     builder: (ctx) => _LogFileListDialog(files: files),
-  //   );
-  //   if (selectedFile == null) return;
+    final selectedFile = await showDialog<File>(
+      context: context,
+      builder: (ctx) => _LogFileListDialog(files: files),
+    );
+    if (selectedFile == null) return;
 
-  //   if (!mounted) return;
-  //   final fileName = selectedFile.uri.pathSegments.last;
-  //   final confirm = await DialogHelper.showSetupDialog(
-  //     context,
-  //     title: '$fileName\n파일을 서버로 전송합니다.',
-  //     showCancelButton: true,
-  //   );
-  //   if (!confirm) return;
+    if (!mounted) return;
+    final fileName = selectedFile.uri.pathSegments.last;
+    final confirm = await DialogHelper.showSetupDialog(
+      context,
+      title: '$fileName\n파일을 서버로 전송합니다.',
+      showCancelButton: true,
+    );
+    if (!confirm) return;
 
-  //   if (!mounted) return;
-  //   context.loaderOverlay.show();
-  //   try {
-  //     final bytes = await selectedFile.readAsBytes();
-  //     final content = cp949.decode(bytes, allowInvalid: true);
-  //     final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
-  //     await ref.read(kioskRepositoryProvider).sendKioskLog(
-  //           machineId: machineId,
-  //           title: fileName,
-  //           content: content,
-  //         );
-  //     if (!mounted) return;
-  //     context.loaderOverlay.hide();
-  //     await DialogHelper.showSetupDialog(context, title: '로그 전송이 완료되었습니다.');
-  //   } catch (e) {
-  //     if (!mounted) return;
-  //     context.loaderOverlay.hide();
-  //     await DialogHelper.showSetupDialog(context, title: '로그 전송에 실패했습니다.\n$e');
-  //   }
-  // }
+    if (!mounted) return;
+    context.loaderOverlay.show();
+    try {
+      final bytes = await selectedFile.readAsBytes();
+      final content = cp949.decode(bytes, allowInvalid: true);
+      final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
+      await ref.read(kioskRepositoryProvider).sendKioskLog(
+            machineId: machineId,
+            title: fileName,
+            content: content,
+          );
+      if (!mounted) return;
+      context.loaderOverlay.hide();
+      await DialogHelper.showSetupDialog(context, title: '로그 전송이 완료되었습니다.');
+    } catch (e) {
+      if (!mounted) return;
+      context.loaderOverlay.hide();
+      await DialogHelper.showSetupDialog(context, title: '로그 전송에 실패했습니다.\n$e');
+    }
+  }
 
   TextButton _getRefundWidget(BuildContext context, OrderEntity order) {
     switch (order.orderStatus) {
