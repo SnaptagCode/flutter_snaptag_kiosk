@@ -1,14 +1,17 @@
-﻿import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_snaptag_kiosk/data/datasources/remote/i_payment_datasource.dart';
 import 'package:flutter_snaptag_kiosk/data/datasources/remote/payment_datasource_impl.dart';
+import 'package:flutter_snaptag_kiosk/data/datasources/remote/slack_log_service.dart';
+import 'package:flutter_snaptag_kiosk/data/repositories/kiosk_repository.dart';
 import 'package:flutter_snaptag_kiosk/data/repositories/payment_repository_impl.dart';
 import 'package:flutter_snaptag_kiosk/domain/repositories/i_payment_repository.dart';
+import 'package:flutter_snaptag_kiosk/domain/services/order_update_service.dart';
 import 'package:flutter_snaptag_kiosk/domain/usecases/payment/approve_payment_use_case.dart';
 import 'package:flutter_snaptag_kiosk/domain/usecases/payment/cancel_payment_use_case.dart';
 import 'package:flutter_snaptag_kiosk/domain/usecases/payment/check_payment_device_use_case.dart';
+import 'package:flutter_snaptag_kiosk/domain/usecases/payment/error409_refund_use_case.dart';
 import 'package:flutter_snaptag_kiosk/domain/usecases/payment/process_payment_use_case.dart';
 import 'package:flutter_snaptag_kiosk/domain/usecases/payment/refund_payment_use_case.dart';
-import 'package:flutter_snaptag_kiosk/domain/usecases/payment/error409_refund_use_case.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'payment_di.g.dart';
@@ -42,10 +45,31 @@ CheckPaymentDeviceUseCase checkPaymentDeviceUseCase(Ref ref) {
 }
 
 @riverpod
-ProcessPaymentUseCase processPaymentUseCase(Ref ref) => ProcessPaymentUseCase(ref);
+OrderUpdateService orderUpdateService(Ref ref) {
+  return OrderUpdateService(
+    ref.watch(kioskRepositoryProvider),
+    SlackLogService(),
+  );
+}
 
 @riverpod
-RefundPaymentUseCase refundPaymentUseCase(Ref ref) => RefundPaymentUseCase(ref);
+ProcessPaymentUseCase processPaymentUseCase(Ref ref) => ProcessPaymentUseCase(
+      ref.watch(kioskRepositoryProvider),
+      ref.watch(approvePaymentUseCaseProvider),
+      ref.watch(orderUpdateServiceProvider),
+      SlackLogService(),
+    );
 
 @riverpod
-Error409RefundUseCase error409RefundUseCase(Ref ref) => Error409RefundUseCase(ref);
+RefundPaymentUseCase refundPaymentUseCase(Ref ref) => RefundPaymentUseCase(
+      ref.watch(cancelPaymentUseCaseProvider),
+      ref.watch(orderUpdateServiceProvider),
+      SlackLogService(),
+    );
+
+@riverpod
+Error409RefundUseCase error409RefundUseCase(Ref ref) => Error409RefundUseCase(
+      ref.watch(cancelPaymentUseCaseProvider),
+      ref.watch(orderUpdateServiceProvider),
+      SlackLogService(),
+    );

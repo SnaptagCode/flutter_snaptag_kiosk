@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_snaptag_kiosk/data/models/request/unique_key_request.dart';
 import 'package:flutter_snaptag_kiosk/data/models/request/update_back_photo_request.dart';
+import 'package:flutter_snaptag_kiosk/domain/repositories/i_kiosk_repository.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_snaptag_kiosk/presentation/core/card_count_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/luca/state/printer_log.dart';
@@ -14,18 +15,18 @@ part 'kiosk_repository.g.dart';
 @riverpod
 class KioskRepository extends _$KioskRepository {
   @override
-  _KioskRepository build() {
+  KioskRepositoryImpl build() {
     final dio = ref.watch(dioProvider(F.kioskBaseUrl));
 
-    return _KioskRepository(KioskApiClient(dio), ref);
+    return KioskRepositoryImpl(KioskApiClient(dio), ref);
   }
 }
 
-class _KioskRepository {
+class KioskRepositoryImpl implements IKioskRepository {
   final KioskApiClient _apiClient;
   final Ref _ref;
 
-  _KioskRepository(this._apiClient, this._ref);
+  KioskRepositoryImpl(this._apiClient, this._ref);
   Future<String> healthCheck() async {
     try {
       return await _apiClient.healthCheck();
@@ -117,6 +118,7 @@ class _KioskRepository {
     }
   }
 
+  @override
   Future<CreateOrderResponse> createOrderStatus(CreateOrderRequest request) async {
     try {
       return await _apiClient.createOrder(
@@ -127,6 +129,7 @@ class _KioskRepository {
     }
   }
 
+  @override
   Future<UpdateOrderResponse> updateOrderStatus(int orderId, UpdateOrderRequest request) async {
     try {
       return await _apiClient.updateOrder(

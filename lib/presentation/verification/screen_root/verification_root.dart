@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_snaptag_kiosk/core/ui/widget/dialog_helper.dart';
 import 'package:flutter_snaptag_kiosk/domain/models/verification/verification_failure.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
+import 'package:flutter_snaptag_kiosk/domain/usecases/payment/error409_refund_use_case.dart';
+import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
 import 'package:flutter_snaptag_kiosk/presentation/payment/di/payment_di.dart';
 import 'package:flutter_snaptag_kiosk/presentation/verification/notifier/auth_code_notifier.dart';
 import 'package:flutter_snaptag_kiosk/presentation/verification/notifier/verification_action.dart';
@@ -61,7 +63,15 @@ class VerificationRoot extends ConsumerWidget {
         if (!context.mounted) return;
         if (confirmed && order != null) {
           try {
-            final success = await ref.read(error409RefundUseCaseProvider).call(order);
+            final kioskInfo = ref.read(kioskInfoServiceProvider);
+            final params = Error409RefundParams(
+              order: order,
+              kioskEventId: kioskInfo?.kioskEventId ?? 0,
+              kioskMachineId: kioskInfo?.kioskMachineId ?? 0,
+              photoCardPrice: kioskInfo?.photoCardPrice ?? 0,
+              photoAuthNumber: ref.read(authCodeProvider),
+            );
+            final success = await ref.read(error409RefundUseCaseProvider).call(params);
             if (!context.mounted) return;
             await (success
                 ? DialogHelper.showAuthNumReissueCompleteDialog(context)

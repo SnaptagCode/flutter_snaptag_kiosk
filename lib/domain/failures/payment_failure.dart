@@ -34,6 +34,27 @@ class CancelledPaymentException extends PaymentFailedException {
   CancelledPaymentException({String? description}) : super('취소된 결제 실패', description: description);
 }
 
+/// 결제 실패 — 주문이 생성된 후 단말기 응답이 실패/취소/타임아웃
+/// orderId와 단말기 응답 정보를 담아 notifier가 환불을 시도할 수 있게 함
+class PaymentRefundableException implements Exception {
+  final String message;
+  final int orderId;
+  final String approvalNo; // 빈 문자열 가능 — 환불 시도 후 번호 없으면 실패 처리
+  final String? tradeTime; // originalApprovalDate 계산용 (yyMMdd 앞 6자리)
+  final String? description;
+
+  PaymentRefundableException(
+    this.message, {
+    required this.orderId,
+    required this.approvalNo,
+    this.tradeTime,
+    this.description,
+  });
+
+  @override
+  String toString() => message;
+}
+
 class OrderCreationException implements Exception {
   final String message;
 

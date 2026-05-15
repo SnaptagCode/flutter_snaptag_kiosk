@@ -1,4 +1,4 @@
-﻿import 'package:flutter_snaptag_kiosk/lib.dart';
+import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_snaptag_kiosk/presentation/core/card_count_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/home/notifier/home_back_photo_type_notifier.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/home_timeout_provider.dart';
@@ -44,16 +44,22 @@ class PaymentNotifier extends _$PaymentNotifier {
 
     state = const PaymentState.loading();
 
-    // TODO: 프린터 없이 디버깅 시 주석 해제
-    // // 결제 전 카드 피더 체크
-    // try {
-    //   await ref.read(printerServiceProvider.notifier).checkFeeder();
-    // } catch (e, stack) {
-    //   state = PaymentState.failure(e, stack);
-    //   return;
-    // }
+    // 나중에 catch 블록에서 환불 params 빌드에 사용
+    int? kioskEventId;
+    int? kioskMachineId;
+    int? photoCardPrice;
+    String? photoAuthNumber;
+    bool isSingleSided = false;
 
     try {
+      // TODO: 프린터 없이 디버깅 시 주석 해제
+      // try {
+      //   await ref.read(printerServiceProvider.notifier).checkFeeder();
+      // } catch (e, stack) {
+      //   state = PaymentState.failure(e, stack);
+      //   return;
+      // }
+
       final selection = ref.read(backPhotoTypeNotifierProvider);
 
       if (selection?.type == BackPhotoType.fixed && selection?.fixedIndex != null) {
@@ -80,14 +86,41 @@ class PaymentNotifier extends _$PaymentNotifier {
 
       ref.read(homeTimeoutNotifierProvider.notifier).cancelTimerWithCallback();
 
-      await _processPaymentUseCase.call();
+      final kioskInfo = ref.read(kioskInfoServiceProvider);
+      final backPhoto = ref.read(backPhotoSessionProvider).value;
+      isSingleSided = ref.read(pagePrintProvider) == PagePrintType.single;
 
+      if (kioskInfo == null) throw PreconditionFailedException('No kiosk settings available');
+      if (backPhoto == null) throw PreconditionFailedException('No back photo available');
+
+      kioskEventId = kioskInfo.kioskEventId;
+      kioskMachineId = kioskInfo.kioskMachineId;
+      photoCardPrice = kioskInfo.photoCardPrice;
+      photoAuthNumber = backPhoto.photoAuthNumber;
+
+      await _processPaymentUseCase.call(ProcessPaymentParams(
+        kioskEventId: kioskEventId,
+        kioskMachineId: kioskMachineId,
+        photoCardPrice: photoCardPrice,
+        photoAuthNumber: photoAuthNumber,
+        isSingleSided: isSingleSided,
+      ));
+
+      await ref.read(cardCountProvider.notifier).decrease();
       state = const PaymentState.success();
     } catch (e, stack) {
-      if (e is! OrderCreationException && e is! PreconditionFailedException) {
+      if (e is PaymentRefundableException && kioskEventId != null) {
         try {
-          await _refundPaymentUseCase.call();
-          if (ref.read(pagePrintProvider) == PagePrintType.single) {
+          await _refundPaymentUseCase.call(RefundPaymentParams(
+            orderId: e.orderId,
+            kioskEventId: kioskEventId,
+            kioskMachineId: kioskMachineId!,
+            photoCardPrice: photoCardPrice!,
+            photoAuthNumber: photoAuthNumber!,
+            approvalNo: e.approvalNo,
+            tradeTime: e.tradeTime,
+          ));
+          if (isSingleSided) {
             await ref.read(cardCountProvider.notifier).increase();
           }
         } catch (refundError) {
