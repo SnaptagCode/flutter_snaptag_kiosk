@@ -1,8 +1,8 @@
 ﻿import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_snaptag_kiosk/core/common/constants/alert_key.dart';
-import 'package:flutter_snaptag_kiosk/data/datasources/local/id_writer.dart';
-import 'package:flutter_snaptag_kiosk/data/datasources/remote/slack_log_service.dart';
 import 'package:flutter_snaptag_kiosk/core/providers/version_notifier.dart';
+import 'package:flutter_snaptag_kiosk/domain/services/i_id_writer_service.dart';
+import 'package:flutter_snaptag_kiosk/domain/services/i_slack_log_service.dart';
 import 'package:flutter_snaptag_kiosk/presentation/payment/di/payment_di.dart';
 import 'package:flutter_snaptag_kiosk/presentation/core/card_count_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
@@ -40,8 +40,10 @@ final class StartEventValidationKioskInfoInvalid extends StartEventValidationRes
 
 class StartKioskEventUseCase {
   final Ref _ref;
+  final ISlackLogService _slackLog;
+  final IIdWriterService _idWriter;
 
-  StartKioskEventUseCase(this._ref);
+  StartKioskEventUseCase(this._ref, this._slackLog, this._idWriter);
 
   Future<StartEventValidationResult> validate() async {
     final printType = _ref.read(pagePrintProvider);
@@ -64,9 +66,9 @@ class StartKioskEventUseCase {
 
     try {
       final response = await _ref.read(checkPaymentDeviceUseCaseProvider).call();
-      SlackLogService().sendLogToSlack('Payment Device check: $response');
+      _slackLog.sendLog('Payment Device check: $response');
     } catch (e) {
-      SlackLogService().sendErrorLogToSlack('Payment Device check: $e');
+      _slackLog.sendErrorLog('Payment Device check: $e');
       return const StartEventValidationPaymentDeviceNotReady();
     }
 
@@ -95,7 +97,7 @@ class StartKioskEventUseCase {
     try {
       await _ref.read(printerServiceProvider.notifier).printerStateLog();
     } catch (e) {
-      SlackLogService().sendErrorLogToSlack('Printer State Log: $e');
+      _slackLog.sendErrorLog('Printer State Log: $e');
     }
 
     try {
@@ -105,13 +107,13 @@ class StartKioskEventUseCase {
             remainingSingleSidedCount: cardCountState.remainingSingleSidedCount,
           );
     } catch (e) {
-      SlackLogService().sendErrorLogToSlack('Delete End Mark: $e');
+      _slackLog.sendErrorLog('Delete End Mark: $e');
     }
 
-    SlackLogService().sendLogToSlack(
+    _slackLog.sendLog(
       'machineId:$machineId, currentVersion:${versionState.currentVersion}, latestVersion:${versionState.latestVersion}',
     );
-    SlackLogService().sendInspectionEndBroadcastLogToSlack(InfoKey.inspectionEnd.key);
+    _slackLog.sendInspectionEndBroadcastLog(InfoKey.inspectionEnd.key);
   }
 
   Future<void> _writePhotocodeMeta(
@@ -131,12 +133,12 @@ class StartKioskEventUseCase {
     final serviceName = serviceNameMap[eventType] ?? '-';
     final cardCountInfo = '${cardCountState.initialCount} / ${cardCountState.currentCount}';
 
-    await writePhotocodeId(
-      machineId.toString(),
-      kioskEventId.toString(),
-      cardCountInfo,
-      serviceName,
-      currentVersion,
+    await _idWriter.writePhotocodeMeta(
+      machineId: machineId.toString(),
+      kioskEventId: kioskEventId.toString(),
+      cardCountInfo: cardCountInfo,
+      serviceName: serviceName,
+      version: currentVersion,
     );
   }
 }

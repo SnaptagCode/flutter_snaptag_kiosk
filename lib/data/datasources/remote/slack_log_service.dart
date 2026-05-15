@@ -6,13 +6,14 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_snaptag_kiosk/data/models/entities/slack_log_template.dart';
 import 'package:flutter_snaptag_kiosk/core/providers/version_notifier.dart';
+import 'package:flutter_snaptag_kiosk/domain/services/i_slack_log_service.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_snaptag_kiosk/presentation/core/card_count_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/core/printer_log_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
 import 'package:flutter_snaptag_kiosk/presentation/setup/main/notifiers/alert_definition_notifier.dart';
 
-class SlackLogService {
+class SlackLogService implements ISlackLogService {
   static final SlackLogService _instance = SlackLogService._internal();
   factory SlackLogService() => _instance;
   SlackLogService._internal();
@@ -32,7 +33,7 @@ class SlackLogService {
     sendLogToSlack("🚀 Flutter App Started!");
   }
 
-  Future<void> sendLog(String type, String message) async {
+  Future<void> _dispatchLog(String type, String message) async {
     if (message.isEmpty) {
       log("❌ Slack 알림 메시지가 없습니다.");
       return;
@@ -49,20 +50,17 @@ class SlackLogService {
 
   Future<void> sendErrorLogToSlack(String message) async {
     final type = kDebugMode ? 'test_error_log' : 'error_log';
-    // await sendLog('test_error_log', message);
-    await sendLog(type, message);
+    await _dispatchLog(type, message);
   }
 
   Future<void> sendLogToSlack(String message) async {
     final type = kDebugMode ? 'test_log' : 'log';
-    // await sendLog('test_log', message);
-    await sendLog(type, message);
+    await _dispatchLog(type, message);
   }
 
   Future<void> sendBroadcastLogToSlack(String message) async {
     final type = kDebugMode ? 'test_service' : 'service';
-    // await sendLog('test_service', message);
-    await sendLog(type, message);
+    await _dispatchLog(type, message);
   }
 
   // 1) 객체 만드는 함수 LogState
@@ -197,6 +195,18 @@ ${slackLogTemplate.description}
       await sendBroadcastLogToSlack(message);
     }
   }
+
+  @override
+  Future<void> sendLog(String message) => sendLogToSlack(message);
+
+  @override
+  Future<void> sendErrorLog(String message) => sendErrorLogToSlack(message);
+
+  @override
+  Future<void> sendBroadcastLogWithKey(String key) => sendBroadcastLogToSlackWithKey(key);
+
+  @override
+  Future<void> sendInspectionEndBroadcastLog(String key) => sendInspectionEndBroadcastLogToSlack(key);
 
   String buildSlackAlertMessage({
     required SlackLogTemplate slackLogTemplate,

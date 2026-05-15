@@ -1,11 +1,13 @@
 ﻿import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
+import 'package:flutter_snaptag_kiosk/data/datasources/local/id_writer_service_impl.dart';
 import 'package:flutter_snaptag_kiosk/data/datasources/remote/event_preview_remote_data_source_impl.dart';
 import 'package:flutter_snaptag_kiosk/data/datasources/remote/i_event_preview_remote_data_source.dart';
 import 'package:flutter_snaptag_kiosk/data/datasources/remote/i_payment_history_remote_data_source.dart';
 import 'package:flutter_snaptag_kiosk/data/datasources/remote/i_setup_remote_data_source.dart';
 import 'package:flutter_snaptag_kiosk/data/datasources/remote/payment_history_remote_data_source_impl.dart';
 import 'package:flutter_snaptag_kiosk/data/datasources/remote/setup_remote_data_source_impl.dart';
+import 'package:flutter_snaptag_kiosk/data/datasources/remote/slack_log_service.dart';
 import 'package:flutter_snaptag_kiosk/data/repositories/event_preview_repository_impl.dart';
 import 'package:flutter_snaptag_kiosk/data/repositories/payment_history_repository_impl.dart';
 import 'package:flutter_snaptag_kiosk/data/repositories/setup_repository_impl.dart';
@@ -33,12 +35,12 @@ ISetupRepository setupRepository(Ref ref) {
 
 @riverpod
 StartKioskEventUseCase startKioskEventUseCase(Ref ref) {
-  return StartKioskEventUseCase(ref);
+  return StartKioskEventUseCase(ref, SlackLogService(), const IdWriterServiceImpl());
 }
 
 @riverpod
 EndKioskApplicationUseCase endKioskApplicationUseCase(Ref ref) {
-  return EndKioskApplicationUseCase(ref);
+  return EndKioskApplicationUseCase(ref, SlackLogService());
 }
 
 @riverpod
@@ -73,5 +75,5 @@ IEventPreviewRepository eventPreviewRepository(Ref ref) {
 
 @riverpod
 RefreshEventPreviewUseCase refreshEventPreviewUseCase(Ref ref) {
-  return RefreshEventPreviewUseCase(ref, ref.watch(eventPreviewRepositoryProvider));
+  return RefreshEventPreviewUseCase(ref, ref.watch(eventPreviewRepositoryProvider), SlackLogService());
 }
