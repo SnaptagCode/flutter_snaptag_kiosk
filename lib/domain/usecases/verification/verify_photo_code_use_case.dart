@@ -1,4 +1,3 @@
-﻿import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_snaptag_kiosk/domain/usecase.dart';
 import 'package:flutter_snaptag_kiosk/domain/models/verification/back_photo_card.dart';
 import 'package:flutter_snaptag_kiosk/domain/repositories/i_verification_repository.dart';
@@ -15,14 +14,14 @@ class VerifyPhotoCodeUseCase implements UseCase<BackPhotoCard, VerifyPhotoCodePa
   VerifyPhotoCodeUseCase(this._repository);
 
   @override
-  Future<AsyncValue<BackPhotoCard>> call(VerifyPhotoCodeParams params) async {
+  Future<BackPhotoCard> call(VerifyPhotoCodeParams params) async {
     final result = await _repository.verifyCode(
       kioskEventId: params.kioskEventId,
       authCode: params.authCode,
     );
     return result.when(
-      success: (card) => AsyncValue.data(card),
-      failure: (failure) => AsyncValue.error(failure, StackTrace.current),
+      success: (card) => card,
+      failure: (failure) => throw failure,
     );
   }
 }

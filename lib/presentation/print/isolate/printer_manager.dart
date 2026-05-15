@@ -6,7 +6,8 @@ import 'dart:isolate';
 
 import 'package:ffi/ffi.dart'; // Utf8 사용을 위한 임포트
 import 'package:flutter/services.dart';
-import 'package:flutter_snaptag_kiosk/lib.dart';
+import 'package:flutter_snaptag_kiosk/core/core.dart';
+import 'package:flutter_snaptag_kiosk/data/data.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/isolate/model/check_card_position_message.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/isolate/model/check_feeder_message.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/isolate/model/connect_message.dart';

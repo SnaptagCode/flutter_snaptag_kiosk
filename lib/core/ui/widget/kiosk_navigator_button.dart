@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_snaptag_kiosk/core/ui/widget/home_button.dart';
 import 'package:flutter_snaptag_kiosk/core/ui/widget/language_switcher.dart';
+import 'package:flutter_snaptag_kiosk/presentation/routers/routers.dart';
 import 'package:go_router/go_router.dart';
 
 class KioskNavigatorButton extends ConsumerWidget {

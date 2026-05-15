@@ -33,7 +33,7 @@ class EventPreviewNotifier extends _$EventPreviewNotifier {
     try {
       final deviceUUID = await ref.read(deviceUuidProvider.future);
       await ref.read(kioskInfoServiceProvider.notifier).refreshWithMachineId(machineId);
-      await _refreshUseCase.execute(machineId: machineId, deviceUUID: deviceUUID);
+      await _refreshUseCase.call(machineId: machineId, deviceUUID: deviceUUID);
       state = const EventPreviewState.refreshSuccess();
     } catch (e) {
       state = EventPreviewState.failure(e);

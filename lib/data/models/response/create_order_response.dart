@@ -1,3 +1,4 @@
+import 'package:flutter_snaptag_kiosk/domain/models/order/order_creation_result.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../enums/enums.dart';
@@ -18,4 +19,15 @@ class CreateOrderResponse with _$CreateOrderResponse {
   }) = _CreateOrderResponse;
 
   factory CreateOrderResponse.fromJson(Map<String, dynamic> json) => _$CreateOrderResponseFromJson(json);
+}
+
+extension CreateOrderResponseMapper on CreateOrderResponse {
+  OrderCreationResult toDomain() => OrderCreationResult(
+        orderId: orderId,
+        kioskEventId: kioskEventId,
+        kioskMachineId: kioskMachineId,
+        backPhotoCardId: backPhotoCardId,
+        amount: amount,
+        status: status,
+      );
 }

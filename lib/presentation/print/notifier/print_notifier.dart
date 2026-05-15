@@ -1,6 +1,12 @@
-﻿import 'package:flutter_snaptag_kiosk/lib.dart';
+import 'package:flutter_snaptag_kiosk/core/core.dart';
+import 'package:flutter_snaptag_kiosk/domain/domain.dart';
+import 'package:flutter_snaptag_kiosk/presentation/core/back_photo_session_notifier.dart';
+import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
+import 'package:flutter_snaptag_kiosk/presentation/payment/notifier/create_order_info_notifier.dart';
+import 'package:flutter_snaptag_kiosk/presentation/payment/notifier/payment_response_notifier.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/di/print_di.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/notifier/print_state.dart';
+import 'package:flutter_snaptag_kiosk/presentation/setup/main/notifiers/page_print_notifier.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'print_notifier.g.dart';
@@ -19,11 +25,30 @@ class PrintNotifier extends _$PrintNotifier {
   Future<void> _startPrint() async {
     state = const PrintState.loading();
     try {
-      await _printCardUseCase.call();
+      final params = _buildParams();
+      await _printCardUseCase.call(params);
       state = const PrintState.success();
     } catch (e, stack) {
       logger.e('PrintNotifier failure', error: e, stackTrace: stack);
       state = PrintState.failure(e, stack);
     }
+  }
+
+  PrintCardParams _buildParams() {
+    final backPhotoCard = ref.read(backPhotoSessionProvider).value;
+    final approvalInfo = ref.read(paymentResponseStateProvider);
+    final kioskInfo = ref.read(kioskInfoServiceProvider);
+
+    if (backPhotoCard == null) throw Exception('No back photo card response info available');
+    if (approvalInfo == null) throw Exception('No payment approval info available');
+
+    return PrintCardParams(
+      backPhotoCardId: backPhotoCard.backPhotoCardId,
+      kioskOrderId: ref.read(createOrderInfoProvider)?.orderId ?? 0,
+      kioskMachineId: kioskInfo?.kioskMachineId ?? 0,
+      kioskEventId: kioskInfo?.kioskEventId ?? 0,
+      kioskMachineName: kioskInfo?.kioskMachineName ?? '',
+      isSingleMode: ref.read(pagePrintProvider) == PagePrintType.single,
+    );
   }
 }

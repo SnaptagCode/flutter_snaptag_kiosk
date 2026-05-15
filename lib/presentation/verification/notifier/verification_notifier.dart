@@ -1,4 +1,4 @@
-﻿import 'package:flutter_snaptag_kiosk/domain/models/verification/verification_failure.dart';
+import 'package:flutter_snaptag_kiosk/domain/models/verification/verification_failure.dart';
 import 'package:flutter_snaptag_kiosk/presentation/core/back_photo_session_notifier.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
 import 'package:flutter_snaptag_kiosk/domain/usecases/verification/verify_photo_code_use_case.dart';
@@ -42,22 +42,15 @@ class VerificationNotifier extends _$VerificationNotifier {
     state = const VerificationState.loading();
 
     try {
-      final result = await _verifyPhotoCodeUseCase(
+      final card = await _verifyPhotoCodeUseCase(
         VerifyPhotoCodeParams(kioskEventId: kioskEventId, authCode: code),
       );
-
-      state = result.when(
-        data: (card) {
-          ref.read(backPhotoSessionProvider.notifier).updateState(card);
-          return VerificationState.success(card);
-        },
-        error: (e, _) => VerificationState.failure(
-          e is VerificationFailure ? e : VerificationFailureUnknown(e.toString()),
-        ),
-        loading: () => const VerificationState.loading(),
-      );
+      ref.read(backPhotoSessionProvider.notifier).updateState(card);
+      state = VerificationState.success(card);
     } catch (e) {
-      state = VerificationState.failure(VerificationFailureUnknown(e.toString()));
+      state = VerificationState.failure(
+        e is VerificationFailure ? e : VerificationFailureUnknown(e.toString()),
+      );
     }
   }
 

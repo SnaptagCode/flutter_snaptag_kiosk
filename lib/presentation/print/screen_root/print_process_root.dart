@@ -1,4 +1,4 @@
-﻿import 'dart:io';
+import 'dart:io';
 import 'dart:math';
 
 import 'package:easy_localization/easy_localization.dart';
@@ -6,18 +6,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_snaptag_kiosk/core/providers/version_notifier.dart';
 import 'package:flutter_snaptag_kiosk/core/ui/widget/dialog_helper.dart';
-import 'package:flutter_snaptag_kiosk/lib.dart';
+import 'package:flutter_snaptag_kiosk/core/core.dart';
+import 'package:flutter_snaptag_kiosk/data/data.dart';
+import 'package:flutter_snaptag_kiosk/domain/domain.dart';
+import 'package:flutter_snaptag_kiosk/locale_keys.dart';
 import 'package:flutter_snaptag_kiosk/presentation/core/card_count_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
 import 'package:flutter_snaptag_kiosk/domain/usecases/payment/refund_payment_use_case.dart';
 import 'package:flutter_snaptag_kiosk/presentation/core/back_photo_session_notifier.dart';
 import 'package:flutter_snaptag_kiosk/presentation/payment/notifier/create_order_info_notifier.dart';
 import 'package:flutter_snaptag_kiosk/presentation/payment/notifier/payment_response_notifier.dart';
+import 'package:flutter_snaptag_kiosk/presentation/core/slack_log_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/payment/di/payment_di.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/card_printer.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/notifier/print_notifier.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/notifier/print_state.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/screen/print_process_screen.dart';
+import 'package:flutter_snaptag_kiosk/presentation/routers/routers.dart';
 import 'package:flutter_snaptag_kiosk/presentation/setup/main/notifiers/page_print_notifier.dart';
 
 class PrintProcessRoot extends ConsumerStatefulWidget {
@@ -147,13 +152,13 @@ class _PrintProcessRootState extends ConsumerState<PrintProcessRoot> with Single
 
           final cleanedError = error.toString().replaceFirst('Exception: ', '').trim();
           if (cleanedError.contains('Card feeder is empty')) {
-            SlackLogService().sendBroadcastLogToSlackWithKey(ErrorKey.printerCardEmpty.key);
+            ref.read(slackLogServiceProvider).sendBroadcastLogWithKey(ErrorKey.printerCardEmpty.key);
           } else if (cleanedError.contains('Failed to eject card')) {
-            SlackLogService().sendBroadcastLogToSlackWithKey(ErrorKey.printerEjectFail.key);
+            ref.read(slackLogServiceProvider).sendBroadcastLogWithKey(ErrorKey.printerEjectFail.key);
           } else if (cleanedError.contains('Printer is not ready')) {
-            SlackLogService().sendBroadcastLogToSlackWithKey(ErrorKey.printerReadyFail.key);
+            ref.read(slackLogServiceProvider).sendBroadcastLogWithKey(ErrorKey.printerReadyFail.key);
           } else {
-            SlackLogService().sendBroadcastLogToSlackWithKey(ErrorKey.printerPrintFail.key);
+            ref.read(slackLogServiceProvider).sendBroadcastLogWithKey(ErrorKey.printerPrintFail.key);
           }
 
           _errorLogging(error.toString(), stackTrace);
@@ -215,17 +220,17 @@ class _PrintProcessRootState extends ConsumerState<PrintProcessRoot> with Single
 
     if (ref.read(cardCountProvider).currentCount < 1) {
       ref.read(pagePrintProvider.notifier).set(PagePrintType.double);
-      SlackLogService().sendLogToSlack('*[MachineId : $machineId]*, change pagePrintType double');
+      ref.read(slackLogServiceProvider).sendLog('*[MachineId : $machineId]*, change pagePrintType double');
     } else {
       ref.read(pagePrintProvider.notifier).set(PagePrintType.single);
-      SlackLogService().sendLogToSlack('*[MachineId : $machineId]*, change pagePrintType single');
+      ref.read(slackLogServiceProvider).sendLog('*[MachineId : $machineId]*, change pagePrintType single');
     }
   }
 
   void _errorLogging(String error, StackTrace stack) {
     logger.e('Print process error', error: error, stackTrace: stack);
     final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
-    SlackLogService().sendErrorLogToSlack('*[MachineId : $machineId]*, Print process error\nError: $error');
+    ref.read(slackLogServiceProvider).sendErrorLog('*[MachineId : $machineId]*, Print process error\nError: $error');
   }
 
   Future<void> _refund() async {
@@ -254,7 +259,7 @@ class _PrintProcessRootState extends ConsumerState<PrintProcessRoot> with Single
         await ref.read(cardCountProvider.notifier).increase();
       }
     } catch (e) {
-      SlackLogService().sendErrorLogToSlack('*[MachineId : $machineId]*, 환불 처리 중 오류 발생: $e');
+      ref.read(slackLogServiceProvider).sendErrorLog('*[MachineId : $machineId]*, 환불 처리 중 오류 발생: $e');
       logger.e('환불 처리 중 오류 발생', error: e);
     }
   }
@@ -274,7 +279,7 @@ class _PrintProcessRootState extends ConsumerState<PrintProcessRoot> with Single
     final machineId = kioskInfo?.kioskMachineId ?? 0;
 
     if (userDir == null) {
-      SlackLogService().sendLogToSlack('machineId: $machineId 배너를 불러오기 위한 사용자 디렉토리를 불러올 수 없습니다.');
+      ref.read(slackLogServiceProvider).sendLog('machineId: $machineId 배너를 불러오기 위한 사용자 디렉토리를 불러올 수 없습니다.');
       return null;
     }
 
@@ -285,7 +290,7 @@ class _PrintProcessRootState extends ConsumerState<PrintProcessRoot> with Single
             : '$userDir\\Snaptag\\$version\\assets\\adImages\\ansan');
 
     if (!adImageFolder.existsSync()) {
-      SlackLogService().sendLogToSlack('machineId: $machineId 배너를 불러오기 위한 이미지 폴더가 존재하지 않습니다.');
+      ref.read(slackLogServiceProvider).sendLog('machineId: $machineId 배너를 불러오기 위한 이미지 폴더가 존재하지 않습니다.');
       return null;
     }
 
@@ -296,7 +301,7 @@ class _PrintProcessRootState extends ConsumerState<PrintProcessRoot> with Single
         .toList();
 
     if (imageFiles.isEmpty) {
-      SlackLogService().sendLogToSlack('machineId: $machineId 배너를 불러오기 위한 이미지 폴더내부에 이미지가 존재하지 않습니다.');
+      ref.read(slackLogServiceProvider).sendLog('machineId: $machineId 배너를 불러오기 위한 이미지 폴더내부에 이미지가 존재하지 않습니다.');
       return null;
     }
 

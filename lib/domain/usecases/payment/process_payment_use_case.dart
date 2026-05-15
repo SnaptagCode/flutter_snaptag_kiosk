@@ -1,9 +1,15 @@
+import 'package:flutter_snaptag_kiosk/core/core.dart';
 import 'package:flutter_snaptag_kiosk/domain/failures/payment_failure.dart';
+import 'package:flutter_snaptag_kiosk/domain/models/enums/payment_type.dart';
+import 'package:flutter_snaptag_kiosk/domain/models/order/create_order_params.dart';
+import 'package:flutter_snaptag_kiosk/domain/models/order/order_creation_result.dart';
+import 'package:flutter_snaptag_kiosk/domain/models/order/update_order_params.dart';
+import 'package:flutter_snaptag_kiosk/domain/models/payment/payment_result.dart';
 import 'package:flutter_snaptag_kiosk/domain/repositories/i_kiosk_repository.dart';
 import 'package:flutter_snaptag_kiosk/domain/services/i_slack_log_service.dart';
 import 'package:flutter_snaptag_kiosk/domain/services/order_update_service.dart';
+import 'package:flutter_snaptag_kiosk/domain/usecase.dart';
 import 'package:flutter_snaptag_kiosk/domain/usecases/payment/approve_payment_use_case.dart';
-import 'package:flutter_snaptag_kiosk/lib.dart';
 
 class ProcessPaymentParams {
   final int kioskEventId;
@@ -22,13 +28,13 @@ class ProcessPaymentParams {
 }
 
 class ProcessPaymentResult {
-  final CreateOrderResponse orderResponse;
-  final PaymentResponse paymentResponse;
+  final OrderCreationResult orderResponse;
+  final PaymentResult paymentResponse;
 
   const ProcessPaymentResult({required this.orderResponse, required this.paymentResponse});
 }
 
-class ProcessPaymentUseCase {
+class ProcessPaymentUseCase implements UseCase<ProcessPaymentResult, ProcessPaymentParams> {
   final IKioskRepository _repository;
   final ApprovePaymentUseCase _approvePayment;
   final OrderUpdateService _orderUpdate;
@@ -36,6 +42,7 @@ class ProcessPaymentUseCase {
 
   const ProcessPaymentUseCase(this._repository, this._approvePayment, this._orderUpdate, this._slackLog);
 
+  @override
   Future<ProcessPaymentResult> call(ProcessPaymentParams params) async {
     final orderResponse = await _createOrder(params)
         .catchError((e) => throw OrderCreationException('Create order fail: $e'));
@@ -45,7 +52,6 @@ class ProcessPaymentUseCase {
       final paymentResponse = await _approvePayment.call(totalAmount: params.photoCardPrice);
       _slackLog.sendLog('paymentResponse : $paymentResponse');
       await _handlePaymentResult(params, orderId, paymentResponse);
-      // _handlePaymentResult 가 throw 없이 반환 = 결제 성공
       return ProcessPaymentResult(orderResponse: orderResponse, paymentResponse: paymentResponse);
     } catch (e) {
       if (e is PaymentRefundableException || e is PaymentFailedException) rethrow;
@@ -67,22 +73,21 @@ class ProcessPaymentUseCase {
     }
   }
 
-  Future<CreateOrderResponse> _createOrder(ProcessPaymentParams params) async {
-    final request = CreateOrderRequest(
+  Future<OrderCreationResult> _createOrder(ProcessPaymentParams params) async {
+    return await _repository.createOrderStatus(CreateOrderParams(
       kioskEventId: params.kioskEventId,
       kioskMachineId: params.kioskMachineId,
       photoAuthNumber: params.photoAuthNumber,
       amount: params.photoCardPrice,
       paymentType: PaymentType.card,
       isSingleSided: params.isSingleSided,
-    );
-    return await _repository.createOrderStatus(request);
+    ));
   }
 
   Future<void> _handlePaymentResult(
     ProcessPaymentParams params,
     int orderId,
-    PaymentResponse paymentResponse,
+    PaymentResult paymentResponse,
   ) async {
     final approvalNo = paymentResponse.approvalNo ?? '';
     if (approvalNo.trim().isEmpty && paymentResponse.res == '0000') {
@@ -95,7 +100,7 @@ class ProcessPaymentUseCase {
   Future<void> _handleEmptyApprovalNumber(
     ProcessPaymentParams params,
     int orderId,
-    PaymentResponse paymentResponse,
+    PaymentResult paymentResponse,
   ) async {
     final description = _formatPaymentMessages(paymentResponse);
     await _orderUpdate.updateOrder(UpdateOrderParams(
@@ -119,7 +124,7 @@ class ProcessPaymentUseCase {
   Future<void> _handlePaymentResponse(
     ProcessPaymentParams params,
     int orderId,
-    PaymentResponse paymentResponse,
+    PaymentResult paymentResponse,
   ) async {
     switch (paymentResponse.res) {
       case '0000':
@@ -157,9 +162,9 @@ class ProcessPaymentUseCase {
   Future<void> _handleSuccessfulPayment(
     ProcessPaymentParams params,
     int orderId,
-    PaymentResponse paymentResponse,
+    PaymentResult paymentResponse,
   ) async {
-    final response = await _orderUpdate.updateOrder(UpdateOrderParams(
+    await _orderUpdate.updateOrder(UpdateOrderParams(
       kioskEventId: params.kioskEventId,
       kioskMachineId: params.kioskMachineId,
       photoCardPrice: params.photoCardPrice,
@@ -168,13 +173,13 @@ class ProcessPaymentUseCase {
       orderId: orderId,
       isRefund: false,
     ));
-    _slackLog.sendLog('paymentResponse0000 : $response');
+    _slackLog.sendLog('payment 0000 success: orderId=$orderId');
   }
 
   Future<void> _handleFailedPayment(
     ProcessPaymentParams params,
     int orderId,
-    PaymentResponse paymentResponse,
+    PaymentResult paymentResponse,
     String description,
   ) async {
     await _orderUpdate.updateOrder(UpdateOrderParams(
@@ -189,7 +194,7 @@ class ProcessPaymentUseCase {
     ));
   }
 
-  String _formatPaymentMessages(PaymentResponse paymentResponse) {
+  String _formatPaymentMessages(PaymentResult paymentResponse) {
     final message1 = paymentResponse.message1?.trim();
     final message2 = paymentResponse.message2?.trim();
 

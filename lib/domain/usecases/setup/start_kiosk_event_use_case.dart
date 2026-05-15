@@ -3,7 +3,7 @@ import 'package:flutter_snaptag_kiosk/domain/repositories/i_setup_repository.dar
 import 'package:flutter_snaptag_kiosk/domain/services/i_id_writer_service.dart';
 import 'package:flutter_snaptag_kiosk/domain/services/i_slack_log_service.dart';
 import 'package:flutter_snaptag_kiosk/domain/usecases/payment/check_payment_device_use_case.dart';
-import 'package:flutter_snaptag_kiosk/presentation/setup/main/notifiers/page_print_notifier.dart'; // TODO: PagePrintType → domain/models 이동 후 경로 업데이트
+import 'package:flutter_snaptag_kiosk/domain/models/page_print_type.dart';
 
 sealed class StartEventValidationResult {
   const StartEventValidationResult();

@@ -4,7 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_snaptag_kiosk/core/ui/widget/front_images_action.dart';
 import 'package:flutter_snaptag_kiosk/core/ui/widget/labcurity_image_test.dart';
 import 'package:flutter_snaptag_kiosk/core/ui/widget/pager_print_type_toggle.dart';
-import 'package:flutter_snaptag_kiosk/lib.dart';
+import 'package:flutter_snaptag_kiosk/core/core.dart';
 import 'package:flutter_snaptag_kiosk/presentation/test/payment_test_widget.dart';
 import 'package:flutter_snaptag_kiosk/presentation/test/print_test_widget.dart';
 import 'package:flutter_svg/svg.dart';

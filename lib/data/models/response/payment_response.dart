@@ -1,6 +1,7 @@
 import 'dart:convert';
 
-import 'package:flutter_snaptag_kiosk/lib.dart';
+import 'package:flutter_snaptag_kiosk/data/models/enums/order_status.dart';
+import 'package:flutter_snaptag_kiosk/domain/models/payment/payment_result.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'payment_response.freezed.dart';
@@ -30,6 +31,19 @@ class PaymentResponse with _$PaymentResponse {
   }) = _PaymentResponse;
 
   factory PaymentResponse.fromJson(Map<String, dynamic> json) => _$PaymentResponseFromJson(json);
+}
+
+extension PaymentResponseMapper on PaymentResponse {
+  PaymentResult toDomain() => PaymentResult(
+        approvalNo: approvalNo,
+        res: res,
+        respCode: respCode,
+        message1: message1,
+        message2: message2,
+        telegramFlag: telegramFlag,
+        tradeTime: tradeTime,
+        ksnet: ksnet,
+      );
 }
 
 extension PaymentResponseExtension on PaymentResponse {

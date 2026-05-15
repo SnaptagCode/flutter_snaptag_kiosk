@@ -1,9 +1,7 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 abstract class UseCase<T, P> {
-  Future<AsyncValue<T>> call(P params);
+  Future<T> call(P params);
 }
 
 abstract class NoParamsUseCase<T> {
-  Future<AsyncValue<T>> call();
+  Future<T> call();
 }

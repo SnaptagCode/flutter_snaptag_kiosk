@@ -1,15 +1,2 @@
 export 'app.dart';
-export 'core/core.dart';
-export 'data/data.dart';
-export 'domain/domain.dart';
 export 'flavors.dart';
-export 'locale_keys.dart';
-export 'main.dart';
-export 'presentation/core/core.dart';
-export 'presentation/home/home.dart';
-export 'presentation/kiosk_shell/kiosk_shell.dart';
-export 'presentation/payment/payment.dart';
-export 'presentation/print/print.dart';
-export 'presentation/routers/routers.dart';
-export 'presentation/setup/setup.dart';
-export 'presentation/verification/verification.dart';

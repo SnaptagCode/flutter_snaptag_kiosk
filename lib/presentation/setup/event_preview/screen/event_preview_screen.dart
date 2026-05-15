@@ -1,6 +1,7 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_snaptag_kiosk/lib.dart';
+import 'package:flutter_snaptag_kiosk/core/core.dart';
+import 'package:flutter_snaptag_kiosk/flavors.dart';
 import 'package:flutter_snaptag_kiosk/core/ui/widget/kiosk_info_widget.dart';
 import 'package:flutter_snaptag_kiosk/presentation/setup/event_preview/notifier/event_preview_action.dart';
 import 'package:flutter_snaptag_kiosk/presentation/setup/event_preview/screen/event_preview_screen_state.dart';

@@ -1,6 +1,8 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_snaptag_kiosk/lib.dart';
+import 'package:flutter_snaptag_kiosk/data/data.dart';
+import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
+import 'package:flutter_snaptag_kiosk/presentation/payment/di/payment_di.dart';
 import 'package:flutter_snaptag_kiosk/presentation/payment/notifier/payment_response_notifier.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -26,7 +28,10 @@ class PaymentTestWidget extends ConsumerWidget {
         throw Exception('금액을 입력해주세요');
       }
 
+      final kioskInfo = ref.read(kioskInfoServiceProvider);
       final response = await ref.read(paymentRepositoryProvider).approve(
+            kioskMachineId: kioskInfo?.kioskMachineId,
+            cardTerminalId: kioskInfo?.cardTerminalId,
             totalAmount: int.parse(amount),
           );
 
@@ -62,7 +67,10 @@ class PaymentTestWidget extends ConsumerWidget {
         throw Exception('승인번호와 승인일자를 입력해주세요');
       }
 
+      final kioskInfo = ref.read(kioskInfoServiceProvider);
       final response = await ref.read(paymentRepositoryProvider).cancel(
+            kioskMachineId: kioskInfo?.kioskMachineId,
+            cardTerminalId: kioskInfo?.cardTerminalId,
             totalAmount: int.parse(amount),
             originalApprovalNo: approvalNo,
             originalApprovalDate: approvalDate,

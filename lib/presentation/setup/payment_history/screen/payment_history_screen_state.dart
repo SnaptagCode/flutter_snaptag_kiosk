@@ -1,7 +1,7 @@
-import 'package:flutter_snaptag_kiosk/lib.dart';
+import 'package:flutter_snaptag_kiosk/domain/models/order/order_list_result.dart';
 
 class PaymentHistoryScreenState {
-  final OrderListResponse? orders;
+  final OrderListResult? orders;
   final bool hasLoadError;
 
   const PaymentHistoryScreenState({

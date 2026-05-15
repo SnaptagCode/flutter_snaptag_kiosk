@@ -1,4 +1,4 @@
-import 'package:flutter_snaptag_kiosk/lib.dart';
+import 'package:flutter_snaptag_kiosk/data/models/models.dart';
 
 abstract interface class IPaymentHistoryRemoteDataSource {
   Future<OrderListResponse> getOrders({

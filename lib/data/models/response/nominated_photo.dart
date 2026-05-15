@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter_snaptag_kiosk/domain/models/photo/front_photo.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'nominated_photo.freezed.dart';
@@ -33,6 +34,10 @@ class NominatedPhoto with _$NominatedPhoto {
 
 // '{id}_{code}_{embeddingProductId}_{selectedWeight}_{isWin}.확장자' 형식
 // - isWin 은 true 일 때 1, false 일 때 0
+extension NominatedPhotoMapper on NominatedPhoto {
+  FrontPhoto toDomain() => FrontPhoto(id: id, embedImage: safeEmbedImage);
+}
+
 extension NominatedPhotoExt on NominatedPhoto {
   String get getFileName => '${id}_${code}_${embeddingProductId}_${selectionWeight}_${isWin ? 1 : 0}';
 }

@@ -1,6 +1,1 @@
-import 'package:json_annotation/json_annotation.dart';
-
-enum PaymentType {
-  @JsonValue('CARD')
-  card,
-}
+export 'package:flutter_snaptag_kiosk/domain/models/enums/payment_type.dart';

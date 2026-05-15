@@ -2,7 +2,7 @@ import 'dart:ffi';
 import 'dart:io';
 
 import 'package:ffi/ffi.dart';
-import 'package:flutter_snaptag_kiosk/lib.dart';
+import 'package:flutter_snaptag_kiosk/core/core.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/luca/state/printer_status.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/luca/state/ribbon_status.dart';
 

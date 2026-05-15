@@ -1,4 +1,5 @@
 export 'kiosk_repository.dart';
+export 'printer_repository_impl.dart';
 export 'version_repository.dart';
 export 'payment_repository_impl.dart';
 export 'verification_repository_impl.dart';

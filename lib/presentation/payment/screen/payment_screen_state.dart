@@ -1,5 +1,5 @@
-﻿import 'package:flutter_snaptag_kiosk/presentation/home/notifier/home_back_photo_type_notifier.dart';
-import 'package:flutter_snaptag_kiosk/lib.dart';
+import 'package:flutter_snaptag_kiosk/presentation/home/notifier/home_back_photo_type_notifier.dart';
+import 'package:flutter_snaptag_kiosk/data/data.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'payment_screen_state.freezed.dart';

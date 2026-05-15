@@ -3,10 +3,10 @@ import 'dart:typed_data';
 
 import 'package:dio/dio.dart' as dio show Dio, Options, ResponseType, Response;
 import 'package:easy_localization/easy_localization.dart';
-import 'package:flutter_snaptag_kiosk/lib.dart';
+import 'package:flutter_snaptag_kiosk/core/core.dart';
 import 'package:path/path.dart' as path;
 
-class ImageHelper {
+class ImageHelper implements IImageConverter {
   static final ImageHelper instance = ImageHelper._internel();
 
   ImageHelper._internel();
@@ -62,6 +62,7 @@ class ImageHelper {
     }
   }
 
+  @override
   Future<File> convertImageUrlToFile(String imageUrl) async {
     try {
       final imageDioResponse = await getImageBytes(imageUrl);

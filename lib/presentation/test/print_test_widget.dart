@@ -8,7 +8,6 @@ import 'package:flutter_snaptag_kiosk/presentation/print/card_printer.dart';
 import 'package:flutter_snaptag_kiosk/presentation/setup/front_photo_list.dart';
 import 'package:flutter_snaptag_kiosk/presentation/setup/main/notifiers/page_print_notifier.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:flutter_snaptag_kiosk/lib.dart';
 
 part 'print_test_widget.g.dart';
 
@@ -23,7 +22,7 @@ class ProcessedImage extends _$ProcessedImage {
     // 1. 랜덤 이미지 선택
     final frontPhotoList = ref.read(frontPhotoListProvider.notifier);
     final randomPhoto = await frontPhotoList.getRandomPhoto();
-    state = (frontFile: randomPhoto.safeEmbedImage, backImage: state.backImage);
+    state = (frontFile: randomPhoto.embedImage, backImage: state.backImage);
   }
 
   Future<void> selectBackImage() async {

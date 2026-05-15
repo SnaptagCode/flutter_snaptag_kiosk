@@ -1,5 +1,6 @@
 ﻿import 'package:flutter_snaptag_kiosk/data/models/entities/order_entity.dart';
 import 'package:flutter_snaptag_kiosk/data/models/entities/paging_entity.dart';
+import 'package:flutter_snaptag_kiosk/domain/models/order/order_list_result.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'order_list_response.freezed.dart';
@@ -13,4 +14,16 @@ abstract class OrderListResponse with _$OrderListResponse {
   }) = _OrderListResponse;
 
   factory OrderListResponse.fromJson(Map<String, dynamic> json) => _$OrderListResponseFromJson(json);
+}
+
+extension OrderListResponseMapper on OrderListResponse {
+  OrderListResult toDomain() => OrderListResult(
+        list: list.map((e) => e.toDomain()).toList(),
+        paging: PagingInfo(
+          totalCount: paging.totalCount,
+          pageSize: paging.pageSize,
+          currentPage: paging.currentPage,
+          canNext: paging.canNext,
+        ),
+      );
 }

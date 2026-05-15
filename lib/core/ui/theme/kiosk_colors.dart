@@ -84,12 +84,12 @@ class KioskColors extends ThemeExtension<KioskColors> {
     Color? popupButtonColor,
   }) {
     return KioskColors(
-      progressBarStartColor: progressBarStartColor ?? this.progressBarStartColor,
-      progressBarEndColor: progressBarEndColor ?? this.progressBarEndColor,
+      progressBarStartColor: progressBarStartColor ?? progressBarStartColor,
+      progressBarEndColor: progressBarEndColor ?? progressBarEndColor,
       buttonColor: buttonColor ?? this.buttonColor,
       buttonTextColor: buttonTextColor ?? this.buttonTextColor,
       keypadButtonColor: keypadButtonColor ?? this.keypadButtonColor,
-      keypadTextColor: keypadTextColor ?? this.keypadTextColor,
+      keypadTextColor: keypadTextColor ?? keypadTextColor,
       couponTextColor: couponTextColor ?? this.couponTextColor,
       textColor: textColor ?? this.textColor,
       popupButtonColor: popupButtonColor ?? this.popupButtonColor,

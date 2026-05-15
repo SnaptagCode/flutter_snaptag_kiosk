@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_snaptag_kiosk/lib.dart';
+import 'package:flutter_snaptag_kiosk/core/core.dart';
 import 'package:flutter_snaptag_kiosk/core/ui/widget/dialog_helper.dart';
+import 'package:flutter_snaptag_kiosk/presentation/routers/routers.dart';
 
 class DialogTestWidget extends StatelessWidget {
   const DialogTestWidget({

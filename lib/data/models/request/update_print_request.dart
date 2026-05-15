@@ -1,4 +1,4 @@
-import 'package:flutter_snaptag_kiosk/lib.dart';
+import 'package:flutter_snaptag_kiosk/data/models/enums/printed_status.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'update_print_request.freezed.dart';

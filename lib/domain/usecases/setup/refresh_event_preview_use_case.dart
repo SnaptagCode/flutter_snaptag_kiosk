@@ -8,7 +8,7 @@ class RefreshEventPreviewUseCase {
 
   RefreshEventPreviewUseCase(this._repository, this._slackLog);
 
-  Future<void> execute({
+  Future<void> call({
     required int machineId,
     required String deviceUUID,
   }) async {

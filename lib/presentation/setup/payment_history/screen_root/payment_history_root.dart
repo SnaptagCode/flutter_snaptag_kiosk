@@ -1,11 +1,12 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_snaptag_kiosk/core/ui/widget/dialog_helper.dart';
-import 'package:flutter_snaptag_kiosk/lib.dart';
+import 'package:flutter_snaptag_kiosk/domain/models/order/order_list_result.dart';
 import 'package:flutter_snaptag_kiosk/presentation/setup/payment_history/notifier/payment_history_action.dart';
 import 'package:flutter_snaptag_kiosk/presentation/setup/payment_history/notifier/payment_history_notifier.dart';
 import 'package:flutter_snaptag_kiosk/presentation/setup/payment_history/notifier/payment_history_state.dart';
+import 'package:flutter_snaptag_kiosk/presentation/routers/routers.dart';
 import 'package:flutter_snaptag_kiosk/presentation/setup/payment_history/screen/payment_history_screen.dart';
 import 'package:flutter_snaptag_kiosk/presentation/setup/payment_history/screen/payment_history_screen_state.dart';
 import 'package:loader_overlay/loader_overlay.dart';
@@ -19,7 +20,7 @@ class PaymentHistoryRoot extends ConsumerStatefulWidget {
 
 class _PaymentHistoryRootState extends ConsumerState<PaymentHistoryRoot> {
   // 이전에 로드된 데이터를 유지해 loading 중에도 화면이 비지 않도록 함
-  OrderListResponse? _lastOrders;
+  OrderListResult? _lastOrders;
 
   @override
   Widget build(BuildContext context) {

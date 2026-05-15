@@ -1,6 +1,5 @@
-import 'dart:convert';
 
-import 'package:flutter_snaptag_kiosk/lib.dart';
+import 'package:flutter_snaptag_kiosk/domain/models/payment/device_check_result.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'kscat_device_response.freezed.dart';
@@ -24,4 +23,15 @@ class KscatDeviceResponse with _$KscatDeviceResponse {
   }) = _KscatDeviceResponse;
 
   factory KscatDeviceResponse.fromJson(Map<String, dynamic> json) => _$KscatDeviceResponseFromJson(json);
+}
+
+extension KscatDeviceResponseMapper on KscatDeviceResponse {
+  DeviceCheckResult toDomain() => DeviceCheckResult(
+        res: res,
+        errcode: errcode,
+        reader: reader,
+        serialno: serialno,
+        swversion: swversion,
+        keyyn: keyyn,
+      );
 }

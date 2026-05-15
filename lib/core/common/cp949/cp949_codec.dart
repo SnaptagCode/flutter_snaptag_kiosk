@@ -29,8 +29,10 @@ class CP949Codec extends Encoding {
   String get name => "euc-kr";
 
   /// cp949 charset needs only 2byte to represent a letter,
+  @override
   Uint8List encode(String source) => encoder.convert(source);
 
+  @override
   String decode(List<int> bytes, {bool? allowInvalid}) {
     Uint8List bytes8 = Uint8List.fromList(bytes);
 
@@ -51,10 +53,12 @@ class CP949Codec extends Encoding {
   /// 이 리턴값은 다트에서는 읽을 수 없습니다.
   String encodeToString(String codeUnits) => String.fromCharCodes(encoder.convert(codeUnits).buffer.asUint8List());
 
+  @override
   CP949Encoder get encoder => const CP949Encoder();
 
   /// Returns the decoder of this, converting from List<int> to String.
   /// It may be stateful and should not be reused.
+  @override
   CP949Decoder get decoder =>
       _allowInvalid ? const CP949Decoder(allowInvalid: true) : const CP949Decoder(allowInvalid: false);
 }

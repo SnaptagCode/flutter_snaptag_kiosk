@@ -1,15 +1,13 @@
-﻿// ffi 임포트 확인
-import 'dart:io';
+﻿import 'dart:io';
 
-// Utf8 사용을 위한 임포트
 import 'package:flutter_snaptag_kiosk/core/common/logger/logger_service.dart';
-import 'package:flutter_snaptag_kiosk/domain/services/i_printer_service.dart';
+import 'package:flutter_snaptag_kiosk/domain/domain.dart';
 import 'package:flutter_snaptag_kiosk/presentation/core/card_count_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/core/printer_log_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
 import 'package:flutter_snaptag_kiosk/presentation/core/slack_log_provider.dart';
 import 'package:flutter_snaptag_kiosk/data/repositories/kiosk_repository.dart';
-import 'package:flutter_snaptag_kiosk/presentation/print/isolate/printer_manager.dart';
+import 'package:flutter_snaptag_kiosk/presentation/print/di/print_di.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/luca/state/printer_log.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/luca/state/ribbon_status.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -23,10 +21,7 @@ class PrinterService extends _$PrinterService implements IPrinterService {
 
   Future<bool> connectedPrinter() async {
     try {
-      final printerManager = await PrinterManager.getInstance();
-      final isConnected = await printerManager.checkConnectedPrint();
-
-      return isConnected;
+      return await ref.read(printerRepositoryProvider).checkConnection();
     } catch (e) {
       return false;
     }
@@ -34,10 +29,7 @@ class PrinterService extends _$PrinterService implements IPrinterService {
 
   Future<bool> checkSettingPrinter() async {
     try {
-      final printerManager = await PrinterManager.getInstance();
-      final isSetting = await printerManager.checkSettingPrinter();
-
-      return isSetting;
+      return await ref.read(printerRepositoryProvider).checkSetting();
     } catch (e) {
       return false;
     }
@@ -45,9 +37,7 @@ class PrinterService extends _$PrinterService implements IPrinterService {
 
   Future<void> checkFeeder() async {
     try {
-      final printerManager = await PrinterManager.getInstance();
-      // await printerManager.initLibrary();
-      await printerManager.checkFeeder();
+      await ref.read(printerRepositoryProvider).checkFeeder();
     } catch (e) {
       rethrow;
     }
@@ -55,8 +45,7 @@ class PrinterService extends _$PrinterService implements IPrinterService {
 
   Future<RibbonStatus> getRibbonStatus() async {
     try {
-      final printerManager = await PrinterManager.getInstance();
-      return await printerManager.getRibbonStatus();
+      return await ref.read(printerRepositoryProvider).getRibbonStatus();
     } catch (e) {
       rethrow;
     }
@@ -64,9 +53,7 @@ class PrinterService extends _$PrinterService implements IPrinterService {
 
   Future<void> printerStateLog() async {
     try {
-      final printerManager = await PrinterManager.getInstance();
-
-      final printerLog = await printerManager.startLog();
+      final printerLog = await ref.read(printerRepositoryProvider).getStateLog();
 
       await _printerStateLog(printerLog);
     } catch (e) {
@@ -105,11 +92,14 @@ class PrinterService extends _$PrinterService implements IPrinterService {
   }) async {
     try {
       state = const AsyncValue.loading();
-      final printerManager = await PrinterManager.getInstance();
       final isMetal = ref.read(kioskInfoServiceProvider)?.isMetal == true ? true : false;
 
-      final printerLog = await printerManager.startPrint(
-          isSingleMode: isSingleMode, frontFile: frontFile, embeddedFile: embeddedFile, isMetal: isMetal);
+      final printerLog = await ref.read(printerRepositoryProvider).executePrint(
+            isSingleMode: isSingleMode,
+            frontFile: frontFile,
+            embeddedFile: embeddedFile,
+            isMetal: isMetal,
+          );
 
       await _updatePrintStatusAndCheckKioskAlive(printerLog);
       // 프린트 성공 시 상태를 완료로 변경

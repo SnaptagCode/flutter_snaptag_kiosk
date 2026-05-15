@@ -1,7 +1,9 @@
-﻿import 'package:flutter_snaptag_kiosk/lib.dart';
-import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
+import 'package:flutter_snaptag_kiosk/domain/models/order/get_orders_params.dart';
+import 'package:flutter_snaptag_kiosk/domain/models/order/order_data.dart';
+import 'package:flutter_snaptag_kiosk/domain/models/order/order_list_result.dart';
 import 'package:flutter_snaptag_kiosk/domain/usecases/setup/get_orders_use_case.dart';
 import 'package:flutter_snaptag_kiosk/domain/usecases/setup/refund_order_use_case.dart';
+import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
 import 'package:flutter_snaptag_kiosk/presentation/setup/di/setup_di.dart';
 import 'package:flutter_snaptag_kiosk/presentation/setup/payment_history/notifier/payment_history_action.dart';
 import 'package:flutter_snaptag_kiosk/presentation/setup/payment_history/notifier/payment_history_state.dart';
@@ -15,7 +17,7 @@ class PaymentHistoryNotifier extends _$PaymentHistoryNotifier {
   late final RefundOrderUseCase _refundOrderUseCase;
 
   int _currentPage = 1;
-  OrderEntity? _pendingRefundOrder;
+  OrderData? _pendingRefundOrder;
   static const int _pageSize = 15;
 
   @override
@@ -50,7 +52,7 @@ class PaymentHistoryNotifier extends _$PaymentHistoryNotifier {
     }
   }
 
-  OrderListResponse? get _currentOrders => switch (state) {
+  OrderListResult? get _currentOrders => switch (state) {
         PaymentHistoryStateLoaded(:final orders) => orders,
         PaymentHistoryStateAwaitingRefundConfirmation(:final orders) => orders,
         PaymentHistoryStateRefundSuccess(:final orders) => orders,
@@ -62,7 +64,7 @@ class PaymentHistoryNotifier extends _$PaymentHistoryNotifier {
     state = const PaymentHistoryState.loading();
     try {
       final kioskMachineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
-      final orders = await _getOrdersUseCase(GetOrdersRequest(
+      final orders = await _getOrdersUseCase(GetOrdersParams(
         pageSize: _pageSize,
         currentPage: page,
         kioskMachineId: kioskMachineId,
@@ -80,11 +82,11 @@ class PaymentHistoryNotifier extends _$PaymentHistoryNotifier {
     final orders = _currentOrders;
     state = const PaymentHistoryState.loading();
     try {
-      await _refundOrderUseCase.execute(
+      await _refundOrderUseCase.call(
         order,
         kioskEventId: ref.read(kioskInfoServiceProvider)?.kioskEventId ?? 0,
       );
-      final freshOrders = await _getOrdersUseCase(GetOrdersRequest(
+      final freshOrders = await _getOrdersUseCase(GetOrdersParams(
         pageSize: _pageSize,
         currentPage: _currentPage,
         kioskMachineId: ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0,

@@ -1,4 +1,4 @@
-import 'package:flutter_snaptag_kiosk/lib.dart';
+import 'package:flutter_snaptag_kiosk/data/data.dart';
 
 class EventPreviewScreenState {
   final KioskMachineInfo? info;

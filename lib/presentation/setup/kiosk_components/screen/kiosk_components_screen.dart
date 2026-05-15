@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_snaptag_kiosk/lib.dart';
+import 'package:flutter_snaptag_kiosk/core/core.dart';
 import 'package:flutter_snaptag_kiosk/core/ui/widget/dialog_test_widget.dart';
 import 'package:flutter_snaptag_kiosk/core/ui/widget/flavor_info_widget.dart';
 import 'package:flutter_snaptag_kiosk/core/ui/widget/kiosk_colors_widget.dart';

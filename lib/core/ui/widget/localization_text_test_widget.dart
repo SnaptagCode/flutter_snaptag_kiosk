@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_snaptag_kiosk/lib.dart';
+import 'package:flutter_snaptag_kiosk/core/core.dart';
+import 'package:flutter_snaptag_kiosk/locale_keys.dart';
 import 'package:flutter_snaptag_kiosk/core/ui/widget/language_switcher.dart';
 
 class LocalizationTextTestWidget extends StatelessWidget {

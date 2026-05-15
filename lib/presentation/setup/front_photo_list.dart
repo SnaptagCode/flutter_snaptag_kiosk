@@ -3,14 +3,17 @@ import 'dart:typed_data';
 
 import 'package:dio/dio.dart' as dio;
 import 'package:flutter_snaptag_kiosk/core/common/random/random_photo_util.dart';
-import 'package:flutter_snaptag_kiosk/lib.dart';
+import 'package:flutter_snaptag_kiosk/core/core.dart';
+import 'package:flutter_snaptag_kiosk/data/data.dart';
+import 'package:flutter_snaptag_kiosk/domain/domain.dart';
+import 'package:flutter_snaptag_kiosk/domain/models/photo/front_photo.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'front_photo_list.g.dart';
 
 @Riverpod(keepAlive: true)
-class FrontPhotoList extends _$FrontPhotoList {
+class FrontPhotoList extends _$FrontPhotoList implements IFrontPhotoService {
   @override
   List<NominatedPhoto> build() {
     return [];
@@ -37,7 +40,8 @@ class FrontPhotoList extends _$FrontPhotoList {
 
   int? _lastSelectedId;
 
-  Future<NominatedPhoto> getRandomPhoto() async {
+  @override
+  Future<FrontPhoto> getRandomPhoto() async {
     if (state.isEmpty) {
       throw Exception('No front images available');
     }
@@ -52,7 +56,7 @@ class FrontPhotoList extends _$FrontPhotoList {
 
       if (result != null) {
         _lastSelectedId = result.id;
-        return result;
+        return result.toDomain();
       }
 
       throw Exception('Invalid file name format: ${result?.embedImage?.path}');

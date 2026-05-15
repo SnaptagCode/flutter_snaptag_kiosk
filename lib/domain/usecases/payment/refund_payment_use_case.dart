@@ -1,7 +1,11 @@
+import 'package:flutter_snaptag_kiosk/core/core.dart';
+import 'package:flutter_snaptag_kiosk/domain/models/enums/order_status.dart';
+import 'package:flutter_snaptag_kiosk/domain/models/order/update_order_params.dart';
+import 'package:flutter_snaptag_kiosk/domain/models/payment/payment_result.dart';
 import 'package:flutter_snaptag_kiosk/domain/services/i_slack_log_service.dart';
 import 'package:flutter_snaptag_kiosk/domain/services/order_update_service.dart';
+import 'package:flutter_snaptag_kiosk/domain/usecase.dart';
 import 'package:flutter_snaptag_kiosk/domain/usecases/payment/cancel_payment_use_case.dart';
-import 'package:flutter_snaptag_kiosk/lib.dart';
 
 class RefundPaymentParams {
   final int orderId;
@@ -23,27 +27,25 @@ class RefundPaymentParams {
   });
 }
 
-class RefundPaymentUseCase {
+class RefundPaymentUseCase implements UseCase<void, RefundPaymentParams> {
   final CancelPaymentUseCase _cancelPayment;
   final OrderUpdateService _orderUpdate;
   final ISlackLogService _slackLog;
 
   const RefundPaymentUseCase(this._cancelPayment, this._orderUpdate, this._slackLog);
 
+  @override
   Future<void> call(RefundPaymentParams params) async {
-    if (params.approvalNo.trim().isEmpty) {
-      throw Exception('No approval number available');
-    }
+    if (params.approvalNo.trim().isEmpty) throw Exception('No approval number available');
 
-    PaymentResponse? cancelResponse;
+    PaymentResult? cancelResponse;
     try {
       cancelResponse = await _cancelPayment.call(
         totalAmount: params.photoCardPrice,
         originalApprovalNo: params.approvalNo,
         originalApprovalDate: params.tradeTime?.substring(0, 6) ?? '',
       );
-      logger.i(
-          'respCode: ${cancelResponse.respCode}\tORDER STATUS: ${cancelResponse.orderState}');
+      logger.i('respCode: ${cancelResponse.respCode}\tORDER STATUS: ${cancelResponse.orderState}');
     } catch (e) {
       logger.e('Refund failed', error: e);
       rethrow;
@@ -52,7 +54,7 @@ class RefundPaymentUseCase {
     }
   }
 
-  Future<void> _updateRefundOrder(RefundPaymentParams params, PaymentResponse? cancelResponse) async {
+  Future<void> _updateRefundOrder(RefundPaymentParams params, PaymentResult? cancelResponse) async {
     if (cancelResponse?.orderState == OrderStatus.refunded) {
       await _orderUpdate.updateOrder(UpdateOrderParams(
         kioskEventId: params.kioskEventId,

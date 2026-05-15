@@ -1,5 +1,6 @@
-import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_snaptag_kiosk/data/datasources/remote/i_payment_history_remote_data_source.dart';
+import 'package:flutter_snaptag_kiosk/data/datasources/remote/kiosk_api_client.dart';
+import 'package:flutter_snaptag_kiosk/data/models/models.dart';
 
 class PaymentHistoryRemoteDataSourceImpl implements IPaymentHistoryRemoteDataSource {
   final KioskApiClient _apiClient;

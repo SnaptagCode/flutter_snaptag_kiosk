@@ -1,8 +1,11 @@
-﻿import 'package:easy_localization/easy_localization.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_snaptag_kiosk/lib.dart';
+import 'package:flutter_snaptag_kiosk/core/core.dart';
 import 'package:flutter_snaptag_kiosk/core/ui/widget/general_error_widget.dart';
+import 'package:flutter_snaptag_kiosk/domain/models/enums/order_status.dart';
+import 'package:flutter_snaptag_kiosk/domain/models/enums/printed_status.dart';
+import 'package:flutter_snaptag_kiosk/domain/models/order/order_data.dart';
 import 'package:flutter_snaptag_kiosk/presentation/setup/payment_history/notifier/payment_history_action.dart';
 import 'package:flutter_snaptag_kiosk/presentation/setup/payment_history/screen/payment_history_screen_state.dart';
 import 'package:flutter_svg/svg.dart';
@@ -99,7 +102,7 @@ class PaymentHistoryScreen extends StatelessWidget {
         DataColumn(label: Text('결제 승인번호'), headingRowAlignment: MainAxisAlignment.center),
       ];
 
-  DataRow _buildRow(BuildContext context, OrderEntity order) {
+  DataRow _buildRow(BuildContext context, OrderData order) {
     return DataRow(
       color: WidgetStateColor.resolveWith((_) => Colors.white),
       cells: [
@@ -142,7 +145,7 @@ class PaymentHistoryScreen extends StatelessWidget {
         _ => '결제 완료',
       };
 
-  Widget _refundCell(BuildContext context, OrderEntity order) {
+  Widget _refundCell(BuildContext context, OrderData order) {
     switch (order.orderStatus) {
       case OrderStatus.pending:
       case OrderStatus.failed:

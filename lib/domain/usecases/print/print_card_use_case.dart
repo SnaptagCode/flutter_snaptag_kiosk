@@ -1,124 +1,142 @@
 import 'dart:io';
 
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_snaptag_kiosk/lib.dart';
-import 'package:flutter_snaptag_kiosk/presentation/core/back_photo_session_notifier.dart';
-import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
-import 'package:flutter_snaptag_kiosk/presentation/print/card_printer.dart';
-import 'package:flutter_snaptag_kiosk/presentation/setup/front_photo_list.dart';
-import 'package:flutter_snaptag_kiosk/presentation/setup/main/notifiers/page_print_notifier.dart';
+import 'package:flutter_snaptag_kiosk/core/core.dart';
+import 'package:flutter_snaptag_kiosk/domain/models/enums/printed_status.dart';
+import 'package:flutter_snaptag_kiosk/domain/models/print/create_print_params.dart';
+import 'package:flutter_snaptag_kiosk/domain/models/print/update_print_params.dart';
+import 'package:flutter_snaptag_kiosk/domain/repositories/i_kiosk_print_repository.dart';
+import 'package:flutter_snaptag_kiosk/domain/services/i_front_photo_service.dart';
+import 'package:flutter_snaptag_kiosk/domain/services/i_printer_service.dart';
+import 'package:flutter_snaptag_kiosk/domain/services/i_slack_log_service.dart';
+import 'package:flutter_snaptag_kiosk/domain/usecase.dart';
 
-class PrintCardUseCase {
-  PrintCardUseCase(this._ref);
-  final Ref _ref;
+class PrintCardParams {
+  final int backPhotoCardId;
+  final int kioskOrderId;
+  final int kioskMachineId;
+  final int kioskEventId;
+  final String kioskMachineName;
+  final bool isSingleMode;
 
-  Future<void> call() async {
+  const PrintCardParams({
+    required this.backPhotoCardId,
+    required this.kioskOrderId,
+    required this.kioskMachineId,
+    required this.kioskEventId,
+    required this.kioskMachineName,
+    required this.isSingleMode,
+  });
+}
+
+class PrintCardUseCase implements UseCase<void, PrintCardParams> {
+  final IFrontPhotoService _frontPhotoService;
+  final IPrinterService _printerService;
+  final IKioskPrintRepository _printRepository;
+  final ISlackLogService _slackLog;
+  final IImageConverter _imageConverter;
+
+  PrintCardUseCase({
+    required IFrontPhotoService frontPhotoService,
+    required IPrinterService printerService,
+    required IKioskPrintRepository printRepository,
+    required ISlackLogService slackLog,
+    required IImageConverter imageConverter,
+  })  : _frontPhotoService = frontPhotoService,
+        _printerService = printerService,
+        _printRepository = printRepository,
+        _slackLog = slackLog,
+        _imageConverter = imageConverter;
+
+  @override
+  Future<void> call(PrintCardParams params) async {
     try {
-      await _handlePrintProcess();
+      await _handlePrintProcess(params);
     } catch (e, stack) {
       logger.e('PrintCardUseCase failure', error: e, stackTrace: stack);
       rethrow;
     }
   }
 
-  Future<void> _handlePrintProcess() async {
-    _validatePrintRequirements();
-
-    final frontPhotoInfo = await _prepareFrontPhoto();
+  Future<void> _handlePrintProcess(PrintCardParams params) async {
+    final frontPhotoInfo = await _frontPhotoService.getRandomPhoto();
 
     final printJobInfo = await _createPrintJobWithEmbeddingBackImage(
+      params: params,
       frontPhotoCardId: frontPhotoInfo.id,
-      backPhotoCardId: _ref.read(backPhotoSessionProvider).value?.backPhotoCardId ?? 0,
     );
 
     await _executePrintJob(
-      printJobInfo.printedPhotoCardId,
-      frontPhotoInfo.safeEmbedImage,
-      printJobInfo.backPhotoFile,
+      params: params,
+      printedPhotoCardId: printJobInfo.printedPhotoCardId,
+      frontPhoto: frontPhotoInfo.embedImage,
+      embedded: printJobInfo.backPhotoFile,
     );
   }
 
-  Future<void> _executePrintJob(int printedPhotoCardId, File frontPhoto, File embedded) async {
+  Future<void> _executePrintJob({
+    required PrintCardParams params,
+    required int printedPhotoCardId,
+    required File frontPhoto,
+    required File embedded,
+  }) async {
     try {
-      await _updatePrintStatus(printedPhotoCardId, PrintedStatus.started);
+      await _updatePrintStatus(params, printedPhotoCardId, PrintedStatus.started);
 
-      final isSingleSidedMode = _ref.read(pagePrintProvider) == PagePrintType.single;
-      if (isSingleSidedMode) {
-        await _executePrint(frontPhoto: null, embedded: embedded);
+      if (params.isSingleMode) {
+        await _executePrint(frontPhoto: null, embedded: embedded, isSingleMode: true);
       } else {
-        await _executePrint(frontPhoto: frontPhoto, embedded: embedded);
+        await _executePrint(frontPhoto: frontPhoto, embedded: embedded, isSingleMode: false);
       }
 
-      await _updatePrintStatus(printedPhotoCardId, PrintedStatus.completed);
+      await _updatePrintStatus(params, printedPhotoCardId, PrintedStatus.completed);
     } catch (e, stack) {
       logger.e('PrintCardUseCase._executePrintJob failure', error: e, stackTrace: stack);
-      await _updatePrintStatus(printedPhotoCardId, PrintedStatus.failed);
+      await _updatePrintStatus(params, printedPhotoCardId, PrintedStatus.failed);
       rethrow;
     }
-  }
-
-  Future<NominatedPhoto> _prepareFrontPhoto() async {
-    final frontPhotoList = _ref.read(frontPhotoListProvider.notifier);
-    return await frontPhotoList.getRandomPhoto();
-  }
-
-  void _validatePrintRequirements() {
-    final backPhotoCardResponseInfo = _ref.read(backPhotoSessionProvider).value;
-    final approvalInfo = _ref.read(paymentResponseStateProvider);
-
-    if (backPhotoCardResponseInfo == null) throw Exception('No back photo card response info available');
-    if (approvalInfo == null) throw Exception('No payment approval info available');
   }
 
   Future<({int printedPhotoCardId, File backPhotoFile})> _createPrintJobWithEmbeddingBackImage({
+    required PrintCardParams params,
     required int frontPhotoCardId,
-    required int backPhotoCardId,
   }) async {
-    try {
-      final kioskOrderId = _ref.read(createOrderInfoProvider)?.orderId ?? 0;
-      final request = CreatePrintRequest(
-        kioskMachineId: _ref.read(kioskInfoServiceProvider)!.kioskMachineId,
-        kioskEventId: _ref.read(kioskInfoServiceProvider)!.kioskEventId,
-        frontPhotoCardId: frontPhotoCardId,
-        backPhotoCardId: backPhotoCardId,
-        kioskOrderId: kioskOrderId,
-      );
+    final createParams = CreatePrintParams(
+      kioskMachineId: params.kioskMachineId,
+      kioskEventId: params.kioskEventId,
+      frontPhotoCardId: frontPhotoCardId,
+      backPhotoCardId: params.backPhotoCardId,
+      kioskOrderId: params.kioskOrderId,
+    );
 
-      final response = await _ref.read(kioskRepositoryProvider).createPrintStatus(request: request);
-      final backPhotoFile = await ImageHelper().convertImageUrlToFile(response.formattedImageUrl);
+    final response = await _printRepository.createPrintStatus(params: createParams);
+    final backPhotoFile = await _imageConverter.convertImageUrlToFile(response.formattedImageUrl);
 
-      return (printedPhotoCardId: response.printedPhotoCardId, backPhotoFile: backPhotoFile);
-    } catch (e) {
-      rethrow;
-    }
+    return (printedPhotoCardId: response.printedPhotoCardId, backPhotoFile: backPhotoFile);
   }
 
-  Future<void> _updatePrintStatus(int printedPhotoCardId, PrintedStatus status) async {
+  Future<void> _updatePrintStatus(PrintCardParams params, int printedPhotoCardId, PrintedStatus status) async {
     const maxRetries = 3;
     int attempt = 0;
 
     while (attempt < maxRetries) {
       try {
-        final request = UpdatePrintRequest(
-          kioskMachineId: _ref.read(kioskInfoServiceProvider)!.kioskMachineId,
-          kioskEventId: _ref.read(kioskInfoServiceProvider)!.kioskEventId,
+        final updateParams = UpdatePrintParams(
+          kioskMachineId: params.kioskMachineId,
+          kioskEventId: params.kioskEventId,
           status: status,
         );
 
-        await _ref.read(kioskRepositoryProvider).updatePrintStatus(
-              printedPhotoCardId: printedPhotoCardId,
-              request: request,
-            );
+        await _printRepository.updatePrintStatus(
+          printedPhotoCardId: printedPhotoCardId,
+          params: updateParams,
+        );
         return;
       } catch (e) {
         attempt++;
 
         if (attempt >= maxRetries) {
-          final kioskInfo = _ref.read(kioskInfoServiceProvider);
-          final machineId = kioskInfo?.kioskMachineId ?? 0;
-          final machineName = kioskInfo?.kioskMachineName ?? '';
-          SlackLogService().sendErrorLogToSlack(
-              '[MACHINE_NAME: $machineName (MACHINE_ID: $machineId)] PrintCardUseCase._updatePrintStatus failure after $maxRetries retries: $e');
+          _slackLog.sendErrorLog(
+              '[MACHINE_NAME: ${params.kioskMachineName} (MACHINE_ID: ${params.kioskMachineId})] PrintCardUseCase._updatePrintStatus failure after $maxRetries retries: $e');
           logger.e('PrintCardUseCase._updatePrintStatus failure', error: e);
           return;
         }
@@ -130,13 +148,14 @@ class PrintCardUseCase {
   Future<void> _executePrint({
     File? frontPhoto,
     required File embedded,
+    required bool isSingleMode,
   }) async {
     try {
-      await _ref.read(printerServiceProvider.notifier).printImage(
-            frontFile: frontPhoto,
-            embeddedFile: embedded,
-            isSingleMode: _ref.read(pagePrintProvider) == PagePrintType.single,
-          );
+      await _printerService.printImage(
+        frontFile: frontPhoto,
+        embeddedFile: embedded,
+        isSingleMode: isSingleMode,
+      );
     } catch (e) {
       rethrow;
     } finally {

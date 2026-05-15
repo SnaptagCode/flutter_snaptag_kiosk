@@ -1,5 +1,5 @@
 import 'package:dio/dio.dart';
-import 'package:flutter_snaptag_kiosk/lib.dart';
+import 'package:flutter_snaptag_kiosk/data/data.dart';
 
 class ServerException extends DioException {
   final ServerError serverError;

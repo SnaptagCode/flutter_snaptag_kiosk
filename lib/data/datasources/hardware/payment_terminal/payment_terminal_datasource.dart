@@ -1,13 +1,12 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:flutter_snaptag_kiosk/lib.dart';
-import 'package:flutter_snaptag_kiosk/data/datasources/remote/i_payment_datasource.dart';
+import 'package:flutter_snaptag_kiosk/core/core.dart';
+import 'package:flutter_snaptag_kiosk/data/datasources/hardware/payment_terminal/i_payment_terminal_datasource.dart';
+import 'package:flutter_snaptag_kiosk/data/models/models.dart';
 import 'package:http/http.dart' as http;
 
-class PaymentApiClient implements IPaymentDatasource {
-  PaymentApiClient();
-
+class PaymentTerminalDataSource implements IPaymentTerminalDatasource {
   static const int _defaultWebPort = 27098;
   static const String _configPath = r'C:\KSCAT\config.ini';
 
@@ -74,10 +73,7 @@ class PaymentApiClient implements IPaymentDatasource {
     );
 
     final body = response.body;
-    final broken = body.substring(
-      callback.length + 1,
-      body.length - 1,
-    );
+    final broken = body.substring(callback.length + 1, body.length - 1);
 
     final decode = cp949.decodeString(broken);
     final trim = trimValues(json.decode(decode));
@@ -98,10 +94,7 @@ class PaymentApiClient implements IPaymentDatasource {
     );
 
     final body = response.body;
-    final broken = body.substring(
-      callback.length + 1,
-      body.length - 1,
-    );
+    final broken = body.substring(callback.length + 1, body.length - 1);
 
     final decode = cp949.decodeString(broken);
     final trim = trimValues(json.decode(decode));

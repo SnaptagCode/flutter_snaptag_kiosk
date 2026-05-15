@@ -1,24 +1,11 @@
-﻿import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_snaptag_kiosk/lib.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_snaptag_kiosk/data/data.dart';
+import 'package:flutter_snaptag_kiosk/presentation/core/slack_log_provider.dart';
+import 'package:flutter_snaptag_kiosk/domain/domain.dart';
+import 'package:flutter_snaptag_kiosk/flavors.dart';
 import 'package:flutter_snaptag_kiosk/data/datasources/local/id_writer_service_impl.dart';
-import 'package:flutter_snaptag_kiosk/data/datasources/remote/event_preview_remote_data_source_impl.dart';
-import 'package:flutter_snaptag_kiosk/data/datasources/remote/i_event_preview_remote_data_source.dart';
-import 'package:flutter_snaptag_kiosk/data/datasources/remote/i_payment_history_remote_data_source.dart';
-import 'package:flutter_snaptag_kiosk/data/datasources/remote/i_setup_remote_data_source.dart';
-import 'package:flutter_snaptag_kiosk/data/datasources/remote/payment_history_remote_data_source_impl.dart';
-import 'package:flutter_snaptag_kiosk/data/datasources/remote/setup_remote_data_source_impl.dart';
-import 'package:flutter_snaptag_kiosk/data/datasources/remote/slack_log_service.dart';
-import 'package:flutter_snaptag_kiosk/data/repositories/event_preview_repository_impl.dart';
-import 'package:flutter_snaptag_kiosk/data/repositories/payment_history_repository_impl.dart';
-import 'package:flutter_snaptag_kiosk/data/repositories/setup_repository_impl.dart';
-import 'package:flutter_snaptag_kiosk/domain/repositories/i_event_preview_repository.dart';
-import 'package:flutter_snaptag_kiosk/domain/repositories/i_payment_history_repository.dart';
-import 'package:flutter_snaptag_kiosk/domain/repositories/i_setup_repository.dart';
-import 'package:flutter_snaptag_kiosk/domain/usecases/setup/end_kiosk_application_use_case.dart';
-import 'package:flutter_snaptag_kiosk/domain/usecases/setup/get_orders_use_case.dart';
-import 'package:flutter_snaptag_kiosk/domain/usecases/setup/refund_order_use_case.dart';
-import 'package:flutter_snaptag_kiosk/domain/usecases/setup/refresh_event_preview_use_case.dart';
-import 'package:flutter_snaptag_kiosk/domain/usecases/setup/start_kiosk_event_use_case.dart';
+import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
+import 'package:flutter_snaptag_kiosk/presentation/payment/di/payment_di.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'setup_di.g.dart';
@@ -38,14 +25,14 @@ StartKioskEventUseCase startKioskEventUseCase(Ref ref) {
   return StartKioskEventUseCase(
     ref.watch(setupRepositoryProvider),
     ref.watch(checkPaymentDeviceUseCaseProvider),
-    SlackLogService(),
+    ref.watch(slackLogServiceProvider),
     const IdWriterServiceImpl(),
   );
 }
 
 @riverpod
 EndKioskApplicationUseCase endKioskApplicationUseCase(Ref ref) {
-  return EndKioskApplicationUseCase(ref.watch(setupRepositoryProvider), SlackLogService());
+  return EndKioskApplicationUseCase(ref.watch(setupRepositoryProvider), ref.watch(slackLogServiceProvider));
 }
 
 @riverpod
@@ -65,10 +52,12 @@ GetOrdersUseCase getOrdersUseCase(Ref ref) {
 
 @riverpod
 RefundOrderUseCase refundOrderUseCase(Ref ref) {
+  final kioskInfo = ref.read(kioskInfoServiceProvider);
   return RefundOrderUseCase(
     ref.watch(paymentHistoryRepositoryProvider),
     ref.watch(paymentRepositoryProvider),
-    SlackLogService(),
+    ref.watch(slackLogServiceProvider),
+    cardTerminalId: kioskInfo?.cardTerminalId,
   );
 }
 
@@ -84,5 +73,5 @@ IEventPreviewRepository eventPreviewRepository(Ref ref) {
 
 @riverpod
 RefreshEventPreviewUseCase refreshEventPreviewUseCase(Ref ref) {
-  return RefreshEventPreviewUseCase(ref.watch(eventPreviewRepositoryProvider), SlackLogService());
+  return RefreshEventPreviewUseCase(ref.watch(eventPreviewRepositoryProvider), ref.watch(slackLogServiceProvider));
 }

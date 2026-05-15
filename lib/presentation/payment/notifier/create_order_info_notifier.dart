@@ -1,4 +1,4 @@
-import 'package:flutter_snaptag_kiosk/lib.dart';
+import 'package:flutter_snaptag_kiosk/domain/models/order/order_creation_result.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'create_order_info_notifier.g.dart';
@@ -6,9 +6,9 @@ part 'create_order_info_notifier.g.dart';
 @Riverpod(keepAlive: true)
 class CreateOrderInfo extends _$CreateOrderInfo {
   @override
-  CreateOrderResponse? build() => null;
+  OrderCreationResult? build() => null;
 
-  void update(CreateOrderResponse response) {
+  void update(OrderCreationResult response) {
     state = response;
   }
 
