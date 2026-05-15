@@ -50,16 +50,19 @@ class SlackLogService implements ISlackLogService {
 
   Future<void> sendErrorLogToSlack(String message) async {
     final type = kDebugMode ? 'test_error_log' : 'error_log';
+    // await _dispatchLog('test_error_log', message);
     await _dispatchLog(type, message);
   }
 
   Future<void> sendLogToSlack(String message) async {
     final type = kDebugMode ? 'test_log' : 'log';
+    // await _dispatchLog('test_log', message);
     await _dispatchLog(type, message);
   }
 
   Future<void> sendBroadcastLogToSlack(String message) async {
     final type = kDebugMode ? 'test_service' : 'service';
+    // await _dispatchLog('test_service', message);
     await _dispatchLog(type, message);
   }
 
@@ -207,6 +210,10 @@ ${slackLogTemplate.description}
 
   @override
   Future<void> sendInspectionEndBroadcastLog(String key) => sendInspectionEndBroadcastLogToSlack(key);
+
+  @override
+  Future<void> sendPaymentBroadcastLog(String key, {required String paymentDescription}) =>
+      sendPaymentBroadcastLogToSlak(key, paymentDescription: paymentDescription);
 
   String buildSlackAlertMessage({
     required SlackLogTemplate slackLogTemplate,

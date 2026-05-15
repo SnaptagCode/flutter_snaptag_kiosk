@@ -80,7 +80,10 @@ class PaymentHistoryNotifier extends _$PaymentHistoryNotifier {
     final orders = _currentOrders;
     state = const PaymentHistoryState.loading();
     try {
-      await _refundOrderUseCase.execute(order);
+      await _refundOrderUseCase.execute(
+        order,
+        kioskEventId: ref.read(kioskInfoServiceProvider)?.kioskEventId ?? 0,
+      );
       final freshOrders = await _getOrdersUseCase(GetOrdersRequest(
         pageSize: _pageSize,
         currentPage: _currentPage,

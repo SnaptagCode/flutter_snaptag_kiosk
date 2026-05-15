@@ -35,12 +35,17 @@ ISetupRepository setupRepository(Ref ref) {
 
 @riverpod
 StartKioskEventUseCase startKioskEventUseCase(Ref ref) {
-  return StartKioskEventUseCase(ref, SlackLogService(), const IdWriterServiceImpl());
+  return StartKioskEventUseCase(
+    ref.watch(setupRepositoryProvider),
+    ref.watch(checkPaymentDeviceUseCaseProvider),
+    SlackLogService(),
+    const IdWriterServiceImpl(),
+  );
 }
 
 @riverpod
 EndKioskApplicationUseCase endKioskApplicationUseCase(Ref ref) {
-  return EndKioskApplicationUseCase(ref, SlackLogService());
+  return EndKioskApplicationUseCase(ref.watch(setupRepositoryProvider), SlackLogService());
 }
 
 @riverpod
@@ -60,7 +65,11 @@ GetOrdersUseCase getOrdersUseCase(Ref ref) {
 
 @riverpod
 RefundOrderUseCase refundOrderUseCase(Ref ref) {
-  return RefundOrderUseCase(ref, ref.watch(paymentHistoryRepositoryProvider));
+  return RefundOrderUseCase(
+    ref.watch(paymentHistoryRepositoryProvider),
+    ref.watch(paymentRepositoryProvider),
+    SlackLogService(),
+  );
 }
 
 @riverpod
@@ -75,5 +84,5 @@ IEventPreviewRepository eventPreviewRepository(Ref ref) {
 
 @riverpod
 RefreshEventPreviewUseCase refreshEventPreviewUseCase(Ref ref) {
-  return RefreshEventPreviewUseCase(ref, ref.watch(eventPreviewRepositoryProvider), SlackLogService());
+  return RefreshEventPreviewUseCase(ref.watch(eventPreviewRepositoryProvider), SlackLogService());
 }

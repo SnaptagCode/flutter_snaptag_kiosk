@@ -1,6 +1,7 @@
-﻿import 'dart:async';
+import 'dart:async';
 
 import 'package:flutter_snaptag_kiosk/core/common/constants/alert_key.dart';
+import 'package:flutter_snaptag_kiosk/core/providers/version_notifier.dart';
 import 'package:flutter_snaptag_kiosk/data/datasources/remote/slack_log_service.dart';
 import 'package:flutter_snaptag_kiosk/presentation/core/card_count_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
@@ -79,7 +80,24 @@ class SetupMainNotifier extends _$SetupMainNotifier {
   Future<void> _validateAndAwaitConfirmation() async {
     state = const SetupMainState.loading();
 
-    final result = await _startKioskEventUseCase.validate();
+    // 단면+수량0 → 양면으로 자동 전환
+    if (ref.read(pagePrintProvider) == PagePrintType.single &&
+        ref.read(cardCountProvider).currentCount == 0) {
+      ref.read(pagePrintProvider.notifier).set(PagePrintType.double);
+    }
+
+    // kioskInfo가 없으면 먼저 로드
+    var kioskInfo = ref.read(kioskInfoServiceProvider);
+    if (kioskInfo == null) {
+      await ref.read(kioskInfoServiceProvider.notifier).getKioskMachineInfo();
+      kioskInfo = ref.read(kioskInfoServiceProvider);
+    }
+
+    final result = await _startKioskEventUseCase.validate(
+      printType: ref.read(pagePrintProvider),
+      kioskEventId: kioskInfo?.kioskEventId,
+      kioskMachineId: kioskInfo?.kioskMachineId,
+    );
 
     state = switch (result) {
       StartEventValidationOk() => const SetupMainState.awaitingEventConfirmation(),
@@ -100,7 +118,24 @@ class SetupMainNotifier extends _$SetupMainNotifier {
     state = const SetupMainState.loading();
 
     try {
-      await _startKioskEventUseCase.execute();
+      final kioskInfo = ref.read(kioskInfoServiceProvider);
+      final cardCountState = ref.read(cardCountProvider);
+      final versionState = ref.read(versionNotifierProvider);
+
+      try {
+        await ref.read(printerServiceProvider.notifier).printerStateLog();
+      } catch (_) {}
+
+      await _startKioskEventUseCase.execute(
+        machineId: kioskInfo?.kioskMachineId ?? 0,
+        kioskEventId: kioskInfo?.kioskEventId ?? 0,
+        remainingSingleSidedCount: cardCountState.remainingSingleSidedCount,
+        cardInitialCount: cardCountState.initialCount,
+        cardCurrentCount: cardCountState.currentCount,
+        currentVersion: versionState.currentVersion,
+        latestVersion: versionState.latestVersion,
+        eventType: kioskInfo?.eventType,
+      );
       state = const SetupMainState.eventStartSuccess();
     } catch (e) {
       state = SetupMainState.failure(SetupMainFailure.eventStartFailed(e));
@@ -108,7 +143,13 @@ class SetupMainNotifier extends _$SetupMainNotifier {
   }
 
   Future<void> _handleExitApp() async {
-    await _endKioskApplicationUseCase.call();
+    final kioskInfo = ref.read(kioskInfoServiceProvider);
+    final cardCountState = ref.read(cardCountProvider);
+    await _endKioskApplicationUseCase.call(
+      kioskEventId: kioskInfo?.kioskEventId ?? 0,
+      kioskMachineId: kioskInfo?.kioskMachineId ?? 0,
+      remainingSingleSidedCount: cardCountState.remainingSingleSidedCount,
+    );
     state = const SetupMainState.exitAppSuccess();
   }
 }
