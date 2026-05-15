@@ -1,4 +1,4 @@
-﻿import 'package:flutter_snaptag_kiosk/data/models/entities/order_error_entity.dart';
+﻿import 'package:flutter_snaptag_kiosk/domain/models/verification/refund_order_info.dart';
 
 sealed class VerificationFailure {
   const VerificationFailure();
@@ -12,7 +12,7 @@ final class VerificationFailureExpired extends VerificationFailure {
 }
 
 final class VerificationFailureRefundRequired extends VerificationFailure {
-  final OrderErrorEntity? order;
+  final RefundOrderInfo? order;
   const VerificationFailureRefundRequired({this.order});
   @override
   String get message => '환불이 필요한 코드입니다.';

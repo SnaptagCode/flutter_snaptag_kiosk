@@ -1,5 +1,6 @@
 ﻿import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
+import 'package:flutter_snaptag_kiosk/domain/models/verification/refund_order_info.dart';
 import 'package:flutter_snaptag_kiosk/presentation/payment/di/payment_di.dart';
 import 'package:flutter_snaptag_kiosk/presentation/payment/notifier/create_order_info_notifier.dart';
 import 'package:flutter_snaptag_kiosk/presentation/payment/notifier/payment_response_notifier.dart';
@@ -12,7 +13,7 @@ class Error409RefundUseCase {
   Error409RefundUseCase(this._ref);
   final Ref _ref;
 
-  Future<bool> call(OrderErrorEntity order) async {
+  Future<bool> call(RefundOrderInfo order) async {
     bool isSuccess = false;
     try {
       final approvalNo = order.authSeqNumber ?? '';

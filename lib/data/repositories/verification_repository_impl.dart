@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
-import 'package:flutter_snaptag_kiosk/data/models/entities/order_error_entity.dart';
 import 'package:flutter_snaptag_kiosk/core/result/result.dart';
 import 'package:flutter_snaptag_kiosk/domain/models/verification/back_photo_card.dart';
+import 'package:flutter_snaptag_kiosk/domain/models/verification/refund_order_info.dart';
 import 'package:flutter_snaptag_kiosk/domain/models/verification/verification_failure.dart';
 import 'package:flutter_snaptag_kiosk/data/datasources/remote/i_verification_remote_data_source.dart';
 import 'package:flutter_snaptag_kiosk/data/models/verification_mapper.dart';
@@ -44,10 +44,16 @@ class VerificationRepositoryImpl implements IVerificationRepository {
     };
   }
 
-  OrderErrorEntity? _parseOrder(dynamic orderData) {
+  RefundOrderInfo? _parseOrder(dynamic orderData) {
     if (orderData is Map<String, dynamic>) {
       try {
-        return OrderErrorEntity.fromJson(orderData);
+        return RefundOrderInfo(
+          orderId: (orderData['orderId'] as num?)?.toInt(),
+          authSeqNumber: orderData['authSeqNumber'] as String?,
+          completedAt: orderData['completedAt'] == null
+              ? null
+              : DateTime.parse(orderData['completedAt'] as String),
+        );
       } catch (_) {
         return null;
       }

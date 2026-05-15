@@ -3,7 +3,7 @@ import 'dart:typed_data';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_snaptag_kiosk/core/common/constants/directory_paths.dart';
-import 'package:flutter_snaptag_kiosk/core/domain/entities/entities.dart';
+import 'package:flutter_snaptag_kiosk/domain/models/security_image_config.dart';
 import 'package:intl/intl.dart';
 import 'package:path/path.dart' as path;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
