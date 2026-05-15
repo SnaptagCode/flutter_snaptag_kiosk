@@ -8,7 +8,12 @@ class EventPreviewRepositoryImpl implements IEventPreviewRepository {
   EventPreviewRepositoryImpl(this._dataSource);
 
   @override
-  Future<void> createUniqueKeyHistory(UniqueKeyRequest request) {
-    return _dataSource.createUniqueKeyHistory(request);
+  Future<void> createUniqueKeyHistory({
+    required String machineId,
+    required String uniqueKey,
+  }) {
+    return _dataSource.createUniqueKeyHistory(
+      UniqueKeyRequest(machineId: machineId, uniqueKey: uniqueKey),
+    );
   }
 }
