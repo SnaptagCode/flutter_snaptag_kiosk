@@ -146,12 +146,16 @@ class KioskRepositoryImpl implements IKioskRepository, IKioskPrintRepository {
 
   @override
   Future<void> updateOrderStatus(int orderId, UpdateOrderParams params) async {
+    final approvalState = params.approval?.orderState;
+    final resolvedStatus = approvalState == null
+        ? (params.isRefund ? OrderStatus.refunded_failed : OrderStatus.failed)
+        : (params.isRefund && approvalState == OrderStatus.failed ? OrderStatus.refunded_failed : approvalState);
     final request = UpdateOrderRequest(
       kioskEventId: params.kioskEventId,
       kioskMachineId: params.kioskMachineId,
       photoAuthNumber: params.photoAuthNumber,
       amount: params.photoCardPrice,
-      status: params.approval?.orderState ?? (params.isRefund ? OrderStatus.refunded_failed : OrderStatus.failed),
+      status: resolvedStatus,
       approvalNumber: params.approval?.approvalNo ?? '-',
       purchaseAuthNumber: params.approval?.approvalNo ?? '-',
       authSeqNumber: params.approval?.approvalNo ?? '-',
