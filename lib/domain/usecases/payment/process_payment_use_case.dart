@@ -21,6 +21,13 @@ class ProcessPaymentParams {
   });
 }
 
+class ProcessPaymentResult {
+  final CreateOrderResponse orderResponse;
+  final PaymentResponse paymentResponse;
+
+  const ProcessPaymentResult({required this.orderResponse, required this.paymentResponse});
+}
+
 class ProcessPaymentUseCase {
   final IKioskRepository _repository;
   final ApprovePaymentUseCase _approvePayment;
@@ -29,7 +36,7 @@ class ProcessPaymentUseCase {
 
   const ProcessPaymentUseCase(this._repository, this._approvePayment, this._orderUpdate, this._slackLog);
 
-  Future<void> call(ProcessPaymentParams params) async {
+  Future<ProcessPaymentResult> call(ProcessPaymentParams params) async {
     final orderResponse = await _createOrder(params)
         .catchError((e) => throw OrderCreationException('Create order fail: $e'));
     final orderId = orderResponse.orderId;
@@ -38,6 +45,8 @@ class ProcessPaymentUseCase {
       final paymentResponse = await _approvePayment.call(totalAmount: params.photoCardPrice);
       _slackLog.sendLog('paymentResponse : $paymentResponse');
       await _handlePaymentResult(params, orderId, paymentResponse);
+      // _handlePaymentResult 가 throw 없이 반환 = 결제 성공
+      return ProcessPaymentResult(orderResponse: orderResponse, paymentResponse: paymentResponse);
     } catch (e) {
       if (e is PaymentRefundableException || e is PaymentFailedException) rethrow;
       await _orderUpdate.updateOrder(UpdateOrderParams(

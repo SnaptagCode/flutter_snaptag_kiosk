@@ -7,6 +7,8 @@ import 'package:flutter_snaptag_kiosk/presentation/payment/notifier/payment_acti
 import 'package:flutter_snaptag_kiosk/presentation/payment/notifier/payment_state.dart';
 import 'package:flutter_snaptag_kiosk/domain/failures/payment_failure.dart';
 import 'package:flutter_snaptag_kiosk/presentation/payment/di/payment_di.dart';
+import 'package:flutter_snaptag_kiosk/presentation/payment/notifier/create_order_info_notifier.dart';
+import 'package:flutter_snaptag_kiosk/presentation/payment/notifier/payment_response_notifier.dart';
 import 'package:flutter_snaptag_kiosk/domain/usecases/payment/process_payment_use_case.dart';
 import 'package:flutter_snaptag_kiosk/domain/usecases/payment/refund_payment_use_case.dart';
 import 'package:flutter_snaptag_kiosk/presentation/setup/main/notifiers/page_print_notifier.dart';
@@ -98,13 +100,17 @@ class PaymentNotifier extends _$PaymentNotifier {
       photoCardPrice = kioskInfo.photoCardPrice;
       photoAuthNumber = backPhoto.photoAuthNumber;
 
-      await _processPaymentUseCase.call(ProcessPaymentParams(
+      final result = await _processPaymentUseCase.call(ProcessPaymentParams(
         kioskEventId: kioskEventId,
         kioskMachineId: kioskMachineId,
         photoCardPrice: photoCardPrice,
         photoAuthNumber: photoAuthNumber,
         isSingleSided: isSingleSided,
       ));
+
+      // print_process_root 의 환불 경로에서 읽을 수 있도록 state 저장
+      ref.read(createOrderInfoProvider.notifier).update(result.orderResponse);
+      ref.read(paymentResponseStateProvider.notifier).update(result.paymentResponse);
 
       await ref.read(cardCountProvider.notifier).decrease();
       state = const PaymentState.success();

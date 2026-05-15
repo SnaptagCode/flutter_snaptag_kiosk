@@ -9,6 +9,9 @@ import 'package:flutter_snaptag_kiosk/core/ui/widget/dialog_helper.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_snaptag_kiosk/presentation/core/card_count_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
+import 'package:flutter_snaptag_kiosk/domain/usecases/payment/refund_payment_use_case.dart';
+import 'package:flutter_snaptag_kiosk/presentation/core/back_photo_session_notifier.dart';
+import 'package:flutter_snaptag_kiosk/presentation/payment/notifier/create_order_info_notifier.dart';
 import 'package:flutter_snaptag_kiosk/presentation/payment/notifier/payment_response_notifier.dart';
 import 'package:flutter_snaptag_kiosk/presentation/payment/di/payment_di.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/card_printer.dart';
@@ -226,9 +229,27 @@ class _PrintProcessRootState extends ConsumerState<PrintProcessRoot> with Single
   }
 
   Future<void> _refund() async {
-    final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
+    final kioskInfo = ref.read(kioskInfoServiceProvider);
+    final machineId = kioskInfo?.kioskMachineId ?? 0;
     try {
-      await ref.read(refundPaymentUseCaseProvider).call();
+      final backPhoto = ref.read(backPhotoSessionProvider).value;
+      final paymentResponse = ref.read(paymentResponseStateProvider);
+      final orderId = ref.read(createOrderInfoProvider)?.orderId;
+
+      if (orderId == null || paymentResponse == null) {
+        throw Exception('결제 정보 없음 — 환불 불가');
+      }
+
+      await ref.read(refundPaymentUseCaseProvider).call(RefundPaymentParams(
+        orderId: orderId,
+        kioskEventId: kioskInfo?.kioskEventId ?? 0,
+        kioskMachineId: machineId,
+        photoCardPrice: kioskInfo?.photoCardPrice ?? 0,
+        photoAuthNumber: backPhoto?.photoAuthNumber ?? '',
+        approvalNo: paymentResponse.approvalNo ?? '',
+        tradeTime: paymentResponse.tradeTime,
+      ));
+
       if (ref.read(pagePrintProvider) == PagePrintType.single) {
         await ref.read(cardCountProvider.notifier).increase();
       }
