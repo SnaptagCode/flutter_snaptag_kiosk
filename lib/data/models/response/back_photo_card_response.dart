@@ -17,3 +17,4 @@ class BackPhotoCardResponse with _$BackPhotoCardResponse {
 
   factory BackPhotoCardResponse.fromJson(Map<String, dynamic> json) => _$BackPhotoCardResponseFromJson(json);
 }
+

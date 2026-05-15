@@ -1,12 +1,14 @@
-﻿import 'package:easy_localization/easy_localization.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_snaptag_kiosk/core/ui/widget/dialog_helper.dart';
-import 'package:flutter_snaptag_kiosk/domain/models/verification/verification_failure.dart';
-import 'package:flutter_snaptag_kiosk/lib.dart';
-import 'package:flutter_snaptag_kiosk/domain/usecases/payment/error409_refund_use_case.dart';
+import 'package:flutter_snaptag_kiosk/core/core.dart';
+import 'package:flutter_snaptag_kiosk/presentation/core/slack_log_provider.dart';
+import 'package:flutter_snaptag_kiosk/domain/domain.dart';
+import 'package:flutter_snaptag_kiosk/locale_keys.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
 import 'package:flutter_snaptag_kiosk/presentation/payment/di/payment_di.dart';
+import 'package:flutter_snaptag_kiosk/presentation/routers/routers.dart';
 import 'package:flutter_snaptag_kiosk/presentation/verification/notifier/auth_code_notifier.dart';
 import 'package:flutter_snaptag_kiosk/presentation/verification/notifier/verification_action.dart';
 import 'package:flutter_snaptag_kiosk/presentation/verification/notifier/verification_notifier.dart';
@@ -87,7 +89,7 @@ class VerificationRoot extends ConsumerWidget {
       case VerificationFailureNetwork():
       case VerificationFailureUnknown():
         await DialogHelper.showErrorDialog(context);
-        SlackLogService().sendLogToSlack('Verification error: ${failure.message}');
+        ref.read(slackLogServiceProvider).sendLog('Verification error: ${failure.message}');
         logger.e('Verification error: ${failure.message}');
     }
   }

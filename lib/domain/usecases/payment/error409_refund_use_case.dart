@@ -1,8 +1,12 @@
+import 'package:flutter_snaptag_kiosk/core/core.dart';
+import 'package:flutter_snaptag_kiosk/domain/models/enums/order_status.dart';
+import 'package:flutter_snaptag_kiosk/domain/models/order/update_order_params.dart';
+import 'package:flutter_snaptag_kiosk/domain/models/payment/payment_result.dart';
 import 'package:flutter_snaptag_kiosk/domain/models/verification/refund_order_info.dart';
 import 'package:flutter_snaptag_kiosk/domain/services/i_slack_log_service.dart';
 import 'package:flutter_snaptag_kiosk/domain/services/order_update_service.dart';
+import 'package:flutter_snaptag_kiosk/domain/usecase.dart';
 import 'package:flutter_snaptag_kiosk/domain/usecases/payment/cancel_payment_use_case.dart';
-import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:intl/intl.dart';
 
 class Error409RefundParams {
@@ -21,29 +25,31 @@ class Error409RefundParams {
   });
 }
 
-class Error409RefundUseCase {
+class Error409RefundUseCase implements UseCase<bool, Error409RefundParams> {
   final CancelPaymentUseCase _cancelPayment;
   final OrderUpdateService _orderUpdate;
   final ISlackLogService _slackLog;
 
   const Error409RefundUseCase(this._cancelPayment, this._orderUpdate, this._slackLog);
 
+  @override
   Future<bool> call(Error409RefundParams params) async {
     final orderId = params.order.orderId;
     if (orderId == null) throw Exception('No order id available');
 
     final approvalNo = params.order.authSeqNumber ?? '';
-    if (approvalNo.trim().isEmpty) {
-      throw Exception('No approval number available');
-    }
+    if (approvalNo.trim().isEmpty) throw Exception('No approval number available');
+
+    final completedAt = params.order.completedAt;
+    if (completedAt == null) throw Exception('No completed date available');
 
     bool isSuccess = false;
-    PaymentResponse? cancelResponse;
+    PaymentResult? cancelResponse;
     try {
       cancelResponse = await _cancelPayment.call(
         totalAmount: params.photoCardPrice,
         originalApprovalNo: approvalNo,
-        originalApprovalDate: DateFormat('yyMMdd').format(params.order.completedAt!),
+        originalApprovalDate: DateFormat('yyMMdd').format(completedAt),
       );
       _slackLog.sendLog('error409_refund cancelResponse: $cancelResponse');
       isSuccess = cancelResponse.isSuccess;
@@ -58,9 +64,13 @@ class Error409RefundUseCase {
     return isSuccess;
   }
 
-  Future<void> _updateRefundOrder(Error409RefundParams params, int orderId, PaymentResponse? cancelResponse) async {
+  Future<void> _updateRefundOrder(
+    Error409RefundParams params,
+    int orderId,
+    PaymentResult? cancelResponse,
+  ) async {
     if (cancelResponse?.orderState == OrderStatus.refunded) {
-      final response = await _orderUpdate.updateOrder(UpdateOrderParams(
+      await _orderUpdate.updateOrder(UpdateOrderParams(
         kioskEventId: params.kioskEventId,
         kioskMachineId: params.kioskMachineId,
         photoCardPrice: params.photoCardPrice,
@@ -70,7 +80,6 @@ class Error409RefundUseCase {
         isRefund: true,
         description: '환불안내',
       ));
-      _slackLog.sendLog('error409 response: $response');
       _slackLog.sendPaymentBroadcastLog(
         InfoKey.paymentRefund.key,
         paymentDescription:

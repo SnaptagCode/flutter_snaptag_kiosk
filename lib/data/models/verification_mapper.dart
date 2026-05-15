@@ -11,4 +11,6 @@ extension BackPhotoCardResponseMapper on BackPhotoCardResponse {
         embeddingProductId: embeddingProductId,
         formattedBackPhotoCardUrl: formattedBackPhotoCardUrl,
       );
+
+  BackPhotoCard toDomain() => toModel();
 }

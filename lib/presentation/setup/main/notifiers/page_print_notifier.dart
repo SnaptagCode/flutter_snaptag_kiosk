@@ -1,6 +1,10 @@
+export 'package:flutter_snaptag_kiosk/domain/models/page_print_type.dart';
+
+import 'package:flutter_snaptag_kiosk/domain/models/page_print_type.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:flutter_snaptag_kiosk/lib.dart';
+import 'package:flutter_snaptag_kiosk/core/core.dart';
+import 'package:flutter_snaptag_kiosk/presentation/core/slack_log_provider.dart';
 
 part 'page_print_notifier.g.dart';
 
@@ -11,7 +15,7 @@ class PagePrint extends _$PagePrint {
 
   void switchType() {
     state = state == PagePrintType.double ? PagePrintType.single : PagePrintType.double;
-    SlackLogService().sendBroadcastLogToSlackWithKey(
+    ref.read(slackLogServiceProvider).sendBroadcastLogWithKey(
         state == PagePrintType.single ? InfoKey.cardPrintModeSwitchSingle.key : InfoKey.cardPrintModeSwitchDuplex.key);
   }
 
@@ -20,15 +24,9 @@ class PagePrint extends _$PagePrint {
     if (type != state) {
       print("chaneg Printe type : $type");
       if (type == PagePrintType.double && machineId != 0) {
-        SlackLogService().sendBroadcastLogToSlackWithKey(InfoKey.cardPrintModeSwitchDuplex.key);
+        ref.read(slackLogServiceProvider).sendBroadcastLogWithKey(InfoKey.cardPrintModeSwitchDuplex.key);
       }
     }
     state = type;
   }
-}
-
-enum PagePrintType {
-  single, // 양면 인쇄
-  double, // 단면 인쇄
-  none // 인쇄모드 미선택
 }

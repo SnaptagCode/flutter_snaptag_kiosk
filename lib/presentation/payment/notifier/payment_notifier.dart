@@ -1,18 +1,16 @@
-import 'package:flutter_snaptag_kiosk/lib.dart';
+import 'package:flutter_snaptag_kiosk/core/core.dart';
+import 'package:flutter_snaptag_kiosk/data/data.dart';
+import 'package:flutter_snaptag_kiosk/domain/domain.dart';
 import 'package:flutter_snaptag_kiosk/presentation/core/card_count_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/home/notifier/home_back_photo_type_notifier.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/home_timeout_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
 import 'package:flutter_snaptag_kiosk/presentation/payment/notifier/payment_action.dart';
 import 'package:flutter_snaptag_kiosk/presentation/payment/notifier/payment_state.dart';
-import 'package:flutter_snaptag_kiosk/domain/failures/payment_failure.dart';
 import 'package:flutter_snaptag_kiosk/presentation/payment/di/payment_di.dart';
 import 'package:flutter_snaptag_kiosk/presentation/payment/notifier/create_order_info_notifier.dart';
 import 'package:flutter_snaptag_kiosk/presentation/payment/notifier/payment_response_notifier.dart';
-import 'package:flutter_snaptag_kiosk/domain/usecases/payment/process_payment_use_case.dart';
-import 'package:flutter_snaptag_kiosk/domain/usecases/payment/refund_payment_use_case.dart';
 import 'package:flutter_snaptag_kiosk/presentation/setup/main/notifiers/page_print_notifier.dart';
-import 'package:flutter_snaptag_kiosk/domain/models/verification/back_photo_card.dart';
 import 'package:flutter_snaptag_kiosk/presentation/core/back_photo_session_notifier.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -70,19 +68,13 @@ class PaymentNotifier extends _$PaymentNotifier {
 
         if (kiosk != null && selectedIndex < kiosk.nominatedBackPhotoCardList.length) {
           final selectedCard = kiosk.nominatedBackPhotoCardList[selectedIndex];
-          final response = await ref.read(kioskRepositoryProvider).getBackPhotoCardByQr(
-                GetBackPhotoByQrRequest(
-                  kioskEventId: kiosk.kioskEventId,
-                  nominatedBackPhotoCardId: selectedCard.id,
-                ),
-              );
-          ref.read(backPhotoSessionProvider.notifier).updateState(BackPhotoCard(
+          final backPhotoCard = await ref.read(kioskRepositoryProvider).getBackPhotoCardByQr(
                 kioskEventId: kiosk.kioskEventId,
-                backPhotoCardId: response.backPhotoCardId,
-                backPhotoCardOriginUrl: selectedCard.originUrl,
-                photoAuthNumber: response.photoAuthNumber,
-                formattedBackPhotoCardUrl: response.formattedBackPhotoCardUrl,
-              ));
+                nominatedBackPhotoCardId: selectedCard.id,
+              );
+          ref.read(backPhotoSessionProvider.notifier).updateState(
+                backPhotoCard.copyWith(backPhotoCardOriginUrl: selectedCard.originUrl),
+              );
         }
       }
 

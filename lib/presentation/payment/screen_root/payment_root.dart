@@ -1,9 +1,12 @@
-﻿import 'package:easy_localization/easy_localization.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_snaptag_kiosk/core/ui/widget/dialog_helper.dart';
 import 'package:flutter_snaptag_kiosk/presentation/home/notifier/home_back_photo_type_notifier.dart';
-import 'package:flutter_snaptag_kiosk/lib.dart';
+import 'package:flutter_snaptag_kiosk/core/core.dart';
+
+import 'package:flutter_snaptag_kiosk/domain/domain.dart';
+import 'package:flutter_snaptag_kiosk/locale_keys.dart';
 import 'package:flutter_snaptag_kiosk/domain/failures/payment_failure.dart';
 import 'package:flutter_snaptag_kiosk/presentation/payment/notifier/payment_action.dart';
 import 'package:flutter_snaptag_kiosk/presentation/payment/notifier/payment_notifier.dart';
@@ -12,6 +15,8 @@ import 'package:flutter_snaptag_kiosk/presentation/payment/screen/payment_screen
 import 'package:flutter_snaptag_kiosk/presentation/payment/screen/payment_screen_state.dart';
 import 'package:flutter_snaptag_kiosk/presentation/core/back_photo_session_notifier.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/home_timeout_provider.dart';
+import 'package:flutter_snaptag_kiosk/presentation/routers/routers.dart';
+import 'package:flutter_snaptag_kiosk/presentation/core/slack_log_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 
@@ -78,7 +83,7 @@ class _PaymentRootState extends ConsumerState<PaymentRoot> {
 
           if (mounted) ref.read(homeTimeoutNotifierProvider.notifier).resumeTimer();
 
-          SlackLogService().sendErrorLogToSlack('Payment process failed: $error');
+          ref.read(slackLogServiceProvider).sendErrorLog('Payment process failed: $error');
 
           if (error.toString().contains('Card feeder is empty')) {
             await DialogHelper.showPrintCardRefillDialog(context);

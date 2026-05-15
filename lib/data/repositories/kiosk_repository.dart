@@ -1,12 +1,21 @@
-﻿import 'dart:developer';
+import 'dart:developer';
 
 import 'package:dio/dio.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_snaptag_kiosk/data/models/request/unique_key_request.dart';
 import 'package:flutter_snaptag_kiosk/data/models/request/update_back_photo_request.dart';
-import 'package:flutter_snaptag_kiosk/domain/repositories/i_kiosk_repository.dart';
-import 'package:flutter_snaptag_kiosk/lib.dart';
-import 'package:flutter_snaptag_kiosk/presentation/core/card_count_provider.dart';
+import 'package:flutter_snaptag_kiosk/core/core.dart';
+import 'package:flutter_snaptag_kiosk/data/datasources/remote/dio_client.dart';
+import 'package:flutter_snaptag_kiosk/data/datasources/remote/kiosk_api_client.dart';
+import 'package:flutter_snaptag_kiosk/data/datasources/remote/slack_log_service.dart';
+import 'package:flutter_snaptag_kiosk/data/models/models.dart';
+import 'package:flutter_snaptag_kiosk/domain/domain.dart';
+import 'package:flutter_snaptag_kiosk/domain/models/order/create_order_params.dart';
+import 'package:flutter_snaptag_kiosk/domain/models/order/order_creation_result.dart';
+import 'package:flutter_snaptag_kiosk/domain/models/order/update_order_params.dart';
+import 'package:flutter_snaptag_kiosk/domain/models/print/create_print_params.dart';
+import 'package:flutter_snaptag_kiosk/domain/models/print/print_job_result.dart';
+import 'package:flutter_snaptag_kiosk/domain/models/print/update_print_params.dart';
+import 'package:flutter_snaptag_kiosk/flavors.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/luca/state/printer_log.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -18,15 +27,14 @@ class KioskRepository extends _$KioskRepository {
   KioskRepositoryImpl build() {
     final dio = ref.watch(dioProvider(F.kioskBaseUrl));
 
-    return KioskRepositoryImpl(KioskApiClient(dio), ref);
+    return KioskRepositoryImpl(KioskApiClient(dio));
   }
 }
 
-class KioskRepositoryImpl implements IKioskRepository {
+class KioskRepositoryImpl implements IKioskRepository, IKioskPrintRepository {
   final KioskApiClient _apiClient;
-  final Ref _ref;
 
-  KioskRepositoryImpl(this._apiClient, this._ref);
+  KioskRepositoryImpl(this._apiClient);
   Future<String> healthCheck() async {
     try {
       return await _apiClient.healthCheck();
@@ -119,44 +127,75 @@ class KioskRepositoryImpl implements IKioskRepository {
   }
 
   @override
-  Future<CreateOrderResponse> createOrderStatus(CreateOrderRequest request) async {
+  Future<OrderCreationResult> createOrderStatus(CreateOrderParams params) async {
+    final request = CreateOrderRequest(
+      kioskEventId: params.kioskEventId,
+      kioskMachineId: params.kioskMachineId,
+      photoAuthNumber: params.photoAuthNumber,
+      amount: params.amount,
+      paymentType: params.paymentType,
+      isSingleSided: params.isSingleSided,
+    );
     try {
-      return await _apiClient.createOrder(
-        body: request.toJson(),
-      );
+      final response = await _apiClient.createOrder(body: request.toJson());
+      return response.toDomain();
     } catch (e) {
       rethrow;
     }
   }
 
   @override
-  Future<UpdateOrderResponse> updateOrderStatus(int orderId, UpdateOrderRequest request) async {
+  Future<void> updateOrderStatus(int orderId, UpdateOrderParams params) async {
+    final request = UpdateOrderRequest(
+      kioskEventId: params.kioskEventId,
+      kioskMachineId: params.kioskMachineId,
+      photoAuthNumber: params.photoAuthNumber,
+      amount: params.photoCardPrice,
+      status: params.approval?.orderState ?? (params.isRefund ? OrderStatus.refunded_failed : OrderStatus.failed),
+      approvalNumber: params.approval?.approvalNo ?? '-',
+      purchaseAuthNumber: params.approval?.approvalNo ?? '-',
+      authSeqNumber: params.approval?.approvalNo ?? '-',
+      detail: params.approval?.KSNET ?? '{}',
+      description: params.description,
+    );
     try {
-      return await _apiClient.updateOrder(
-        orderId: orderId,
-        body: request.toJson(),
-      );
+      await _apiClient.updateOrder(orderId: orderId, body: request.toJson());
     } catch (e) {
       rethrow;
     }
   }
 
-  Future<CreatePrintResponse> createPrintStatus({
-    required CreatePrintRequest request,
+  @override
+  Future<PrintJobResult> createPrintStatus({
+    required CreatePrintParams params,
   }) async {
+    final request = CreatePrintRequest(
+      kioskMachineId: params.kioskMachineId,
+      kioskEventId: params.kioskEventId,
+      frontPhotoCardId: params.frontPhotoCardId,
+      backPhotoCardId: params.backPhotoCardId,
+      kioskOrderId: params.kioskOrderId,
+    );
     try {
-      return await _apiClient.createPrint(body: request.toJson());
+      final response = await _apiClient.createPrint(body: request.toJson());
+      return response.toDomain();
     } catch (e) {
       rethrow;
     }
   }
 
-  Future<UpdatePrintResponse> updatePrintStatus({
+  @override
+  Future<void> updatePrintStatus({
     required int printedPhotoCardId,
-    required UpdatePrintRequest request,
+    required UpdatePrintParams params,
   }) async {
+    final request = UpdatePrintRequest(
+      kioskMachineId: params.kioskMachineId,
+      kioskEventId: params.kioskEventId,
+      status: params.status,
+    );
     try {
-      return await _apiClient.updatePrint(
+      await _apiClient.updatePrint(
         printedPhotoCardId: printedPhotoCardId,
         body: request.toJson(),
       );
@@ -169,16 +208,7 @@ class KioskRepositoryImpl implements IKioskRepository {
     required PrinterLog request,
   }) async {
     try {
-      final cardCount = _ref.read(cardCountProvider);
-
-      await _apiClient.updatePrintLog(
-        body: request
-            .copyWith(
-              remainingSingleSidedCountPre: cardCount.currentCount.toString(),
-              remainingSingleSidedCountPost: cardCount.initialCount.toString(),
-            )
-            .toJson(),
-      );
+      await _apiClient.updatePrintLog(body: request.toJson());
     } catch (e) {
       SlackLogService().sendErrorLogToSlack('KioskRepository.updatePrintLog failure: $e');
       logger.e('KioskRepository.updatePrintLog failure', error: e);
@@ -232,11 +262,19 @@ class KioskRepositoryImpl implements IKioskRepository {
     }
   }
 
-  Future<BackPhotoCardResponse> getBackPhotoCardByQr(GetBackPhotoByQrRequest request) async {
+  @override
+  Future<BackPhotoCard> getBackPhotoCardByQr({
+    required int kioskEventId,
+    required int nominatedBackPhotoCardId,
+  }) async {
     try {
-      return await _apiClient.getBackPhotoCardByQr(
-        body: request.toJson(),
+      final response = await _apiClient.getBackPhotoCardByQr(
+        body: GetBackPhotoByQrRequest(
+          kioskEventId: kioskEventId,
+          nominatedBackPhotoCardId: nominatedBackPhotoCardId,
+        ).toJson(),
       );
+      return response.toDomain();
     } catch (e) {
       rethrow;
     }

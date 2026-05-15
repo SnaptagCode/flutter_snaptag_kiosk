@@ -1,5 +1,5 @@
 ﻿import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
-import 'package:flutter_snaptag_kiosk/data/datasources/remote/slack_log_service.dart';
+import 'package:flutter_snaptag_kiosk/presentation/core/slack_log_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'printer_connect_state.g.dart';
@@ -29,7 +29,7 @@ class PrinterConnect extends _$PrinterConnect {
       return;
     }
 
-    SlackLogService().sendLogToSlack('*[MachineId: $machineId]*\nPrinter ${state.name}');
+    ref.read(slackLogServiceProvider).sendLog('*[MachineId: $machineId]*\nPrinter ${state.name}');
 
     this.state = state;
   }

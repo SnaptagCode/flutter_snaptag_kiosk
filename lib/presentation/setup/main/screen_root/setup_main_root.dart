@@ -1,14 +1,13 @@
-﻿import 'dart:io';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_snaptag_kiosk/core/common/constants/alert_key.dart';
 import 'package:flutter_snaptag_kiosk/core/common/launcher/launcher_service.dart';
-import 'package:flutter_snaptag_kiosk/data/datasources/local/id_writer.dart';
-import 'package:flutter_snaptag_kiosk/data/datasources/remote/slack_log_service.dart';
+import 'package:flutter_snaptag_kiosk/presentation/core/slack_log_provider.dart';
 import 'package:flutter_snaptag_kiosk/core/providers/version_notifier.dart';
 import 'package:flutter_snaptag_kiosk/core/ui/widget/dialog_helper.dart';
-import 'package:flutter_snaptag_kiosk/lib.dart';
+import 'package:flutter_snaptag_kiosk/core/core.dart';
+
 import 'package:flutter_snaptag_kiosk/presentation/core/card_count_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/luca/state/printer_connect_state.dart';
@@ -16,6 +15,7 @@ import 'package:flutter_snaptag_kiosk/presentation/setup/main/notifiers/page_pri
 import 'package:flutter_snaptag_kiosk/presentation/setup/main/notifier/setup_main_action.dart';
 import 'package:flutter_snaptag_kiosk/presentation/setup/main/notifier/setup_main_notifier.dart';
 import 'package:flutter_snaptag_kiosk/presentation/setup/main/notifier/setup_main_state.dart';
+import 'package:flutter_snaptag_kiosk/presentation/routers/routers.dart';
 import 'package:flutter_snaptag_kiosk/presentation/setup/main/screen/setup_main_screen.dart';
 import 'package:flutter_snaptag_kiosk/presentation/setup/main/screen/setup_main_screen_state.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -96,7 +96,7 @@ class _SetupMainRootState extends ConsumerState<SetupMainRoot> {
           case SetupMainActionRequestPaymentHistory():
             PaymentHistoryRouteData().go(context);
           case SetupMainActionRequestMaintenance():
-            SlackLogService().sendBroadcastLogToSlackWithKey(InfoKey.serviceMaintenanceEnter.key);
+            ref.read(slackLogServiceProvider).sendBroadcastLogWithKey(InfoKey.serviceMaintenanceEnter.key);
             MaintenanceRouteData().go(context);
           case SetupMainActionRequestKioskComponents():
             KioskComponentsRouteData().go(context);
@@ -129,7 +129,7 @@ class _SetupMainRootState extends ConsumerState<SetupMainRoot> {
       case SetupMainFailureKioskInfoInvalid():
         await DialogHelper.showSetupDialog(context, title: '이벤트를 실행하려면\n키오스크 기기번호를 입력해 주세요.');
       case SetupMainFailureEventStartFailed(:final error):
-        SlackLogService().sendErrorLogToSlack('Event Start Failed: $error');
+        ref.read(slackLogServiceProvider).sendErrorLog('Event Start Failed: $error');
         await DialogHelper.showSetupDialog(context, title: '이벤트 실행 중 오류가 발생했습니다.');
     }
   }

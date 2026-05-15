@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_snaptag_kiosk/core/common/constants/alert_key.dart';
 import 'package:flutter_snaptag_kiosk/core/providers/version_notifier.dart';
-import 'package:flutter_snaptag_kiosk/data/datasources/remote/slack_log_service.dart';
+import 'package:flutter_snaptag_kiosk/presentation/core/slack_log_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/core/card_count_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/card_printer.dart';
@@ -56,7 +56,7 @@ class SetupMainNotifier extends _$SetupMainNotifier {
           ref.read(pagePrintProvider.notifier).set(PagePrintType.single);
           final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
           if (machineId != 0) {
-            SlackLogService().sendBroadcastLogToSlackWithKey(InfoKey.cardPrintModeSwitchSingle.key);
+            ref.read(slackLogServiceProvider).sendBroadcastLogWithKey(InfoKey.cardPrintModeSwitchSingle.key);
           }
         }
 

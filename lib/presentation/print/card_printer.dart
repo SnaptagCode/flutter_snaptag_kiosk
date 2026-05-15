@@ -3,10 +3,11 @@ import 'dart:io';
 
 // Utf8 사용을 위한 임포트
 import 'package:flutter_snaptag_kiosk/core/common/logger/logger_service.dart';
+import 'package:flutter_snaptag_kiosk/domain/services/i_printer_service.dart';
 import 'package:flutter_snaptag_kiosk/presentation/core/card_count_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/core/printer_log_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
-import 'package:flutter_snaptag_kiosk/data/datasources/remote/slack_log_service.dart';
+import 'package:flutter_snaptag_kiosk/presentation/core/slack_log_provider.dart';
 import 'package:flutter_snaptag_kiosk/data/repositories/kiosk_repository.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/isolate/printer_manager.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/luca/state/printer_log.dart';
@@ -16,7 +17,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'card_printer.g.dart';
 
 @Riverpod(keepAlive: true)
-class PrinterService extends _$PrinterService {
+class PrinterService extends _$PrinterService implements IPrinterService {
   @override
   FutureOr<void> build() async {}
 
@@ -70,7 +71,7 @@ class PrinterService extends _$PrinterService {
       await _printerStateLog(printerLog);
     } catch (e) {
       final machineName = ref.read(kioskInfoServiceProvider)?.kioskMachineName ?? '-';
-      SlackLogService().sendLogToSlack('*[$machineName]* \n printerError: $e');
+      ref.read(slackLogServiceProvider).sendLog('*[$machineName]* \n printerError: $e');
       rethrow;
     }
   }
@@ -79,11 +80,16 @@ class PrinterService extends _$PrinterService {
     try {
       if (printerLog != null) {
         final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
-        final log = printerLog.copyWith(kioskMachineId: machineId);
+        final cardCountState = ref.read(cardCountProvider);
+        final log = printerLog.copyWith(
+          kioskMachineId: machineId,
+          remainingSingleSidedCountPre: cardCountState.currentCount.toString(),
+          remainingSingleSidedCountPost: cardCountState.initialCount.toString(),
+        );
         if (machineId != 0) {
           await ref.read(kioskRepositoryProvider).updatePrintLog(request: log);
           ref.read(printerLogProvider.notifier).update(log);
-          SlackLogService().sendLogToSlack('PrintState : $log');
+          ref.read(slackLogServiceProvider).sendLog('PrintState : $log');
         }
       }
     } catch (e) {
@@ -91,6 +97,7 @@ class PrinterService extends _$PrinterService {
     }
   }
 
+  @override
   Future<void> printImage({
     required File? frontFile,
     required File? embeddedFile,
@@ -121,7 +128,11 @@ class PrinterService extends _$PrinterService {
       if (machineId != 0 && printerLog != null) {
         final kioskEventId = ref.read(kioskInfoServiceProvider)?.kioskEventId ?? 0;
         final cardCountState = ref.read(cardCountProvider);
-        final log = printerLog.copyWith(kioskMachineId: machineId);
+        final log = printerLog.copyWith(
+          kioskMachineId: machineId,
+          remainingSingleSidedCountPre: cardCountState.currentCount.toString(),
+          remainingSingleSidedCountPost: cardCountState.initialCount.toString(),
+        );
         ref.read(printerLogProvider.notifier).update(log);
         await ref.read(kioskRepositoryProvider).updatePrintLog(request: log);
         if (kioskEventId != 0) {
@@ -132,13 +143,13 @@ class PrinterService extends _$PrinterService {
                   remainingSingleSidedCount: cardCountState.remainingSingleSidedCount,
                 );
           } catch (e) {
-            SlackLogService().sendErrorLogToSlack('CardPrinter.printImage checkKioskAlive failure: $e');
+            ref.read(slackLogServiceProvider).sendErrorLog('CardPrinter.printImage checkKioskAlive failure: $e');
             logger.e('CardPrinter.printImage checkKioskAlive failure', error: e);
           }
         }
       }
     } catch (e) {
-      SlackLogService().sendErrorLogToSlack('CardPrinter.printImage _updatePrintStatusAndCheckKioskAlive failure: $e');
+      ref.read(slackLogServiceProvider).sendErrorLog('CardPrinter.printImage _updatePrintStatusAndCheckKioskAlive failure: $e');
       logger.e('CardPrinter.printImage _updatePrintStatusAndCheckKioskAlive failure', error: e);
     }
   }

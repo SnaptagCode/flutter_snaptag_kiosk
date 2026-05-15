@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_snaptag_kiosk/lib.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_snaptag_kiosk/core/core.dart';
+import 'package:flutter_snaptag_kiosk/data/models/enums/keypad_mode.dart';
+import 'package:flutter_snaptag_kiosk/presentation/core/slack_log_provider.dart';
+import 'package:flutter_snaptag_kiosk/flavors.dart';
 import 'package:flutter_snaptag_kiosk/core/ui/widget/dialog_helper.dart';
+import 'package:flutter_snaptag_kiosk/presentation/core/triple_tap_state.dart';
+import 'package:flutter_snaptag_kiosk/presentation/routers/routers.dart';
 import 'package:intl/intl.dart';
 
 class TripleTapFloatingButton extends ConsumerWidget {
@@ -12,7 +16,7 @@ class TripleTapFloatingButton extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final tripleTapNotifier = ref.read(tripleTapStateProvider.notifier);
 
-    String _generateCurrentTimePin() {
+    String generateCurrentTimePin() {
       return DateFormat("MMddHH").format(DateTime.now()); // 예: 031110 (3월 11일 10시)
     }
 
@@ -34,10 +38,10 @@ class TripleTapFloatingButton extends ConsumerWidget {
           String? enteredCode = await DialogHelper.showKeypadDialog(context, mode: ModeType.admin);
 
           if (enteredCode != null) {
-            String correctPassword = _generateCurrentTimePin();
+            String correctPassword = generateCurrentTimePin();
 
             if (enteredCode == correctPassword || enteredCode == '960623') {
-              SlackLogService().sendBroadcastLogToSlackWithKey(InfoKey.adminModeEnter.key);
+              ref.read(slackLogServiceProvider).sendBroadcastLogWithKey(InfoKey.adminModeEnter.key);
               SetupMainRouteData().go(context);
             } else {
               //await showAdminFailDialog(context); //비밀번호 불일치 → 오류 모달 표시
