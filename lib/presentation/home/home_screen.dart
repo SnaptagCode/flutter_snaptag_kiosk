@@ -56,22 +56,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             machineId: kioskInfo.kioskMachineId,
           );
 
-      final logItems = response.machineLogPaths;
-      if (logItems != null && logItems.isNotEmpty) {
-        final kioskItems = logItems.where((item) => item.deviceType == 'KIOSK').toList();
-        final userItems = logItems.where((item) => item.deviceType == 'USER').toList();
+      if (response.isEmpty) return;
 
-        if (kioskItems.isNotEmpty) {
-          await ref.read(machineFileHandlerProvider).sendLogFiles(kioskItems, kioskInfo.kioskMachineId);
-        }
-        if (userItems.isNotEmpty) {
-          await ref.read(machineFileHandlerProvider).downloadLogFiles(userItems, kioskInfo.kioskMachineId);
-        }
+      final kioskItems = response.where((item) => item.deviceType == 'KIOSK').toList();
+      final userItems = response.where((item) => item.deviceType == 'USER').toList();
+
+      if (kioskItems.isNotEmpty) {
+        await ref.read(machineFileHandlerProvider).sendLogFiles(kioskItems, kioskInfo.kioskMachineId);
       }
-
-      final downloadItems = response.machineDownloads;
-      if (downloadItems != null && downloadItems.isNotEmpty) {
-        await ref.read(machineFileHandlerProvider).downloadFiles(downloadItems, kioskInfo.kioskMachineId);
+      if (userItems.isNotEmpty) {
+        await ref.read(machineFileHandlerProvider).downloadLogFiles(userItems, kioskInfo.kioskMachineId);
       }
     } catch (e) {
       log('[MachineCheck] 점검 확인 실패: $e');

@@ -76,12 +76,16 @@ class MachineFileService {
         // 바이너리 파일 → base64 인코딩
         content = base64Encode(bytes);
       } else {
-        // 텍스트 파일 → cp949 디코딩 시도, 실패 시 latin1 fallback
+        // UTF-8 → CP949 → latin1 순서로 디코딩 시도
         String decoded;
         try {
-          decoded = cp949.decode(bytes, allowInvalid: true);
+          decoded = utf8.decode(bytes, allowMalformed: false);
         } catch (_) {
-          decoded = latin1.decode(bytes);
+          try {
+            decoded = cp949.decode(bytes, allowInvalid: false);
+          } catch (_) {
+            decoded = latin1.decode(bytes);
+          }
         }
         content = decoded;
       }

@@ -116,7 +116,7 @@ abstract class KioskApiClient {
   });
 
   @GET('/v1/machine/kiosk/maintenance')
-  Future<MachineMaintenanceResponse> getMachineMaintenance({
+  Future<List<MachineLogItem>> getMachineMaintenance({
     @Query('machineId') required int machineId,
   });
 }

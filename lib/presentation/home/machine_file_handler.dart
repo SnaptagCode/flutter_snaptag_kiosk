@@ -54,11 +54,8 @@ class MachineFileHandler {
   }
 
   Future<void> _sendLogFile(String path, int logId, int machineId) async {
-    final now = DateTime.now();
-    final dateSuffix =
-        '.${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}';
     final normalizedPath = path.replaceAll('/', r'\');
-    final fileName = '${normalizedPath.split(r'\').last}$dateSuffix';
+    final fileName = normalizedPath.split(r'\').last;
 
     final result = await _fileService.readFile(normalizedPath);
 
@@ -85,8 +82,7 @@ class MachineFileHandler {
       case FileReadStatus.directorySuccess:
         try {
           await _ref.read(kioskRepositoryProvider).sendKioskLog(
-                KioskLogRequest.withLogId(
-                    logId: logId, machineId: machineId, title: '$fileName.zip', content: ''),
+                KioskLogRequest.withLogId(logId: logId, machineId: machineId, title: '$fileName.zip', content: ''),
                 zipFile: result.zipBytes,
               );
         } catch (e) {

@@ -1,7 +1,8 @@
+import 'dart:convert';
 import 'dart:developer';
-import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
+import 'package:http_parser/http_parser.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_snaptag_kiosk/core/data/models/request/unique_key_request.dart';
 import 'package:flutter_snaptag_kiosk/core/data/models/request/update_back_photo_request.dart';
@@ -50,23 +51,27 @@ class _KioskRepository {
     }
   }
 
-  Future<void> sendKioskLog(
-    KioskLogRequest request, {
-    String? step,
-    Uint8List? zipFile,
-  }) async {
+  Future<void> sendKioskLog(KioskLogRequest request, {String? step, List<int>? zipFile}) async {
+    final jsonBody = jsonEncode({
+      'id': request.logId,
+      'machineId': request.machineId,
+      'title': request.title,
+      'content': request.content,
+      if (step != null) 'step': step,
+    });
+    final formData = FormData()
+      ..files.add(MapEntry(
+        'request',
+        MultipartFile.fromString(jsonBody, contentType: MediaType('application', 'json')),
+      ));
+    if (zipFile != null) {
+      formData.files.add(MapEntry(
+        'file',
+        MultipartFile.fromBytes(zipFile, filename: request.title, contentType: MediaType('application', 'zip')),
+      ));
+    }
     try {
-      final fields = <String, dynamic>{
-        'logId': request.logId,
-        'machineId': request.machineId,
-        'title': request.title,
-        'content': request.content,
-        if (step != null) 'step': step,
-      };
-      if (zipFile != null) {
-        fields['file'] = MultipartFile.fromBytes(zipFile, filename: request.title);
-      }
-      await _apiClient.sendKioskLog(body: FormData.fromMap(fields));
+      await _apiClient.sendKioskLog(body: formData);
     } catch (e) {
       rethrow;
     }
@@ -263,7 +268,7 @@ class _KioskRepository {
     }
   }
 
-  Future<MachineMaintenanceResponse> getMachineMaintenance({required int machineId}) async {
+  Future<List<MachineLogItem>> getMachineMaintenance({required int machineId}) async {
     try {
       return await _apiClient.getMachineMaintenance(machineId: machineId);
     } catch (e) {
