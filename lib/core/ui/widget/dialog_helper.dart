@@ -114,6 +114,7 @@ class DialogHelper {
     BuildContext context, {
     required String title,
     String? content,
+    String? subContent,
     bool showCancelButton = false,
     String cancelButtonText = '취소',
     required String confirmButtonText,
@@ -165,6 +166,19 @@ class DialogHelper {
                       style: context.typography.kioskAlert2M.copyWith(
                         color: Colors.black,
                         fontFamily: 'Pretendard',
+                      ),
+                    ),
+                  ),
+                if (subContent != null)
+                  Padding(
+                    padding: EdgeInsets.only(top: 16.h, left: 40.w, right: 40.w),
+                    child: Text(
+                      subContent,
+                      textAlign: TextAlign.center,
+                      style: context.typography.kioskAlert2M.copyWith(
+                        color: const Color(0xFFFF333F),
+                        fontFamily: 'Pretendard',
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                   ),
@@ -230,6 +244,7 @@ class DialogHelper {
     BuildContext context, {
     required String title,
     required String contentText,
+    String? subContentText,
     String? cancelButtonText,
     required String confirmButtonText,
     ButtonStyle? confirmButtonStyle,
@@ -238,6 +253,7 @@ class DialogHelper {
       context,
       title: title,
       content: contentText,
+      subContent: subContentText,
       showCancelButton: cancelButtonText != null,
       cancelButtonText: cancelButtonText ?? '취소',
       confirmButtonText: confirmButtonText,

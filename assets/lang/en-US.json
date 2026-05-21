@@ -46,6 +46,7 @@
   "alert_txt_refund_info": "There are transactions that haven’t\r\nbeen refunded.\r\nPlease insert the previously used card\r\ninto the terminal and proceed with the refund.",
   "alert_title_auto_refund_alert": "Refund Notice",
   "alert_txt_auto_refund_alert": "The printer is not working properly.\r\nA refund will be processed.",
+  "alert_sub_txt_auto_refund_alert": "Please keep your card inserted until the refund is complete!",
   "alert_btn_cancel": "Cancel",
   "alert_btn_ok": "OK",
   "alert_btn_go_to_home": "Go to Home",
