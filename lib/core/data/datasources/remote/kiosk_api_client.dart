@@ -16,7 +16,7 @@ abstract class KioskApiClient {
 
   @POST('/v1/internal/slack/kiosk-log')
   Future<void> sendKioskLog({
-    @Body() required Map<String, dynamic> body,
+    @Body() required FormData body,
   });
 
   // Health Check
@@ -113,5 +113,10 @@ abstract class KioskApiClient {
   @POST('/v1/qr/back-photo-nominated')
   Future<BackPhotoCardResponse> getBackPhotoCardByQr({
     @Body() required Map<String, dynamic> body,
+  });
+
+  @GET('/v1/machine/kiosk/maintenance')
+  Future<MachineMaintenanceResponse> getMachineMaintenance({
+    @Query('machineId') required int machineId,
   });
 }

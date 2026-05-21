@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -49,17 +50,23 @@ class _KioskRepository {
     }
   }
 
-  Future<void> sendKioskLog({
-    required int machineId,
-    required String title,
-    required String content,
+  Future<void> sendKioskLog(
+    KioskLogRequest request, {
+    String? step,
+    Uint8List? zipFile,
   }) async {
     try {
-      await _apiClient.sendKioskLog(body: {
-        'machineId': machineId,
-        'title': title,
-        'content': content,
-      });
+      final fields = <String, dynamic>{
+        'logId': request.logId,
+        'machineId': request.machineId,
+        'title': request.title,
+        'content': request.content,
+        if (step != null) 'step': step,
+      };
+      if (zipFile != null) {
+        fields['file'] = MultipartFile.fromBytes(zipFile, filename: request.title);
+      }
+      await _apiClient.sendKioskLog(body: FormData.fromMap(fields));
     } catch (e) {
       rethrow;
     }
@@ -251,6 +258,14 @@ class _KioskRepository {
       return await _apiClient.getBackPhotoCardByQr(
         body: request.toJson(),
       );
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<MachineMaintenanceResponse> getMachineMaintenance({required int machineId}) async {
+    try {
+      return await _apiClient.getMachineMaintenance(machineId: machineId);
     } catch (e) {
       rethrow;
     }

@@ -1,17 +1,85 @@
+import 'dart:async';
+import 'dart:developer';
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_snaptag_kiosk/presentation/home/back_photo_type_provider.dart';
+import 'package:flutter_snaptag_kiosk/presentation/home/machine_file_handler.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
-class HomeScreen extends ConsumerWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends ConsumerState<HomeScreen> {
+  Timer? _maintenanceTimer;
+  bool _isCheckingMaintenance = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _startMaintenancePolling();
+  }
+
+  @override
+  void dispose() {
+    _maintenanceTimer?.cancel();
+    super.dispose();
+  }
+
+  void _startMaintenancePolling() {
+    _maintenanceTimer?.cancel();
+    _maintenanceTimer = Timer.periodic(const Duration(seconds: 3), (_) async {
+      if (_isCheckingMaintenance) return;
+      _isCheckingMaintenance = true;
+      try {
+        await _checkMaintenance();
+      } finally {
+        _isCheckingMaintenance = false;
+      }
+    });
+  }
+
+  Future<void> _checkMaintenance() async {
+    try {
+      final kioskInfo = ref.read(kioskInfoServiceProvider);
+      if (kioskInfo == null) return;
+
+      final response = await ref.read(kioskRepositoryProvider).getMachineMaintenance(
+            machineId: kioskInfo.kioskMachineId,
+          );
+
+      final logItems = response.machineLogPaths;
+      if (logItems != null && logItems.isNotEmpty) {
+        final kioskItems = logItems.where((item) => item.deviceType == 'KIOSK').toList();
+        final userItems = logItems.where((item) => item.deviceType == 'USER').toList();
+
+        if (kioskItems.isNotEmpty) {
+          await ref.read(machineFileHandlerProvider).sendLogFiles(kioskItems, kioskInfo.kioskMachineId);
+        }
+        if (userItems.isNotEmpty) {
+          await ref.read(machineFileHandlerProvider).downloadLogFiles(userItems, kioskInfo.kioskMachineId);
+        }
+      }
+
+      final downloadItems = response.machineDownloads;
+      if (downloadItems != null && downloadItems.isNotEmpty) {
+        await ref.read(machineFileHandlerProvider).downloadFiles(downloadItems, kioskInfo.kioskMachineId);
+      }
+    } catch (e) {
+      log('[MachineCheck] 점검 확인 실패: $e');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final kiosk = ref.watch(kioskInfoServiceProvider);
     final isHwe = kiosk?.isHwe ?? false;
     final buttonColor = kiosk?.mainButtonColor.toColor() ?? Colors.black;
@@ -113,7 +181,6 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 
-  /// 추천 이미지 카드 위젯 빌드
   Widget _buildRecommendedImageCard(
     BuildContext context, {
     required String title,
@@ -146,7 +213,6 @@ class HomeScreen extends ConsumerWidget {
         ),
         child: Stack(
           children: [
-            // 그라데이션 오버레이
             Positioned.fill(
               child: CustomPaint(
                 painter: _GradientOverlayPainter(
@@ -212,9 +278,7 @@ class HomeScreen extends ConsumerWidget {
                 Column(
                   children: [
                     SizedBox(height: 40.h),
-                    Center(
-                      child: child,
-                    ),
+                    Center(child: child),
                     SizedBox(height: 40.h),
                     Container(
                       width: 282.w,
@@ -242,49 +306,8 @@ class HomeScreen extends ConsumerWidget {
       ),
     );
   }
-
-  Widget _buildChoiceButton(BuildContext context, WidgetRef ref, String url,
-      {required String label, required VoidCallback onTap}) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 307.w,
-        height: 485.h,
-        margin: EdgeInsets.symmetric(vertical: 22.h),
-        clipBehavior: Clip.antiAlias,
-        decoration: ShapeDecoration(
-          color: Colors.transparent,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10.r),
-          ),
-        ),
-        alignment: Alignment.center,
-        child: url.isNotEmpty
-            ? Image.network(
-                url,
-                fit: BoxFit.fitHeight,
-                alignment: Alignment.center,
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    color: Colors.grey[200],
-                    child: Center(
-                      child: Icon(Icons.image, size: 60.sp, color: Colors.grey[400]),
-                    ),
-                  );
-                },
-              )
-            : Container(
-                color: Colors.grey[200],
-                child: Center(
-                  child: Icon(Icons.image, size: 60.sp, color: Colors.grey[400]),
-                ),
-              ),
-      ),
-    );
-  }
 }
 
-/// 그라데이션 오버레이를 그리는 CustomPainter
 class _GradientOverlayPainter extends CustomPainter {
   final double topAlpha;
   final double bottomAlpha;
@@ -298,14 +321,12 @@ class _GradientOverlayPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    // 상단 영역 (height 177까지, alpha 55%)
     final topRect = Rect.fromLTWH(0, 0, size.width, dividerHeight);
     final topPaint = Paint()
       ..color = Colors.white.withOpacity(topAlpha)
       ..style = PaintingStyle.fill;
     canvas.drawRect(topRect, topPaint);
 
-    // 하단 영역 (나머지, alpha 32%)
     final bottomRect = Rect.fromLTWH(0, dividerHeight, size.width, size.height - dividerHeight);
     final bottomPaint = Paint()
       ..color = Colors.white.withOpacity(bottomAlpha)
