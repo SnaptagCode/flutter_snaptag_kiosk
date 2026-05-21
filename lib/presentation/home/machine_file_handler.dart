@@ -32,9 +32,21 @@ class MachineFileHandler {
         return;
       } catch (e) {
         if (attempt == _maxRetries) {
+          final message = '파일 작업 실패 ($_maxRetries회 시도 실패) ($path): $e';
           SlackLogService().sendErrorLogToSlack(
-            '*[MachineId: $machineId / LogId: $logId]* 파일 작업 실패 ($_maxRetries회 시도 실패) ($path): $e',
+            '*[MachineId: $machineId / LogId: $logId]* $message',
           );
+          try {
+            await _ref.read(kioskRepositoryProvider).sendKioskLog(
+                  KioskLogRequest.withLogId(
+                    logId: logId,
+                    machineId: machineId,
+                    title: '파일 작업 실패',
+                    content: message,
+                  ),
+                  step: 'ERROR',
+                );
+          } catch (_) {}
         } else {
           await Future.delayed(_retryDelay);
         }
