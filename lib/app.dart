@@ -25,6 +25,7 @@ class App extends ConsumerStatefulWidget {
 class _AppState extends ConsumerState<App> with WindowListener {
   bool _initializedFullScreen = false;
   bool _hasInitializedKioskInfo = false;
+  Timer? _windowPositionTimer;
 
   @override
   void initState() {
@@ -68,6 +69,7 @@ class _AppState extends ConsumerState<App> with WindowListener {
 
   @override
   void dispose() {
+    _windowPositionTimer?.cancel();
     if (Platform.isWindows) {
       windowManager.removeListener(this);
     }
@@ -90,6 +92,9 @@ class _AppState extends ConsumerState<App> with WindowListener {
         await windowManager.setPosition(Offset(-6, 0.0));
         await windowManager.setResizable(false);
         await windowManager.show();
+      });
+      _windowPositionTimer = Timer.periodic(const Duration(seconds: 5), (_) {
+        windowManager.setPosition(const Offset(-6, 0.0));
       });
     }
   }
@@ -114,11 +119,6 @@ class _AppState extends ConsumerState<App> with WindowListener {
 
   @override
   void onWindowFocus() {}
-
-  @override
-  void onWindowMove() {
-    windowManager.setPosition(const Offset(-6, 0.0));
-  }
 
   @override
   Widget build(BuildContext context) {
