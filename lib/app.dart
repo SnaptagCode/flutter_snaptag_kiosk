@@ -25,6 +25,7 @@ class App extends ConsumerStatefulWidget {
 class _AppState extends ConsumerState<App> with WindowListener {
   bool _initializedFullScreen = false;
   bool _hasInitializedKioskInfo = false;
+  Timer? _windowPositionTimer;
 
   @override
   void initState() {
@@ -59,7 +60,8 @@ class _AppState extends ConsumerState<App> with WindowListener {
           await ref.read(kioskInfoServiceProvider.notifier).getKioskMachineInfo();
         } catch (error) {
           final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
-          SlackLogService().sendErrorLogToSlack('*[MachineId : $machineId]* Kiosk info load failed at app startup: $error');
+          SlackLogService()
+              .sendErrorLogToSlack('*[MachineId : $machineId]* Kiosk info load failed at app startup: $error');
         }
       }
     });
@@ -67,6 +69,7 @@ class _AppState extends ConsumerState<App> with WindowListener {
 
   @override
   void dispose() {
+    _windowPositionTimer?.cancel();
     if (Platform.isWindows) {
       windowManager.removeListener(this);
     }
@@ -87,7 +90,11 @@ class _AppState extends ConsumerState<App> with WindowListener {
       );
       await windowManager.waitUntilReadyToShow(windowOptions, () async {
         await windowManager.setPosition(Offset(-6, 0.0));
+        await windowManager.setResizable(false);
         await windowManager.show();
+      });
+      _windowPositionTimer = Timer.periodic(const Duration(seconds: 5), (_) {
+        windowManager.setPosition(const Offset(-6, 0.0));
       });
     }
   }

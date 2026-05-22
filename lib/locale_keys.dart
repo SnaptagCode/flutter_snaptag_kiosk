@@ -60,6 +60,7 @@ abstract class LocaleKeys {
 
   static const alert_title_auto_refund_alert = 'alert_title_auto_refund_alert';
   static const alert_txt_auto_refund_alert = 'alert_txt_auto_refund_alert';
+  static const alert_sub_txt_auto_refund_alert = 'alert_sub_txt_auto_refund_alert';
   static const alert_title_network_error = 'alert_title_network_error';
   static const alert_txt_print_network_error = 'alert_txt_print_network_error';
   static const choice_recommended_images = 'choice_recommended_images';
