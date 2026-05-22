@@ -150,6 +150,7 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> with Si
               context,
               title: LocaleKeys.alert_title_auto_refund_alert.tr(),
               contentText: LocaleKeys.alert_txt_auto_refund_alert.tr(),
+              subContentText: LocaleKeys.alert_sub_txt_auto_refund_alert.tr(),
               confirmButtonText: LocaleKeys.alert_btn_paymentcard_failure.tr(),
             );
 
