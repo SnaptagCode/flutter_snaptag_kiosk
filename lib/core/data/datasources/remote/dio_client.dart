@@ -12,6 +12,7 @@ final dioProvider = Provider.family<Dio, String>((ref, baseUrl) {
     ..options.receiveTimeout = const Duration(seconds: 30);
   dio.interceptors.add(DioLogger(
       sendHook: (log) {
+        if (log.contains('/machine/kiosk/maintenance')) return;
         SlackLogService().sendLogToSlack(log);
       },
       machineIdProvider: () => ref.read(kioskInfoServiceProvider)?.kioskMachineId,

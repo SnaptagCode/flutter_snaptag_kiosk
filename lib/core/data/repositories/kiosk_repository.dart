@@ -1,6 +1,8 @@
+import 'dart:convert';
 import 'dart:developer';
 
 import 'package:dio/dio.dart';
+import 'package:http_parser/http_parser.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_snaptag_kiosk/core/data/models/request/unique_key_request.dart';
 import 'package:flutter_snaptag_kiosk/core/data/models/request/update_back_photo_request.dart';
@@ -49,17 +51,27 @@ class _KioskRepository {
     }
   }
 
-  Future<void> sendKioskLog({
-    required int machineId,
-    required String title,
-    required String content,
-  }) async {
+  Future<void> sendKioskLog(KioskLogRequest request, {String? step, List<int>? zipFile}) async {
+    final jsonBody = jsonEncode({
+      'id': request.logId,
+      'machineId': request.machineId,
+      'title': request.title,
+      'content': request.content,
+      if (step != null) 'step': step,
+    });
+    final formData = FormData()
+      ..files.add(MapEntry(
+        'request',
+        MultipartFile.fromString(jsonBody, contentType: MediaType('application', 'json')),
+      ));
+    if (zipFile != null) {
+      formData.files.add(MapEntry(
+        'file',
+        MultipartFile.fromBytes(zipFile, filename: request.title, contentType: MediaType('application', 'zip')),
+      ));
+    }
     try {
-      await _apiClient.sendKioskLog(body: {
-        'machineId': machineId,
-        'title': title,
-        'content': content,
-      });
+      await _apiClient.sendKioskLog(body: formData);
     } catch (e) {
       rethrow;
     }
@@ -251,6 +263,14 @@ class _KioskRepository {
       return await _apiClient.getBackPhotoCardByQr(
         body: request.toJson(),
       );
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<List<MachineLogItem>> getMachineMaintenance({required int machineId}) async {
+    try {
+      return await _apiClient.getMachineMaintenance(machineId: machineId);
     } catch (e) {
       rethrow;
     }

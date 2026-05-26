@@ -149,7 +149,7 @@ class DioLogger extends Interceptor {
       }
     }
     if (!err.requestOptions.path.contains('slack') &&
-        !err.requestOptions.path.contains('machine/maintenance') &&
+        !err.requestOptions.path.contains('maintenance') &&
         !err.requestOptions.path.contains('polling') &&
         !err.requestOptions.path.contains('error-code')) {
       sendHook?.call(_buffer.toString());
@@ -186,7 +186,7 @@ class DioLogger extends Interceptor {
       _printLine('╚');
     }
     if (!response.requestOptions.path.contains('slack') &&
-        !response.requestOptions.path.contains('machine/maintenance') &&
+        !response.requestOptions.path.contains('maintenance') &&
         !response.requestOptions.path.contains('polling') &&
         !response.requestOptions.path.contains('error-code')) {
       sendHook?.call(_buffer.toString());
