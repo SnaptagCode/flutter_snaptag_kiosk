@@ -68,7 +68,12 @@ class PhotoCardPreviewScreenProvider extends _$PhotoCardPreviewScreenProvider {
 
       state = const AsyncValue.data(null);
     } catch (e, stack) {
-      if (e is! OrderCreationException && e is! PreconditionFailedException && e is! EmptyApprovalNumberException) {
+      if (e is! OrderCreationException &&
+          e is! PreconditionFailedException &&
+          e is! EmptyApprovalNumberException &&
+          e is! CancelledPaymentException &&
+          e is! TimeoutPaymentException &&
+          e is! UnknownPaymentException) {
         try {
           await ref.read(paymentServiceProvider.notifier).refund();
           if (ref.read(pagePrintProvider) == PagePrintType.single) {
