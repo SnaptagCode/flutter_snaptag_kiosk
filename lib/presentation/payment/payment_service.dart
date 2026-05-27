@@ -356,7 +356,7 @@ class PaymentService extends _$PaymentService {
       approvalNumber: approval?.approvalNo ?? '-',
       purchaseAuthNumber: approval?.approvalNo ?? '-',
       authSeqNumber: approval?.approvalNo ?? '-',
-      detail: approval?.KSNET ?? '{}',
+      detail: approval?.KSNET ?? '({})',
       description: description,
     );
 

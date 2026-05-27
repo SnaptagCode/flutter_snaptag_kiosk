@@ -12,13 +12,41 @@ final machineFileHandlerProvider = Provider((ref) {
 });
 
 class MachineFileHandler {
-  const MachineFileHandler(this._ref, this._fileService);
+  MachineFileHandler(this._ref, this._fileService);
 
   final Ref _ref;
   final MachineFileService _fileService;
 
+  bool _isRunning = false;
+
   static const _maxRetries = 3;
   static const _retryDelay = Duration(milliseconds: 500);
+
+  Future<void> handleFileTasks({
+    required List<MachineLogItem>? logPaths,
+    required List<MachineDownloadItem>? downloads,
+    required int machineId,
+  }) async {
+    if (_isRunning) return;
+    _isRunning = true;
+    try {
+      if (logPaths != null && logPaths.isNotEmpty) {
+        final kioskItems = logPaths.where((item) => item.deviceType == 'KIOSK').toList();
+        final userItems = logPaths.where((item) => item.deviceType == 'USER').toList();
+        if (kioskItems.isNotEmpty) await _sendLogFiles(kioskItems, machineId);
+        if (userItems.isNotEmpty) await _downloadLogFiles(userItems, machineId);
+      }
+      if (downloads != null && downloads.isNotEmpty) {
+        await _downloadFiles(downloads, machineId);
+      }
+    } catch (e) {
+      SlackLogService().sendErrorLogToSlack(
+        '*[MachineId: $machineId]* handleFileTasks 실패: $e',
+      );
+    } finally {
+      _isRunning = false;
+    }
+  }
 
   Future<void> _withRetry({
     required Future<void> Function() op,
@@ -32,8 +60,9 @@ class MachineFileHandler {
         return;
       } catch (e) {
         if (attempt == _maxRetries) {
+          final message = '파일 작업 실패 ($_maxRetries회 시도 실패) ($path): $e';
           SlackLogService().sendErrorLogToSlack(
-            '*[MachineId: $machineId / LogId: $logId]* 파일 작업 실패 ($_maxRetries회 시도 실패) ($path): $e',
+            '*[MachineId: $machineId / LogId: $logId]* $message',
           );
           try {
             await _ref.read(kioskRepositoryProvider).sendKioskLog(
@@ -53,7 +82,7 @@ class MachineFileHandler {
     }
   }
 
-  Future<void> sendLogFiles(List<MachineLogItem> items, int machineId) async {
+  Future<void> _sendLogFiles(List<MachineLogItem> items, int machineId) async {
     for (final item in items) {
       await _withRetry(
         op: () => _sendLogFile(item.path, item.id, machineId),
@@ -104,11 +133,11 @@ class MachineFileHandler {
     }
   }
 
-  Future<void> downloadFiles(List<MachineDownloadItem> items, int machineId) async {
+  Future<void> _downloadFiles(List<MachineDownloadItem> items, int machineId) async {
     for (final item in items) {
       final bytes = base64Decode(item.content);
       await _withRetry(
-        op: () => downloadFile(item.path, bytes, item.id, machineId),
+        op: () => _downloadFile(item.path, bytes, item.id, machineId),
         machineId: machineId,
         logId: item.id,
         path: item.path,
@@ -116,11 +145,11 @@ class MachineFileHandler {
     }
   }
 
-  Future<void> downloadLogFiles(List<MachineLogItem> items, int machineId) async {
+  Future<void> _downloadLogFiles(List<MachineLogItem> items, int machineId) async {
     for (final item in items) {
       if (item.urlPath == null) continue;
       await _withRetry(
-        op: () => downloadFileFromUrl(item.urlPath!, item.path, item.id, machineId),
+        op: () => _downloadFileFromUrl(item.urlPath!, item.path, item.id, machineId),
         machineId: machineId,
         logId: item.id,
         path: item.path,
@@ -128,48 +157,40 @@ class MachineFileHandler {
     }
   }
 
-  Future<void> downloadFileFromUrl(String urlPath, String path, int logId, int machineId) async {
+  Future<void> _downloadFileFromUrl(String urlPath, String path, int logId, int machineId) async {
     final normalizedPath = path.replaceAll('/', r'\');
     final fileName = normalizedPath.split(r'\').last;
 
-    try {
-      final bytes = await _fileService.downloadBytesFromUrl(urlPath);
-      await _fileService.writeFile(path, bytes);
+    final bytes = await _fileService.downloadBytesFromUrl(urlPath);
+    await _fileService.writeFile(path, bytes);
 
-      try {
-        await _ref.read(kioskRepositoryProvider).sendKioskLog(
-              KioskLogRequest.withLogId(
-                  logId: logId, machineId: machineId, title: fileName, content: '파일 저장 완료: $path'),
-            );
-      } catch (e) {
-        SlackLogService().sendErrorLogToSlack(
-          '*[MachineId: $machineId / LogId: $logId]* 파일 저장 완료 알림 전송 실패 ($path): $e',
-        );
-      }
+    try {
+      await _ref.read(kioskRepositoryProvider).sendKioskLog(
+            KioskLogRequest.withLogId(
+                logId: logId, machineId: machineId, title: fileName, content: '파일 저장 완료: $path'),
+          );
     } catch (e) {
-      rethrow;
+      SlackLogService().sendErrorLogToSlack(
+        '*[MachineId: $machineId / LogId: $logId]* 파일 저장 완료 알림 전송 실패 ($path): $e',
+      );
     }
   }
 
-  Future<void> downloadFile(String path, List<int> bytes, int logId, int machineId) async {
+  Future<void> _downloadFile(String path, List<int> bytes, int logId, int machineId) async {
     final normalizedPath = path.replaceAll('/', r'\');
     final fileName = normalizedPath.split(r'\').last;
 
-    try {
-      await _fileService.writeFile(path, bytes);
+    await _fileService.writeFile(path, bytes);
 
-      try {
-        await _ref.read(kioskRepositoryProvider).sendKioskLog(
-              KioskLogRequest.withLogId(
-                  logId: logId, machineId: machineId, title: fileName, content: '파일 저장 완료: $path'),
-            );
-      } catch (e) {
-        SlackLogService().sendErrorLogToSlack(
-          '*[MachineId: $machineId / LogId: $logId]* 파일 저장 완료 알림 전송 실패 ($path): $e',
-        );
-      }
+    try {
+      await _ref.read(kioskRepositoryProvider).sendKioskLog(
+            KioskLogRequest.withLogId(
+                logId: logId, machineId: machineId, title: fileName, content: '파일 저장 완료: $path'),
+          );
     } catch (e) {
-      rethrow;
+      SlackLogService().sendErrorLogToSlack(
+        '*[MachineId: $machineId / LogId: $logId]* 파일 저장 완료 알림 전송 실패 ($path): $e',
+      );
     }
   }
 }
