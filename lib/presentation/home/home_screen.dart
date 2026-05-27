@@ -20,7 +20,6 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   Timer? _maintenanceTimer;
-  bool _isCheckingMaintenance = false;
 
   @override
   void initState() {
@@ -36,14 +35,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   void _startMaintenancePolling() {
     _maintenanceTimer?.cancel();
-    _maintenanceTimer = Timer.periodic(const Duration(seconds: 3), (_) async {
-      if (_isCheckingMaintenance) return;
-      _isCheckingMaintenance = true;
-      try {
-        await _checkMaintenance();
-      } finally {
-        _isCheckingMaintenance = false;
-      }
+    _maintenanceTimer = Timer.periodic(const Duration(seconds: 3), (_) {
+      _checkMaintenance();
     });
   }
 
@@ -56,17 +49,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             machineId: kioskInfo.kioskMachineId,
           );
 
-      if (response.isEmpty) return;
-
-      final kioskItems = response.where((item) => item.deviceType == 'KIOSK').toList();
-      final userItems = response.where((item) => item.deviceType == 'USER').toList();
-
-      if (kioskItems.isNotEmpty) {
-        await ref.read(machineFileHandlerProvider).sendLogFiles(kioskItems, kioskInfo.kioskMachineId);
-      }
-      if (userItems.isNotEmpty) {
-        await ref.read(machineFileHandlerProvider).downloadLogFiles(userItems, kioskInfo.kioskMachineId);
-      }
+      unawaited(ref.read(machineFileHandlerProvider).handleFileTasks(
+            logPaths: response,
+            downloads: null,
+            machineId: kioskInfo.kioskMachineId,
+          ));
     } catch (e) {
       log('[MachineCheck] 점검 확인 실패: $e');
     }
