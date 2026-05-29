@@ -142,11 +142,4 @@ abstract class KioskApiClient {
   Future<void> succeedMachineJob({
     @Path('printJobId') required int printJobId,
   });
-
-  // TODO: 백엔드 엔드포인트 확정 후 경로 수정
-  @PATCH('/v1/machine/order/{kioskOrderId}/status')
-  Future<void> updateMachineJobOrder({
-    @Path('kioskOrderId') required int kioskOrderId,
-    @Body() required Map<String, dynamic> body,
-  });
 }

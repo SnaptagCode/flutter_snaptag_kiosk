@@ -313,15 +313,4 @@ class _KioskRepository {
       rethrow;
     }
   }
-
-  Future<void> updateMachineJobOrder(int kioskOrderId, UpdateMachineJobOrderRequest request) async {
-    try {
-      await _apiClient.updateMachineJobOrder(
-        kioskOrderId: kioskOrderId,
-        body: request.toJson(),
-      );
-    } catch (e) {
-      rethrow;
-    }
-  }
 }

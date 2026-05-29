@@ -82,7 +82,7 @@ class MachineJobPolling extends _$MachineJobPolling {
       // 선점: 다른 처리와 중복되지 않도록 서버에 잠금
       await ref.read(kioskRepositoryProvider).pickMachineJob(response.printJobId!);
     } catch (e) {
-      await _failQuietly(response.printJobId, '선점 실패: $e');
+      await _failJob(response.printJobId, '선점 실패: $e');
       if (!_disposed) _startTimer();
       return;
     }
@@ -93,7 +93,7 @@ class MachineJobPolling extends _$MachineJobPolling {
 
   /// View: 사용자가 환불을 취소(또는 타임아웃)
   Future<void> cancelJob(MachineJobPollingResponse response) async {
-    await _failQuietly(response.printJobId, '사용자 취소');
+    await _failJob(response.printJobId, '사용자 취소');
     resume();
   }
 
@@ -104,13 +104,15 @@ class MachineJobPolling extends _$MachineJobPolling {
     _startTimer();
   }
 
-  Future<void> _failQuietly(int? printJobId, String reason) async {
+  Future<void> _failJob(int? printJobId, String reason) async {
     if (printJobId == null) return;
     try {
       await ref.read(kioskRepositoryProvider).failMachineJob(
             printJobId: printJobId,
             failureReason: reason,
           );
-    } catch (_) {}
+    } catch (e) {
+      SlackLogService().sendErrorLogToSlack('환불 job($printJobId) failMachineJob 실패: $e');
+    }
   }
 }

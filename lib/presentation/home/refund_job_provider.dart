@@ -26,6 +26,8 @@ class RefundJobNotifier extends _$RefundJobNotifier {
 
   Future<void> process(MachineJobPollingResponse response) async {
     if (state.isLoading) return;
+    // 처리 시작 후에는 홈 화면이 dispose돼도 환불(취소→주문갱신→job 종결)이 끝까지 완료되도록 살려둔다.
+    final link = ref.keepAlive();
     state = const AsyncValue.loading();
     try {
       final result = await _processRefund(response);
@@ -34,16 +36,11 @@ class RefundJobNotifier extends _$RefundJobNotifier {
       final printJobId = response.printJobId;
       SlackLogService().sendErrorLogToSlack('환불 job($printJobId) 예상치 못한 오류: $e');
       if (printJobId != null) {
-        try {
-          await ref.read(kioskRepositoryProvider).failMachineJob(
-                printJobId: printJobId,
-                failureReason: '환불 처리 중 예상치 못한 오류: $e',
-              );
-        } catch (e2) {
-          SlackLogService().sendErrorLogToSlack('환불 job($printJobId) failMachineJob 실패: $e2');
-        }
+        await _failJob(printJobId, '환불 처리 중 예상치 못한 오류: $e');
       }
       state = AsyncValue.data(RefundFailure(e is PaymentFailedException ? e.message : '환불을 완료하지 못했어요.'));
+    } finally {
+      link.close();
     }
   }
 
@@ -57,16 +54,21 @@ class RefundJobNotifier extends _$RefundJobNotifier {
           '(printJobId=$printJobId, kioskOrderId=$kioskOrderId, refundInfo=${refundInfo == null ? 'null' : 'ok'})';
       SlackLogService().sendErrorLogToSlack(reason);
       if (printJobId != null) {
-        try {
-          await ref.read(kioskRepositoryProvider).failMachineJob(
-                printJobId: printJobId,
-                failureReason: reason,
-              );
-        } catch (e) {
-          SlackLogService().sendErrorLogToSlack('환불 job($printJobId) failMachineJob 실패: $e');
-        }
+        await _failJob(printJobId, reason);
       }
       return null;
+    }
+
+    // Phase 0: 단말기 상태 확인 — 미응답이거나 RES 비정상이면 환불 진행 불가
+    try {
+      final device = await ref.read(paymentRepositoryProvider).check();
+      if (!device.isReady) {
+        throw PaymentProcessingException('단말기 상태 비정상 (res: ${device.res}, errcode: ${device.errcode})');
+      }
+    } catch (e) {
+      final reason = e is PaymentFailedException ? e.message : '단말기 응답 없음: $e';
+      await _failJob(printJobId, '단말기 점검 실패: $reason');
+      return RefundFailure('카드 단말기 상태를 확인해주세요.');
     }
 
     // Phase 1: 결제사 취소 — 실패 시 failMachineJob 가능
@@ -78,51 +80,40 @@ class RefundJobNotifier extends _$RefundJobNotifier {
             originalApprovalDate: refundInfo.originalApprovalDate,
           );
     } catch (e) {
-      try {
-        await ref.read(kioskRepositoryProvider).failMachineJob(
-              printJobId: printJobId,
-              failureReason: '환불 실패: $e',
-            );
-      } catch (e2) {
-        SlackLogService().sendErrorLogToSlack('환불 job($printJobId) failMachineJob 실패: $e2');
-      }
+      await _failJob(printJobId, '환불 실패: $e');
       return RefundFailure(e is PaymentFailedException ? e.message : '환불을 완료하지 못했어요.');
     }
 
-    // Phase 2: cancel 완료 이후 — isSuccess=true면 failMachineJob 금지
-    final isSuccess = paymentResponse.isSuccess || paymentResponse.isAlreadyCanceled;
+    // Phase 2: cancel 완료 이후 — 성공 판정은 프로젝트 표준(orderState)에 맞춘다.
+    // (isSuccess=true면 실제 환불됨 → succeed, 금지: fail)
+    final isSuccess = paymentResponse.orderState == OrderStatus.refunded;
     final kioskInfo = ref.read(kioskInfoServiceProvider);
 
     if (kioskInfo == null) {
       SlackLogService().sendErrorLogToSlack(
         '환불 job($printJobId) kioskInfo null — 수동 정산 필요 (isSuccess=$isSuccess)',
       );
-      try {
-        if (isSuccess) {
-          await ref.read(kioskRepositoryProvider).succeedMachineJob(printJobId);
-        } else {
-          await ref.read(kioskRepositoryProvider).failMachineJob(
-                printJobId: printJobId,
-                failureReason: 'kioskInfo null',
-              );
-        }
-      } catch (e) {
-        SlackLogService().sendErrorLogToSlack('환불 job($printJobId) job 종결 실패: $e');
+      if (isSuccess) {
+        await _succeedJob(printJobId);
+      } else {
+        await _failJob(printJobId, 'kioskInfo null');
       }
       return null;
     }
 
     final int machineId;
-    final UpdateMachineJobOrderRequest statusRequest;
+    final UpdateOrderRequest statusRequest;
     try {
       machineId = kioskInfo.kioskMachineId;
-      statusRequest = UpdateMachineJobOrderRequest(
+      statusRequest = UpdateOrderRequest(
         kioskEventId: refundInfo.kioskEventId,
         kioskMachineId: kioskInfo.kioskMachineId,
+        photoAuthNumber: refundInfo.photoAuthNumber,
         status: isSuccess ? OrderStatus.refunded : OrderStatus.refunded_failed,
         amount: refundInfo.amount,
-        authSeqNumber: isSuccess ? (paymentResponse.approvalNo ?? '-') : '-',
-        approvalNumber: isSuccess ? (paymentResponse.approvalNo ?? '-') : '-',
+        purchaseAuthNumber: refundInfo.originalApprovalNo,
+        authSeqNumber: refundInfo.originalApprovalNo,
+        approvalNumber: refundInfo.originalApprovalNo,
         description: isSuccess
             ? null
             : (paymentResponse.msg?.isNotEmpty == true ? paymentResponse.msg : paymentResponse.message1),
@@ -132,58 +123,74 @@ class RefundJobNotifier extends _$RefundJobNotifier {
       SlackLogService().sendErrorLogToSlack(
         '환불 job($printJobId) 상태 요청 구성 실패 — 수동 정산 필요: $e',
       );
-      try {
-        if (isSuccess) {
-          await ref.read(kioskRepositoryProvider).succeedMachineJob(printJobId);
-        } else {
-          await ref.read(kioskRepositoryProvider).failMachineJob(
-                printJobId: printJobId,
-                failureReason: '상태 요청 구성 실패: $e',
-              );
-        }
-      } catch (e2) {
-        SlackLogService().sendErrorLogToSlack('환불 job($printJobId) job 종결 실패: $e2');
+      if (isSuccess) {
+        await _succeedJob(printJobId);
+      } else {
+        await _failJob(printJobId, '상태 요청 구성 실패: $e');
       }
       return isSuccess ? RefundSuccess(refundInfo.amount) : null;
     }
 
+    // 주문 상태 갱신 (3회 재시도, 점진적 백오프). 성공 여부를 추적한다.
+    var orderUpdated = false;
     for (int attempt = 1; attempt <= 3; attempt++) {
       try {
-        await ref.read(kioskRepositoryProvider).updateMachineJobOrder(kioskOrderId, statusRequest);
+        await ref.read(kioskRepositoryProvider).updateOrderStatus(kioskOrderId, statusRequest);
+        orderUpdated = true;
         break;
       } catch (e) {
         if (attempt >= 3) {
           SlackLogService().sendErrorLogToSlack(
-            '[MachineId: $machineId] 환불 job($printJobId) updateMachineJobOrder 3회 실패 — 수동 정산 필요: $e',
+            '[MachineId: $machineId] 환불 job($printJobId) updateOrderStatus 3회 실패: $e',
           );
+        } else {
+          await Future.delayed(Duration(milliseconds: 300 * attempt));
         }
       }
     }
 
     if (isSuccess) {
-      try {
-        await ref.read(kioskRepositoryProvider).succeedMachineJob(printJobId);
-      } catch (e) {
-        SlackLogService().sendErrorLogToSlack('환불 job($printJobId) succeedMachineJob 실패: $e');
+      await _succeedJob(printJobId);
+      if (orderUpdated) {
+        SlackLogService().sendLogToSlack(
+            '[MachineId: $machineId] polling 환불 성공 | job=$printJobId | ${refundInfo.amount}원');
+      } else {
+        // 카드 취소(환불)는 됐지만 주문 상태 갱신 실패 → 데이터 불일치, 사람이 직접 정산 필요
+        SlackLogService().sendErrorLogToSlack(
+          '[MachineId: $machineId] ⚠️ polling 환불 성공했으나 주문 상태 갱신 실패 — 수동 정산 필요 '
+          '| job=$printJobId | orderId=$kioskOrderId | ${refundInfo.amount}원',
+        );
       }
-      SlackLogService().sendLogToSlack(
-          '[MachineId: $machineId] polling 환불 성공 | job=$printJobId | ${refundInfo.amount}원');
       return RefundSuccess(refundInfo.amount);
     } else {
       final failReason =
           (paymentResponse.msg?.isNotEmpty == true ? paymentResponse.msg : paymentResponse.message1) ?? '환불 실패';
-      try {
-        await ref.read(kioskRepositoryProvider).failMachineJob(
-              printJobId: printJobId,
-              failureReason: failReason,
-            );
-      } catch (e) {
-        SlackLogService().sendErrorLogToSlack('환불 job($printJobId) failMachineJob 실패: $e');
-      }
+      await _failJob(printJobId, failReason);
       SlackLogService().sendErrorLogToSlack(
         '[MachineId: $machineId] polling 환불 실패 | job=$printJobId | $failReason',
       );
       return RefundFailure('환불을 완료하지 못했어요.');
+    }
+  }
+
+  /// job을 실패로 종결. 내부 호출 실패 시에도 반드시 Slack에 남긴다 (무음 방지).
+  Future<void> _failJob(int printJobId, String reason) async {
+    try {
+      await ref.read(kioskRepositoryProvider).failMachineJob(
+            printJobId: printJobId,
+            failureReason: reason,
+          );
+    } catch (e) {
+      SlackLogService().sendErrorLogToSlack('환불 job($printJobId) failMachineJob 실패: $e');
+    }
+  }
+
+  /// job을 성공으로 종결. 내부 호출 실패 시에도 반드시 Slack에 남긴다.
+  Future<void> _succeedJob(int printJobId) async {
+    try {
+      await ref.read(kioskRepositoryProvider).succeedMachineJob(printJobId);
+    } catch (e) {
+      SlackLogService().sendErrorLogToSlack('환불 job($printJobId) succeedMachineJob 실패: $e');
     }
   }
 }
