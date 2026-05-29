@@ -20,6 +20,8 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
+  bool _refundDialogOpen = false;
+
   @override
   Widget build(BuildContext context) {
     // 유지보수 폴링을 홈 화면 수명 동안 살려둔다 (keep-alive)
@@ -30,14 +32,25 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       machineJobPollingProvider,
       (previous, next) async {
         if (next is! MachineJobDetected) return;
-        if (!mounted) return;
+        if (!mounted || _refundDialogOpen) return;
+        _refundDialogOpen = true;
         final response = next.response;
-        final confirmed = await DialogHelper.showRefundCardInsertDialog(context);
-        if (!confirmed) {
+        try {
+          final confirmed = await DialogHelper.showRefundCardInsertDialog(context);
+          if (!confirmed) {
+            await ref.read(machineJobPollingProvider.notifier).cancelJob(response);
+            return;
+          }
+          await ref.read(refundJobNotifierProvider.notifier).process(response);
+        } catch (e) {
+          // 선점 이후 다이얼로그 단계에서 예기치 못한 예외로 흐름이 끊기면
+          // job이 picked 상태로 떠있지 않도록 fail 처리한다.
+          // (process() 내부 예외는 자체적으로 fail 종결하므로 여기 도달하지 않음)
+          SlackLogService().sendErrorLogToSlack('환불 다이얼로그 처리 중 예외 → job fail: $e');
           await ref.read(machineJobPollingProvider.notifier).cancelJob(response);
-          return;
+        } finally {
+          _refundDialogOpen = false;
         }
-        await ref.read(refundJobNotifierProvider.notifier).process(response);
       },
     );
 
