@@ -21,6 +21,8 @@ class PaymentHistoryScreen extends ConsumerStatefulWidget {
 }
 
 class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
+  int _lastRefundAmount = 0;
+
   @override
   Widget build(BuildContext context) {
     ref.listen(setupRefundProcessProvider, (prev, next) {
@@ -32,7 +34,7 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
         data: (response) async {
           context.loaderOverlay.hide();
           if (response != null && response.code == 1) {
-            await DialogHelper.showRefundSuccessDialog(context);
+            await DialogHelper.showRefundSuccessDialog(context, amount: _lastRefundAmount);
           } else if (response != null) {
             await DialogHelper.showRefundFailDialog(context);
           }
@@ -403,6 +405,7 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
                   showCancelButton: true,
                 );
                 if (result2) {
+                  _lastRefundAmount = order.amount.toInt();
                   await ref.read(setupRefundProcessProvider.notifier).startRefund(order);
                   context.loaderOverlay.hide();
                 } else {
@@ -448,6 +451,7 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
                   showCancelButton: true,
                 );
                 if (result2) {
+                  _lastRefundAmount = order.amount.toInt();
                   await ref.read(setupRefundProcessProvider.notifier).startRefund(order);
                   context.loaderOverlay.hide();
                 } else {

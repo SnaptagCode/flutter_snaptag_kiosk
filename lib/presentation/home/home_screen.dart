@@ -1,14 +1,15 @@
-import 'dart:async';
-import 'dart:developer';
-
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_snaptag_kiosk/core/ui/widget/dialog_helper.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_snaptag_kiosk/presentation/home/back_photo_type_provider.dart';
-import 'package:flutter_snaptag_kiosk/presentation/home/machine_file_handler.dart';
+import 'package:flutter_snaptag_kiosk/presentation/home/machine_job_polling_provider.dart';
+import 'package:flutter_snaptag_kiosk/presentation/home/maintenance_polling_provider.dart';
+import 'package:flutter_snaptag_kiosk/presentation/home/refund_job_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
+import 'package:loader_overlay/loader_overlay.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -19,48 +20,49 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
-  Timer? _maintenanceTimer;
-
-  @override
-  void initState() {
-    super.initState();
-    _startMaintenancePolling();
-  }
-
-  @override
-  void dispose() {
-    _maintenanceTimer?.cancel();
-    super.dispose();
-  }
-
-  void _startMaintenancePolling() {
-    _maintenanceTimer?.cancel();
-    _maintenanceTimer = Timer.periodic(const Duration(seconds: 3), (_) {
-      _checkMaintenance();
-    });
-  }
-
-  Future<void> _checkMaintenance() async {
-    try {
-      final kioskInfo = ref.read(kioskInfoServiceProvider);
-      if (kioskInfo == null) return;
-
-      final response = await ref.read(kioskRepositoryProvider).getMachineMaintenance(
-            machineId: kioskInfo.kioskMachineId,
-          );
-
-      unawaited(ref.read(machineFileHandlerProvider).handleFileTasks(
-            logPaths: response,
-            downloads: null,
-            machineId: kioskInfo.kioskMachineId,
-          ));
-    } catch (e) {
-      log('[MachineCheck] 점검 확인 실패: $e');
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
+    // 유지보수 폴링을 홈 화면 수명 동안 살려둔다 (keep-alive)
+    ref.watch(maintenancePollingProvider);
+
+    // 폴링 노티파이어가 환불 job을 감지하면 카드삽입 다이얼로그를 띄운다
+    ref.listen<MachineJobState>(
+      machineJobPollingProvider,
+      (previous, next) async {
+        if (next is! MachineJobDetected) return;
+        if (!mounted) return;
+        final response = next.response;
+        final confirmed = await DialogHelper.showRefundCardInsertDialog(context);
+        if (!confirmed) {
+          await ref.read(machineJobPollingProvider.notifier).cancelJob(response);
+          return;
+        }
+        await ref.read(refundJobNotifierProvider.notifier).process(response);
+      },
+    );
+
+    ref.listen<AsyncValue<RefundResult?>>(
+      refundJobNotifierProvider,
+      (previous, next) async {
+        if (next.isLoading) {
+          if (mounted) context.loaderOverlay.show();
+          return;
+        }
+        if (mounted && context.loaderOverlay.visible) {
+          context.loaderOverlay.hide();
+        }
+        if (!mounted) return;
+        final result = next.valueOrNull;
+        if (result is RefundSuccess) {
+          await DialogHelper.showRefundSuccessDialog(context, amount: result.amount);
+        } else if (result is RefundFailure) {
+          await DialogHelper.showRefundFailedDialog(context, reason: result.reason);
+        }
+        // 결과 다이얼로그를 닫은 뒤 폴링 재개
+        if (mounted) ref.read(machineJobPollingProvider.notifier).resume();
+      },
+    );
+
     final kiosk = ref.watch(kioskInfoServiceProvider);
     final isHwe = kiosk?.isHwe ?? false;
     final buttonColor = kiosk?.mainButtonColor.toColor() ?? Colors.black;

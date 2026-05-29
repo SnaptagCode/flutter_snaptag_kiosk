@@ -60,6 +60,11 @@ abstract class LocaleKeys {
 
   static const alert_title_auto_refund_alert = 'alert_title_auto_refund_alert';
   static const alert_txt_auto_refund_alert = 'alert_txt_auto_refund_alert';
+  static const alert_title_refund_complete = 'alert_title_refund_complete';
+  static const alert_txt_refund_complete = 'alert_txt_refund_complete';
+  static const alert_title_refund_failed = 'alert_title_refund_failed';
+  static const alert_title_refund_card_insert = 'alert_title_refund_card_insert';
+  static const alert_txt_refund_card_insert = 'alert_txt_refund_card_insert';
   static const alert_sub_txt_auto_refund_alert = 'alert_sub_txt_auto_refund_alert';
   static const alert_title_network_error = 'alert_title_network_error';
   static const alert_txt_print_network_error = 'alert_txt_print_network_error';
