@@ -59,15 +59,13 @@ class RefundJobNotifier extends _$RefundJobNotifier {
       return null;
     }
 
-    // Phase 0: 단말기 상태 확인 — 미응답이거나 RES 비정상이면 환불 진행 불가
+    // Phase 0: 단말기 응답 확인 — 응답이 없으면(throw) 환불 진행 불가.
+    // C0(디바이스 조회)는 정상 시 RES가 0000이 아니라 1001로 와서 코드값으로 판정하지 않고,
+    // 응답 수신 여부로만 판단한다(기존 setup_main_screen._checkPaymentDevice와 동일 컨벤션).
     try {
-      final device = await ref.read(paymentRepositoryProvider).check();
-      if (!device.isReady) {
-        throw PaymentProcessingException('단말기 상태 비정상 (res: ${device.res}, errcode: ${device.errcode})');
-      }
+      await ref.read(paymentRepositoryProvider).check();
     } catch (e) {
-      final reason = e is PaymentFailedException ? e.message : '단말기 응답 없음: $e';
-      await _failJob(printJobId, '단말기 점검 실패: $reason');
+      await _failJob(printJobId, '단말기 점검 실패(응답 없음): $e');
       return RefundFailure('카드 단말기 상태를 확인해주세요.');
     }
 
