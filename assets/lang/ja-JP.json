@@ -49,6 +49,8 @@
   "alert_title_refund_complete": "返金完了",
   "alert_txt_refund_complete": "{amount}ウォンが返金されました。",
   "alert_title_refund_failed": "返金失敗",
+  "alert_txt_refund_failed": "返金を完了できませんでした。",
+  "alert_txt_refund_terminal_error": "カード端末の状態を確認してください。",
   "alert_title_refund_card_insert": "返金を進めます",
   "alert_txt_refund_card_insert": "カードを挿入して確認ボタンを押してください。\n({seconds}秒後に自動キャンセル)",
   "alert_sub_txt_auto_refund_alert": "カードを挿入したまま、返金が完了するまでお待ちください！",

@@ -67,24 +67,28 @@ class DialogHelper {
   static Future<void> showRefundSuccessDialog(
     BuildContext context, {
     required int amount,
+    Duration? autoCloseDuration,
   }) async {
     await showKioskDialog(
       context,
       title: LocaleKeys.alert_title_refund_complete.tr(),
       contentText: LocaleKeys.alert_txt_refund_complete.tr(namedArgs: {'amount': amount.toString()}),
       confirmButtonText: LocaleKeys.alert_btn_ok.tr(),
+      autoCloseDuration: autoCloseDuration,
     );
   }
 
   static Future<void> showRefundFailedDialog(
     BuildContext context, {
     required String reason,
+    Duration? autoCloseDuration,
   }) async {
     await showKioskDialog(
       context,
       title: LocaleKeys.alert_title_refund_failed.tr(),
       contentText: reason,
       confirmButtonText: LocaleKeys.alert_btn_ok.tr(),
+      autoCloseDuration: autoCloseDuration,
     );
   }
 
@@ -111,6 +115,7 @@ class DialogHelper {
     TextStyle? cancelTextStyle,
     TextStyle? confirmTextStyle,
     bool barrierDismissible = false,
+    Duration? autoCloseDuration,
   }) async {
     final result = await showDialog<bool>(
       context: context,
@@ -118,11 +123,15 @@ class DialogHelper {
       builder: (BuildContext dialogContext) {
         final isHwe = context.isHwe;
 
-        return DefaultTextStyle(
-          style: TextStyle(
-            fontFamily: context.locale.languageCode == 'ja' ? 'MPLUSRounded' : 'Cafe24Ssurround2',
-          ),
-          child: Dialog(
+        return _AutoCloseScope(
+          // 타이머를 다이얼로그 라이프사이클에 바인딩한다. 사용자가 먼저 닫으면
+          // dispose에서 타이머가 취소되고, 발화 시에도 자기 다이얼로그만 pop한다.
+          duration: autoCloseDuration,
+          child: DefaultTextStyle(
+            style: TextStyle(
+              fontFamily: context.locale.languageCode == 'ja' ? 'MPLUSRounded' : 'Cafe24Ssurround2',
+            ),
+            child: Dialog(
             backgroundColor: Colors.white,
             insetPadding: EdgeInsets.symmetric(horizontal: 211.w),
             shape: RoundedRectangleBorder(
@@ -203,6 +212,7 @@ class DialogHelper {
               ],
             ),
           ),
+          ),
         );
       },
     );
@@ -238,6 +248,7 @@ class DialogHelper {
     required String confirmButtonText,
     ButtonStyle? confirmButtonStyle,
     bool barrierDismissible = false,
+    Duration? autoCloseDuration,
   }) async {
     return await _showConfirmDialog(
       context,
@@ -252,6 +263,7 @@ class DialogHelper {
       cancelTextStyle: TextStyle(color: const Color(0xFF999999)),
       confirmTextStyle: TextStyle(color: const Color(0xFFFFFFFF)),
       barrierDismissible: barrierDismissible,
+      autoCloseDuration: autoCloseDuration,
     );
   }
 
@@ -451,6 +463,45 @@ class DialogHelper {
       },
     );
   }
+}
+
+/// 다이얼로그 자동 닫힘 스코프.
+/// [duration]이 지정되면 그 시간 후 자기 다이얼로그를 닫는다([maybePop]).
+/// 타이머가 위젯 라이프사이클에 묶여 있어, 사용자가 먼저 닫으면 [dispose]에서
+/// 타이머가 취소되고 스테일 발화로 다른 라우트를 잘못 pop하지 않는다.
+class _AutoCloseScope extends StatefulWidget {
+  final Duration? duration;
+  final Widget child;
+
+  const _AutoCloseScope({required this.duration, required this.child});
+
+  @override
+  State<_AutoCloseScope> createState() => _AutoCloseScopeState();
+}
+
+class _AutoCloseScopeState extends State<_AutoCloseScope> {
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    final duration = widget.duration;
+    if (duration != null) {
+      _timer = Timer(duration, () {
+        if (!mounted) return;
+        Navigator.of(context).maybePop(false);
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
 }
 
 /// 타임아웃 다이얼로그 위젯 (실시간 카운트다운)

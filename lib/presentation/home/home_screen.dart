@@ -67,9 +67,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         if (!mounted) return;
         final result = next.valueOrNull;
         if (result is RefundSuccess) {
-          await DialogHelper.showRefundSuccessDialog(context, amount: result.amount);
+          await DialogHelper.showRefundSuccessDialog(
+            context,
+            amount: result.amount,
+            autoCloseDuration: const Duration(seconds: 5),
+          );
         } else if (result is RefundFailure) {
-          await DialogHelper.showRefundFailedDialog(context, reason: result.reason);
+          await DialogHelper.showRefundFailedDialog(
+            context,
+            reason: result.reasonKey.tr(),
+            autoCloseDuration: const Duration(seconds: 5),
+          );
         }
         // 결과 다이얼로그를 닫은 뒤 폴링 재개
         if (mounted) ref.read(machineJobPollingProvider.notifier).resume();

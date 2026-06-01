@@ -1,6 +1,5 @@
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
-import 'package:flutter_snaptag_kiosk/presentation/payment/payment_failed_type.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'refund_job_provider.g.dart';
@@ -15,8 +14,10 @@ final class RefundSuccess extends RefundResult {
 }
 
 final class RefundFailure extends RefundResult {
-  final String reason;
-  const RefundFailure(this.reason);
+  /// 사용자에게 보여줄 안내 문구의 로케일 키. View에서 `.tr()`로 다국어 처리한다.
+  /// (PG 원문 메시지는 사용자에게 노출하지 않고 Slack 로그로만 남긴다.)
+  final String reasonKey;
+  const RefundFailure(this.reasonKey);
 }
 
 @riverpod
@@ -38,7 +39,7 @@ class RefundJobNotifier extends _$RefundJobNotifier {
       if (printJobId != null) {
         await _failJob(printJobId, '환불 처리 중 예상치 못한 오류: $e');
       }
-      state = AsyncValue.data(RefundFailure(e is PaymentFailedException ? e.message : '환불을 완료하지 못했어요.'));
+      state = AsyncValue.data(const RefundFailure(LocaleKeys.alert_txt_refund_failed));
     } finally {
       link.close();
     }
@@ -66,7 +67,7 @@ class RefundJobNotifier extends _$RefundJobNotifier {
       await ref.read(paymentRepositoryProvider).check();
     } catch (e) {
       await _failJob(printJobId, '단말기 점검 실패(응답 없음): $e');
-      return RefundFailure('카드 단말기 상태를 확인해주세요.');
+      return const RefundFailure(LocaleKeys.alert_txt_refund_terminal_error);
     }
 
     // Phase 1: 결제사 취소 — 실패 시 failMachineJob 가능
@@ -79,7 +80,7 @@ class RefundJobNotifier extends _$RefundJobNotifier {
           );
     } catch (e) {
       await _failJob(printJobId, '환불 실패: $e');
-      return RefundFailure(e is PaymentFailedException ? e.message : '환불을 완료하지 못했어요.');
+      return const RefundFailure(LocaleKeys.alert_txt_refund_failed);
     }
 
     // Phase 2: cancel 완료 이후 — 성공 판정은 프로젝트 표준(orderState)에 맞춘다.
@@ -142,7 +143,7 @@ class RefundJobNotifier extends _$RefundJobNotifier {
             '[MachineId: $machineId] 환불 job($printJobId) updateOrderStatus 3회 실패: $e',
           );
         } else {
-          await Future.delayed(Duration(milliseconds: 300 * attempt));
+          await Future.delayed(Duration(milliseconds: 500 * attempt));
         }
       }
     }
@@ -150,8 +151,8 @@ class RefundJobNotifier extends _$RefundJobNotifier {
     if (isSuccess) {
       await _succeedJob(printJobId);
       if (orderUpdated) {
-        SlackLogService().sendLogToSlack(
-            '[MachineId: $machineId] polling 환불 성공 | job=$printJobId | ${refundInfo.amount}원');
+        SlackLogService()
+            .sendLogToSlack('[MachineId: $machineId] polling 환불 성공 | job=$printJobId | ${refundInfo.amount}원');
       } else {
         // 카드 취소(환불)는 됐지만 주문 상태 갱신 실패 → 데이터 불일치, 사람이 직접 정산 필요
         SlackLogService().sendErrorLogToSlack(
@@ -167,7 +168,7 @@ class RefundJobNotifier extends _$RefundJobNotifier {
       SlackLogService().sendErrorLogToSlack(
         '[MachineId: $machineId] polling 환불 실패 | job=$printJobId | $failReason',
       );
-      return RefundFailure('환불을 완료하지 못했어요.');
+      return const RefundFailure(LocaleKeys.alert_txt_refund_failed);
     }
   }
 

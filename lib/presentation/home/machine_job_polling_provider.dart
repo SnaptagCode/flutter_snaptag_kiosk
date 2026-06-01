@@ -39,6 +39,8 @@ class MachineJobPolling extends _$MachineJobPolling {
 
   void _startTimer() {
     _timer?.cancel();
+    // 재시작 직후 첫 tick이 이전 체크 잔여 상태로 스킵되지 않도록 플래그를 리셋한다.
+    _isChecking = false;
     _timer = Timer.periodic(const Duration(seconds: 3), (_) => _tick());
   }
 
