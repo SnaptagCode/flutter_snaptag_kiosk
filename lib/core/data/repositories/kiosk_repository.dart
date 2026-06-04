@@ -275,4 +275,42 @@ class _KioskRepository {
       rethrow;
     }
   }
+
+  Future<MachineJobPollingResponse> getMachineJobPolling(int machineId) async {
+    try {
+      return await _apiClient.getMachineJobPolling(machineId: machineId);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> pickMachineJob(int printJobId) async {
+    try {
+      await _apiClient.pickMachineJob(printJobId: printJobId);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> failMachineJob({
+    required int printJobId,
+    required String failureReason,
+  }) async {
+    try {
+      await _apiClient.failMachineJob(
+        printJobId: printJobId,
+        body: {'failureReason': failureReason},
+      );
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> succeedMachineJob(int printJobId) async {
+    try {
+      await _apiClient.succeedMachineJob(printJobId: printJobId);
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

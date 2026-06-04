@@ -119,4 +119,27 @@ abstract class KioskApiClient {
   Future<List<MachineLogItem>> getMachineMaintenance({
     @Query('machineId') required int machineId,
   });
+
+  // 머신 잡 polling (자동 환불 등)
+  @GET('/v1/machine/print-job/polling/{machineId}')
+  Future<MachineJobPollingResponse> getMachineJobPolling({
+    @Path('machineId') required int machineId,
+  });
+
+  // 선점: 해당 job을 이 키오스크가 처리 중임을 서버에 잠금
+  @POST('/v1/vending/print/job/{printJobId}/pick')
+  Future<void> pickMachineJob({
+    @Path('printJobId') required int printJobId,
+  });
+
+  @POST('/v1/vending/print/job/{printJobId}/fail')
+  Future<void> failMachineJob({
+    @Path('printJobId') required int printJobId,
+    @Body() required Map<String, dynamic> body,
+  });
+
+  @POST('/v1/vending/print/job/{printJobId}/success')
+  Future<void> succeedMachineJob({
+    @Path('printJobId') required int printJobId,
+  });
 }

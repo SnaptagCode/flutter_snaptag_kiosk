@@ -24,4 +24,7 @@ class KscatDeviceResponse with _$KscatDeviceResponse {
   }) = _KscatDeviceResponse;
 
   factory KscatDeviceResponse.fromJson(Map<String, dynamic> json) => _$KscatDeviceResponseFromJson(json);
+
+  /// 단말기 정상 응답 여부 (디바이스 조회 RES 0000)
+  bool get isReady => res == '0000';
 }
