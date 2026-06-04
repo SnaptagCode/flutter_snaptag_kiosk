@@ -50,6 +50,7 @@ app.*.map.json
 
 # 보안
 *.env
+!assets/.env
 pubspec.lock
 macos/
 
