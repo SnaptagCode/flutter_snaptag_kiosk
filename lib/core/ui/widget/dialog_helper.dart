@@ -2,13 +2,11 @@ import 'dart:async';
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_snaptag_kiosk/core/common/sound/sound_manager.dart';
-import 'package:flutter_snaptag_kiosk/lib.dart';
-import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_snaptag_kiosk/core/ui/widget/code_keypad.dart';
+import 'package:flutter_snaptag_kiosk/lib.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 ///
 /// [Figma](https://www.figma.com/design/8IDM2KJtqAYWm2IsmytU5W/%ED%82%A4%EC%98%A4%EC%8A%A4%ED%81%AC_%EB%94%94%EC%9E%90%EC%9D%B8_%EA%B3%B5%EC%9C%A0%EC%9A%A9?node-id=943-15366&m=dev)
@@ -132,86 +130,86 @@ class DialogHelper {
               fontFamily: context.locale.languageCode == 'ja' ? 'MPLUSRounded' : 'Cafe24Ssurround2',
             ),
             child: Dialog(
-            backgroundColor: Colors.white,
-            insetPadding: EdgeInsets.symmetric(horizontal: 211.w),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20.r),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Center(
-                  child: Padding(
-                    padding: EdgeInsets.only(top: 60.h, left: 40.w, right: 40.w),
-                    child: Text(
-                      title,
-                      textAlign: TextAlign.center,
-                      style: context.typography.kioskAlert1B.copyWith(
-                        fontFamily: isHwe ? 'Hanwha' : 'Pretendard',
-                        color: Colors.black,
-                        fontSize: isHwe ? 52.sp : 42.sp,
+              backgroundColor: Colors.white,
+              insetPadding: EdgeInsets.symmetric(horizontal: 211.w),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20.r),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Center(
+                    child: Padding(
+                      padding: EdgeInsets.only(top: 60.h, left: 40.w, right: 40.w),
+                      child: Text(
+                        title,
+                        textAlign: TextAlign.center,
+                        style: context.typography.kioskAlert1B.copyWith(
+                          fontFamily: isHwe ? 'Hanwha' : 'Pretendard',
+                          color: Colors.black,
+                          fontSize: isHwe ? 52.sp : 42.sp,
+                        ),
                       ),
                     ),
                   ),
-                ),
-                if (content != null)
+                  if (content != null)
+                    Padding(
+                      padding: EdgeInsets.only(top: 20.h, left: 40.w, right: 40.w),
+                      child: Text(
+                        content,
+                        textAlign: TextAlign.center,
+                        style: context.typography.kioskAlert2M.copyWith(
+                          color: Colors.black,
+                          fontFamily: 'Pretendard',
+                        ),
+                      ),
+                    ),
+                  if (subContent != null)
+                    Padding(
+                      padding: EdgeInsets.only(top: 16.h, left: 40.w, right: 40.w),
+                      child: Text(
+                        subContent,
+                        textAlign: TextAlign.center,
+                        style: context.typography.kioskAlert2M.copyWith(
+                          color: const Color(0xFFFF333F),
+                          fontFamily: 'Pretendard',
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
                   Padding(
-                    padding: EdgeInsets.only(top: 20.h, left: 40.w, right: 40.w),
-                    child: Text(
-                      content,
-                      textAlign: TextAlign.center,
-                      style: context.typography.kioskAlert2M.copyWith(
-                        color: Colors.black,
-                        fontFamily: 'Pretendard',
-                      ),
-                    ),
-                  ),
-                if (subContent != null)
-                  Padding(
-                    padding: EdgeInsets.only(top: 16.h, left: 40.w, right: 40.w),
-                    child: Text(
-                      subContent,
-                      textAlign: TextAlign.center,
-                      style: context.typography.kioskAlert2M.copyWith(
-                        color: const Color(0xFFFF333F),
-                        fontFamily: 'Pretendard',
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                Padding(
-                  padding: EdgeInsets.only(top: 36.h, bottom: 40.h, left: 40.w, right: 40.w),
-                  child: Row(
-                    children: [
-                      if (showCancelButton)
+                    padding: EdgeInsets.only(top: 36.h, bottom: 40.h, left: 40.w, right: 40.w),
+                    child: Row(
+                      children: [
+                        if (showCancelButton)
+                          Expanded(
+                            child: OutlinedButton(
+                              onPressed: () async {
+                                await SoundManager().playSound();
+                                Navigator.of(dialogContext).pop(false);
+                              },
+                              style: cancelButtonStyle,
+                              child: Text(cancelButtonText, style: cancelTextStyle),
+                            ),
+                          ),
+                        if (showCancelButton) SizedBox(width: 12.w),
                         Expanded(
-                          child: OutlinedButton(
+                          child: ElevatedButton(
                             onPressed: () async {
                               await SoundManager().playSound();
-                              Navigator.of(dialogContext).pop(false);
+                              Navigator.of(dialogContext).pop(true);
                             },
-                            style: cancelButtonStyle,
-                            child: Text(cancelButtonText, style: cancelTextStyle),
+                            style: confirmButtonStyle,
+                            child: Text(confirmButtonText, style: confirmTextStyle),
                           ),
                         ),
-                      if (showCancelButton) SizedBox(width: 12.w),
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: () async {
-                            await SoundManager().playSound();
-                            Navigator.of(dialogContext).pop(true);
-                          },
-                          style: confirmButtonStyle,
-                          child: Text(confirmButtonText, style: confirmTextStyle),
-                        ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
           ),
         );
       },
@@ -408,6 +406,15 @@ class DialogHelper {
       title: LocaleKeys.alert_title_purchase_failure.tr(),
       contentText: LocaleKeys.alert_txt_purchase_failure.tr(),
       confirmButtonText: LocaleKeys.alert_btn_purchase_failure.tr(),
+    );
+  }
+
+  static Future<void> showPaymentPreparationFailedDialog(BuildContext context) async {
+    await showKioskDialog(
+      context,
+      title: LocaleKeys.alert_title_payment_prep_failure.tr(),
+      contentText: LocaleKeys.alert_txt_payment_prep_failure.tr(),
+      confirmButtonText: LocaleKeys.alert_btn_payment_prep_failure.tr(),
     );
   }
 

@@ -28,6 +28,9 @@ abstract class LocaleKeys {
   static const alert_title_purchase_failure = 'alert_title_purchase_failure';
   static const alert_txt_purchase_failure = 'alert_txt_purchase_failure';
   static const alert_btn_purchase_failure = 'alert_btn_purchase_failure';
+  static const alert_title_payment_prep_failure = 'alert_title_payment_prep_failure';
+  static const alert_txt_payment_prep_failure = 'alert_txt_payment_prep_failure';
+  static const alert_btn_payment_prep_failure = 'alert_btn_payment_prep_failure';
   static const alert_title_paymentcard_failure = 'alert_title_paymentcard_failure';
   static const alert_txt_paymentcard_failure = 'alert_txt_paymentcard_failure';
   static const alert_btn_paymentcard_failure = 'alert_btn_paymentcard_failure';
