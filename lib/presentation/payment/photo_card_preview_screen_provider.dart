@@ -63,7 +63,12 @@ class PhotoCardPreviewScreenProvider extends _$PhotoCardPreviewScreenProvider {
 
       final timeoutNotifier = ref.read(homeTimeoutNotifierProvider.notifier);
       timeoutNotifier.cancelTimerWithCallback();
+    } catch (e, stack) {
+      state = AsyncValue.error(e, stack);
+      return;
+    }
 
+    try {
       await ref.read(paymentServiceProvider.notifier).processPayment();
 
       state = const AsyncValue.data(null);

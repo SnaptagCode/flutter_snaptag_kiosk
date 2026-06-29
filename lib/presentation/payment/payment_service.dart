@@ -17,6 +17,12 @@ class PaymentService extends _$PaymentService {
   @override
   FutureOr<void> build() => null;
 
+  void clearPaymentInfo() {
+    ref.read(paymentResponseStateProvider.notifier).reset();
+    ref.read(createOrderInfoProvider.notifier).reset();
+    ref.read(verifyPhotoCardProvider.notifier).reset();
+  }
+
   Future<void> processPayment() async {
     // 1. 사전 검증
     _validatePreconditions();
