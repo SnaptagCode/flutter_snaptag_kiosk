@@ -4,16 +4,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_snaptag_kiosk/core/common/sound/sound_manager.dart';
-import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
-import 'package:flutter_snaptag_kiosk/presentation/payment/payment_failed_type.dart';
-import 'package:flutter_snaptag_kiosk/presentation/home/back_photo_type_provider.dart';
-import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/home_timeout_provider.dart';
-import 'package:flutter_snaptag_kiosk/lib.dart';
-import 'package:flutter_snaptag_kiosk/presentation/verification/verify_photo_card_provider.dart';
 import 'package:flutter_snaptag_kiosk/core/ui/widget/dialog_helper.dart';
 import 'package:flutter_snaptag_kiosk/core/ui/widget/general_error_widget.dart';
 import 'package:flutter_snaptag_kiosk/core/ui/widget/price_box.dart';
+import 'package:flutter_snaptag_kiosk/lib.dart';
+import 'package:flutter_snaptag_kiosk/presentation/home/back_photo_type_provider.dart';
+import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/home_timeout_provider.dart';
+import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
+import 'package:flutter_snaptag_kiosk/presentation/payment/payment_failed_type.dart';
 import 'package:flutter_snaptag_kiosk/presentation/payment/photo_card_preview_screen_provider.dart';
+import 'package:flutter_snaptag_kiosk/presentation/verification/verify_photo_card_provider.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 
 /// 카드 선택 효과 시안 타입
@@ -47,6 +47,7 @@ class PaymentScreen extends ConsumerStatefulWidget {
 
 class _PaymentScreenState extends ConsumerState<PaymentScreen> {
   bool _isNetworkErrorHandled = false;
+
   /// 시안 6: 선택되지 않은 카드 크기 축소 + 애니메이션
   Widget _buildVariant6AnimatedScaleOnUnselected({
     required int index,
@@ -234,8 +235,7 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
       if (_isNetworkErrorHandled) return;
       if (previous?.status == next.status) return;
 
-      final isNetworkDown =
-          next.status == NetworkStatus.disconnected || next.status == NetworkStatus.unstable;
+      final isNetworkDown = next.status == NetworkStatus.disconnected || next.status == NetworkStatus.unstable;
       if (!isNetworkDown) return;
       if (!ref.read(photoCardPreviewScreenProviderProvider).isLoading) return;
 
@@ -288,6 +288,13 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
 
             if (error.toString().contains('Card feeder is empty')) {
               await DialogHelper.showPrintCardRefillDialog(
+                context,
+              );
+              return;
+            }
+
+            if (error is PaymentPreparationException) {
+              await DialogHelper.showPaymentPreparationFailedDialog(
                 context,
               );
               return;

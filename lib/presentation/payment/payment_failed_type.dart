@@ -33,3 +33,13 @@ class TimeoutPaymentException extends PaymentFailedException {
 class CancelledPaymentException extends PaymentFailedException {
   CancelledPaymentException({String? description}) : super('취소된 결제 실패', description: description);
 }
+
+// 결제 시도 전 실패
+class PaymentPreparationException implements Exception {
+  final Object cause;
+
+  PaymentPreparationException(this.cause);
+
+  @override
+  String toString() => 'PaymentPreparationException: $cause';
+}
