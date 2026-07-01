@@ -150,10 +150,11 @@ class RefundJobNotifier extends _$RefundJobNotifier {
 
     if (isSuccess) {
       await _succeedJob(printJobId);
-      if (orderUpdated) {
-        SlackLogService()
-            .sendLogToSlack('[MachineId: $machineId] polling 환불 성공 | job=$printJobId | ${refundInfo.amount}원');
-      } else {
+      // 성공: 브로드캐스트 알림 (동작로직: web 어드민 환불)
+      SlackLogService().sendPaymentBroadcastLogToSlak(InfoKey.paymentRefund.key,
+          paymentDescription:
+              "동작로직: web 어드민 환불\n- 인증번호: ${refundInfo.photoAuthNumber}\n- 승인번호: ${refundInfo.originalApprovalNo}\n- 금액: ${refundInfo.amount}원");
+      if (!orderUpdated) {
         // 카드 취소(환불)는 됐지만 주문 상태 갱신 실패 → 데이터 불일치, 사람이 직접 정산 필요
         SlackLogService().sendErrorLogToSlack(
           '[MachineId: $machineId] ⚠️ polling 환불 성공했으나 주문 상태 갱신 실패 — 수동 정산 필요 '
@@ -162,12 +163,12 @@ class RefundJobNotifier extends _$RefundJobNotifier {
       }
       return RefundSuccess(refundInfo.amount);
     } else {
-      final failReason =
-          (paymentResponse.msg?.isNotEmpty == true ? paymentResponse.msg : paymentResponse.message1) ?? '환불 실패';
-      await _failJob(printJobId, failReason);
-      SlackLogService().sendErrorLogToSlack(
-        '[MachineId: $machineId] polling 환불 실패 | job=$printJobId | $failReason',
-      );
+      // 실패: PG 원문 대신 응답코드 기반 상세 사유로 통일
+      final reason = refundReasonFor(paymentResponse);
+      await _failJob(printJobId, reason);
+      SlackLogService().sendPaymentBroadcastLogToSlak(InfoKey.paymentRefundFail.key,
+          paymentDescription:
+              "동작로직: web 어드민 환불\n- 사유: $reason\n- 인증번호: ${refundInfo.photoAuthNumber}\n- 승인번호: ${refundInfo.originalApprovalNo}");
       return const RefundFailure(LocaleKeys.alert_txt_refund_failed);
     }
   }
