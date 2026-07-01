@@ -6,8 +6,9 @@ import 'package:flutter_snaptag_kiosk/lib.dart';
 /// 필요에 따라 이 Map에 줄만 추가/삭제하면 유동적으로 확장할 수 있다.
 /// 미등록 코드는 [refundReasonFor]에서 "확인필요 (코드: XXXX)"로 표기되므로,
 /// 로그에 뜬 코드를 보고 여기에 추가하면 된다.
+/// 실패 사유용 매핑이므로 성공 코드('0000')는 넣지 않는다.
+/// (성공 케이스는 refundReasonFor를 호출하지 않음)
 const Map<String, String> kRefundReasonByCode = {
-  '0000': '정상완료',
   // 1.신용(인증)
   '7001': '이미 취소된 거래',
   '7002': '이미 매입된 거래',
