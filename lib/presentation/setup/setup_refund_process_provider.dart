@@ -60,8 +60,6 @@ class SetupRefundProcess extends _$SetupRefundProcess {
       detail: payment?.KSNET ?? '{}',
     );
 
-    // 성공/실패 판정은 res 단독이 아니라 실제 결과(orderState)로 통일한다.
-    // (예: RES=0000 이지만 RESPCODE=7003(원거래없음)인 실패가 res만 보면 누락되던 버그 수정)
     final success = payment?.orderState == OrderStatus.refunded;
     final reason = success ? null : refundReasonFor(payment);
 

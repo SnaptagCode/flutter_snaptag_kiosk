@@ -220,15 +220,10 @@ class PaymentService extends _$PaymentService {
       final approvalInfo = ref.read(paymentResponseStateProvider);
       final backPhoto = ref.watch(verifyPhotoCardProvider).value;
       if (approvalInfo?.orderState == OrderStatus.refunded) {
-        // 성공: 현행 유지
         await _updateOrder(isRefund: true, description: "자동환불");
-        SlackLogService().sendPaymentBroadcastLogToSlak(InfoKey.paymentRefund.key,
-            paymentDescription:
-                "동작로직: 자동환불\n- 인증번호: ${backPhoto?.photoAuthNumber ?? "없음"}\n- 승인번호: ${approvalInfo?.approvalNo ?? "없음"}");
         ref.read(paymentResponseStateProvider.notifier).reset();
         SlackLogService().sendLogToSlack('paymentResponseState Reset'); //paymentTestSlack
       } else {
-        // 실패: 응답코드 기반 상세 사유로 통일
         final reason = refundReasonFor(approvalInfo);
         await _updateOrder(isRefund: true, description: reason);
         SlackLogService().sendPaymentBroadcastLogToSlak(InfoKey.paymentRefundFail.key,

@@ -150,10 +150,9 @@ class RefundJobNotifier extends _$RefundJobNotifier {
 
     if (isSuccess) {
       await _succeedJob(printJobId);
-      // 성공: 브로드캐스트 알림 (동작로직: web 어드민 환불)
       SlackLogService().sendPaymentBroadcastLogToSlak(InfoKey.paymentRefund.key,
           paymentDescription:
-              "동작로직: web 어드민 환불\n- 인증번호: ${refundInfo.photoAuthNumber}\n- 승인번호: ${refundInfo.originalApprovalNo}\n- 금액: ${refundInfo.amount}원");
+              "동작로직: 포토코드web환불\n- 인증번호: ${refundInfo.photoAuthNumber}\n- 승인번호: ${refundInfo.originalApprovalNo}\n- 금액: ${refundInfo.amount}원");
       if (!orderUpdated) {
         // 카드 취소(환불)는 됐지만 주문 상태 갱신 실패 → 데이터 불일치, 사람이 직접 정산 필요
         SlackLogService().sendErrorLogToSlack(
@@ -168,7 +167,7 @@ class RefundJobNotifier extends _$RefundJobNotifier {
       await _failJob(printJobId, reason);
       SlackLogService().sendPaymentBroadcastLogToSlak(InfoKey.paymentRefundFail.key,
           paymentDescription:
-              "동작로직: web 어드민 환불\n- 사유: $reason\n- 인증번호: ${refundInfo.photoAuthNumber}\n- 승인번호: ${refundInfo.originalApprovalNo}");
+              "동작로직: 포토코드web환불\n- 사유: $reason\n- 인증번호: ${refundInfo.photoAuthNumber}\n- 승인번호: ${refundInfo.originalApprovalNo}");
       return const RefundFailure(LocaleKeys.alert_txt_refund_failed);
     }
   }

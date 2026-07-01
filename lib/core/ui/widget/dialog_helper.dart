@@ -20,46 +20,47 @@ class DialogHelper {
   static Future<bool> showRefundFailDialog(
     BuildContext context,
   ) async {
-    return await showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return DefaultTextStyle(
-          style: TextStyle(
-            fontFamily: context.locale.languageCode == 'ja' ? 'MPLUSRounded' : 'Cafe24Ssurround2',
-          ),
-          child: Center(
-            child: SizedBox(
-              width: 658.w,
-              child: AlertDialog(
-                backgroundColor: Colors.white,
-                insetPadding: EdgeInsets.zero,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20.r),
-                ),
-                title: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    SvgPicture.asset(
-                      SnaptagSvg.error,
-                      width: 44.w,
-                      height: 44.w,
+    return await showDialog<bool>(
+          context: context,
+          builder: (BuildContext context) {
+            return DefaultTextStyle(
+              style: TextStyle(
+                fontFamily: context.locale.languageCode == 'ja' ? 'MPLUSRounded' : 'Cafe24Ssurround2',
+              ),
+              child: Center(
+                child: SizedBox(
+                  width: 658.w,
+                  child: AlertDialog(
+                    backgroundColor: Colors.white,
+                    insetPadding: EdgeInsets.zero,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20.r),
                     ),
-                    SizedBox(width: 20.w),
-                    Text(
-                      '환불이 실패했습니다.',
-                      style: context.typography.kioskAlert1B.copyWith(
-                        fontFamily: 'Pretendard',
-                        color: Colors.black,
-                      ),
+                    title: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SvgPicture.asset(
+                          SnaptagSvg.error,
+                          width: 44.w,
+                          height: 44.w,
+                        ),
+                        SizedBox(width: 20.w),
+                        Text(
+                          '환불이 실패했습니다.',
+                          style: context.typography.kioskAlert1B.copyWith(
+                            fontFamily: 'Pretendard',
+                            color: Colors.black,
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
               ),
-            ),
-          ),
-        );
-      },
-    );
+            );
+          },
+        ) ??
+        false;
   }
 
   static Future<void> showRefundSuccessDialog(
