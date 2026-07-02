@@ -14,7 +14,7 @@ KscatPaymentGateway kscatPaymentGateway(Ref ref) {
   );
 }
 
-/// P0: 항상 KSCAT 반환. (P1: paymentModeProvider를 watch해 OFF면 DisabledPaymentGateway로 스왑)
+/// 결제 모드에 따라 게이트웨이를 교체하는 지점. 현재는 항상 KSCAT를 반환한다.
 @riverpod
 PaymentGateway paymentGateway(Ref ref) {
   return ref.watch(kscatPaymentGatewayProvider);

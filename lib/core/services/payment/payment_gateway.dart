@@ -15,7 +15,6 @@ abstract class PaymentGateway {
   });
 }
 
-/// 결제 비활성(무료 모드) 상태에서 approve 호출 시 발생 (P1에서 사용)
 class PaymentDisabledException implements Exception {
   final String message;
 

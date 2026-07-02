@@ -2,8 +2,6 @@ import 'package:flutter_snaptag_kiosk/core/data/models/response/kscat_device_res
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-/// 위임 대상(실제로는 KscatPaymentGateway) 대역.
-/// 호출 여부/인자를 기록하고, 지정한 응답을 돌려주거나 예외를 던진다.
 class FakePaymentGateway implements PaymentGateway {
   int approveCallCount = 0;
   int checkCallCount = 0;
