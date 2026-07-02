@@ -64,7 +64,7 @@ class RefundJobNotifier extends _$RefundJobNotifier {
     // C0(디바이스 조회)는 정상 시 RES가 0000이 아니라 1001로 와서 코드값으로 판정하지 않고,
     // 응답 수신 여부로만 판단한다(기존 setup_main_screen._checkPaymentDevice와 동일 컨벤션).
     try {
-      await ref.read(paymentRepositoryProvider).check();
+      await ref.read(paymentGatewayProvider).check();
     } catch (e) {
       await _failJob(printJobId, '단말기 점검 실패(응답 없음): $e');
       return const RefundFailure(LocaleKeys.alert_txt_refund_terminal_error);
@@ -73,7 +73,7 @@ class RefundJobNotifier extends _$RefundJobNotifier {
     // Phase 1: 결제사 취소 — 실패 시 failMachineJob 가능
     final PaymentResponse paymentResponse;
     try {
-      paymentResponse = await ref.read(paymentRepositoryProvider).cancel(
+      paymentResponse = await ref.read(paymentGatewayProvider).cancel(
             totalAmount: refundInfo.amount,
             originalApprovalNo: refundInfo.originalApprovalNo,
             originalApprovalDate: refundInfo.originalApprovalDate,

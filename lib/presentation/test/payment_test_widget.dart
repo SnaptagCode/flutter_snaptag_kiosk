@@ -26,7 +26,7 @@ class PaymentTestWidget extends ConsumerWidget {
         throw Exception('금액을 입력해주세요');
       }
 
-      final response = await ref.read(paymentRepositoryProvider).approve(
+      final response = await ref.read(paymentGatewayProvider).approve(
             totalAmount: int.parse(amount),
           );
 
@@ -62,7 +62,7 @@ class PaymentTestWidget extends ConsumerWidget {
         throw Exception('승인번호와 승인일자를 입력해주세요');
       }
 
-      final response = await ref.read(paymentRepositoryProvider).cancel(
+      final response = await ref.read(paymentGatewayProvider).cancel(
             totalAmount: int.parse(amount),
             originalApprovalNo: approvalNo,
             originalApprovalDate: approvalDate,

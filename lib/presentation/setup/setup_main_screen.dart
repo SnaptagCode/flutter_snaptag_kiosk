@@ -213,7 +213,7 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
 
   Future<bool> _checkPaymentDevice() async {
     try {
-      final response = await ref.read(paymentRepositoryProvider).check();
+      final response = await ref.read(paymentGatewayProvider).check();
       SlackLogService().sendLogToSlack("Payment Device check: $response");
 
       return true;
