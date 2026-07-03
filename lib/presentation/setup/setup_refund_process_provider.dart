@@ -23,7 +23,7 @@ class SetupRefundProcess extends _$SetupRefundProcess {
       final Invoice invoice = Invoice.calculate(order.amount.toInt());
       state = const AsyncValue.loading();
 
-      final response = await ref.read(paymentRepositoryProvider).cancel(
+      final response = await ref.read(paymentGatewayProvider).cancel(
             totalAmount: invoice.total,
             originalApprovalNo: order.paymentAuthNumber ?? '',
             originalApprovalDate: DateFormat('yyMMdd').format(order.completedAt!),
