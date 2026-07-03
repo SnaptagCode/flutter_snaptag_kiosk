@@ -79,14 +79,21 @@ class PhotoCardPreviewScreenProvider extends _$PhotoCardPreviewScreenProvider {
           e is! CancelledPaymentException &&
           e is! TimeoutPaymentException &&
           e is! UnknownPaymentException) {
+        // 결제 승인 후 후속 처리 실패 → 자동환불 시도. 결과(성공/실패)를 화면에 전달해
+        // 사용자가 환불 여부를 알 수 있게 한다.
+        RefundResult refundResult;
         try {
-          await ref.read(paymentServiceProvider.notifier).refund();
-          if (ref.read(pagePrintProvider) == PagePrintType.single) {
+          refundResult = await ref.read(paymentServiceProvider.notifier).refund();
+          // 인쇄되지 않은 카드 수량 복구는 환불이 실제 성공했을 때만 반영한다.
+          if (refundResult is RefundSuccess && ref.read(pagePrintProvider) == PagePrintType.single) {
             await ref.read(cardCountProvider.notifier).increase();
           }
         } catch (refundError) {
           logger.e('Payment and refund failed', error: refundError);
+          refundResult = RefundFailure(LocaleKeys.alert_txt_refund_failed);
         }
+        state = AsyncValue.error(PostPaymentRefundException(refundResult, e), stack);
+        return;
       }
       state = AsyncValue.error(e, stack);
     }

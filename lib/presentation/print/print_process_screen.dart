@@ -145,7 +145,7 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> with Si
 
             final result = await DialogHelper.showKioskDialog(
               context,
-              title: LocaleKeys.alert_title_auto_refund_alert.tr(),
+              title: LocaleKeys.alert_title_print_failure.tr(),
               contentText: LocaleKeys.alert_txt_auto_refund_alert.tr(),
               subContentText: LocaleKeys.alert_sub_txt_auto_refund_alert.tr(),
               confirmButtonText: LocaleKeys.alert_btn_paymentcard_failure.tr(),
@@ -153,26 +153,29 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> with Si
 
             if (result) {
               // 에러 발생 시 환불 처리
-              await refund();
+              final refundResult = await refund();
 
               // 카드 단일 카드 수량 확인
               checkCardSingleCardCount();
 
-              // 카드 공급기가 비어있는지 확인
+              // 카드 공급기가 비어있으면 리필 안내가 우선
               if (checkCardFeederIsEmpty(errorMessage)) {
                 await DialogHelper.showPrintCardRefillDialog(
                   context,
                 );
-                if (result) {
-                  HomeRouteData().go(context);
-                }
-              } else {
-                final result = await DialogHelper.showPrintErrorDialog(
+                HomeRouteData().go(context);
+              } else if (refundResult is RefundSuccess) {
+                // 환불 성공 → 환불 완료 + 사과 안내
+                await DialogHelper.showAutoRefundSuccessDialog(
                   context,
+                  amount: refundResult.amount,
+                  autoCloseDuration: const Duration(seconds: 5),
                 );
-                if (result) {
-                  HomeRouteData().go(context);
-                }
+                HomeRouteData().go(context);
+              } else {
+                // 환불 실패(출력도 실패, 환불도 안 됨) → 직원 문의 안내, 확인 필수
+                await DialogHelper.showAutoRefundFailedDialog(context);
+                HomeRouteData().go(context);
               }
             }
           },
@@ -324,14 +327,16 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> with Si
     SlackLogService().sendErrorLogToSlack('*[MachineId : $machineId]*, Print process error\nError: $error');
   }
 
-  Future<void> refund() async {
+  Future<RefundResult> refund() async {
     final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
     try {
-      await ref.read(paymentServiceProvider.notifier).refund();
+      final result = await ref.read(paymentServiceProvider.notifier).refund();
       if (ref.read(pagePrintProvider) == PagePrintType.single) await ref.read(cardCountProvider.notifier).increase();
+      return result;
     } catch (e) {
       SlackLogService().sendErrorLogToSlack('*[MachineId : $machineId]*, 환불 처리 중 오류 발생: $e');
       logger.e('환불 처리 중 오류 발생', error: e);
+      return RefundFailure(LocaleKeys.alert_txt_refund_failed);
     }
   }
 

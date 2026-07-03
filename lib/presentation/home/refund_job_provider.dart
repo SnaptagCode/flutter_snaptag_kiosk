@@ -4,21 +4,8 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'refund_job_provider.g.dart';
 
-sealed class RefundResult {
-  const RefundResult();
-}
-
-final class RefundSuccess extends RefundResult {
-  final int amount;
-  const RefundSuccess(this.amount);
-}
-
-final class RefundFailure extends RefundResult {
-  /// 사용자에게 보여줄 안내 문구의 로케일 키. View에서 `.tr()`로 다국어 처리한다.
-  /// (PG 원문 메시지는 사용자에게 노출하지 않고 Slack 로그로만 남긴다.)
-  final String reasonKey;
-  const RefundFailure(this.reasonKey);
-}
+// RefundResult/RefundSuccess/RefundFailure는 lib/core/services/payment/refund_result.dart로
+// 이동해 원격환불·자동환불이 공용으로 사용한다 (배럴 lib.dart 경유로 참조).
 
 @riverpod
 class RefundJobNotifier extends _$RefundJobNotifier {
