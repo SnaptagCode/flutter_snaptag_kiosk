@@ -118,7 +118,7 @@ class _FrontPhotoSelectScreenState extends ConsumerState<FrontPhotoSelectScreen>
           ),
           SizedBox(height: 36.h),
           SizedBox(
-            height: 585.h,
+            height: 560.h,
             child: photos.isEmpty
                 ? Center(
                     child: Text(
@@ -156,8 +156,8 @@ class _FrontPhotoSelectScreenState extends ConsumerState<FrontPhotoSelectScreen>
                               );
                             },
                             child: SelectablePhotoCard(
-                              width: 356.w,
-                              height: 560.h,
+                              width: 340.w,
+                              height: 535.h,
                               index: index,
                               selectedIndex: selectedIndex,
                               imageFile: photo.embedImage,
@@ -256,6 +256,8 @@ class _FrontPhotoSelectScreenState extends ConsumerState<FrontPhotoSelectScreen>
               ),
             ),
           ),
+          // 배경 이미지 하단의 SNAPTAG 로고가 가려지지 않도록 버튼을 위로 올린다
+          SizedBox(height: 110.h),
         ],
       ),
     );
