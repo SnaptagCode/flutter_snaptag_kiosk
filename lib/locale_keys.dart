@@ -88,6 +88,9 @@ abstract class LocaleKeys {
   static const front_photo_select_title = 'front_photo_select_title';
   static const front_photo_select_subtitle = 'front_photo_select_subtitle';
   static const front_photo_select_empty = 'front_photo_select_empty';
+  static const front_photo_select_home_header = 'front_photo_select_home_header';
+  static const front_photo_select_step1 = 'front_photo_select_step1';
+  static const front_photo_select_step2 = 'front_photo_select_step2';
   static const print_takes_one_minute = 'print_takes_one_minute';
   static const currency_won = 'currency_won';
   static const common_btn_back = 'common_btn_back';
