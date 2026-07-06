@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_snaptag_kiosk/presentation/home/back_photo_type_provider.dart';
-import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
+import 'package:flutter_snaptag_kiosk/presentation/setup/front_photo_mode_provider.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 
@@ -26,7 +26,7 @@ class KioskBackButton extends ConsumerWidget {
 
     final selection = ref.watch(backPhotoTypeProvider);
     final isFixed = selection?.type == BackPhotoType.fixed;
-    final isFrontPhotoUserSelect = ref.watch(kioskInfoServiceProvider)?.isFrontPhotoUserSelect ?? false;
+    final isFrontPhotoUserSelect = ref.watch(isFrontPhotoUserSelectProvider);
 
     logger.i(
         'KioskBackButton: currentPath: $currentPath isHomeScreen: $isHomeScreen isPrintProcessScreen: $isPrintProcessScreen isKioskRoute: $isKioskRoute');

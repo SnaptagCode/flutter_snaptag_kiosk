@@ -10,6 +10,7 @@ import 'package:flutter_snaptag_kiosk/presentation/home/machine_job_polling_prov
 import 'package:flutter_snaptag_kiosk/presentation/home/maintenance_polling_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/home/refund_job_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
+import 'package:flutter_snaptag_kiosk/presentation/setup/front_photo_mode_provider.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
@@ -97,7 +98,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     final kiosk = ref.watch(kioskInfoServiceProvider);
     final isHwe = kiosk?.isHwe ?? false;
-    final isFrontPhotoUserSelect = kiosk?.isFrontPhotoUserSelect ?? false;
+    // 관리자 오버라이드 > 서버 frontPhotoType (JKLI-175)
+    final isFrontPhotoUserSelect = ref.watch(isFrontPhotoUserSelectProvider);
     final buttonColor = kiosk?.mainButtonColor.toColor() ?? Colors.black;
     final buttonTextColor = kiosk?.buttonTextColor.toColor(fallback: Colors.white) ?? Colors.white;
     final mainTextColor = kiosk?.mainTextColor.toColor(fallback: Colors.white) ?? Colors.white;

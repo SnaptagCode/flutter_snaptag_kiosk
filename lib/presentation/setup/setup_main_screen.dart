@@ -15,6 +15,7 @@ import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_servic
 import 'package:flutter_snaptag_kiosk/presentation/print/card_printer.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/luca/state/printer_connect_state.dart';
 import 'package:flutter_snaptag_kiosk/presentation/setup/alert_definition_provider.dart';
+import 'package:flutter_snaptag_kiosk/presentation/setup/front_photo_mode_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/setup/page_print_provider.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -87,9 +88,9 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
       }
     }
 
-    final isReady = await _validatePrinterReadyAndShowDialogs(context);
+    // final isReady = await _validatePrinterReadyAndShowDialogs(context);
 
-    if (!isReady) return;
+    // if (!isReady) return;
 
     final isPaymentDeviceReady = await _checkPaymentDevice();
     if (!isPaymentDeviceReady) return;
@@ -203,6 +204,36 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
     HomeRouteData().go(context);
 
     SlackLogService().sendInspectionEndBroadcastLogToSlack(InfoKey.inspectionEnd.key);
+  }
+
+  /// 앞면 이미지 모드(랜덤형/선택형) 토글 버튼
+  Widget _buildFrontPhotoModeButton({required String label, required FrontPhotoMode mode}) {
+    final isUserSelect = ref.watch(isFrontPhotoUserSelectProvider);
+    final isActive = (mode == FrontPhotoMode.userSelect) == isUserSelect;
+
+    return InkWell(
+      borderRadius: const BorderRadius.all(Radius.circular(12)),
+      onTap: () async {
+        await SoundManager().playSound();
+        ref.read(frontPhotoModeOverrideProvider.notifier).set(mode);
+      },
+      child: Container(
+        width: 250.w,
+        height: 80.h,
+        decoration: BoxDecoration(
+          color: isActive ? Colors.black : Colors.white,
+          border: Border.all(color: const Color(0xFFE6E8EB)),
+          borderRadius: const BorderRadius.all(Radius.circular(12)),
+        ),
+        alignment: Alignment.center,
+        child: Text(
+          label,
+          style: isActive
+              ? context.typography.kioskBody1B.copyWith(color: Colors.white)
+              : context.typography.kioskBody1B.copyWith(color: Colors.black),
+        ),
+      ),
+    );
   }
 
   Future<bool> _checkPaymentDevice() async {
@@ -412,6 +443,29 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
                       ),
                     ),
                   ),
+                ],
+              ),
+              SizedBox(height: 10),
+              // 앞면 이미지 랜덤형/선택형 설정 (JKLI-175) — 미조작 시 서버 frontPhotoType 따름
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SizedBox(
+                    width: 240.w,
+                    height: 80.h,
+                    child: Align(
+                      alignment: Alignment.center,
+                      child: Text(
+                        '앞면 이미지',
+                        textAlign: TextAlign.center,
+                        style: context.typography.kioskBody1B.copyWith(color: Colors.black),
+                      ),
+                    ),
+                  ),
+                  _buildFrontPhotoModeButton(label: '랜덤형', mode: FrontPhotoMode.random),
+                  SizedBox(width: 20.w),
+                  _buildFrontPhotoModeButton(label: '선택형', mode: FrontPhotoMode.userSelect),
                 ],
               ),
               SizedBox(
