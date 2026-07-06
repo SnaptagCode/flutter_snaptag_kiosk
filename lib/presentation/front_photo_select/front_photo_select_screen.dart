@@ -33,7 +33,7 @@ class _FrontPhotoSelectScreenState extends ConsumerState<FrontPhotoSelectScreen>
     final selected = ref.read(selectedFrontPhotoProvider);
     final initialIndex = selected == null ? -1 : photos.indexWhere((photo) => photo.id == selected.id);
     _currentPage = initialIndex < 0 ? 0 : initialIndex;
-    _pageController = PageController(viewportFraction: 0.36, initialPage: _currentPage);
+    _pageController = PageController(viewportFraction: 0.31, initialPage: _currentPage);
   }
 
   @override
@@ -118,7 +118,7 @@ class _FrontPhotoSelectScreenState extends ConsumerState<FrontPhotoSelectScreen>
           ),
           SizedBox(height: 36.h),
           SizedBox(
-            height: 560.h,
+            height: 500.h,
             child: photos.isEmpty
                 ? Center(
                     child: Text(
@@ -156,8 +156,8 @@ class _FrontPhotoSelectScreenState extends ConsumerState<FrontPhotoSelectScreen>
                               );
                             },
                             child: SelectablePhotoCard(
-                              width: 340.w,
-                              height: 535.h,
+                              width: 300.w,
+                              height: 471.h,
                               index: index,
                               selectedIndex: selectedIndex,
                               imageFile: photo.embedImage,
@@ -256,8 +256,8 @@ class _FrontPhotoSelectScreenState extends ConsumerState<FrontPhotoSelectScreen>
               ),
             ),
           ),
-          // 배경 이미지 하단의 SNAPTAG 로고가 가려지지 않도록 버튼을 위로 올린다
-          SizedBox(height: 110.h),
+          // 전체 콘텐츠를 가용 영역(약 995.h)보다 충분히 작게 유지해 중앙 정렬 시
+          // 위아래 여백이 대칭으로 생기고, 하단 SNAPTAG 로고도 가려지지 않는다.
         ],
       ),
     );
