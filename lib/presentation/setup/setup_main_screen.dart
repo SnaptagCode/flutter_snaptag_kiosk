@@ -33,28 +33,22 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
     super.initState();
 
     _timer = Timer.periodic(Duration(seconds: 2), (timer) async {
+      // 타이머 cancel은 실행 중인 async 콜백을 멈추지 못하므로,
+      // await 이후에는 반드시 mounted 확인 후 ref를 사용해야 한다.
       final connected = await ref.read(printerServiceProvider.notifier).connectedPrinter();
+      if (!mounted) return;
       if (connected) {
         final settingCompleted = await ref.read(printerServiceProvider.notifier).checkSettingPrinter();
-        if (mounted) {
-          setState(() {
-            ref.read(printerConnectProvider.notifier).update(
-                  connected && settingCompleted
-                      ? PrinterConnectState.connected
-                      : settingCompleted
-                          ? PrinterConnectState.connected
-                          : PrinterConnectState.setupInComplete,
-                );
-          });
-        } else {
-          ref.read(printerConnectProvider.notifier).update(PrinterConnectState.disconnected);
-        }
+        if (!mounted) return;
+        setState(() {
+          ref.read(printerConnectProvider.notifier).update(
+                settingCompleted ? PrinterConnectState.connected : PrinterConnectState.setupInComplete,
+              );
+        });
       } else {
-        if (mounted) {
-          setState(() {
-            ref.read(printerConnectProvider.notifier).update(PrinterConnectState.disconnected);
-          });
-        }
+        setState(() {
+          ref.read(printerConnectProvider.notifier).update(PrinterConnectState.disconnected);
+        });
       }
     });
   }
