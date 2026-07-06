@@ -144,7 +144,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
                 onTap: () async {
                   ref.read(backPhotoTypeProvider.notifier).selectFixed(0);
-                  PhotoCardPreviewRouteData().go(context);
+                  // TODO(JKLI-175): Step 3에서 frontPhotoType(RANDOM/USER_SELECT) 분기 적용
+                  FrontPhotoSelectRouteData().go(context);
                 },
               ),
               SizedBox(width: 40.w),
