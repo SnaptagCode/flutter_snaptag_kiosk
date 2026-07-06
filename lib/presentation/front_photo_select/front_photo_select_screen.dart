@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -24,13 +25,13 @@ class FrontPhotoSelectScreen extends ConsumerWidget {
     return Column(
       children: [
         Text(
-          '앞면 이미지 선택',
+          LocaleKeys.front_photo_select_title.tr(),
           style: context.typography.kioskBtn1B.copyWith(fontSize: 53.sp, color: mainTextColor),
           textAlign: TextAlign.center,
         ),
         SizedBox(height: 10.h),
         Text(
-          '원하는 앞면 이미지를 선택해 주세요',
+          LocaleKeys.front_photo_select_subtitle.tr(),
           style: context.typography.kioskBody1B.copyWith(fontSize: 26.sp, color: mainTextColor),
           textAlign: TextAlign.center,
         ),
@@ -39,7 +40,7 @@ class FrontPhotoSelectScreen extends ConsumerWidget {
           child: photos.isEmpty
               ? Center(
                   child: Text(
-                    '선택 가능한 앞면 이미지가 없습니다',
+                    LocaleKeys.front_photo_select_empty.tr(),
                     style: context.typography.kioskBody1B.copyWith(fontSize: 28.sp, color: mainTextColor),
                     textAlign: TextAlign.center,
                   ),
@@ -87,7 +88,7 @@ class FrontPhotoSelectScreen extends ConsumerWidget {
             ),
             alignment: Alignment.center,
             child: Text(
-              '홈으로',
+              LocaleKeys.alert_btn_go_to_home.tr(),
               style: context.typography.kioskBtn1B.copyWith(fontSize: 30.sp, color: buttonTextColor),
             ),
           ),
