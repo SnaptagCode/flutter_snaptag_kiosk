@@ -91,6 +91,31 @@ class DialogHelper {
     );
   }
 
+  /// 자동환불 성공 안내 (결제/인쇄 경로 공용) — 환불 완료 + 사과 안내.
+  static Future<void> showAutoRefundSuccessDialog(
+    BuildContext context, {
+    required int amount,
+    Duration? autoCloseDuration,
+  }) async {
+    await showKioskDialog(
+      context,
+      title: LocaleKeys.alert_title_refund_complete.tr(),
+      contentText: LocaleKeys.alert_txt_auto_refund_complete.tr(namedArgs: {'amount': amount.toString()}),
+      confirmButtonText: LocaleKeys.alert_btn_ok.tr(),
+      autoCloseDuration: autoCloseDuration,
+    );
+  }
+
+  /// 자동환불 실패 안내 (결제 경로) — 결제됐으나 환불 안 됨. 확인 필수(자동 닫힘 없음).
+  static Future<void> showAutoRefundFailedDialog(BuildContext context) async {
+    await showKioskDialog(
+      context,
+      title: LocaleKeys.alert_title_refund_failed.tr(),
+      contentText: LocaleKeys.alert_txt_auto_refund_failed.tr(),
+      confirmButtonText: LocaleKeys.alert_btn_ok.tr(),
+    );
+  }
+
   static Future<bool> showRefundCardInsertDialog(BuildContext context) async {
     return await showDialog<bool>(
           context: context,

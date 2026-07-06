@@ -193,7 +193,14 @@ class PaymentService extends _$PaymentService {
     await _updateOrder(isRefund: false, description: "확인필요");
   }
 
-  Future<void> refund() async {
+  /// 자동환불. 결과를 [RefundResult]로 반환한다(성공/실패 모두 반환, 예외를 밖으로 던지지 않음).
+  /// Slack 알림/주문상태 갱신 조건·문구는 기존과 동일하게 유지한다
+  /// (성공=무알림+"자동환불", 실패=🟡 paymentRefundFail + refundReasonFor 사유).
+  Future<RefundResult> refund() async {
+    final price = ref.read(kioskInfoServiceProvider)?.photoCardPrice ?? 0;
+
+    // 1. 결제사 취소 시도. 승인정보/승인번호가 없거나 cancel이 실패하면
+    //    아래 결과 판정에서 non-refunded로 처리된다(예외를 밖으로 던지지 않음).
     try {
       final approvalInfo = ref.read(paymentResponseStateProvider);
       if (approvalInfo == null) {
@@ -204,7 +211,6 @@ class PaymentService extends _$PaymentService {
         throw Exception('No approval number available');
       }
 
-      final price = ref.read(kioskInfoServiceProvider)!.photoCardPrice;
       final paymentResponse = await ref.read(paymentGatewayProvider).cancel(
             totalAmount: price,
             originalApprovalNo: approvalInfo.approvalNo ?? '',
@@ -215,21 +221,23 @@ class PaymentService extends _$PaymentService {
       ref.read(paymentResponseStateProvider.notifier).update(paymentResponse);
     } catch (e) {
       logger.e('Refund failed', error: e);
-      rethrow;
-    } finally {
-      final approvalInfo = ref.read(paymentResponseStateProvider);
-      final backPhoto = ref.watch(verifyPhotoCardProvider).value;
-      if (approvalInfo?.orderState == OrderStatus.refunded) {
-        await _updateOrder(isRefund: true, description: "자동환불");
-        ref.read(paymentResponseStateProvider.notifier).reset();
-        SlackLogService().sendLogToSlack('paymentResponseState Reset'); //paymentTestSlack
-      } else {
-        final reason = refundReasonFor(approvalInfo);
-        await _updateOrder(isRefund: true, description: reason);
-        SlackLogService().sendPaymentBroadcastLogToSlak(InfoKey.paymentRefundFail.key,
-            paymentDescription:
-                "동작로직: 자동환불\n- 사유: $reason\n- 인증번호: ${backPhoto?.photoAuthNumber ?? "없음"}\n- 승인번호: ${approvalInfo?.approvalNo ?? "없음"}");
-      }
+    }
+
+    // 2. 결과 판정 — 성공/실패 모두 결과를 반환한다.
+    final approvalInfo = ref.read(paymentResponseStateProvider);
+    final backPhoto = ref.watch(verifyPhotoCardProvider).value;
+    if (approvalInfo?.orderState == OrderStatus.refunded) {
+      await _updateOrder(isRefund: true, description: "자동환불");
+      ref.read(paymentResponseStateProvider.notifier).reset();
+      SlackLogService().sendLogToSlack('paymentResponseState Reset'); //paymentTestSlack
+      return RefundSuccess(price);
+    } else {
+      final reason = refundReasonFor(approvalInfo);
+      await _updateOrder(isRefund: true, description: reason);
+      SlackLogService().sendPaymentBroadcastLogToSlak(InfoKey.paymentRefundFail.key,
+          paymentDescription:
+              "동작로직: 자동환불\n- 사유: $reason\n- 인증번호: ${backPhoto?.photoAuthNumber ?? "없음"}\n- 승인번호: ${approvalInfo?.approvalNo ?? "없음"}");
+      return RefundFailure(LocaleKeys.alert_txt_refund_failed);
     }
   }
 
