@@ -177,10 +177,13 @@ ${slackLogTemplate.description}
 
       description = '''
 ${slackLogTemplate.description}
-            
+
 - $paymentDescription''';
 
-      final message = buildSlackAlertMessage(slackLogTemplate: slackLogTemplate.copyWith(description: description));
+      final category = errorKey == InfoKey.paymentRefundFail.key ? 'warning' : slackLogTemplate.category;
+
+      final message = buildSlackAlertMessage(
+          slackLogTemplate: slackLogTemplate.copyWith(description: description, category: category));
 
       await sendBroadcastLogToSlack(message);
     }
