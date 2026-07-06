@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
 import 'package:flutter_snaptag_kiosk/presentation/payment/create_order_info_state.dart';
+import 'package:flutter_snaptag_kiosk/presentation/front_photo_select/selected_front_photo_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/payment/payment_response_state.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/card_printer.dart';
 import 'package:flutter_snaptag_kiosk/presentation/setup/front_photo_list.dart';
@@ -72,6 +73,12 @@ class PrintService extends _$PrintService {
   }
 
   Future<NominatedPhoto> _prepareFrontPhoto() async {
+    // 선택형(USER_SELECT) 이벤트에서 사용자가 직접 고른 앞면이 있으면 우선 사용 (JKLI-175)
+    final selectedPhoto = ref.read(selectedFrontPhotoProvider);
+    if (selectedPhoto != null) {
+      return selectedPhoto;
+    }
+
     final frontPhotoList = ref.read(frontPhotoListProvider.notifier);
     final randomPhoto = await frontPhotoList.getRandomPhoto();
 

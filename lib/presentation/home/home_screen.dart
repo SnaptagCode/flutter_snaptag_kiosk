@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_snaptag_kiosk/core/ui/widget/dialog_helper.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
+import 'package:flutter_snaptag_kiosk/presentation/front_photo_select/selected_front_photo_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/home/back_photo_type_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/home/machine_job_polling_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/home/maintenance_polling_provider.dart';
@@ -21,6 +22,16 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   bool _refundDialogOpen = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // 홈 복귀(인쇄 완료/취소/타임아웃) 시 이전 사용자의 앞면 선택을 초기화 (JKLI-175)
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      ref.read(selectedFrontPhotoProvider.notifier).reset();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
