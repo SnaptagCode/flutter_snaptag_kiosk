@@ -144,8 +144,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
                 onTap: () async {
                   ref.read(backPhotoTypeProvider.notifier).selectFixed(0);
-                  // TODO(JKLI-175): Step 3에서 frontPhotoType(RANDOM/USER_SELECT) 분기 적용
-                  FrontPhotoSelectRouteData().go(context);
+                  // 선택형(USER_SELECT) 이벤트면 앞면 선택 화면, 아니면 기존대로 결제 화면 (JKLI-175)
+                  if (kiosk?.isFrontPhotoUserSelect ?? false) {
+                    FrontPhotoSelectRouteData().go(context);
+                  } else {
+                    PhotoCardPreviewRouteData().go(context);
+                  }
                 },
               ),
               SizedBox(width: 40.w),

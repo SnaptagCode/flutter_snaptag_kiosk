@@ -18,16 +18,19 @@ class KioskRepository extends _$KioskRepository {
   @override
   _KioskRepository build() {
     final dio = ref.watch(dioProvider(F.kioskBaseUrl));
+    // JKLI-175: machine/info 계열만 mock으로 보낼 수 있도록 별도 클라이언트 사용
+    final machineInfoDio = ref.watch(dioProvider(F.machineInfoBaseUrl));
 
-    return _KioskRepository(KioskApiClient(dio), ref);
+    return _KioskRepository(KioskApiClient(dio), KioskApiClient(machineInfoDio), ref);
   }
 }
 
 class _KioskRepository {
   final KioskApiClient _apiClient;
+  final KioskApiClient _machineInfoApiClient;
   final Ref _ref;
 
-  _KioskRepository(this._apiClient, this._ref);
+  _KioskRepository(this._apiClient, this._machineInfoApiClient, this._ref);
   Future<String> healthCheck() async {
     try {
       return await _apiClient.healthCheck();
@@ -89,7 +92,7 @@ class _KioskRepository {
   // Machine Info Operations
   Future<KioskMachineInfo> getKioskMachineInfo(int machineId) async {
     try {
-      return await _apiClient.getKioskMachineInfo(kioskMachineId: machineId);
+      return await _machineInfoApiClient.getKioskMachineInfo(kioskMachineId: machineId);
     } catch (e) {
       rethrow;
     }
@@ -97,7 +100,7 @@ class _KioskRepository {
 
   Future<KioskMachineInfo> getKioskMachineInfoByKey(String uniqueKey) async {
     try {
-      return await _apiClient.getKioskMachineInfoByKey(uniqueKey: uniqueKey);
+      return await _machineInfoApiClient.getKioskMachineInfoByKey(uniqueKey: uniqueKey);
     } catch (e) {
       rethrow;
     }

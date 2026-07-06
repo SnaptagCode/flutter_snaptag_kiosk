@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 enum Flavor {
   dev,
   prod,
@@ -39,6 +41,20 @@ class F {
       default:
         return 'https://api-spring-kiosk.snaptag.co.kr';
     }
+  }
+
+  /// JKLI-175: machine/info 응답 mock 테스트용 Postman mock URL.
+  /// 로컬 디버그 테스트 시에만 URL을 기입하고, 커밋/릴리즈에는 항상 null 유지.
+  /// mock: https://ed9ee921-fb3f-49a5-9a8e-647d9036465e.mock.pstmn.io
+  static const String? machineInfoMockUrl = null;
+
+  /// machine/info 계열 API가 실제 사용하는 base URL.
+  /// 디버그 빌드에서 machineInfoMockUrl이 설정된 경우에만 mock으로 향한다 (나머지 API는 kioskBaseUrl 유지).
+  static String get machineInfoBaseUrl {
+    if (kDebugMode && machineInfoMockUrl != null) {
+      return machineInfoMockUrl!;
+    }
+    return kioskBaseUrl;
   }
 
   static String get qrCodePrefix {

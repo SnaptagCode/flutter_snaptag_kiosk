@@ -33,6 +33,7 @@ abstract class KioskMachineInfo with _$KioskMachineInfo {
     @Default([]) List<EventVideo> eventVideos,
     @Default([]) List<NominatedBackPhotoCard> nominatedBackPhotoCardList,
     @Default('') String emblemImageUrl,
+    @Default('RANDOM') String frontPhotoType,
   }) = _KioskMachineInfo;
 
   factory KioskMachineInfo.fromJson(Map<String, dynamic> json) => _$KioskMachineInfoFromJson(json);
@@ -41,4 +42,7 @@ abstract class KioskMachineInfo with _$KioskMachineInfo {
 extension KioskMachineInfoX on KioskMachineInfo {
   bool get isSuwon => kioskMachineId == 2 || kioskMachineId == 3;
   bool get isHwe => eventType == 'HWEG';
+
+  /// 앞면 이미지 선택형 이벤트 여부 (JKLI-175). 미지정/구버전 서버는 RANDOM(기존 랜덤 동작)
+  bool get isFrontPhotoUserSelect => frontPhotoType == 'USER_SELECT';
 }
