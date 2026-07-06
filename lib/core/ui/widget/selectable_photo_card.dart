@@ -157,7 +157,6 @@ class SelectablePhotoCard extends StatelessWidget {
     final kioskColors = Theme.of(context).extension<KioskColors>();
     final buttonColor = kioskColors?.buttonColor ?? const Color(0xFF1B5E4F);
 
-    // 선택되지 않은 경우 크기를 0.85배로 축소
     final scale = selectedIndex == null ? 1.0 : (isSelected ? 1.0 : 0.85);
     final opacity = selectedIndex == null ? 1.0 : (isSelected ? 1.0 : 0.6);
 

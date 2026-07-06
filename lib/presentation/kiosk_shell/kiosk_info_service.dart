@@ -137,6 +137,14 @@ class KioskInfoService extends _$KioskInfoService {
     state = await _fetchAndUpdateKioskInfo(machineId: machineId);
   }
 
+  /// 앞면 이미지 모드(랜덤형/선택형) 변경 (JKLI-175). API 성공 시 머신정보 state 갱신
+  Future<void> setFrontPhotoUserSelect(bool userSelect) async {
+    final machineId = _cachedMachineId ?? state?.kioskMachineId ?? 0;
+    final value = userSelect ? 'USER_SELECT' : 'RANDOM';
+    await ref.read(kioskRepositoryProvider).updateFrontPhotoType(machineId: machineId, frontPhotoType: value);
+    state = state?.copyWith(frontPhotoType: value);
+  }
+
   /// 10분마다 실행되는 주기적 타이머 시작
   Future<void> _startPeriodicTimer() async {
     // 기존 타이머가 있다면 취소

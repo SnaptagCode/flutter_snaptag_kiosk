@@ -10,10 +10,6 @@ import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_servic
 import 'package:flutter_snaptag_kiosk/presentation/setup/front_photo_list.dart';
 
 /// 앞면 이미지 선택 화면 (선택형 이벤트 전용)
-///
-/// 뒷면 고정 이미지 선택(PaymentScreen)과 동일한 디자인(SelectablePhotoCard)으로,
-/// 가로 슬라이더에서 앞면 후보를 넘겨보고 탭으로 선택한 뒤
-/// 하단 '이미지 선택하기' 버튼으로 결제(미리보기) 화면에 진입한다.
 class FrontPhotoSelectScreen extends ConsumerStatefulWidget {
   const FrontPhotoSelectScreen({super.key});
 
@@ -51,7 +47,6 @@ class _FrontPhotoSelectScreenState extends ConsumerState<FrontPhotoSelectScreen>
     );
   }
 
-  /// 슬라이더 좌우 이동 버튼 (첫/마지막 페이지에서는 해당 방향 비활성)
   Widget _buildArrowButton({
     required IconData icon,
     required bool enabled,
@@ -86,12 +81,10 @@ class _FrontPhotoSelectScreenState extends ConsumerState<FrontPhotoSelectScreen>
     final buttonColor = kiosk?.mainButtonColor.toColor() ?? Colors.black;
     final buttonTextColor = (kiosk?.buttonTextColor ?? '').toColor(fallback: Colors.white);
 
-    // 선택된 앞면의 인덱스 (리스트 갱신으로 사라졌으면 미선택 취급)
     final foundIndex = selectedPhoto == null ? -1 : photos.indexWhere((photo) => photo.id == selectedPhoto.id);
     final selectedIndex = foundIndex < 0 ? null : foundIndex;
 
-    // KioskShell이 화면을 높이 무제한 Column(center) 안에 배치하므로
-    // Expanded 대신 고정 높이를 사용해야 한다 (가용 영역 약 995.h).
+    // KioskShell이 화면을 높이 무제한 Column(center) 안에 배치하므로 Expanded 대신 고정 높이를 사용해야 한다.
     return DefaultTextStyle(
       style: TextStyle(
         fontFamily: context.locale.languageCode == 'ja' ? 'MPLUSRounded' : 'Cafe24Ssurround2',
@@ -142,7 +135,6 @@ class _FrontPhotoSelectScreenState extends ConsumerState<FrontPhotoSelectScreen>
                           return AnimatedBuilder(
                             animation: _pageController,
                             builder: (context, child) {
-                              // 중앙에서 멀어질수록 카드 축소 + 살짝 반투명 (캐러셀 효과)
                               final page = _pageController.hasClients && _pageController.position.haveDimensions
                                   ? _pageController.page ?? _currentPage.toDouble()
                                   : _currentPage.toDouble();
@@ -166,7 +158,6 @@ class _FrontPhotoSelectScreenState extends ConsumerState<FrontPhotoSelectScreen>
                               showCheckBadge: true,
                               onTap: () {
                                 SoundManager().playSound();
-                                // 옆 카드를 탭하면 가운데로 이동하며 선택
                                 if (index != _currentPage) {
                                   _pageController.animateToPage(
                                     index,
@@ -180,7 +171,6 @@ class _FrontPhotoSelectScreenState extends ConsumerState<FrontPhotoSelectScreen>
                           );
                         },
                       ),
-                      // 스와이프에 익숙하지 않은 사용자를 위한 좌우 이동 버튼
                       if (photos.length > 1) ...[
                         Align(
                           alignment: Alignment.centerLeft,
@@ -209,7 +199,6 @@ class _FrontPhotoSelectScreenState extends ConsumerState<FrontPhotoSelectScreen>
                   ),
           ),
           SizedBox(height: 20.h),
-          // 10장 이하는 도트, 그 이상은 카운터로 표시 (도트가 길어지는 것 방지)
           if (photos.length > 1 && photos.length <= 10)
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -256,8 +245,6 @@ class _FrontPhotoSelectScreenState extends ConsumerState<FrontPhotoSelectScreen>
               ),
             ),
           ),
-          // 전체 콘텐츠를 가용 영역(약 995.h)보다 충분히 작게 유지해 중앙 정렬 시
-          // 위아래 여백이 대칭으로 생기고, 하단 SNAPTAG 로고도 가려지지 않는다.
         ],
       ),
     );

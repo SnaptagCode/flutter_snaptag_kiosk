@@ -106,6 +106,14 @@ class _KioskRepository {
     }
   }
 
+  Future<void> updateFrontPhotoType({required int machineId, required String frontPhotoType}) async {
+    try {
+      await _machineInfoApiClient.updateFrontPhotoType(machineId: machineId, frontPhotoType: frontPhotoType);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   // Photo Operations
   Future<NominatedPhotoList> getFrontPhotoList(int eventId) async {
     try {

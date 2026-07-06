@@ -39,6 +39,13 @@ abstract class KioskApiClient {
     @Query('uniqueKey') required String uniqueKey,
   });
 
+  // 앞면 이미지 모드(RANDOM/USER_SELECT) 변경 (JKLI-175) — 현재는 Postman mock으로 제공
+  @PATCH('/v1/machine/{machineId}/front-photo-type')
+  Future<void> updateFrontPhotoType({
+    @Path('machineId') required int machineId,
+    @Query('frontPhotoType') required String frontPhotoType,
+  });
+
   @GET('/v1/kiosk-event/back-photo')
   Future<BackPhotoCardResponse> getBackPhotoCard({
     @Query('kioskEventId') required int kioskEventId,

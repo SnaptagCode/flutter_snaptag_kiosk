@@ -88,9 +88,9 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
       }
     }
 
-    // final isReady = await _validatePrinterReadyAndShowDialogs(context);
+    final isReady = await _validatePrinterReadyAndShowDialogs(context);
 
-    // if (!isReady) return;
+    if (!isReady) return;
 
     final isPaymentDeviceReady = await _checkPaymentDevice();
     if (!isPaymentDeviceReady) return;
@@ -215,7 +215,12 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
       borderRadius: const BorderRadius.all(Radius.circular(12)),
       onTap: () async {
         await SoundManager().playSound();
-        ref.read(frontPhotoModeOverrideProvider.notifier).set(mode);
+        try {
+          await ref.read(kioskInfoServiceProvider.notifier).setFrontPhotoUserSelect(mode == FrontPhotoMode.userSelect);
+        } catch (e) {
+          if (!context.mounted) return;
+          DialogHelper.showSetupDialog(context, title: '앞면 이미지 설정 변경에 실패했습니다.');
+        }
       },
       child: Container(
         width: 250.w,
