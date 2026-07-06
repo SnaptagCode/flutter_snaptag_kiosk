@@ -135,6 +135,9 @@ class SelectablePhotoCard extends StatelessWidget {
   final double? height;
   final BoxFit fit;
 
+  /// true면 선택된 카드 우상단에 체크 배지를 표시 (앞면 선택 그리드용)
+  final bool showCheckBadge;
+
   const SelectablePhotoCard({
     super.key,
     required this.index,
@@ -145,6 +148,7 @@ class SelectablePhotoCard extends StatelessWidget {
     this.width,
     this.height,
     this.fit = BoxFit.fitHeight,
+    this.showCheckBadge = false,
   });
 
   @override
@@ -167,28 +171,59 @@ class SelectablePhotoCard extends StatelessWidget {
           opacity: opacity,
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeOutCubic,
-          child: PhotoCardFrame(
-            width: width,
-            height: height,
-            fit: fit,
-            imageUrl: imageUrl,
-            imageFile: imageFile,
-            boxShadow: isSelected
-                ? [
-                    BoxShadow(
-                      color: buttonColor.withValues(alpha: 0.4),
-                      blurRadius: 12.r,
-                      spreadRadius: 2.r,
-                      offset: Offset(0, 4.h),
+          child: Stack(
+            children: [
+              PhotoCardFrame(
+                width: width,
+                height: height,
+                fit: fit,
+                imageUrl: imageUrl,
+                imageFile: imageFile,
+                boxShadow: isSelected
+                    ? [
+                        BoxShadow(
+                          color: buttonColor.withValues(alpha: 0.4),
+                          blurRadius: 12.r,
+                          spreadRadius: 2.r,
+                          offset: Offset(0, 4.h),
+                        ),
+                      ]
+                    : [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.1),
+                          blurRadius: 4.r,
+                          offset: Offset(0, 2.h),
+                        ),
+                      ],
+              ),
+              if (showCheckBadge)
+                Positioned(
+                  top: 10.h,
+                  right: 10.w,
+                  child: AnimatedScale(
+                    scale: isSelected ? 1.0 : 0.0,
+                    duration: const Duration(milliseconds: 250),
+                    curve: Curves.easeOutBack,
+                    child: Container(
+                      width: 40.w,
+                      height: 40.w,
+                      decoration: BoxDecoration(
+                        color: buttonColor,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white, width: 2.w),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.25),
+                            blurRadius: 6.r,
+                            offset: Offset(0, 2.h),
+                          ),
+                        ],
+                      ),
+                      child: Icon(Icons.check_rounded, size: 26.sp, color: Colors.white),
                     ),
-                  ]
-                : [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.1),
-                      blurRadius: 4.r,
-                      offset: Offset(0, 2.h),
-                    ),
-                  ],
+                  ),
+                ),
+            ],
           ),
         ),
       ),

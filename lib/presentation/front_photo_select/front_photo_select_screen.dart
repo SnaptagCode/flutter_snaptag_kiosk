@@ -46,7 +46,16 @@ class FrontPhotoSelectScreen extends ConsumerWidget {
                 ? context.typography.vendingTitle1B.copyWith(color: mainTextColor)
                 : context.typography.kioskBtn1B.copyWith(fontSize: 53.sp, color: mainTextColor),
           ),
-          SizedBox(height: 50.h),
+          SizedBox(height: 12.h),
+          Text(
+            LocaleKeys.front_photo_select_subtitle.tr(),
+            textAlign: TextAlign.center,
+            style: isHwe
+                ? context.typography.vendingBody4B.copyWith(color: mainTextColor.withValues(alpha: 0.85))
+                : context.typography.kioskBody1B
+                    .copyWith(fontSize: 26.sp, color: mainTextColor.withValues(alpha: 0.85)),
+          ),
+          SizedBox(height: 40.h),
           SizedBox(
             height: 620.h,
             child: photos.isEmpty
@@ -76,12 +85,13 @@ class FrontPhotoSelectScreen extends ConsumerWidget {
                         imageFile: photo.embedImage,
                         imageUrl: photo.originUrl,
                         fit: BoxFit.cover,
+                        showCheckBadge: true,
                         onTap: () => ref.read(selectedFrontPhotoProvider.notifier).select(photo),
                       );
                     },
                   ),
           ),
-          SizedBox(height: 50.h),
+          SizedBox(height: 40.h),
           ElevatedButton(
             style: context.paymentButtonStyle,
             onPressed: selectedPhoto == null
