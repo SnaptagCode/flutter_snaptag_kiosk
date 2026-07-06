@@ -7,6 +7,7 @@ import 'package:flutter_snaptag_kiosk/core/common/sound/sound_manager.dart';
 import 'package:flutter_snaptag_kiosk/core/ui/widget/dialog_helper.dart';
 import 'package:flutter_snaptag_kiosk/core/ui/widget/general_error_widget.dart';
 import 'package:flutter_snaptag_kiosk/core/ui/widget/price_box.dart';
+import 'package:flutter_snaptag_kiosk/core/ui/widget/selectable_photo_card.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_snaptag_kiosk/presentation/home/back_photo_type_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/home_timeout_provider.dart';
@@ -48,153 +49,29 @@ class PaymentScreen extends ConsumerStatefulWidget {
 class _PaymentScreenState extends ConsumerState<PaymentScreen> {
   bool _isNetworkErrorHandled = false;
 
-  /// 시안 6: 선택되지 않은 카드 크기 축소 + 애니메이션
-  Widget _buildVariant6AnimatedScaleOnUnselected({
-    required int index,
-    required int? selectedIndex,
-    required String? imageUrl,
-    required VoidCallback onTap,
-  }) {
-    final isSelected = selectedIndex == index;
-    final kioskColors = Theme.of(context).extension<KioskColors>();
-    final buttonColor = kioskColors?.buttonColor ?? const Color(0xFF1B5E4F);
-
-    // 선택되지 않은 경우 크기를 0.85배로 축소
-    final scale = selectedIndex == null ? 1.0 : (isSelected ? 1.0 : 0.85);
-    final opacity = selectedIndex == null ? 1.0 : (isSelected ? 1.0 : 0.6);
-
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedScale(
-        scale: scale,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeOutCubic,
-        child: AnimatedOpacity(
-          opacity: opacity,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOutCubic,
-          child: _buildFixedBackPhotoCard(
-            boxShadow: isSelected
-                ? [
-                    BoxShadow(
-                      color: buttonColor.withOpacity(0.4),
-                      blurRadius: 12.r,
-                      spreadRadius: 2.r,
-                      offset: Offset(0, 4.h),
-                    ),
-                  ]
-                : [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 4.r,
-                      offset: Offset(0, 2.h),
-                    ),
-                  ],
-            imageUrl: imageUrl,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildFixedBackPhotoCard({
-    required List<BoxShadow>? boxShadow,
-    required String? imageUrl,
-    bool hasBorder = false,
-  }) {
-    return Container(
-      width: 226.w,
-      height: 355.h,
-      clipBehavior: Clip.antiAlias,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10.r),
-        border: hasBorder ? Border.all(color: Colors.white, width: 1.w) : null,
-        boxShadow: hasBorder
-            ? [
-                BoxShadow(
-                  color: Colors.white.withValues(alpha: 0.8),
-                  blurRadius: 4.r,
-                  spreadRadius: 1.r,
-                ),
-                BoxShadow(
-                  color: Colors.white.withValues(alpha: 0.4),
-                  blurRadius: 12.r,
-                  spreadRadius: 3.r,
-                ),
-                BoxShadow(
-                  color: Colors.white.withValues(alpha: 0.2),
-                  blurRadius: 28.r,
-                  spreadRadius: 6.r,
-                ),
-              ]
-            : boxShadow,
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(10.r),
-        child: imageUrl != null && imageUrl.isNotEmpty ? _buildNetworkImage(imageUrl) : _buildEmptyImagePlaceholder(),
-      ),
-    );
-  }
-
-  /// 네트워크 이미지 위젯 빌더 (공통 빌더 포함)
-  Widget _buildNetworkImage(String imageUrl) {
-    return Image.network(
-      imageUrl,
-      fit: BoxFit.fitHeight,
-      alignment: Alignment.center,
-      frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
-        if (wasSynchronouslyLoaded) return child;
-        return AnimatedOpacity(
-          opacity: frame == null ? 0 : 1,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOut,
-          child: child,
-        );
-      },
-      loadingBuilder: (context, child, loadingProgress) {
-        if (loadingProgress == null) return child;
-        return Center(
-          child: CircularProgressIndicator(
-            value: loadingProgress.expectedTotalBytes != null
-                ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
-                : null,
-          ),
-        );
-      },
-      errorBuilder: (context, error, stackTrace) => _buildEmptyImagePlaceholder(),
-    );
-  }
-
-  /// 빈 이미지 플레이스홀더
-  Widget _buildEmptyImagePlaceholder() {
-    return Container(
-      color: Colors.grey[200],
-      child: Center(
-        child: Icon(Icons.image, size: 60.sp, color: Colors.grey[400]),
-      ),
-    );
-  }
-
   Widget _buildFixedBackPhotoCardList({
     required KioskMachineInfo? kiosk,
     required bool isFixed,
     required int? selectedIndex,
   }) {
     final nominatedBackPhotoCardList = kiosk?.nominatedBackPhotoCardList ?? [];
-    if (kiosk == null || nominatedBackPhotoCardList.isEmpty) return _buildEmptyImagePlaceholder();
+    if (kiosk == null || nominatedBackPhotoCardList.isEmpty) return const PhotoCardEmptyPlaceholder();
 
     return isFixed
         ? Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               if (nominatedBackPhotoCardList.length == 1)
-                _buildFixedBackPhotoCard(
-                  boxShadow: null,
+                PhotoCardFrame(
+                  width: 226.w,
+                  height: 355.h,
                   imageUrl: nominatedBackPhotoCardList[0].originUrl,
                   hasBorder: true,
                 )
               else
-                _buildVariant6AnimatedScaleOnUnselected(
+                SelectablePhotoCard(
+                  width: 226.w,
+                  height: 355.h,
                   index: 0,
                   selectedIndex: selectedIndex,
                   imageUrl: nominatedBackPhotoCardList[0].originUrl,
@@ -204,7 +81,9 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
                 ),
               if (nominatedBackPhotoCardList.length > 1) SizedBox(width: 100.w),
               if (nominatedBackPhotoCardList.length > 1)
-                _buildVariant6AnimatedScaleOnUnselected(
+                SelectablePhotoCard(
+                  width: 226.w,
+                  height: 355.h,
                   index: 1,
                   selectedIndex: selectedIndex,
                   imageUrl: nominatedBackPhotoCardList[1].originUrl,
@@ -218,8 +97,8 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
               data: (data) {
                 final imageUrl = data?.formattedBackPhotoCardUrl ?? '';
                 return imageUrl.isNotEmpty
-                    ? _buildFixedBackPhotoCard(boxShadow: null, imageUrl: imageUrl)
-                    : _buildEmptyImagePlaceholder();
+                    ? PhotoCardFrame(width: 226.w, height: 355.h, imageUrl: imageUrl)
+                    : const PhotoCardEmptyPlaceholder();
               },
               loading: () => const CircularProgressIndicator(),
               error: (error, stack) => GeneralErrorWidget(
