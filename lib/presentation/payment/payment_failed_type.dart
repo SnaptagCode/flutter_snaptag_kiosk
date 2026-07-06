@@ -1,3 +1,5 @@
+import 'package:flutter_snaptag_kiosk/core/services/payment/refund_result.dart';
+
 /// 결제 실패 예외의 기본 클래스
 abstract class PaymentFailedException implements Exception {
   final String message;
@@ -42,4 +44,17 @@ class PaymentPreparationException implements Exception {
 
   @override
   String toString() => 'PaymentPreparationException: $cause';
+}
+
+/// 결제 승인 후 후속 처리 실패로 자동환불을 시도한 결과를 화면에 전달하기 위한 예외.
+/// 원래 실패 예외([originalError])와 자동환불 결과([refundResult])를 함께 담는다.
+/// (기존 Slack 로그 내용을 보존하기 위해 toString은 원래 오류를 위임한다.)
+class PostPaymentRefundException implements Exception {
+  final RefundResult refundResult;
+  final Object originalError;
+
+  PostPaymentRefundException(this.refundResult, this.originalError);
+
+  @override
+  String toString() => originalError.toString();
 }

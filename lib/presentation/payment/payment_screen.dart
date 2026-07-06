@@ -286,6 +286,24 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
             final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
             SlackLogService().sendLogToSlack('*[MachineId : $machineId]* Payment process failed: $error');
 
+            // 결제 승인 후 후속 처리 실패로 자동환불을 탄 경우 → 환불 결과를 사용자에게 안내한다.
+            if (error is PostPaymentRefundException) {
+              final refundResult = error.refundResult;
+              if (!mounted) return;
+              if (refundResult is RefundSuccess) {
+                await DialogHelper.showAutoRefundSuccessDialog(
+                  context,
+                  amount: refundResult.amount,
+                  autoCloseDuration: const Duration(seconds: 5),
+                );
+              } else {
+                // 환불 실패(결제됐으나 환불 안 됨, 돈이 묶임) → 직원 문의 안내, 확인 필수
+                await DialogHelper.showAutoRefundFailedDialog(context);
+              }
+              if (mounted) HomeRouteData().go(context);
+              return;
+            }
+
             if (error.toString().contains('Card feeder is empty')) {
               await DialogHelper.showPrintCardRefillDialog(
                 context,

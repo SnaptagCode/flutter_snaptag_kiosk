@@ -67,6 +67,8 @@ abstract class LocaleKeys {
   static const alert_txt_refund_complete = 'alert_txt_refund_complete';
   static const alert_title_refund_failed = 'alert_title_refund_failed';
   static const alert_txt_refund_failed = 'alert_txt_refund_failed';
+  static const alert_txt_auto_refund_complete = 'alert_txt_auto_refund_complete';
+  static const alert_txt_auto_refund_failed = 'alert_txt_auto_refund_failed';
   static const alert_txt_refund_terminal_error = 'alert_txt_refund_terminal_error';
   static const alert_title_refund_card_insert = 'alert_title_refund_card_insert';
   static const alert_txt_refund_card_insert = 'alert_txt_refund_card_insert';
