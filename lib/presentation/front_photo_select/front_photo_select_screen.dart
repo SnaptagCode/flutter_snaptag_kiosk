@@ -11,21 +11,48 @@ import 'package:flutter_snaptag_kiosk/presentation/setup/front_photo_list.dart';
 
 /// 앞면 이미지 선택 화면 (선택형 이벤트 전용)
 ///
-/// 뒷면 고정 이미지 선택(PaymentScreen)과 동일한 디자인(SelectablePhotoCard)·레이아웃으로
-/// 앞면 후보를 고른 뒤, 하단 '이미지 선택하기' 버튼으로 결제(미리보기) 화면에 진입한다.
-class FrontPhotoSelectScreen extends ConsumerWidget {
+/// 뒷면 고정 이미지 선택(PaymentScreen)과 동일한 디자인(SelectablePhotoCard)으로,
+/// 가로 슬라이더에서 앞면 후보를 넘겨보고 탭으로 선택한 뒤
+/// 하단 '이미지 선택하기' 버튼으로 결제(미리보기) 화면에 진입한다.
+class FrontPhotoSelectScreen extends ConsumerStatefulWidget {
   const FrontPhotoSelectScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<FrontPhotoSelectScreen> createState() => _FrontPhotoSelectScreenState();
+}
+
+class _FrontPhotoSelectScreenState extends ConsumerState<FrontPhotoSelectScreen> {
+  late final PageController _pageController;
+  int _currentPage = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    // 이전에 선택한 앞면이 있으면 해당 카드에서 시작
+    final photos = ref.read(frontPhotoListProvider);
+    final selected = ref.read(selectedFrontPhotoProvider);
+    final initialIndex = selected == null ? -1 : photos.indexWhere((photo) => photo.id == selected.id);
+    _currentPage = initialIndex < 0 ? 0 : initialIndex;
+    _pageController = PageController(viewportFraction: 0.36, initialPage: _currentPage);
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final kiosk = ref.watch(kioskInfoServiceProvider);
     final photos = ref.watch(frontPhotoListProvider);
     final selectedPhoto = ref.watch(selectedFrontPhotoProvider);
     final isHwe = kiosk?.isHwe ?? false;
     final mainTextColor = kiosk?.mainTextColor.toColor(fallback: Colors.white) ?? Colors.white;
+    final buttonColor = kiosk?.mainButtonColor.toColor() ?? Colors.black;
     final buttonTextColor = (kiosk?.buttonTextColor ?? '').toColor(fallback: Colors.white);
 
-    // 선택된 앞면의 그리드 인덱스 (리스트 갱신으로 사라졌으면 미선택 취급)
+    // 선택된 앞면의 인덱스 (리스트 갱신으로 사라졌으면 미선택 취급)
     final foundIndex = selectedPhoto == null ? -1 : photos.indexWhere((photo) => photo.id == selectedPhoto.id);
     final selectedIndex = foundIndex < 0 ? null : foundIndex;
 
@@ -55,9 +82,9 @@ class FrontPhotoSelectScreen extends ConsumerWidget {
                 : context.typography.kioskBody1B
                     .copyWith(fontSize: 26.sp, color: mainTextColor.withValues(alpha: 0.85)),
           ),
-          SizedBox(height: 40.h),
+          SizedBox(height: 36.h),
           SizedBox(
-            height: 620.h,
+            height: 585.h,
             child: photos.isEmpty
                 ? Center(
                     child: Text(
@@ -68,30 +95,70 @@ class FrontPhotoSelectScreen extends ConsumerWidget {
                           : context.typography.kioskBody2B.copyWith(color: mainTextColor),
                     ),
                   )
-                : GridView.builder(
-                    padding: EdgeInsets.symmetric(horizontal: 70.w, vertical: 10.h),
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 3,
-                      mainAxisSpacing: 24.h,
-                      crossAxisSpacing: 24.w,
-                      childAspectRatio: 226 / 355,
-                    ),
+                : PageView.builder(
+                    controller: _pageController,
+                    onPageChanged: (index) => setState(() => _currentPage = index),
                     itemCount: photos.length,
                     itemBuilder: (context, index) {
                       final photo = photos[index];
-                      return SelectablePhotoCard(
-                        index: index,
-                        selectedIndex: selectedIndex,
-                        imageFile: photo.embedImage,
-                        imageUrl: photo.originUrl,
-                        fit: BoxFit.cover,
-                        showCheckBadge: true,
-                        onTap: () => ref.read(selectedFrontPhotoProvider.notifier).select(photo),
+                      return AnimatedBuilder(
+                        animation: _pageController,
+                        builder: (context, child) {
+                          // 중앙에서 멀어질수록 카드 축소 (캐러셀 효과)
+                          final page = _pageController.hasClients && _pageController.position.haveDimensions
+                              ? _pageController.page ?? _currentPage.toDouble()
+                              : _currentPage.toDouble();
+                          final distance = (page - index).abs().clamp(0.0, 1.0);
+                          final scale = 1.0 - distance * 0.12;
+                          return Center(
+                            child: Transform.scale(scale: scale, child: child),
+                          );
+                        },
+                        child: SelectablePhotoCard(
+                          width: 356.w,
+                          height: 560.h,
+                          index: index,
+                          selectedIndex: selectedIndex,
+                          imageFile: photo.embedImage,
+                          imageUrl: photo.originUrl,
+                          fit: BoxFit.cover,
+                          showCheckBadge: true,
+                          onTap: () {
+                            // 옆 카드를 탭하면 가운데로 이동하며 선택
+                            if (index != _currentPage) {
+                              _pageController.animateToPage(
+                                index,
+                                duration: const Duration(milliseconds: 300),
+                                curve: Curves.easeOutCubic,
+                              );
+                            }
+                            ref.read(selectedFrontPhotoProvider.notifier).select(photo);
+                          },
+                        ),
                       );
                     },
                   ),
           ),
-          SizedBox(height: 40.h),
+          SizedBox(height: 20.h),
+          if (photos.length > 1)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(photos.length, (index) {
+                final isActive = index == _currentPage;
+                return AnimatedContainer(
+                  duration: const Duration(milliseconds: 250),
+                  curve: Curves.easeOutCubic,
+                  width: isActive ? 28.w : 12.w,
+                  height: 12.w,
+                  margin: EdgeInsets.symmetric(horizontal: 5.w),
+                  decoration: BoxDecoration(
+                    color: isActive ? buttonColor : Colors.white.withValues(alpha: 0.5),
+                    borderRadius: BorderRadius.circular(6.r),
+                  ),
+                );
+              }),
+            ),
+          SizedBox(height: 30.h),
           ElevatedButton(
             style: context.paymentButtonStyle,
             onPressed: selectedPhoto == null
