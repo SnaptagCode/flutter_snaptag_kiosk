@@ -22,7 +22,10 @@ class FrontPhotoSelectScreen extends ConsumerWidget {
     final buttonColor = kiosk?.mainButtonColor.toColor() ?? Colors.black;
     final buttonTextColor = kiosk?.buttonTextColor.toColor(fallback: Colors.white) ?? Colors.white;
 
+    // KioskShell이 화면을 높이 무제한 Column(center) 안에 배치하므로
+    // Expanded 대신 고정 높이를 사용해야 한다 (가용 영역 약 995.h).
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
         Text(
           LocaleKeys.front_photo_select_title.tr(),
@@ -36,7 +39,8 @@ class FrontPhotoSelectScreen extends ConsumerWidget {
           textAlign: TextAlign.center,
         ),
         SizedBox(height: 24.h),
-        Expanded(
+        SizedBox(
+          height: 680.h,
           child: photos.isEmpty
               ? Center(
                   child: Text(
