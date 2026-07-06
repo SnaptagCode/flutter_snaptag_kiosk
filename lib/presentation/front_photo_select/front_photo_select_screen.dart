@@ -42,6 +42,40 @@ class _FrontPhotoSelectScreenState extends ConsumerState<FrontPhotoSelectScreen>
     super.dispose();
   }
 
+  void _moveToPage(int index) {
+    SoundManager().playSound();
+    _pageController.animateToPage(
+      index,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeOutCubic,
+    );
+  }
+
+  /// 슬라이더 좌우 이동 버튼 (첫/마지막 페이지에서는 해당 방향 비활성)
+  Widget _buildArrowButton({
+    required IconData icon,
+    required bool enabled,
+    required VoidCallback onTap,
+  }) {
+    return AnimatedOpacity(
+      opacity: enabled ? 1.0 : 0.25,
+      duration: const Duration(milliseconds: 200),
+      child: GestureDetector(
+        onTap: enabled ? onTap : null,
+        child: Container(
+          width: 72.w,
+          height: 72.w,
+          decoration: BoxDecoration(
+            color: Colors.black.withValues(alpha: 0.35),
+            shape: BoxShape.circle,
+            border: Border.all(color: Colors.white.withValues(alpha: 0.6), width: 1.5.w),
+          ),
+          child: Icon(icon, size: 48.sp, color: Colors.white),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final kiosk = ref.watch(kioskInfoServiceProvider);
@@ -95,52 +129,88 @@ class _FrontPhotoSelectScreenState extends ConsumerState<FrontPhotoSelectScreen>
                           : context.typography.kioskBody2B.copyWith(color: mainTextColor),
                     ),
                   )
-                : PageView.builder(
-                    controller: _pageController,
-                    onPageChanged: (index) => setState(() => _currentPage = index),
-                    itemCount: photos.length,
-                    itemBuilder: (context, index) {
-                      final photo = photos[index];
-                      return AnimatedBuilder(
-                        animation: _pageController,
-                        builder: (context, child) {
-                          // 중앙에서 멀어질수록 카드 축소 (캐러셀 효과)
-                          final page = _pageController.hasClients && _pageController.position.haveDimensions
-                              ? _pageController.page ?? _currentPage.toDouble()
-                              : _currentPage.toDouble();
-                          final distance = (page - index).abs().clamp(0.0, 1.0);
-                          final scale = 1.0 - distance * 0.12;
-                          return Center(
-                            child: Transform.scale(scale: scale, child: child),
+                : Stack(
+                    children: [
+                      PageView.builder(
+                        controller: _pageController,
+                        // 카드 글로우/그림자가 페이지 경계에서 잘리지 않도록
+                        clipBehavior: Clip.none,
+                        onPageChanged: (index) => setState(() => _currentPage = index),
+                        itemCount: photos.length,
+                        itemBuilder: (context, index) {
+                          final photo = photos[index];
+                          return AnimatedBuilder(
+                            animation: _pageController,
+                            builder: (context, child) {
+                              // 중앙에서 멀어질수록 카드 축소 + 살짝 반투명 (캐러셀 효과)
+                              final page = _pageController.hasClients && _pageController.position.haveDimensions
+                                  ? _pageController.page ?? _currentPage.toDouble()
+                                  : _currentPage.toDouble();
+                              final distance = (page - index).abs().clamp(0.0, 1.0);
+                              final scale = 1.0 - distance * 0.12;
+                              return Center(
+                                child: Transform.scale(
+                                  scale: scale,
+                                  child: Opacity(opacity: 1.0 - distance * 0.15, child: child),
+                                ),
+                              );
+                            },
+                            child: SelectablePhotoCard(
+                              width: 356.w,
+                              height: 560.h,
+                              index: index,
+                              selectedIndex: selectedIndex,
+                              imageFile: photo.embedImage,
+                              imageUrl: photo.originUrl,
+                              fit: BoxFit.cover,
+                              showCheckBadge: true,
+                              onTap: () {
+                                SoundManager().playSound();
+                                // 옆 카드를 탭하면 가운데로 이동하며 선택
+                                if (index != _currentPage) {
+                                  _pageController.animateToPage(
+                                    index,
+                                    duration: const Duration(milliseconds: 300),
+                                    curve: Curves.easeOutCubic,
+                                  );
+                                }
+                                ref.read(selectedFrontPhotoProvider.notifier).select(photo);
+                              },
+                            ),
                           );
                         },
-                        child: SelectablePhotoCard(
-                          width: 356.w,
-                          height: 560.h,
-                          index: index,
-                          selectedIndex: selectedIndex,
-                          imageFile: photo.embedImage,
-                          imageUrl: photo.originUrl,
-                          fit: BoxFit.cover,
-                          showCheckBadge: true,
-                          onTap: () {
-                            // 옆 카드를 탭하면 가운데로 이동하며 선택
-                            if (index != _currentPage) {
-                              _pageController.animateToPage(
-                                index,
-                                duration: const Duration(milliseconds: 300),
-                                curve: Curves.easeOutCubic,
-                              );
-                            }
-                            ref.read(selectedFrontPhotoProvider.notifier).select(photo);
-                          },
+                      ),
+                      // 스와이프에 익숙하지 않은 사용자를 위한 좌우 이동 버튼
+                      if (photos.length > 1) ...[
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: Padding(
+                            padding: EdgeInsets.only(left: 28.w),
+                            child: _buildArrowButton(
+                              icon: Icons.chevron_left_rounded,
+                              enabled: _currentPage > 0,
+                              onTap: () => _moveToPage(_currentPage - 1),
+                            ),
+                          ),
                         ),
-                      );
-                    },
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: Padding(
+                            padding: EdgeInsets.only(right: 28.w),
+                            child: _buildArrowButton(
+                              icon: Icons.chevron_right_rounded,
+                              enabled: _currentPage < photos.length - 1,
+                              onTap: () => _moveToPage(_currentPage + 1),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
           ),
           SizedBox(height: 20.h),
-          if (photos.length > 1)
+          // 10장 이하는 도트, 그 이상은 카운터로 표시 (도트가 길어지는 것 방지)
+          if (photos.length > 1 && photos.length <= 10)
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: List.generate(photos.length, (index) {
@@ -157,6 +227,14 @@ class _FrontPhotoSelectScreenState extends ConsumerState<FrontPhotoSelectScreen>
                   ),
                 );
               }),
+            )
+          else if (photos.length > 10)
+            Text(
+              '${_currentPage + 1} / ${photos.length}',
+              style: isHwe
+                  ? context.typography.vendingBody4B.copyWith(color: mainTextColor.withValues(alpha: 0.85))
+                  : context.typography.kioskBody1B
+                      .copyWith(fontSize: 24.sp, color: mainTextColor.withValues(alpha: 0.85)),
             ),
           SizedBox(height: 30.h),
           ElevatedButton(
