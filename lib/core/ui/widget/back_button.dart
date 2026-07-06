@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_snaptag_kiosk/presentation/home/back_photo_type_provider.dart';
+import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 
@@ -25,6 +26,7 @@ class KioskBackButton extends ConsumerWidget {
 
     final selection = ref.watch(backPhotoTypeProvider);
     final isFixed = selection?.type == BackPhotoType.fixed;
+    final isFrontPhotoUserSelect = ref.watch(kioskInfoServiceProvider)?.isFrontPhotoUserSelect ?? false;
 
     logger.i(
         'KioskBackButton: currentPath: $currentPath isHomeScreen: $isHomeScreen isPrintProcessScreen: $isPrintProcessScreen isKioskRoute: $isKioskRoute');
@@ -40,7 +42,7 @@ class KioskBackButton extends ConsumerWidget {
       ),
       child: InkWell(
         onTap: () {
-          _navigateBack(context, currentPath, isFixed);
+          _navigateBack(context, currentPath, isFixed, isFrontPhotoUserSelect);
         },
         child: Container(
           decoration: BoxDecoration(
@@ -79,17 +81,22 @@ class KioskBackButton extends ConsumerWidget {
     );
   }
 
-  void _navigateBack(BuildContext context, String currentPath, bool isFixed) {
+  void _navigateBack(BuildContext context, String currentPath, bool isFixed, bool isFrontPhotoUserSelect) {
     // 현재 경로에 따라 이전 화면으로 명시적으로 이동
     if (currentPath == CodeVerificationRouteData().location) {
-      // /kiosk/qr → /kiosk/home
+      // /kiosk/code-verification → /kiosk/home
       const HomeRouteData().go(context);
-    } else if (currentPath == CodeVerificationRouteData().location) {
-      // /kiosk/code-verification → /kiosk/qr
-      HomeRouteData().go(context);
+    } else if (currentPath == FrontPhotoSelectRouteData().location) {
+      // /kiosk/front-photo-select → /kiosk/home
+      const HomeRouteData().go(context);
     } else if (currentPath == PhotoCardPreviewRouteData().location) {
-      // /kiosk/preview → /kiosk/code-verification
-      isFixed ? HomeRouteData().go(context) : CodeVerificationRouteData().go(context);
+      if (isFixed) {
+        // 고정 뒷면: 선택형(USER_SELECT) 이벤트면 앞면 선택 화면으로, 아니면 홈으로 (JKLI-175)
+        isFrontPhotoUserSelect ? FrontPhotoSelectRouteData().go(context) : HomeRouteData().go(context);
+      } else {
+        // 커스텀 뒷면: 인증번호 입력 화면으로
+        CodeVerificationRouteData().go(context);
+      }
     } else {
       // 기본적으로 pop 시도, 실패 시 홈으로
       if (context.canPop()) {
