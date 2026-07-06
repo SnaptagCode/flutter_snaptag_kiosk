@@ -10,6 +10,7 @@ import 'package:flutter_snaptag_kiosk/presentation/home/machine_job_polling_prov
 import 'package:flutter_snaptag_kiosk/presentation/home/maintenance_polling_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/home/refund_job_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
+import 'package:flutter_snaptag_kiosk/presentation/setup/front_photo_list.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
@@ -97,6 +98,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     final kiosk = ref.watch(kioskInfoServiceProvider);
     final isHwe = kiosk?.isHwe ?? false;
+    final isFrontPhotoUserSelect = kiosk?.isFrontPhotoUserSelect ?? false;
+    final frontPhotos = ref.watch(frontPhotoListProvider);
     final buttonColor = kiosk?.mainButtonColor.toColor() ?? Colors.black;
     final buttonTextColor = kiosk?.buttonTextColor.toColor(fallback: Colors.white) ?? Colors.white;
     final mainTextColor = kiosk?.mainTextColor.toColor(fallback: Colors.white) ?? Colors.white;
@@ -141,17 +144,25 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               _buildRecommendedImageCard(
                 context,
                 isHwe: isHwe,
-                title: LocaleKeys.choice_recommended_images.tr(),
-                subtitle1: LocaleKeys.choice_select_and_print.tr(),
+                // 선택형(USER_SELECT) 이벤트는 앞면 이미지 선택 안내로 표시 (JKLI-175)
+                title: isFrontPhotoUserSelect
+                    ? LocaleKeys.front_photo_select_title.tr()
+                    : LocaleKeys.choice_recommended_images.tr(),
+                subtitle1: isFrontPhotoUserSelect
+                    ? LocaleKeys.front_photo_select_subtitle.tr()
+                    : LocaleKeys.choice_select_and_print.tr(),
                 subtitle2: null,
-                subtitleSize: 25.sp,
+                subtitleSize: isFrontPhotoUserSelect ? 20.sp : 25.sp,
                 imageUrl: kiosk?.emblemImageUrl ?? '',
                 mainButtonColor: buttonColor,
                 buttonTextColor: buttonTextColor,
                 mainTextColor: mainTextColor,
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(10.r),
-                  child: Image.network(kiosk?.emblemImageUrl ?? '', width: 264.w, height: 264.h, fit: BoxFit.contain),
+                  child: isFrontPhotoUserSelect && frontPhotos.isNotEmpty && frontPhotos.first.embedImage != null
+                      // 선택형이면 앞면 후보 첫 이미지를 미리보기로 노출
+                      ? Image.file(frontPhotos.first.embedImage!, width: 264.w, height: 264.h, fit: BoxFit.cover)
+                      : Image.network(kiosk?.emblemImageUrl ?? '', width: 264.w, height: 264.h, fit: BoxFit.contain),
                 ),
                 onTap: () async {
                   ref.read(backPhotoTypeProvider.notifier).selectFixed(0);

@@ -237,19 +237,23 @@ class _FrontPhotoSelectScreenState extends ConsumerState<FrontPhotoSelectScreen>
                       .copyWith(fontSize: 24.sp, color: mainTextColor.withValues(alpha: 0.85)),
             ),
           SizedBox(height: 30.h),
-          ElevatedButton(
-            style: context.paymentButtonStyle,
-            onPressed: selectedPhoto == null
-                ? null
-                : () async {
-                    await SoundManager().playSound();
-                    if (context.mounted) PhotoCardPreviewRouteData().go(context);
-                  },
-            child: Text(
-              LocaleKeys.choice_select_image.tr(),
-              style: isHwe
-                  ? context.typography.vendingBtn2B.copyWith(color: buttonTextColor)
-                  : context.typography.kioskBtn1B.copyWith(color: buttonTextColor),
+          SizedBox(
+            width: 520.w,
+            height: 82.h,
+            child: ElevatedButton(
+              style: context.mainLargeButtonStyle,
+              onPressed: selectedPhoto == null
+                  ? null
+                  : () async {
+                      await SoundManager().playSound();
+                      if (context.mounted) PhotoCardPreviewRouteData().go(context);
+                    },
+              child: Text(
+                LocaleKeys.choice_select_image.tr(),
+                style: isHwe
+                    ? context.typography.vendingBtn2B.copyWith(color: buttonTextColor)
+                    : context.typography.kioskBtn1B.copyWith(color: buttonTextColor),
+              ),
             ),
           ),
         ],
