@@ -6,6 +6,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_snaptag_kiosk/core/common/sound/sound_manager.dart';
 import 'package:flutter_snaptag_kiosk/core/ui/widget/dialog_helper.dart';
 import 'package:flutter_snaptag_kiosk/core/ui/widget/general_error_widget.dart';
+import 'package:flutter_snaptag_kiosk/core/ui/widget/photo_card_carousel.dart';
 import 'package:flutter_snaptag_kiosk/core/ui/widget/price_box.dart';
 import 'package:flutter_snaptag_kiosk/core/ui/widget/selectable_photo_card.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
@@ -78,7 +79,12 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
         _buildLabeledCard(
           label: LocaleKeys.back_photo_label.tr(),
           labelColor: labelColor,
-          card: _buildFixedBackPhotoCardList(kiosk: kiosk, isFixed: isFixed, selectedIndex: selectedIndex),
+          card: _buildFixedBackPhotoCardList(
+            kiosk: kiosk,
+            isFixed: isFixed,
+            selectedIndex: selectedIndex,
+            carouselWidth: 480.w,
+          ),
         ),
       ],
     );
@@ -105,59 +111,59 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
     required KioskMachineInfo? kiosk,
     required bool isFixed,
     required int? selectedIndex,
+    double? carouselWidth,
   }) {
     final nominatedBackPhotoCardList = kiosk?.nominatedBackPhotoCardList ?? [];
     if (kiosk == null || nominatedBackPhotoCardList.isEmpty) return const PhotoCardEmptyPlaceholder();
 
-    return isFixed
-        ? Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              if (nominatedBackPhotoCardList.length == 1)
-                PhotoCardFrame(
-                  width: 226.w,
-                  height: 355.h,
-                  imageUrl: nominatedBackPhotoCardList[0].originUrl,
-                  hasBorder: true,
-                )
-              else
-                SelectablePhotoCard(
-                  width: 226.w,
-                  height: 355.h,
-                  index: 0,
-                  selectedIndex: selectedIndex,
-                  imageUrl: nominatedBackPhotoCardList[0].originUrl,
-                  onTap: () {
-                    ref.read(backPhotoTypeProvider.notifier).selectFixed(0);
-                  },
-                ),
-              if (nominatedBackPhotoCardList.length > 1) SizedBox(width: 100.w),
-              if (nominatedBackPhotoCardList.length > 1)
-                SelectablePhotoCard(
-                  width: 226.w,
-                  height: 355.h,
-                  index: 1,
-                  selectedIndex: selectedIndex,
-                  imageUrl: nominatedBackPhotoCardList[1].originUrl,
-                  onTap: () {
-                    ref.read(backPhotoTypeProvider.notifier).selectFixed(1);
-                  },
-                ),
-            ],
-          )
-        : ref.watch(verifyPhotoCardProvider).when(
-              data: (data) {
-                final imageUrl = data?.formattedBackPhotoCardUrl ?? '';
-                return imageUrl.isNotEmpty
-                    ? PhotoCardFrame(width: 226.w, height: 355.h, imageUrl: imageUrl)
-                    : const PhotoCardEmptyPlaceholder();
-              },
-              loading: () => const CircularProgressIndicator(),
-              error: (error, stack) => GeneralErrorWidget(
-                exception: error as Exception,
-                onRetry: () => ref.refresh(verifyPhotoCardProvider),
-              ),
-            );
+    // 커스텀(QR/인증번호): 조회된 뒷면 1장
+    if (!isFixed) {
+      return ref.watch(verifyPhotoCardProvider).when(
+            data: (data) {
+              final imageUrl = data?.formattedBackPhotoCardUrl ?? '';
+              return imageUrl.isNotEmpty
+                  ? PhotoCardFrame(width: 226.w, height: 355.h, imageUrl: imageUrl)
+                  : const PhotoCardEmptyPlaceholder();
+            },
+            loading: () => const CircularProgressIndicator(),
+            error: (error, stack) => GeneralErrorWidget(
+              exception: error as Exception,
+              onRetry: () => ref.refresh(verifyPhotoCardProvider),
+            ),
+          );
+    }
+
+    // 고정 뒷면 1장: 선택지 없음
+    if (nominatedBackPhotoCardList.length == 1) {
+      return PhotoCardFrame(
+        width: 226.w,
+        height: 355.h,
+        imageUrl: nominatedBackPhotoCardList[0].originUrl,
+        hasBorder: true,
+      );
+    }
+
+    // 고정 뒷면 여러 장: 앞면과 동일한 슬라이더로 선택 (장수 제한 없음)
+    final buttonColor = kiosk.mainButtonColor.toColor();
+    final buttonTextColor = kiosk.buttonTextColor.toColor(fallback: Colors.white);
+    final mainTextColor = kiosk.mainTextColor.toColor(fallback: Colors.white);
+    return PhotoCardCarousel(
+      key: ValueKey('back-${nominatedBackPhotoCardList.length}'),
+      items: [
+        for (final card in nominatedBackPhotoCardList) PhotoCardCarouselItem(imageUrl: card.originUrl),
+      ],
+      selectedIndex: selectedIndex,
+      onSelect: (index) => ref.read(backPhotoTypeProvider.notifier).selectFixed(index),
+      arrowBgColor: buttonColor,
+      arrowFgColor: buttonTextColor,
+      indicatorActiveColor: buttonColor,
+      indicatorInactiveColor: mainTextColor.withValues(alpha: 0.35),
+      width: carouselWidth,
+      viewportHeight: 400.h,
+      cardWidth: 226.w,
+      cardHeight: 355.h,
+      viewportFraction: carouselWidth == null ? 0.31 : 0.62,
+    );
   }
 
   @override
