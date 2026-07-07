@@ -45,8 +45,8 @@ class F {
 
   /// JKLI-175: machine/info 응답 mock 테스트용 Postman mock URL.
   /// 로컬 디버그 테스트 시에만 URL을 기입하고, 커밋/릴리즈에는 항상 null 유지.
-  /// mock: https://8a3908b8-52c9-4d1b-8e76-2163034ddb54.mock.pstmn.io
-  // static const String? machineInfoMockUrl = 'https://8a3908b8-52c9-4d1b-8e76-2163034ddb54.mock.pstmn.io';
+  /// mock(v5, 뒷면 4장): https://10349959-b80e-43e8-9b5e-94860e7cd7af.mock.pstmn.io
+  // static const String? machineInfoMockUrl = 'https://10349959-b80e-43e8-9b5e-94860e7cd7af.mock.pstmn.io';
   static const String? machineInfoMockUrl = null;
 
   /// machine/info 계열 API가 실제 사용하는 base URL.
