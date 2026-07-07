@@ -166,9 +166,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
                 onTap: () async {
                   ref.read(backPhotoTypeProvider.notifier).selectFixed(0);
-                  // 선택형(USER_SELECT + 양면)이면 앞면 선택 화면, 아니면 기존대로 결제 화면 (JKLI-175)
+                  // 선택형이면 앞면 선택, 아니면 뒷면 여러 장일 때만 뒷면 선택, 그 외 결제 (JKLI-175)
+                  final backCount = kiosk?.nominatedBackPhotoCardList.length ?? 0;
                   if (isFrontPhotoUserSelect) {
                     FrontPhotoSelectRouteData().go(context);
+                  } else if (backCount > 1) {
+                    BackPhotoSelectRouteData().go(context);
                   } else {
                     PhotoCardPreviewRouteData().go(context);
                   }

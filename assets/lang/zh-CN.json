@@ -80,6 +80,8 @@
   "front_photo_select_title": "选择正面图片",
   "front_photo_select_subtitle": "请选择您想要的正面图片",
   "front_photo_select_empty": "没有可选择的正面图片",
+  "back_photo_select_title": "选择背面图片",
+  "back_photo_select_subtitle": "请选择您想要的背面图片",
   "front_photo_select_home_header": "请选择照片卡的制作方式",
   "front_photo_select_step1": "STEP 1. 挑选喜欢的正面图片",
   "front_photo_select_step2": "STEP 2. 付款后立即打印",

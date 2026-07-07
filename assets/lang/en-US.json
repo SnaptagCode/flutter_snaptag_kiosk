@@ -82,6 +82,8 @@
   "front_photo_select_title": "Select a front image",
   "front_photo_select_subtitle": "Please select the front image you want",
   "front_photo_select_empty": "No front images available",
+  "back_photo_select_title": "Select a back image",
+  "back_photo_select_subtitle": "Please select the back image you want",
   "front_photo_select_home_header": "Choose how to make your card",
   "front_photo_select_step1": "STEP 1. Choose a front image",
   "front_photo_select_step2": "STEP 2. Pay & print",

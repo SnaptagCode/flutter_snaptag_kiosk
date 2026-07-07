@@ -92,7 +92,14 @@ class FrontPhotoSelectScreen extends ConsumerWidget {
                   ? null
                   : () async {
                       await SoundManager().playSound();
-                      if (context.mounted) PhotoCardPreviewRouteData().go(context);
+                      if (!context.mounted) return;
+                      // 뒷면이 여러 장이면 뒷면 선택 화면, 아니면 결제 화면 (JKLI-175)
+                      final backCount = kiosk?.nominatedBackPhotoCardList.length ?? 0;
+                      if (backCount > 1) {
+                        BackPhotoSelectRouteData().go(context);
+                      } else {
+                        PhotoCardPreviewRouteData().go(context);
+                      }
                     },
               child: Text(
                 LocaleKeys.choice_select_image.tr(),

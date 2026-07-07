@@ -5,6 +5,7 @@ import 'package:flutter_snaptag_kiosk/presentation/setup/kiosk_components_screen
 import 'package:flutter_snaptag_kiosk/presentation/setup/kiosk_info_screen.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_shell.dart';
 import 'package:flutter_snaptag_kiosk/presentation/setup/maintenance_screen.dart';
+import 'package:flutter_snaptag_kiosk/presentation/back_photo_select/back_photo_select_screen.dart';
 import 'package:flutter_snaptag_kiosk/presentation/front_photo_select/front_photo_select_screen.dart';
 import 'package:flutter_snaptag_kiosk/presentation/home/home_screen.dart';
 import 'package:flutter_snaptag_kiosk/presentation/setup/payment_history_screen.dart';
@@ -39,6 +40,7 @@ final GlobalKey<NavigatorState> globalNavigatorKey = GlobalKey<NavigatorState>(d
           routes: <TypedRoute<RouteData>>[
             TypedGoRoute<HomeRouteData>(path: 'home'),
             TypedGoRoute<FrontPhotoSelectRouteData>(path: 'front-photo-select'),
+            TypedGoRoute<BackPhotoSelectRouteData>(path: 'back-photo-select'),
             TypedGoRoute<CodeVerificationRouteData>(path: 'code-verification'),
             TypedGoRoute<PhotoCardPreviewRouteData>(path: 'preview'),
             TypedGoRoute<PrintProcessRouteData>(path: 'print-process'),
@@ -150,6 +152,17 @@ class FrontPhotoSelectRouteData extends GoRouteData with _$FrontPhotoSelectRoute
   Page<void> buildPage(BuildContext context, GoRouterState state) {
     return NoTransitionPage(
       child: const FrontPhotoSelectScreen(),
+    );
+  }
+}
+
+class BackPhotoSelectRouteData extends GoRouteData with _$BackPhotoSelectRouteData {
+  const BackPhotoSelectRouteData();
+
+  @override
+  Page<void> buildPage(BuildContext context, GoRouterState state) {
+    return NoTransitionPage(
+      child: const BackPhotoSelectScreen(),
     );
   }
 }

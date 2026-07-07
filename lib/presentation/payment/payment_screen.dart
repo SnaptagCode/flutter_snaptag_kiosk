@@ -6,7 +6,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_snaptag_kiosk/core/common/sound/sound_manager.dart';
 import 'package:flutter_snaptag_kiosk/core/ui/widget/dialog_helper.dart';
 import 'package:flutter_snaptag_kiosk/core/ui/widget/general_error_widget.dart';
-import 'package:flutter_snaptag_kiosk/core/ui/widget/photo_card_carousel.dart';
 import 'package:flutter_snaptag_kiosk/core/ui/widget/price_box.dart';
 import 'package:flutter_snaptag_kiosk/core/ui/widget/selectable_photo_card.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
@@ -51,14 +50,15 @@ class PaymentScreen extends ConsumerStatefulWidget {
 class _PaymentScreenState extends ConsumerState<PaymentScreen> {
   bool _isNetworkErrorHandled = false;
 
-  /// 선택형: 선택한 앞면 + 뒷면을 라벨과 함께 나란히 확인 (JKLI-175)
+  /// 선택형: 선택 완료된 앞면 + 뒷면을 동일 크기로 나란히 확인 (JKLI-175)
   Widget _buildFrontBackConfirm({
     required KioskMachineInfo? kiosk,
-    required bool isFixed,
     required int? selectedIndex,
     required NominatedPhoto front,
     required Color labelColor,
   }) {
+    final backs = kiosk?.nominatedBackPhotoCardList ?? [];
+    final backUrl = backs.isEmpty ? '' : backs[(selectedIndex ?? 0).clamp(0, backs.length - 1)].originUrl;
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -67,8 +67,8 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
           label: LocaleKeys.front_photo_label.tr(),
           labelColor: labelColor,
           card: PhotoCardFrame(
-            width: 226.w,
-            height: 355.h,
+            width: 260.w,
+            height: 408.h,
             imageFile: front.embedImage,
             imageUrl: front.originUrl,
             fit: BoxFit.cover,
@@ -79,12 +79,7 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
         _buildLabeledCard(
           label: LocaleKeys.back_photo_label.tr(),
           labelColor: labelColor,
-          card: _buildFixedBackPhotoCardList(
-            kiosk: kiosk,
-            isFixed: isFixed,
-            selectedIndex: selectedIndex,
-            carouselWidth: 480.w,
-          ),
+          card: PhotoCardFrame(width: 260.w, height: 408.h, imageUrl: backUrl, hasBorder: true),
         ),
       ],
     );
@@ -95,28 +90,26 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
+        card,
+        SizedBox(height: 16.h),
         Text(
           label,
           style: isHwe
               ? context.typography.vendingBody2B.copyWith(color: labelColor)
-              : context.typography.kioskBody1B.copyWith(fontSize: 30.sp, color: labelColor),
+              : context.typography.kioskBody1B.copyWith(fontSize: 28.sp, color: labelColor),
         ),
-        SizedBox(height: 16.h),
-        card,
       ],
     );
   }
 
+  /// 뒷면 확인 카드 (선택은 뒷면 선택 화면에서 완료). 커스텀은 인증된 뒷면 1장.
   Widget _buildFixedBackPhotoCardList({
     required KioskMachineInfo? kiosk,
     required bool isFixed,
     required int? selectedIndex,
-    double? carouselWidth,
   }) {
-    final nominatedBackPhotoCardList = kiosk?.nominatedBackPhotoCardList ?? [];
-    if (kiosk == null || nominatedBackPhotoCardList.isEmpty) return const PhotoCardEmptyPlaceholder();
+    if (kiosk == null) return const PhotoCardEmptyPlaceholder();
 
-    // 커스텀(QR/인증번호): 조회된 뒷면 1장
     if (!isFixed) {
       return ref.watch(verifyPhotoCardProvider).when(
             data: (data) {
@@ -133,37 +126,10 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
           );
     }
 
-    // 고정 뒷면 1장: 선택지 없음
-    if (nominatedBackPhotoCardList.length == 1) {
-      return PhotoCardFrame(
-        width: 226.w,
-        height: 355.h,
-        imageUrl: nominatedBackPhotoCardList[0].originUrl,
-        hasBorder: true,
-      );
-    }
-
-    // 고정 뒷면 여러 장: 앞면과 동일한 슬라이더로 선택 (장수 제한 없음)
-    final buttonColor = kiosk.mainButtonColor.toColor();
-    final buttonTextColor = kiosk.buttonTextColor.toColor(fallback: Colors.white);
-    final mainTextColor = kiosk.mainTextColor.toColor(fallback: Colors.white);
-    return PhotoCardCarousel(
-      key: ValueKey('back-${nominatedBackPhotoCardList.length}'),
-      items: [
-        for (final card in nominatedBackPhotoCardList) PhotoCardCarouselItem(imageUrl: card.originUrl),
-      ],
-      selectedIndex: selectedIndex,
-      onSelect: (index) => ref.read(backPhotoTypeProvider.notifier).selectFixed(index),
-      arrowBgColor: buttonColor,
-      arrowFgColor: buttonTextColor,
-      indicatorActiveColor: buttonColor,
-      indicatorInactiveColor: mainTextColor.withValues(alpha: 0.35),
-      width: carouselWidth,
-      viewportHeight: 400.h,
-      cardWidth: 226.w,
-      cardHeight: 355.h,
-      viewportFraction: carouselWidth == null ? 0.31 : 0.62,
-    );
+    final backs = kiosk.nominatedBackPhotoCardList;
+    if (backs.isEmpty) return const PhotoCardEmptyPlaceholder();
+    final url = backs[(selectedIndex ?? 0).clamp(0, backs.length - 1)].originUrl;
+    return PhotoCardFrame(width: 226.w, height: 355.h, imageUrl: url, hasBorder: true);
   }
 
   @override
@@ -325,11 +291,7 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
                 Text(
                   showFrontBackConfirm
                       ? LocaleKeys.front_back_confirm_title.tr()
-                      : (isFixed &&
-                              kiosk?.nominatedBackPhotoCardList.length != null &&
-                              kiosk!.nominatedBackPhotoCardList.length > 1
-                          ? LocaleKeys.choice_select_recommended_image.tr()
-                          : LocaleKeys.sub02_txt_02.tr()),
+                      : LocaleKeys.sub02_txt_02.tr(),
                   textAlign: TextAlign.center,
                   style: isHwe
                       ? context.typography.vendingTitle1B.copyWith(color: mainTextColor)
@@ -339,7 +301,6 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
                 showFrontBackConfirm
                     ? _buildFrontBackConfirm(
                         kiosk: kiosk,
-                        isFixed: isFixed,
                         selectedIndex: selectedIndex,
                         front: selectedFront,
                         labelColor: mainTextColor,
