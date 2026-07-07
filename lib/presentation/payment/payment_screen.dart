@@ -9,6 +9,7 @@ import 'package:flutter_snaptag_kiosk/core/ui/widget/general_error_widget.dart';
 import 'package:flutter_snaptag_kiosk/core/ui/widget/price_box.dart';
 import 'package:flutter_snaptag_kiosk/core/ui/widget/selectable_photo_card.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
+import 'package:flutter_snaptag_kiosk/presentation/front_photo_select/selected_front_photo_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/home/back_photo_type_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/home_timeout_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
@@ -48,6 +49,57 @@ class PaymentScreen extends ConsumerStatefulWidget {
 
 class _PaymentScreenState extends ConsumerState<PaymentScreen> {
   bool _isNetworkErrorHandled = false;
+
+  /// 선택형: 선택한 앞면 + 뒷면을 라벨과 함께 나란히 확인 (JKLI-175)
+  Widget _buildFrontBackConfirm({
+    required KioskMachineInfo? kiosk,
+    required bool isFixed,
+    required int? selectedIndex,
+    required NominatedPhoto front,
+    required Color labelColor,
+  }) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildLabeledCard(
+          label: LocaleKeys.front_photo_label.tr(),
+          labelColor: labelColor,
+          card: PhotoCardFrame(
+            width: 226.w,
+            height: 355.h,
+            imageFile: front.embedImage,
+            imageUrl: front.originUrl,
+            fit: BoxFit.cover,
+            hasBorder: true,
+          ),
+        ),
+        SizedBox(width: 60.w),
+        _buildLabeledCard(
+          label: LocaleKeys.back_photo_label.tr(),
+          labelColor: labelColor,
+          card: _buildFixedBackPhotoCardList(kiosk: kiosk, isFixed: isFixed, selectedIndex: selectedIndex),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLabeledCard({required String label, required Color labelColor, required Widget card}) {
+    final isHwe = ref.read(kioskInfoServiceProvider)?.isHwe ?? false;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          label,
+          style: isHwe
+              ? context.typography.vendingBody2B.copyWith(color: labelColor)
+              : context.typography.kioskBody1B.copyWith(fontSize: 30.sp, color: labelColor),
+        ),
+        SizedBox(height: 16.h),
+        card,
+      ],
+    );
+  }
 
   Widget _buildFixedBackPhotoCardList({
     required KioskMachineInfo? kiosk,
@@ -249,6 +301,9 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
     final isFixed = selection?.type == BackPhotoType.fixed;
     final selectedIndex = selection?.fixedIndex;
     final mainTextColor = kiosk?.mainTextColor.toColor(fallback: Colors.white) ?? Colors.white;
+    // 선택형: 사용자가 고른 앞면이 있으면 앞·뒷면을 함께 확인시킨다 (JKLI-175)
+    final selectedFront = ref.watch(selectedFrontPhotoProvider);
+    final showFrontBackConfirm = isFixed && selectedFront != null;
 
     return DefaultTextStyle(
       style: TextStyle(
@@ -262,18 +317,28 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Text(
-                  isFixed &&
-                          kiosk?.nominatedBackPhotoCardList.length != null &&
-                          kiosk!.nominatedBackPhotoCardList.length > 1
-                      ? LocaleKeys.choice_select_recommended_image.tr()
-                      : LocaleKeys.sub02_txt_02.tr(),
+                  showFrontBackConfirm
+                      ? LocaleKeys.front_back_confirm_title.tr()
+                      : (isFixed &&
+                              kiosk?.nominatedBackPhotoCardList.length != null &&
+                              kiosk!.nominatedBackPhotoCardList.length > 1
+                          ? LocaleKeys.choice_select_recommended_image.tr()
+                          : LocaleKeys.sub02_txt_02.tr()),
                   textAlign: TextAlign.center,
                   style: isHwe
                       ? context.typography.vendingTitle1B.copyWith(color: mainTextColor)
                       : context.typography.kioskBtn1B.copyWith(fontSize: 53.sp, color: mainTextColor),
                 ),
                 SizedBox(height: 50.h),
-                _buildFixedBackPhotoCardList(kiosk: kiosk, isFixed: isFixed, selectedIndex: selectedIndex),
+                showFrontBackConfirm
+                    ? _buildFrontBackConfirm(
+                        kiosk: kiosk,
+                        isFixed: isFixed,
+                        selectedIndex: selectedIndex,
+                        front: selectedFront,
+                        labelColor: mainTextColor,
+                      )
+                    : _buildFixedBackPhotoCardList(kiosk: kiosk, isFixed: isFixed, selectedIndex: selectedIndex),
                 SizedBox(height: 50.h),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
