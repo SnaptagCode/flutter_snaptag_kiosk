@@ -98,7 +98,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     final kiosk = ref.watch(kioskInfoServiceProvider);
     final isHwe = kiosk?.isHwe ?? false;
-    // 관리자 오버라이드 > 서버 frontPhotoType (JKLI-175)
+    // 선택형 여부: 서버/관리자 설정 frontPhotoType + 양면 인쇄 조건까지 반영 (JKLI-175)
     final isFrontPhotoUserSelect = ref.watch(isFrontPhotoUserSelectProvider);
     final buttonColor = kiosk?.mainButtonColor.toColor() ?? Colors.black;
     final buttonTextColor = kiosk?.buttonTextColor.toColor(fallback: Colors.white) ?? Colors.white;
@@ -166,8 +166,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
                 onTap: () async {
                   ref.read(backPhotoTypeProvider.notifier).selectFixed(0);
-                  // 선택형(USER_SELECT) 이벤트면 앞면 선택 화면, 아니면 기존대로 결제 화면 (JKLI-175)
-                  if (kiosk?.isFrontPhotoUserSelect ?? false) {
+                  // 선택형(USER_SELECT + 양면)이면 앞면 선택 화면, 아니면 기존대로 결제 화면 (JKLI-175)
+                  if (isFrontPhotoUserSelect) {
                     FrontPhotoSelectRouteData().go(context);
                   } else {
                     PhotoCardPreviewRouteData().go(context);
