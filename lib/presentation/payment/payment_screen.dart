@@ -128,8 +128,27 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
 
     final backs = kiosk.nominatedBackPhotoCardList;
     if (backs.isEmpty) return const PhotoCardEmptyPlaceholder();
-    final url = backs[(selectedIndex ?? 0).clamp(0, backs.length - 1)].originUrl;
-    return PhotoCardFrame(width: 226.w, height: 355.h, imageUrl: url, hasBorder: true);
+    // 고정 뒷면 1장: 선택지 없음
+    if (backs.length == 1) {
+      return PhotoCardFrame(width: 226.w, height: 355.h, imageUrl: backs[0].originUrl, hasBorder: true);
+    }
+    // 고정 뒷면 여러 장(랜덤형): 결제 화면에서 바로 선택 (기존 동작)
+    return Wrap(
+      alignment: WrapAlignment.center,
+      spacing: 100.w,
+      runSpacing: 24.h,
+      children: [
+        for (int i = 0; i < backs.length; i++)
+          SelectablePhotoCard(
+            width: 226.w,
+            height: 355.h,
+            index: i,
+            selectedIndex: selectedIndex,
+            imageUrl: backs[i].originUrl,
+            onTap: () => ref.read(backPhotoTypeProvider.notifier).selectFixed(i),
+          ),
+      ],
+    );
   }
 
   @override
@@ -291,7 +310,9 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
                 Text(
                   showFrontBackConfirm
                       ? LocaleKeys.front_back_confirm_title.tr()
-                      : LocaleKeys.sub02_txt_02.tr(),
+                      : (isFixed && (kiosk?.nominatedBackPhotoCardList.length ?? 0) > 1
+                          ? LocaleKeys.choice_select_recommended_image.tr()
+                          : LocaleKeys.sub02_txt_02.tr()),
                   textAlign: TextAlign.center,
                   style: isHwe
                       ? context.typography.vendingTitle1B.copyWith(color: mainTextColor)

@@ -98,15 +98,13 @@ class KioskBackButton extends ConsumerWidget {
       // /kiosk/front-photo-select → /kiosk/home
       const HomeRouteData().go(context);
     } else if (currentPath == BackPhotoSelectRouteData().location) {
-      // /kiosk/back-photo-select → 앞면 선택(선택형)했으면 앞면 선택 화면, 아니면 홈 (JKLI-175)
-      isFrontPhotoUserSelect ? const FrontPhotoSelectRouteData().go(context) : const HomeRouteData().go(context);
+      // /kiosk/back-photo-select → (선택형 흐름에서만 진입) 앞면 선택 화면으로 (JKLI-175)
+      const FrontPhotoSelectRouteData().go(context);
     } else if (currentPath == PhotoCardPreviewRouteData().location) {
       if (isFixed) {
-        // 고정 뒷면 이전 단계: 뒷면 여러 장이면 뒷면 선택, 선택형이면 앞면 선택, 아니면 홈 (JKLI-175)
-        if (backCount > 1) {
-          const BackPhotoSelectRouteData().go(context);
-        } else if (isFrontPhotoUserSelect) {
-          const FrontPhotoSelectRouteData().go(context);
+        // 선택형 이전 단계: 뒷면 여러 장이면 뒷면 선택, 아니면 앞면 선택 / 랜덤형은 홈 (JKLI-175)
+        if (isFrontPhotoUserSelect) {
+          backCount > 1 ? const BackPhotoSelectRouteData().go(context) : const FrontPhotoSelectRouteData().go(context);
         } else {
           const HomeRouteData().go(context);
         }
