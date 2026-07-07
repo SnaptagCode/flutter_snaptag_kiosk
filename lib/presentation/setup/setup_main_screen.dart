@@ -88,9 +88,9 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
       }
     }
 
-    final isReady = await _validatePrinterReadyAndShowDialogs(context);
+    // final isReady = await _validatePrinterReadyAndShowDialogs(context);
 
-    if (!isReady) return;
+    // if (!isReady) return;
 
     final isPaymentDeviceReady = await _checkPaymentDevice();
     if (!isPaymentDeviceReady) return;
@@ -210,11 +210,18 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
   Widget _buildFrontPhotoModeButton({required String label, required FrontPhotoMode mode}) {
     final isUserSelect = ref.watch(isFrontPhotoUserSelectProvider);
     final isActive = (mode == FrontPhotoMode.userSelect) == isUserSelect;
+    // 선택형은 앞면을 인쇄하는 양면 모드에서만 설정 가능 (단면은 앞면 인쇄 생략)
+    final isEnabled = mode == FrontPhotoMode.random || ref.watch(pagePrintProvider) == PagePrintType.double;
 
     return InkWell(
       borderRadius: const BorderRadius.all(Radius.circular(12)),
       onTap: () async {
         await SoundManager().playSound();
+        if (!isEnabled) {
+          if (!context.mounted) return;
+          DialogHelper.showSetupDialog(context, title: '선택형은 양면 인쇄에서만 설정할 수 있습니다.');
+          return;
+        }
         try {
           await ref.read(kioskInfoServiceProvider.notifier).setFrontPhotoUserSelect(mode == FrontPhotoMode.userSelect);
         } catch (e) {
@@ -222,20 +229,23 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
           DialogHelper.showSetupDialog(context, title: '앞면 이미지 설정 변경에 실패했습니다.');
         }
       },
-      child: Container(
-        width: 250.w,
-        height: 80.h,
-        decoration: BoxDecoration(
-          color: isActive ? Colors.black : Colors.white,
-          border: Border.all(color: const Color(0xFFE6E8EB)),
-          borderRadius: const BorderRadius.all(Radius.circular(12)),
-        ),
-        alignment: Alignment.center,
-        child: Text(
-          label,
-          style: isActive
-              ? context.typography.kioskBody1B.copyWith(color: Colors.white)
-              : context.typography.kioskBody1B.copyWith(color: Colors.black),
+      child: Opacity(
+        opacity: isEnabled ? 1.0 : 0.4,
+        child: Container(
+          width: 250.w,
+          height: 80.h,
+          decoration: BoxDecoration(
+            color: isActive ? Colors.black : Colors.white,
+            border: Border.all(color: const Color(0xFFE6E8EB)),
+            borderRadius: const BorderRadius.all(Radius.circular(12)),
+          ),
+          alignment: Alignment.center,
+          child: Text(
+            label,
+            style: isActive
+                ? context.typography.kioskBody1B.copyWith(color: Colors.white)
+                : context.typography.kioskBody1B.copyWith(color: Colors.black),
+          ),
         ),
       ),
     );
