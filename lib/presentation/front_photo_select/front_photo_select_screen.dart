@@ -51,6 +51,8 @@ class _FrontPhotoSelectScreenState extends ConsumerState<FrontPhotoSelectScreen>
     required IconData icon,
     required bool enabled,
     required VoidCallback onTap,
+    required Color bgColor,
+    required Color fgColor,
   }) {
     return AnimatedOpacity(
       opacity: enabled ? 1.0 : 0.25,
@@ -61,11 +63,11 @@ class _FrontPhotoSelectScreenState extends ConsumerState<FrontPhotoSelectScreen>
           width: 72.w,
           height: 72.w,
           decoration: BoxDecoration(
-            color: Colors.black.withValues(alpha: 0.35),
+            color: bgColor.withValues(alpha: 0.9),
             shape: BoxShape.circle,
-            border: Border.all(color: Colors.white.withValues(alpha: 0.6), width: 1.5.w),
+            border: Border.all(color: fgColor.withValues(alpha: 0.6), width: 1.5.w),
           ),
-          child: Icon(icon, size: 48.sp, color: Colors.white),
+          child: Icon(icon, size: 48.sp, color: fgColor),
         ),
       ),
     );
@@ -180,6 +182,8 @@ class _FrontPhotoSelectScreenState extends ConsumerState<FrontPhotoSelectScreen>
                               icon: Icons.chevron_left_rounded,
                               enabled: _currentPage > 0,
                               onTap: () => _moveToPage(_currentPage - 1),
+                              bgColor: buttonColor,
+                              fgColor: buttonTextColor,
                             ),
                           ),
                         ),
@@ -191,6 +195,8 @@ class _FrontPhotoSelectScreenState extends ConsumerState<FrontPhotoSelectScreen>
                               icon: Icons.chevron_right_rounded,
                               enabled: _currentPage < photos.length - 1,
                               onTap: () => _moveToPage(_currentPage + 1),
+                              bgColor: buttonColor,
+                              fgColor: buttonTextColor,
                             ),
                           ),
                         ),
@@ -211,7 +217,7 @@ class _FrontPhotoSelectScreenState extends ConsumerState<FrontPhotoSelectScreen>
                   height: 12.w,
                   margin: EdgeInsets.symmetric(horizontal: 5.w),
                   decoration: BoxDecoration(
-                    color: isActive ? buttonColor : Colors.white.withValues(alpha: 0.5),
+                    color: isActive ? buttonColor : mainTextColor.withValues(alpha: 0.35),
                     borderRadius: BorderRadius.circular(6.r),
                   ),
                 );
