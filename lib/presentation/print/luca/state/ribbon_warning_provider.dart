@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_snaptag_kiosk/presentation/print/luca/state/ribbon_status.dart';
+import 'package:flutter_snaptag_kiosk/core/services/printer/models/ribbon_status.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_snaptag_kiosk/core/data/datasources/remote/slack_log_service.dart';

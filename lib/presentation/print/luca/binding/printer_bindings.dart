@@ -3,8 +3,8 @@ import 'dart:io';
 
 import 'package:ffi/ffi.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
+import 'package:flutter_snaptag_kiosk/core/services/printer/models/ribbon_status.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/luca/state/printer_status.dart';
-import 'package:flutter_snaptag_kiosk/presentation/print/luca/state/ribbon_status.dart';
 
 part 'printer_bindings.typedef.dart';
 

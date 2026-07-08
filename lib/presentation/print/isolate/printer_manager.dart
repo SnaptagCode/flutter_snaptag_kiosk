@@ -20,9 +20,9 @@ import 'package:flutter_snaptag_kiosk/presentation/print/isolate/model/print_rib
 import 'package:flutter_snaptag_kiosk/presentation/print/isolate/model/print_state_message.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/isolate/model/setting_printer_message.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/isolate/print_path.dart';
+import 'package:flutter_snaptag_kiosk/core/services/printer/models/printer_log.dart';
+import 'package:flutter_snaptag_kiosk/core/services/printer/models/ribbon_status.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/luca/binding/printer_bindings.dart';
-import 'package:flutter_snaptag_kiosk/presentation/print/luca/state/printer_log.dart';
-import 'package:flutter_snaptag_kiosk/presentation/print/luca/state/ribbon_status.dart';
 import 'package:image/image.dart' as img;
 import 'package:path_provider/path_provider.dart';
 

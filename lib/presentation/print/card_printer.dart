@@ -5,12 +5,10 @@ import 'dart:io';
 import 'package:flutter_snaptag_kiosk/core/common/logger/logger_service.dart';
 import 'package:flutter_snaptag_kiosk/core/data/datasources/remote/slack_log_service.dart';
 import 'package:flutter_snaptag_kiosk/core/data/repositories/kiosk_repository.dart';
+import 'package:flutter_snaptag_kiosk/core/services/printer/printer.dart';
 import 'package:flutter_snaptag_kiosk/presentation/core/card_count_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/core/printer_log_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
-import 'package:flutter_snaptag_kiosk/presentation/print/isolate/printer_manager.dart';
-import 'package:flutter_snaptag_kiosk/presentation/print/luca/state/printer_log.dart';
-import 'package:flutter_snaptag_kiosk/presentation/print/luca/state/ribbon_status.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'card_printer.g.dart';
@@ -22,34 +20,32 @@ class PrinterService extends _$PrinterService {
 
   Future<bool> connectedPrinter() async {
     try {
-      final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId;
-      final printerManager = await PrinterManager.getInstance(machineId: machineId);
-      final isConnected = await printerManager.checkConnectedPrint();
+      final device = ref.read(printerDeviceProvider);
+      final isConnected = await device.isConnected();
 
       return isConnected;
     } catch (e) {
+      logger.w('PrinterService.connectedPrinter failed: $e');
       return false;
     }
   }
 
   Future<bool> checkSettingPrinter() async {
     try {
-      final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId;
-      final printerManager = await PrinterManager.getInstance(machineId: machineId);
-      final isSetting = await printerManager.checkSettingPrinter();
+      final device = ref.read(printerDeviceProvider);
+      final isSetting = await device.ensureReady();
 
       return isSetting;
     } catch (e) {
+      logger.w('PrinterService.checkSettingPrinter failed: $e');
       return false;
     }
   }
 
   Future<void> checkFeeder() async {
     try {
-      final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId;
-      final printerManager = await PrinterManager.getInstance(machineId: machineId);
-      // await printerManager.initLibrary();
-      await printerManager.checkFeeder();
+      final device = ref.read(printerDeviceProvider);
+      await device.ensureFeederLoaded();
     } catch (e) {
       rethrow;
     }
@@ -57,9 +53,8 @@ class PrinterService extends _$PrinterService {
 
   Future<RibbonStatus> getRibbonStatus() async {
     try {
-      final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId;
-      final printerManager = await PrinterManager.getInstance(machineId: machineId);
-      return await printerManager.getRibbonStatus();
+      final device = ref.read(printerDeviceProvider);
+      return await device.ribbonStatus();
     } catch (e) {
       rethrow;
     }
@@ -67,10 +62,9 @@ class PrinterService extends _$PrinterService {
 
   Future<void> printerStateLog() async {
     try {
-      final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId;
-      final printerManager = await PrinterManager.getInstance(machineId: machineId);
+      final device = ref.read(printerDeviceProvider);
 
-      final printerLog = await printerManager.startLog();
+      final printerLog = await device.readLog();
 
       await _printerStateLog(printerLog);
     } catch (e) {
@@ -98,10 +92,9 @@ class PrinterService extends _$PrinterService {
 
   Future<void> clearLibrary() async {
     try {
-      final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId;
-      final printerManager = await PrinterManager.getInstance(machineId: machineId);
-      await printerManager.clearLibrary();
-      final machineIdForLog = machineId ?? 0;
+      final device = ref.read(printerDeviceProvider);
+      await device.clearCache();
+      final machineIdForLog = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
       SlackLogService().sendLogToSlack('*[MachineId : $machineIdForLog]* printer clearLibrary completed');
     } catch (e) {
       logger.w('PrinterService.clearLibrary failed: $e');
@@ -115,12 +108,11 @@ class PrinterService extends _$PrinterService {
   }) async {
     try {
       state = const AsyncValue.loading();
-      final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId;
-      final printerManager = await PrinterManager.getInstance(machineId: machineId);
+      final device = ref.read(printerDeviceProvider);
       final isMetal = ref.read(kioskInfoServiceProvider)?.isMetal == true ? true : false;
 
-      final printerLog = await printerManager.startPrint(
-          isSingleMode: isSingleMode, frontFile: frontFile, embeddedFile: embeddedFile, isMetal: isMetal);
+      final printerLog = await device.print(PrintJob(
+          isSingleMode: isSingleMode, frontFile: frontFile, backFile: embeddedFile, isMetal: isMetal));
 
       await _updatePrintStatusAndCheckKioskAlive(printerLog);
       // 프린트 성공 시 상태를 완료로 변경
