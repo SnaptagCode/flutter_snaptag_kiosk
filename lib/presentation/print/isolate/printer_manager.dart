@@ -311,7 +311,7 @@ class PrinterManager {
 
       return isConnected;
     } catch (e) {
-      SlackLogService().sendBroadcastLogToSlack('[MachineId: $_machineId] [PRINTER] checkConnectedPrint 오류: $e');
+      SlackLogService().sendErrorLogToSlack('[MachineId: $_machineId] [PRINTER] checkConnectedPrint 오류: $e');
       return false;
     }
   }
