@@ -1,4 +1,4 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
+﻿// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -47,55 +47,6 @@ class PaymentScreen extends ConsumerStatefulWidget {
 
 class _PaymentScreenState extends ConsumerState<PaymentScreen> {
   bool _isNetworkErrorHandled = false;
-
-  /// 시안 6: 선택되지 않은 카드 크기 축소 + 애니메이션
-  Widget _buildVariant6AnimatedScaleOnUnselected({
-    required int index,
-    required int? selectedIndex,
-    required String? imageUrl,
-    required VoidCallback onTap,
-  }) {
-    final isSelected = selectedIndex == index;
-    final kioskColors = Theme.of(context).extension<KioskColors>();
-    final buttonColor = kioskColors?.buttonColor ?? const Color(0xFF1B5E4F);
-
-    // 선택되지 않은 경우 크기를 0.85배로 축소
-    final scale = selectedIndex == null ? 1.0 : (isSelected ? 1.0 : 0.85);
-    final opacity = selectedIndex == null ? 1.0 : (isSelected ? 1.0 : 0.6);
-
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedScale(
-        scale: scale,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeOutCubic,
-        child: AnimatedOpacity(
-          opacity: opacity,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOutCubic,
-          child: _buildFixedBackPhotoCard(
-            boxShadow: isSelected
-                ? [
-                    BoxShadow(
-                      color: buttonColor.withOpacity(0.4),
-                      blurRadius: 12.r,
-                      spreadRadius: 2.r,
-                      offset: Offset(0, 4.h),
-                    ),
-                  ]
-                : [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 4.r,
-                      offset: Offset(0, 2.h),
-                    ),
-                  ],
-            imageUrl: imageUrl,
-          ),
-        ),
-      ),
-    );
-  }
 
   Widget _buildFixedBackPhotoCard({
     required List<BoxShadow>? boxShadow,
@@ -183,50 +134,286 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
     final nominatedBackPhotoCardList = kiosk?.nominatedBackPhotoCardList ?? [];
     if (kiosk == null || nominatedBackPhotoCardList.isEmpty) return _buildEmptyImagePlaceholder();
 
-    return isFixed
-        ? Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              if (nominatedBackPhotoCardList.length == 1)
-                _buildFixedBackPhotoCard(
-                  boxShadow: null,
-                  imageUrl: nominatedBackPhotoCardList[0].originUrl,
-                  hasBorder: true,
-                )
-              else
-                _buildVariant6AnimatedScaleOnUnselected(
-                  index: 0,
-                  selectedIndex: selectedIndex,
-                  imageUrl: nominatedBackPhotoCardList[0].originUrl,
-                  onTap: () {
-                    ref.read(backPhotoTypeProvider.notifier).selectFixed(0);
-                  },
+    if (!isFixed) {
+      return ref.watch(verifyPhotoCardProvider).when(
+            data: (data) {
+              final imageUrl = data?.formattedBackPhotoCardUrl ?? '';
+              return imageUrl.isNotEmpty
+                  ? _buildFixedBackPhotoCard(boxShadow: null, imageUrl: imageUrl)
+                  : _buildEmptyImagePlaceholder();
+            },
+            loading: () => const CircularProgressIndicator(),
+            error: (error, stack) => GeneralErrorWidget(
+              exception: error as Exception,
+              onRetry: () => ref.refresh(verifyPhotoCardProvider),
+            ),
+          );
+    }
+
+    // 뒷면 이미지 썸네일 목록 1차 선택
+    final int selected = (selectedIndex ?? 0).clamp(0, nominatedBackPhotoCardList.length - 1);
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (nominatedBackPhotoCardList.length > 1) ...[
+          // _buildStepLabel(LocaleKeys.choice_step1_select_image.tr()),
+          // SizedBox(height: 14.h),
+          _buildImageThumbnailStrip(nominatedBackPhotoCardList, selected),
+          // SizedBox(height: 34.h),
+          // _buildStepLabel(LocaleKeys.choice_step2_select_style.tr()),
+          // SizedBox(height: 14.h),
+        ],
+        _buildStyleStep(card: nominatedBackPhotoCardList[selected]),
+      ],
+    );
+  }
+
+  /// 풀이미지가 1장 이상일시 목록 선택형으로 진행
+  Widget _buildImageThumbnailStrip(List<NominatedBackPhotoCard> cards, int selectedIndex) {
+    final kioskColors = Theme.of(context).extension<KioskColors>();
+    final buttonColor = kioskColors?.buttonColor ?? const Color(0xFF1B5E4F);
+    final double thumbHeight = 170.h;
+    final double thumbWidth = thumbHeight * 650 / 1023; // ?ㅻЪ ?ы넗移대뱶 鍮꾩쑉
+
+    return SizedBox(
+      height: thumbHeight,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        shrinkWrap: true,
+        padding: EdgeInsets.symmetric(horizontal: 40.w),
+        itemCount: cards.length,
+        separatorBuilder: (_, __) => SizedBox(width: 24.w),
+        itemBuilder: (context, index) {
+          final isSelected = index == selectedIndex;
+          return GestureDetector(
+            onTap: () => ref.read(backPhotoTypeProvider.notifier).selectFixed(index),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              curve: Curves.easeOut,
+              width: thumbWidth,
+              clipBehavior: Clip.antiAlias,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8.r),
+                border: Border.all(
+                  color: isSelected ? buttonColor : Colors.white.withValues(alpha: 0.35),
+                  width: isSelected ? 3.w : 1.w,
                 ),
-              if (nominatedBackPhotoCardList.length > 1) SizedBox(width: 100.w),
-              if (nominatedBackPhotoCardList.length > 1)
-                _buildVariant6AnimatedScaleOnUnselected(
-                  index: 1,
-                  selectedIndex: selectedIndex,
-                  imageUrl: nominatedBackPhotoCardList[1].originUrl,
-                  onTap: () {
-                    ref.read(backPhotoTypeProvider.notifier).selectFixed(1);
-                  },
-                ),
-            ],
-          )
-        : ref.watch(verifyPhotoCardProvider).when(
-              data: (data) {
-                final imageUrl = data?.formattedBackPhotoCardUrl ?? '';
-                return imageUrl.isNotEmpty
-                    ? _buildFixedBackPhotoCard(boxShadow: null, imageUrl: imageUrl)
-                    : _buildEmptyImagePlaceholder();
-              },
-              loading: () => const CircularProgressIndicator(),
-              error: (error, stack) => GeneralErrorWidget(
-                exception: error as Exception,
-                onRetry: () => ref.refresh(verifyPhotoCardProvider),
+                boxShadow: isSelected
+                    ? [
+                        BoxShadow(
+                          color: buttonColor.withValues(alpha: 0.45),
+                          blurRadius: 10.r,
+                          spreadRadius: 1.r,
+                        ),
+                      ]
+                    : null,
               ),
-            );
+              child: Opacity(
+                opacity: isSelected ? 1.0 : 0.55,
+                child: _buildCoverNetworkImage(cards[index].originUrl),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Color get _mainTextColor {
+    final kiosk = ref.read(kioskInfoServiceProvider);
+    return kiosk?.mainTextColor.toColor(fallback: Colors.white) ?? Colors.white;
+  }
+
+  Widget _buildStepLabel(String text) {
+    return Text(
+      text,
+      style: context.typography.kioskBody2B.copyWith(color: _mainTextColor),
+    );
+  }
+
+  Widget _buildStyleStep({required NominatedBackPhotoCard card}) {
+    final layout = ref.watch(backPhotoTypeProvider)?.layoutType;
+    // 라벨 이미지, 풀이미지 선택
+    final selectedStyleIndex = layout == BackPhotoLayoutType.full ? 1 : 0;
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // 카드 미리보기
+        // Text(
+        //   LocaleKeys.choice_back_side_notice.tr(),
+        //   style: context.typography.kioskBody2B.copyWith(color: _mainTextColor.withValues(alpha: 0.85)),
+        // ),
+        SizedBox(height: 24.h),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            _buildStyleCard(
+              index: 0,
+              selectedIndex: selectedStyleIndex,
+              card: _buildLabeledPreviewCard(card.originUrl),
+              onTap: () => ref.read(backPhotoTypeProvider.notifier).selectLayout(BackPhotoLayoutType.labeled),
+            ),
+            SizedBox(width: 100.w),
+            _buildStyleCard(
+              index: 1,
+              selectedIndex: selectedStyleIndex,
+              card: _buildFullPreviewCard(card.originUrl),
+              onTap: () => ref.read(backPhotoTypeProvider.notifier).selectLayout(BackPhotoLayoutType.full),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  /// 실제 포토카드 비율에 맞는 UI 크기 조젇
+  /// 전체크기 650*1023 상단 라벨위치 y: 0~80/ 하단 라벨 위치 y: 943~1023 (650 * 80)
+  Widget _buildLabeledPreviewCard(String imageUrl) {
+    final kiosk = ref.read(kioskInfoServiceProvider);
+    final eventName = kiosk?.printedEventName ?? '';
+    final now = DateTime.now();
+    final dateText = '${now.year}.${now.month.toString().padLeft(2, '0')}.${now.day.toString().padLeft(2, '0')}';
+
+    final double cardHeight = 355.h;
+    final double bandHeight = cardHeight * 80 / 1023; // ?ㅻЪ ?쇰꺼 諛대뱶 80px 鍮꾨?
+
+    return Container(
+      width: 226.w,
+      height: cardHeight,
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10.r),
+      ),
+      child: Column(
+        children: [
+          Container(
+            height: bandHeight,
+            alignment: Alignment.center,
+            padding: EdgeInsets.symmetric(horizontal: 8.w),
+            child: Text(
+              eventName,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontFamily: _labelFontFamily,
+                fontSize: bandHeight * 0.5,
+                color: Colors.black87,
+              ),
+            ),
+          ),
+          Expanded(
+            child: SizedBox(
+              width: double.infinity,
+              child: _buildCoverNetworkImage(imageUrl),
+            ),
+          ),
+          Container(
+            height: bandHeight,
+            alignment: Alignment.center,
+            child: Text(
+              dateText,
+              style: TextStyle(
+                fontFamily: _labelFontFamily,
+                fontSize: bandHeight * 0.45,
+                color: Colors.black87,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 포토카드 라벨 글꼴: 한화(HWEG) HanwhaEagles-Regular
+  /// 일본어 KeinanMugimaruJP, 기본 Cafe24Ssurround v2.
+  String get _labelFontFamily {
+    if (ref.read(kioskInfoServiceProvider)?.isHwe ?? false) return 'Hanwha';
+    if (context.locale.languageCode == 'ja') return 'KeinanMugimaruJP';
+    return 'Cafe24Ssurround2';
+  }
+
+  /// 풀스크린 이미지
+  Widget _buildFullPreviewCard(String imageUrl) {
+    return Container(
+      width: 226.w,
+      height: 355.h,
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(borderRadius: BorderRadius.circular(10.r)),
+      child: _buildCoverNetworkImage(imageUrl),
+    );
+  }
+
+  Widget _buildCoverNetworkImage(String imageUrl) {
+    return Image.network(
+      imageUrl,
+      fit: BoxFit.cover,
+      width: double.infinity,
+      height: double.infinity,
+      frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
+        if (wasSynchronouslyLoaded) return child;
+        return AnimatedOpacity(
+          opacity: frame == null ? 0 : 1,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+          child: child,
+        );
+      },
+      loadingBuilder: (context, child, loadingProgress) {
+        if (loadingProgress == null) return child;
+        return const Center(child: CircularProgressIndicator());
+      },
+      errorBuilder: (context, error, stackTrace) => _buildEmptyImagePlaceholder(),
+    );
+  }
+
+  Widget _buildStyleCard({
+    required int index,
+    required int selectedIndex,
+    required Widget card,
+    required VoidCallback onTap,
+  }) {
+    final isSelected = selectedIndex == index;
+    final kioskColors = Theme.of(context).extension<KioskColors>();
+    final buttonColor = kioskColors?.buttonColor ?? const Color(0xFF1B5E4F);
+
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedScale(
+        scale: isSelected ? 1.0 : 0.85,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOutCubic,
+        child: AnimatedOpacity(
+          opacity: isSelected ? 1.0 : 0.6,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOutCubic,
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10.r),
+              boxShadow: isSelected
+                  ? [
+                      BoxShadow(
+                        color: buttonColor.withValues(alpha: 0.4),
+                        blurRadius: 12.r,
+                        spreadRadius: 2.r,
+                        offset: Offset(0, 4.h),
+                      ),
+                    ]
+                  : null,
+            ),
+            child: card,
+          ),
+        ),
+      ),
+    );
+  }
+
+  String _titleText(KioskMachineInfo? kiosk, bool isFixed) {
+    final cards = kiosk?.nominatedBackPhotoCardList ?? [];
+    if (isFixed && cards.isNotEmpty) return LocaleKeys.choice_select_print_style.tr();
+    return LocaleKeys.sub02_txt_02.tr();
   }
 
   @override
@@ -383,17 +570,13 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Text(
-                  isFixed &&
-                          kiosk?.nominatedBackPhotoCardList.length != null &&
-                          kiosk!.nominatedBackPhotoCardList.length > 1
-                      ? LocaleKeys.choice_select_recommended_image.tr()
-                      : LocaleKeys.sub02_txt_02.tr(),
+                  _titleText(kiosk, isFixed),
                   textAlign: TextAlign.center,
                   style: isHwe
                       ? context.typography.vendingTitle1B.copyWith(color: mainTextColor)
                       : context.typography.kioskBtn1B.copyWith(fontSize: 53.sp, color: mainTextColor),
                 ),
-                SizedBox(height: 50.h),
+                SizedBox(height: 20.h),
                 _buildFixedBackPhotoCardList(kiosk: kiosk, isFixed: isFixed, selectedIndex: selectedIndex),
                 SizedBox(height: 50.h),
                 Row(
@@ -426,17 +609,6 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
                       },
                     ),
                   ],
-                ),
-                SizedBox(height: 30.h),
-                Text(
-                  LocaleKeys.sub03_txt_03.tr(),
-                  style: isHwe
-                      ? context.typography.vendingBody2B
-                          .copyWith(color: (kiosk?.couponTextColor ?? '').toColor(fallback: Colors.white))
-                      : context.typography.kioskBody2B.copyWith(
-                          color: (kiosk?.couponTextColor ?? '').toColor(fallback: Colors.white),
-                          //fontFamily: 'Pretendard',
-                        ),
                 ),
               ],
             ),

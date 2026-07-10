@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter_snaptag_kiosk/lib.dart';
+import 'package:flutter_snaptag_kiosk/presentation/home/back_photo_type_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
 import 'package:flutter_snaptag_kiosk/presentation/payment/create_order_info_state.dart';
 import 'package:flutter_snaptag_kiosk/presentation/payment/payment_response_state.dart';
@@ -104,6 +105,7 @@ class PrintService extends _$PrintService {
         frontPhotoCardId: frontPhotoCardId,
         backPhotoCardId: backPhotoCardId,
         kioskOrderId: kioskOrderId,
+        backPhotoLayoutType: _selectedBackPhotoLayoutType(),
       );
 
       final response = await ref.read(kioskRepositoryProvider).createPrintStatus(request: request);
@@ -114,6 +116,14 @@ class PrintService extends _$PrintService {
     } catch (e) {
       rethrow;
     }
+  }
+
+  /// 고정(추천) 뒷면에서 사용자가 출력 스타일을 선택한 경우에만 전송한다.
+  /// null이면 필드 자체가 빠져 서버 기본(LABELED)으로 동작 — 구버전 서버/미선택 하위호환 (JKLI-214)
+  String? _selectedBackPhotoLayoutType() {
+    final selection = ref.read(backPhotoTypeProvider);
+    if (selection?.type != BackPhotoType.fixed) return null;
+    return selection?.layoutType?.serverValue;
   }
 
   Future<void> _updatePrintStatus(int printedPhotoCardId, PrintedStatus status) async {
