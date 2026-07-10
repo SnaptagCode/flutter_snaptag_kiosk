@@ -19,8 +19,11 @@ enum BackPhotoLayoutType {
 }
 
 extension BackPhotoLayoutTypeX on BackPhotoLayoutType {
-  /// POST /v1/print backPhotoLayoutType 전송 값
-  String get serverValue => this == BackPhotoLayoutType.full ? 'FULL' : 'LABELED';
+  /// POST /v1/qr/back-photo-nominated 의 imageType 전송 값 (대문자)
+  ///
+  /// 라벨 이미지는 서버가 이벤트명·날짜 밴드를 합성한 것이라 FORMATTED,
+  /// 풀이미지는 원본 그대로라 ORIGIN 이다.
+  String get imageType => this == BackPhotoLayoutType.full ? 'ORIGIN' : 'FORMATTED';
 }
 
 /// 뒷면 이미지 선택 상태

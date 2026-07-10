@@ -37,6 +37,17 @@ enum SelectionDesignVariant {
   animatedScaleOnUnselected,
 }
 
+/// 선택 강조 모션 값. 썸네일/스타일 카드가 같은 리듬으로 움직이도록 공유한다.
+class _SelectionMotion {
+  const _SelectionMotion._();
+
+  static const Duration duration = Duration(milliseconds: 180);
+  static const Curve curve = Curves.easeOutCubic;
+
+  /// 체크 배지는 살짝 튕기며 등장한다.
+  static const Curve badgeCurve = Curves.easeOutBack;
+}
+
 class PaymentScreen extends ConsumerStatefulWidget {
   const PaymentScreen({
     super.key,
@@ -150,22 +161,71 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
           );
     }
 
+    // 출력 스타일(라벨/풀이미지) 선택은 한화(HWEG) 전용. 그 외 업체는 기존 카드 선택 UI 유지 (JKLI-214)
+    if (!kiosk.isHwe) return _buildLegacyFixedCards(nominatedBackPhotoCardList, selectedIndex);
+
     // 뒷면 이미지 썸네일 목록 1차 선택
     final int selected = (selectedIndex ?? 0).clamp(0, nominatedBackPhotoCardList.length - 1);
 
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        if (nominatedBackPhotoCardList.length > 1) ...[
-          // _buildStepLabel(LocaleKeys.choice_step1_select_image.tr()),
-          // SizedBox(height: 14.h),
-          _buildImageThumbnailStrip(nominatedBackPhotoCardList, selected),
-          // SizedBox(height: 34.h),
-          // _buildStepLabel(LocaleKeys.choice_step2_select_style.tr()),
-          // SizedBox(height: 14.h),
-        ],
+        if (nominatedBackPhotoCardList.length > 1) _buildImageThumbnailStrip(nominatedBackPhotoCardList, selected),
+        SizedBox(height: 24.h),
         _buildStyleStep(card: nominatedBackPhotoCardList[selected]),
       ],
+    );
+  }
+
+  /// 한화 외 업체의 고정 뒷면 선택 UI — 추천 이미지 카드를 그대로 나란히 놓는다.
+  /// 1장이면 네온 테두리만, 2장 이상이면 앞의 두 장을 선택형으로 노출한다 (JKLI-110 이전 동작).
+  Widget _buildLegacyFixedCards(List<NominatedBackPhotoCard> cards, int? selectedIndex) {
+    if (cards.length == 1) {
+      return _buildFixedBackPhotoCard(boxShadow: null, imageUrl: cards[0].originUrl, hasBorder: true);
+    }
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        _buildLegacyFixedCard(index: 0, selectedIndex: selectedIndex, imageUrl: cards[0].originUrl),
+        SizedBox(width: 100.w),
+        _buildLegacyFixedCard(index: 1, selectedIndex: selectedIndex, imageUrl: cards[1].originUrl),
+      ],
+    );
+  }
+
+  Widget _buildLegacyFixedCard({
+    required int index,
+    required int? selectedIndex,
+    required String imageUrl,
+  }) {
+    final isSelected = selectedIndex == index;
+    final kioskColors = Theme.of(context).extension<KioskColors>();
+    final buttonColor = kioskColors?.buttonColor ?? const Color(0xFF1B5E4F);
+
+    return GestureDetector(
+      onTap: () => ref.read(backPhotoTypeProvider.notifier).selectFixed(index),
+      child: _SelectionTransition(
+        // 아직 아무것도 고르지 않았으면 두 장 모두 원래 크기로 둔다.
+        isSelected: selectedIndex == null || isSelected,
+        unselectedScale: 0.85,
+        unselectedOpacity: 0.6,
+        child: _buildFixedBackPhotoCard(
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: buttonColor.withValues(alpha: 0.4),
+                    blurRadius: 12.r,
+                    spreadRadius: 2.r,
+                    offset: Offset(0, 4.h),
+                  ),
+                ]
+              : [
+                  BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 4.r, offset: Offset(0, 2.h)),
+                ],
+          imageUrl: imageUrl,
+        ),
+      ),
     );
   }
 
@@ -173,49 +233,93 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
   Widget _buildImageThumbnailStrip(List<NominatedBackPhotoCard> cards, int selectedIndex) {
     final kioskColors = Theme.of(context).extension<KioskColors>();
     final buttonColor = kioskColors?.buttonColor ?? const Color(0xFF1B5E4F);
-    final double thumbHeight = 170.h;
-    final double thumbWidth = thumbHeight * 650 / 1023; // ?ㅻЪ ?ы넗移대뱶 鍮꾩쑉
+    final double thumbSize = 118.h;
+    // 선택 시 링/글로우가 이웃 썸네일에 닿지 않을 만큼의 간격
+    final double thumbGap = 40.w;
+    final double sidePadding = 24.w;
 
     return SizedBox(
-      height: thumbHeight,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        shrinkWrap: true,
-        padding: EdgeInsets.symmetric(horizontal: 40.w),
-        itemCount: cards.length,
-        separatorBuilder: (_, __) => SizedBox(width: 24.w),
-        itemBuilder: (context, index) {
-          final isSelected = index == selectedIndex;
-          return GestureDetector(
-            onTap: () => ref.read(backPhotoTypeProvider.notifier).selectFixed(index),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              curve: Curves.easeOut,
-              width: thumbWidth,
-              clipBehavior: Clip.antiAlias,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8.r),
-                border: Border.all(
-                  color: isSelected ? buttonColor : Colors.white.withValues(alpha: 0.35),
-                  width: isSelected ? 3.w : 1.w,
+      // 링/글로우가 위아래로 잘리지 않도록 확보하는 여백
+      height: thumbSize + 28.h,
+      child: Center(
+        // shrinkWrap + Center: 개수가 적으면 가운데 모이고, 넘치면 스크롤된다.
+        child: ListView.separated(
+          scrollDirection: Axis.horizontal,
+          shrinkWrap: true,
+          physics: const BouncingScrollPhysics(),
+          padding: EdgeInsets.symmetric(horizontal: sidePadding),
+          itemCount: cards.length,
+          separatorBuilder: (_, __) => SizedBox(width: thumbGap),
+          itemBuilder: (context, index) {
+            // 가로 ListView는 교차축을 tight하게 강제한다. Center로 감싸지 않으면
+            // 아이템이 스트립 높이만큼 세로로 늘어난다.
+            return Center(
+              child: _buildThumbnailItem(
+                card: cards[index],
+                index: index,
+                selectedIndex: selectedIndex,
+                buttonColor: buttonColor,
+                size: thumbSize,
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildThumbnailItem({
+    required NominatedBackPhotoCard card,
+    required int index,
+    required int selectedIndex,
+    required Color buttonColor,
+    required double size,
+  }) {
+    final isSelected = index == selectedIndex;
+
+    return GestureDetector(
+      onTap: () => ref.read(backPhotoTypeProvider.notifier).selectFixed(index),
+      child: _SelectionTransition(
+        isSelected: isSelected,
+        unselectedScale: 0.9,
+        child: SizedBox(
+          width: size,
+          height: size,
+          child: Stack(
+            // 배지가 튕기며 커질 때(easeOutBack 오버슈트) 모서리가 잘리지 않게 한다.
+            clipBehavior: Clip.none,
+            children: [
+              _SelectionRing(
+                isSelected: isSelected,
+                color: buttonColor,
+                child: ClipOval(
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      _buildCoverNetworkImage(card.originUrl),
+                      AnimatedOpacity(
+                        opacity: isSelected ? 0.0 : 0.45,
+                        duration: _SelectionMotion.duration,
+                        curve: _SelectionMotion.curve,
+                        child: const ColoredBox(color: Colors.black),
+                      ),
+                    ],
+                  ),
                 ),
-                boxShadow: isSelected
-                    ? [
-                        BoxShadow(
-                          color: buttonColor.withValues(alpha: 0.45),
-                          blurRadius: 10.r,
-                          spreadRadius: 1.r,
-                        ),
-                      ]
-                    : null,
               ),
-              child: Opacity(
-                opacity: isSelected ? 1.0 : 0.55,
-                child: _buildCoverNetworkImage(cards[index].originUrl),
+              // 배지는 원 안쪽을 가리지 않도록 우하단 모서리에 걸친다.
+              Positioned(
+                right: 0,
+                bottom: 0,
+                child: _SelectionCheckBadge(
+                  visible: isSelected,
+                  size: 30.w,
+                  color: buttonColor,
+                ),
               ),
-            ),
-          );
-        },
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -234,35 +338,24 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
 
   Widget _buildStyleStep({required NominatedBackPhotoCard card}) {
     final layout = ref.watch(backPhotoTypeProvider)?.layoutType;
-    // 라벨 이미지, 풀이미지 선택
+    // 라벨 이미지가 기본값 (미선택 = null 도 라벨로 취급, 서버 기본값과 동일)
     final selectedStyleIndex = layout == BackPhotoLayoutType.full ? 1 : 0;
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        // 카드 미리보기
-        // Text(
-        //   LocaleKeys.choice_back_side_notice.tr(),
-        //   style: context.typography.kioskBody2B.copyWith(color: _mainTextColor.withValues(alpha: 0.85)),
-        // ),
-        SizedBox(height: 24.h),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            _buildStyleCard(
-              index: 0,
-              selectedIndex: selectedStyleIndex,
-              card: _buildLabeledPreviewCard(card.originUrl),
-              onTap: () => ref.read(backPhotoTypeProvider.notifier).selectLayout(BackPhotoLayoutType.labeled),
-            ),
-            SizedBox(width: 100.w),
-            _buildStyleCard(
-              index: 1,
-              selectedIndex: selectedStyleIndex,
-              card: _buildFullPreviewCard(card.originUrl),
-              onTap: () => ref.read(backPhotoTypeProvider.notifier).selectLayout(BackPhotoLayoutType.full),
-            ),
-          ],
+        _buildStyleCard(
+          index: 0,
+          selectedIndex: selectedStyleIndex,
+          card: _buildLabeledPreviewCard(card.originUrl),
+          onTap: () => ref.read(backPhotoTypeProvider.notifier).selectLayout(BackPhotoLayoutType.labeled),
+        ),
+        SizedBox(width: 100.w),
+        _buildStyleCard(
+          index: 1,
+          selectedIndex: selectedStyleIndex,
+          card: _buildFullPreviewCard(card.originUrl),
+          onTap: () => ref.read(backPhotoTypeProvider.notifier).selectLayout(BackPhotoLayoutType.full),
         ),
       ],
     );
@@ -379,32 +472,38 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
     final kioskColors = Theme.of(context).extension<KioskColors>();
     final buttonColor = kioskColors?.buttonColor ?? const Color(0xFF1B5E4F);
 
+    // 카드 모서리(10.r)에 링 두께와 간격을 더해야 링이 카드와 동심원으로 보인다.
+    final outerRadius = BorderRadius.circular(10.r + _SelectionRing.inset);
+
     return GestureDetector(
       onTap: onTap,
-      child: AnimatedScale(
-        scale: isSelected ? 1.0 : 0.85,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeOutCubic,
-        child: AnimatedOpacity(
-          opacity: isSelected ? 1.0 : 0.6,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOutCubic,
-          child: Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10.r),
-              boxShadow: isSelected
-                  ? [
-                      BoxShadow(
-                        color: buttonColor.withValues(alpha: 0.4),
-                        blurRadius: 12.r,
-                        spreadRadius: 2.r,
-                        offset: Offset(0, 4.h),
-                      ),
-                    ]
-                  : null,
+      child: _SelectionTransition(
+        isSelected: isSelected,
+        unselectedScale: 0.92,
+        unselectedOpacity: 0.68,
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            _SelectionRing(
+              isSelected: isSelected,
+              color: buttonColor,
+              borderRadius: outerRadius,
+              // 비선택 카드도 배경 사진 위에서 떠 보이도록 옅은 그림자를 남긴다.
+              restShadow: [
+                BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 4.r, offset: Offset(0, 2.h)),
+              ],
+              child: card,
             ),
-            child: card,
-          ),
+            Positioned(
+              right: 12.w,
+              bottom: 12.h,
+              child: _SelectionCheckBadge(
+                visible: isSelected,
+                size: 40.w,
+                color: buttonColor,
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -412,8 +511,14 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
 
   String _titleText(KioskMachineInfo? kiosk, bool isFixed) {
     final cards = kiosk?.nominatedBackPhotoCardList ?? [];
-    if (isFixed && cards.isNotEmpty) return LocaleKeys.choice_select_print_style.tr();
-    return LocaleKeys.sub02_txt_02.tr();
+
+    // 커스텀(나만의 포토카드)은 추천 이미지가 아니므로 '포토카드 이미지 확인하기'
+    if (!isFixed || cards.isEmpty) return LocaleKeys.sub02_txt_01.tr();
+
+    // 한화만 출력 스타일 선택 단계가 있다.
+    if (kiosk?.isHwe ?? false) return LocaleKeys.choice_select_print_style.tr();
+
+    return cards.length > 1 ? LocaleKeys.choice_select_recommended_image.tr() : LocaleKeys.sub02_txt_02.tr();
   }
 
   @override
@@ -557,6 +662,10 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
     final isFixed = selection?.type == BackPhotoType.fixed;
     final selectedIndex = selection?.fixedIndex;
     final mainTextColor = kiosk?.mainTextColor.toColor(fallback: Colors.white) ?? Colors.white;
+    final couponTextColor = (kiosk?.couponTextColor ?? '').toColor(fallback: Colors.white);
+
+    // 한화의 출력 스타일 단계는 세로로 길어서 타이틀 간격을 줄인다.
+    final hasStyleStep = isFixed && isHwe && (kiosk?.nominatedBackPhotoCardList.isNotEmpty ?? false);
 
     return DefaultTextStyle(
       style: TextStyle(
@@ -576,7 +685,7 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
                       ? context.typography.vendingTitle1B.copyWith(color: mainTextColor)
                       : context.typography.kioskBtn1B.copyWith(fontSize: 53.sp, color: mainTextColor),
                 ),
-                SizedBox(height: 20.h),
+                SizedBox(height: hasStyleStep ? 20.h : 50.h),
                 _buildFixedBackPhotoCardList(kiosk: kiosk, isFixed: isFixed, selectedIndex: selectedIndex),
                 SizedBox(height: 50.h),
                 Row(
@@ -610,10 +719,149 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
                     ),
                   ],
                 ),
+                SizedBox(height: 30.h),
+                Text(
+                  LocaleKeys.sub03_txt_03.tr(),
+                  textAlign: TextAlign.center,
+                  style: isHwe
+                      ? context.typography.vendingBody2B.copyWith(color: couponTextColor)
+                      : context.typography.kioskBody2B.copyWith(color: couponTextColor),
+                ),
               ],
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// 선택/비선택을 크기와 투명도로 함께 전환하는 공용 애니메이터.
+///
+/// 화면 내 선택 UI(썸네일, 스타일 카드)가 모두 이 위젯을 쓴다.
+/// 암시적 애니메이션이라 부모가 리빌드돼도 진행 중인 전환이 끊기지 않는다.
+/// (AnimatedSwitcher처럼 key로 서브트리를 갈아끼우면 Image.network가 매번
+/// 새로 붙고 이전/다음 카드가 겹쳐 보인다.)
+class _SelectionTransition extends StatelessWidget {
+  const _SelectionTransition({
+    required this.isSelected,
+    required this.child,
+    this.unselectedScale = 0.92,
+    this.unselectedOpacity = 1.0,
+  });
+
+  final bool isSelected;
+  final Widget child;
+
+  /// 비선택 시 축소 배율
+  final double unselectedScale;
+
+  /// 비선택 시 투명도. 1.0이면 투명도는 건드리지 않는다.
+  final double unselectedOpacity;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedScale(
+      scale: isSelected ? 1.0 : unselectedScale,
+      duration: _SelectionMotion.duration,
+      curve: _SelectionMotion.curve,
+      child: AnimatedOpacity(
+        opacity: isSelected ? 1.0 : unselectedOpacity,
+        duration: _SelectionMotion.duration,
+        curve: _SelectionMotion.curve,
+        child: child,
+      ),
+    );
+  }
+}
+
+/// 선택된 항목을 감싸는 링 + 글로우.
+///
+/// 원형(썸네일)과 라운드 사각(스타일 카드)이 같은 강조 언어를 쓰도록 공용화했다.
+/// [borderRadius]가 null이면 원형으로 그린다.
+class _SelectionRing extends StatelessWidget {
+  const _SelectionRing({
+    required this.isSelected,
+    required this.color,
+    required this.child,
+    this.borderRadius,
+    this.restShadow,
+  });
+
+  final bool isSelected;
+  final Color color;
+  final Widget child;
+  final BorderRadius? borderRadius;
+
+  /// 비선택 상태에서 유지할 그림자. null이면 그림자 없음.
+  final List<BoxShadow>? restShadow;
+
+  static double get ringWidth => 3.w;
+  static double get ringGap => 4.r;
+
+  /// 링이 내용물 바깥으로 차지하는 두께 (테두리 + 간격)
+  static double get inset => ringWidth + ringGap;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedContainer(
+      duration: _SelectionMotion.duration,
+      curve: _SelectionMotion.curve,
+      // 링 두께와 간격은 선택 여부와 무관하게 항상 자리를 차지해야
+      // 내용물이 찌그러지거나 크기가 튀지 않는다.
+      padding: EdgeInsets.all(ringGap),
+      decoration: BoxDecoration(
+        shape: borderRadius == null ? BoxShape.circle : BoxShape.rectangle,
+        borderRadius: borderRadius,
+        border: Border.all(
+          color: isSelected ? color : Colors.transparent,
+          width: ringWidth,
+        ),
+        // 이벤트 배경 사진 위에서도 선택이 드러나도록 링 바깥으로 번지게 한다.
+        boxShadow: isSelected
+            ? [
+                BoxShadow(color: color.withValues(alpha: 0.45), blurRadius: 8.r),
+                BoxShadow(color: color.withValues(alpha: 0.18), blurRadius: 20.r, spreadRadius: 2.r),
+              ]
+            : restShadow,
+      ),
+      child: child,
+    );
+  }
+}
+
+/// 선택된 항목에 튕기듯 나타나는 체크 배지.
+class _SelectionCheckBadge extends StatelessWidget {
+  const _SelectionCheckBadge({
+    required this.visible,
+    required this.size,
+    required this.color,
+  });
+
+  final bool visible;
+  final double size;
+
+  /// 배지 바탕색(이벤트 테마의 buttonColor)
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedScale(
+      scale: visible ? 1.0 : 0.0,
+      duration: _SelectionMotion.duration,
+      curve: _SelectionMotion.badgeCurve,
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          color: color,
+          shape: BoxShape.circle,
+          border: Border.all(color: Colors.white, width: 2.w),
+          boxShadow: [
+            BoxShadow(color: Colors.black.withValues(alpha: 0.25), blurRadius: 6.r, offset: Offset(0, 2.h)),
+          ],
+        ),
+        child: Icon(Icons.check_rounded, size: size * 0.55, color: Colors.white),
       ),
     );
   }

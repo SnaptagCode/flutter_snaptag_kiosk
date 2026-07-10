@@ -45,10 +45,14 @@ class PhotoCardPreviewScreenProvider extends _$PhotoCardPreviewScreenProvider {
         if (kiosk != null && selectedIndex < kiosk.nominatedBackPhotoCardList.length) {
           final selectedCard = kiosk.nominatedBackPhotoCardList[selectedIndex];
 
+          // 스타일 미선택(null)은 화면상 라벨 이미지가 기본 선택이므로 FORMATTED로 보낸다.
+          final layoutType = selection.layoutType ?? BackPhotoLayoutType.labeled;
+
           final response = await ref.read(kioskRepositoryProvider).getBackPhotoCardByQr(
                 GetBackPhotoByQrRequest(
                   kioskEventId: kiosk.kioskEventId,
                   nominatedBackPhotoCardId: selectedCard.id,
+                  imageType: layoutType.imageType,
                 ),
               );
 
