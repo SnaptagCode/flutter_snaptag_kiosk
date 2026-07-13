@@ -32,7 +32,7 @@ class BackPhotoSelection {
   final int? fixedIndex; // 고정 이미지인 경우 선택된 인덱스 (0 또는 1)
 
   /// 선택된 출력 스타일. null = 미선택(스타일 UI 미노출 포함) —
-  /// print 요청에 전송하지 않으며 서버 기본(LABELED)과 동일하게 출력된다.
+  /// 결제 시 [effectiveLayoutType]으로 업체별 기본값이 보정된다.
   final BackPhotoLayoutType? layoutType;
 
   const BackPhotoSelection({
@@ -56,6 +56,13 @@ class BackPhotoSelection {
       fixedIndex: null,
     );
   }
+
+  /// 결제 시 실제 적용될 출력 스타일 — 화면 하이라이트와 imageType 전송이 공유하는 규칙 (JKLI-214).
+  ///
+  /// 미선택(null)이면 한화는 풀이미지(ORIGIN), 그 외 업체는 스타일 UI가 없으므로
+  /// 라벨(FORMATTED = 기존 출력과 동일)로 보정한다.
+  BackPhotoLayoutType effectiveLayoutType({required bool isHwe}) =>
+      layoutType ?? (isHwe ? BackPhotoLayoutType.full : BackPhotoLayoutType.labeled);
 }
 
 class BackPhotoTypeNotifier extends StateNotifier<BackPhotoSelection?> {

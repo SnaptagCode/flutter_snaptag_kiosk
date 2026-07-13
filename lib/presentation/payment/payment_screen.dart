@@ -337,25 +337,25 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
   }
 
   Widget _buildStyleStep({required NominatedBackPhotoCard card}) {
-    final layout = ref.watch(backPhotoTypeProvider)?.layoutType;
-    // 라벨 이미지가 기본값 (미선택 = null 도 라벨로 취급, 서버 기본값과 동일)
+    // 풀이미지가 기본 선택 (이 화면은 한화 전용) — 전송값 보정(effectiveLayoutType)과 같은 규칙
+    final layout = ref.watch(backPhotoTypeProvider)?.effectiveLayoutType(isHwe: true) ?? BackPhotoLayoutType.full;
     final selectedStyleIndex = layout == BackPhotoLayoutType.full ? 1 : 0;
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         _buildStyleCard(
-          index: 0,
-          selectedIndex: selectedStyleIndex,
-          card: _buildLabeledPreviewCard(card.originUrl),
-          onTap: () => ref.read(backPhotoTypeProvider.notifier).selectLayout(BackPhotoLayoutType.labeled),
-        ),
-        SizedBox(width: 100.w),
-        _buildStyleCard(
           index: 1,
           selectedIndex: selectedStyleIndex,
           card: _buildFullPreviewCard(card.originUrl),
           onTap: () => ref.read(backPhotoTypeProvider.notifier).selectLayout(BackPhotoLayoutType.full),
+        ),
+        SizedBox(width: 100.w),
+        _buildStyleCard(
+          index: 0,
+          selectedIndex: selectedStyleIndex,
+          card: _buildLabeledPreviewCard(card.originUrl),
+          onTap: () => ref.read(backPhotoTypeProvider.notifier).selectLayout(BackPhotoLayoutType.labeled),
         ),
       ],
     );

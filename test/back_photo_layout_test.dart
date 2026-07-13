@@ -37,7 +37,7 @@ void main() {
   });
 
   group('BackPhotoSelection.layoutType', () {
-    test('기본값은 null(미선택) — 호출부에서 라벨(FORMATTED)로 보정한다', () {
+    test('기본값은 null(미선택) — 결제 시 effectiveLayoutType으로 보정한다', () {
       expect(BackPhotoSelection.fixed(0).layoutType, isNull);
       expect(BackPhotoSelection.custom().layoutType, isNull);
     });
@@ -66,10 +66,25 @@ void main() {
       expect(BackPhotoLayoutType.full.imageType, 'ORIGIN');
     });
 
-    test('미선택(null) 보정 결과는 FORMATTED', () {
+    test('effectiveLayoutType: 한화는 미선택 시 풀이미지(ORIGIN)가 기본', () {
       final selection = BackPhotoSelection.fixed(0);
-      final layout = selection.layoutType ?? BackPhotoLayoutType.labeled;
-      expect(layout.imageType, 'FORMATTED');
+      expect(selection.effectiveLayoutType(isHwe: true), BackPhotoLayoutType.full);
+      expect(selection.effectiveLayoutType(isHwe: true).imageType, 'ORIGIN');
+    });
+
+    test('effectiveLayoutType: 비-한화는 미선택 시 라벨(FORMATTED) — 기존 출력 유지', () {
+      final selection = BackPhotoSelection.fixed(0);
+      expect(selection.effectiveLayoutType(isHwe: false), BackPhotoLayoutType.labeled);
+      expect(selection.effectiveLayoutType(isHwe: false).imageType, 'FORMATTED');
+    });
+
+    test('effectiveLayoutType: 명시 선택은 업체와 무관하게 유지된다', () {
+      final notifier = BackPhotoTypeNotifier();
+      notifier.selectFixed(0);
+      notifier.selectLayout(BackPhotoLayoutType.labeled);
+
+      expect(notifier.state!.effectiveLayoutType(isHwe: true), BackPhotoLayoutType.labeled);
+      expect(notifier.state!.effectiveLayoutType(isHwe: false), BackPhotoLayoutType.labeled);
     });
   });
 }
