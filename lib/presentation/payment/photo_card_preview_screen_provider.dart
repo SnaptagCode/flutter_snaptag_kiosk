@@ -45,10 +45,14 @@ class PhotoCardPreviewScreenProvider extends _$PhotoCardPreviewScreenProvider {
         if (kiosk != null && selectedIndex < kiosk.nominatedBackPhotoCardList.length) {
           final selectedCard = kiosk.nominatedBackPhotoCardList[selectedIndex];
 
+          // 스타일 미선택(null) 보정: 한화는 풀이미지(ORIGIN), 그 외는 라벨(FORMATTED) — 화면 기본 선택과 동일 규칙
+          final layoutType = selection.effectiveLayoutType(isHwe: kiosk.isHwe);
+
           final response = await ref.read(kioskRepositoryProvider).getBackPhotoCardByQr(
                 GetBackPhotoByQrRequest(
                   kioskEventId: kiosk.kioskEventId,
                   nominatedBackPhotoCardId: selectedCard.id,
+                  imageType: layoutType.imageType,
                 ),
               );
 
