@@ -37,14 +37,12 @@ enum SelectionDesignVariant {
   animatedScaleOnUnselected,
 }
 
-/// 선택 강조 모션 값. 썸네일/스타일 카드가 같은 리듬으로 움직이도록 공유한다.
 class _SelectionMotion {
   const _SelectionMotion._();
 
   static const Duration duration = Duration(milliseconds: 180);
   static const Curve curve = Curves.easeOutCubic;
 
-  /// 체크 배지는 살짝 튕기며 등장한다.
   static const Curve badgeCurve = Curves.easeOutBack;
 }
 
@@ -58,6 +56,41 @@ class PaymentScreen extends ConsumerStatefulWidget {
 
 class _PaymentScreenState extends ConsumerState<PaymentScreen> {
   bool _isNetworkErrorHandled = false;
+
+  bool _thumbCanScrollLeft = false;
+  bool _thumbCanScrollRight = false;
+
+  final ScrollController _thumbScrollController = ScrollController();
+
+  @override
+  void dispose() {
+    _thumbScrollController.dispose();
+    super.dispose();
+  }
+
+  void _scrollThumbsBy(double delta) {
+    if (!_thumbScrollController.hasClients) return;
+    final position = _thumbScrollController.position;
+    final target = (position.pixels + delta).clamp(position.minScrollExtent, position.maxScrollExtent);
+    _thumbScrollController.animateTo(
+      target,
+      duration: const Duration(milliseconds: 300),
+      curve: _SelectionMotion.curve,
+    );
+  }
+
+  bool _updateThumbEdgeFades(ScrollMetrics metrics) {
+    const tolerance = 1.0;
+    final canLeft = metrics.pixels > metrics.minScrollExtent + tolerance;
+    final canRight = metrics.pixels < metrics.maxScrollExtent - tolerance;
+    if (canLeft != _thumbCanScrollLeft || canRight != _thumbCanScrollRight) {
+      setState(() {
+        _thumbCanScrollLeft = canLeft;
+        _thumbCanScrollRight = canRight;
+      });
+    }
+    return false;
+  }
 
   Widget _buildFixedBackPhotoCard({
     required List<BoxShadow>? boxShadow,
@@ -98,7 +131,6 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
     );
   }
 
-  /// 네트워크 이미지 위젯 빌더 (공통 빌더 포함)
   Widget _buildNetworkImage(String imageUrl) {
     return Image.network(
       imageUrl,
@@ -161,10 +193,8 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
           );
     }
 
-    // 출력 스타일(라벨/풀이미지) 선택은 한화(HWEG) 전용. 그 외 업체는 기존 카드 선택 UI 유지 (JKLI-214)
     if (!kiosk.isHwe) return _buildLegacyFixedCards(nominatedBackPhotoCardList, selectedIndex);
 
-    // 뒷면 이미지 썸네일 목록 1차 선택
     final int selected = (selectedIndex ?? 0).clamp(0, nominatedBackPhotoCardList.length - 1);
 
     return Column(
@@ -177,8 +207,6 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
     );
   }
 
-  /// 한화 외 업체의 고정 뒷면 선택 UI — 추천 이미지 카드를 그대로 나란히 놓는다.
-  /// 1장이면 네온 테두리만, 2장 이상이면 앞의 두 장을 선택형으로 노출한다 (JKLI-110 이전 동작).
   Widget _buildLegacyFixedCards(List<NominatedBackPhotoCard> cards, int? selectedIndex) {
     if (cards.length == 1) {
       return _buildFixedBackPhotoCard(boxShadow: null, imageUrl: cards[0].originUrl, hasBorder: true);
@@ -229,46 +257,125 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
     );
   }
 
-  /// 풀이미지가 1장 이상일시 목록 선택형으로 진행
   Widget _buildImageThumbnailStrip(List<NominatedBackPhotoCard> cards, int selectedIndex) {
     final kioskColors = Theme.of(context).extension<KioskColors>();
     final buttonColor = kioskColors?.buttonColor ?? const Color(0xFF1B5E4F);
-    final double thumbSize = 118.h;
-    // 선택 시 링/글로우가 이웃 썸네일에 닿지 않을 만큼의 간격
-    final double thumbGap = 40.w;
-    final double sidePadding = 24.w;
+    final double thumbSize = 118.r;
+    final double thumbGap = 40.r;
+    final double sidePadding = 12.r;
 
     return SizedBox(
-      // 링/글로우가 위아래로 잘리지 않도록 확보하는 여백
-      height: thumbSize + 28.h,
-      child: Center(
-        // shrinkWrap + Center: 개수가 적으면 가운데 모이고, 넘치면 스크롤된다.
-        child: ListView.separated(
-          scrollDirection: Axis.horizontal,
-          shrinkWrap: true,
-          physics: const BouncingScrollPhysics(),
-          padding: EdgeInsets.symmetric(horizontal: sidePadding),
-          itemCount: cards.length,
-          separatorBuilder: (_, __) => SizedBox(width: thumbGap),
-          itemBuilder: (context, index) {
-            // 가로 ListView는 교차축을 tight하게 강제한다. Center로 감싸지 않으면
-            // 아이템이 스트립 높이만큼 세로로 늘어난다.
-            return Center(
-              child: _buildThumbnailItem(
-                card: cards[index],
-                index: index,
-                selectedIndex: selectedIndex,
-                buttonColor: buttonColor,
-                size: thumbSize,
+      height: thumbSize + 28.r,
+      child: Row(
+        children: [
+          SizedBox(
+            width: 72.r,
+            child: Center(
+              child: _buildStripArrow(
+                isLeft: true,
+                visible: _thumbCanScrollLeft,
+                onTap: () => _scrollThumbsBy(-3 * (thumbSize + thumbGap)),
               ),
-            );
-          },
+            ),
+          ),
+          Expanded(
+            child: NotificationListener<ScrollMetricsNotification>(
+              onNotification: (n) => _updateThumbEdgeFades(n.metrics),
+              child: NotificationListener<ScrollNotification>(
+                onNotification: (n) => _updateThumbEdgeFades(n.metrics),
+                child: ShaderMask(
+                  shaderCallback: (bounds) {
+                    final fade = ((thumbSize * 0.55) / bounds.width).clamp(0.0, 0.25);
+                    return LinearGradient(
+                      colors: [
+                        _thumbCanScrollLeft ? Colors.white.withValues(alpha: 0) : Colors.white,
+                        Colors.white,
+                        Colors.white,
+                        _thumbCanScrollRight ? Colors.white.withValues(alpha: 0) : Colors.white,
+                      ],
+                      stops: [0, fade, 1 - fade, 1],
+                    ).createShader(bounds);
+                  },
+                  blendMode: BlendMode.dstIn,
+                  child: Center(
+                    child: ListView.separated(
+                      controller: _thumbScrollController,
+                      scrollDirection: Axis.horizontal,
+                      shrinkWrap: true,
+                      physics: const BouncingScrollPhysics(),
+                      padding: EdgeInsets.symmetric(horizontal: sidePadding),
+                      itemCount: cards.length,
+                      separatorBuilder: (_, __) => SizedBox(width: thumbGap),
+                      itemBuilder: (context, index) {
+                        return Center(
+                          child: Builder(
+                            builder: (itemContext) => _buildThumbnailItem(
+                              itemContext: itemContext,
+                              card: cards[index],
+                              index: index,
+                              selectedIndex: selectedIndex,
+                              buttonColor: buttonColor,
+                              size: thumbSize,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          SizedBox(
+            width: 72.r,
+            child: Center(
+              child: _buildStripArrow(
+                isLeft: false,
+                visible: _thumbCanScrollRight,
+                onTap: () => _scrollThumbsBy(3 * (thumbSize + thumbGap)),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStripArrow({
+    required bool isLeft,
+    required bool visible,
+    required VoidCallback onTap,
+  }) {
+    return AnimatedOpacity(
+      opacity: visible ? 1.0 : 0.0,
+      duration: _SelectionMotion.duration,
+      curve: _SelectionMotion.curve,
+      child: IgnorePointer(
+        ignoring: !visible,
+        child: GestureDetector(
+          onTap: onTap,
+          behavior: HitTestBehavior.opaque,
+          child: SizedBox(
+            width: 64.r,
+            height: 96.r,
+            child: Center(
+              child: Icon(
+                isLeft ? Icons.chevron_left_rounded : Icons.chevron_right_rounded,
+                size: 48.r,
+                color: Colors.white,
+                shadows: [
+                  Shadow(color: Colors.black.withValues(alpha: 0.45), blurRadius: 8.r),
+                ],
+              ),
+            ),
+          ),
         ),
       ),
     );
   }
 
   Widget _buildThumbnailItem({
+    required BuildContext itemContext,
     required NominatedBackPhotoCard card,
     required int index,
     required int selectedIndex,
@@ -278,7 +385,16 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
     final isSelected = index == selectedIndex;
 
     return GestureDetector(
-      onTap: () => ref.read(backPhotoTypeProvider.notifier).selectFixed(index),
+      onTap: () {
+        ref.read(backPhotoTypeProvider.notifier).selectFixed(index);
+        // 탭한 썸네일을 스트립 중앙으로
+        Scrollable.ensureVisible(
+          itemContext,
+          alignment: 0.5,
+          duration: const Duration(milliseconds: 300),
+          curve: _SelectionMotion.curve,
+        );
+      },
       child: _SelectionTransition(
         isSelected: isSelected,
         unselectedScale: 0.9,
@@ -313,7 +429,7 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
                 bottom: 0,
                 child: _SelectionCheckBadge(
                   visible: isSelected,
-                  size: 30.w,
+                  size: 30.r,
                   color: buttonColor,
                 ),
               ),
@@ -499,7 +615,7 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
               bottom: 12.h,
               child: _SelectionCheckBadge(
                 visible: isSelected,
-                size: 40.w,
+                size: 40.r,
                 color: buttonColor,
               ),
             ),
@@ -796,7 +912,7 @@ class _SelectionRing extends StatelessWidget {
   /// 비선택 상태에서 유지할 그림자. null이면 그림자 없음.
   final List<BoxShadow>? restShadow;
 
-  static double get ringWidth => 3.w;
+  static double get ringWidth => 3.r;
   static double get ringGap => 4.r;
 
   /// 링이 내용물 바깥으로 차지하는 두께 (테두리 + 간격)
@@ -856,9 +972,9 @@ class _SelectionCheckBadge extends StatelessWidget {
         decoration: BoxDecoration(
           color: color,
           shape: BoxShape.circle,
-          border: Border.all(color: Colors.white, width: 2.w),
+          border: Border.all(color: Colors.white, width: 2.r),
           boxShadow: [
-            BoxShadow(color: Colors.black.withValues(alpha: 0.25), blurRadius: 6.r, offset: Offset(0, 2.h)),
+            BoxShadow(color: Colors.black.withValues(alpha: 0.25), blurRadius: 6.r, offset: Offset(0, 2.r)),
           ],
         ),
         child: Icon(Icons.check_rounded, size: size * 0.55, color: Colors.white),
