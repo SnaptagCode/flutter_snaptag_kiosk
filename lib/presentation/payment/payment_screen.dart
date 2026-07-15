@@ -1,4 +1,4 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
+﻿// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -52,14 +52,26 @@ class PaymentScreen extends ConsumerStatefulWidget {
 class _PaymentScreenState extends ConsumerState<PaymentScreen> {
   bool _isNetworkErrorHandled = false;
 
+  /// 실제 포토카드 원본 규격 — 650×1023, 상/하단 각 80px가 이벤트명·날짜 라벨 밴드
+  static const double _photoCardWidth = 650;
+  static const double _photoCardHeight = 1023;
+  static const double _labelBandHeight = 80;
+
   Widget _buildFixedBackPhotoCard({
     required List<BoxShadow>? boxShadow,
     required String? imageUrl,
     bool hasBorder = false,
+    bool cropLabelBands = false,
   }) {
+    // cropLabelBands: 높이는 기존 카드와 같은 355를 유지하고, 폭을 라벨 제외 영역(650×863)
+    // 비율로 늘린다(≈267). cover로 채우면 650×1023 원본 기준 위아래가 정확히 80px씩만 잘린다.
+    final double height = 355.h;
+    final double width =
+        cropLabelBands ? height * _photoCardWidth / (_photoCardHeight - 2 * _labelBandHeight) : 226.w;
+
     return Container(
-      width: 226.w,
-      height: 355.h,
+      width: width,
+      height: height,
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10.r),
@@ -86,7 +98,9 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(10.r),
-        child: imageUrl != null && imageUrl.isNotEmpty ? _buildNetworkImage(imageUrl) : const BackPhotoPlaceholder(),
+        child: imageUrl != null && imageUrl.isNotEmpty
+            ? (cropLabelBands ? CoverNetworkImage(imageUrl) : _buildNetworkImage(imageUrl))
+            : const BackPhotoPlaceholder(),
       ),
     );
   }
@@ -164,7 +178,8 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
 
   Widget _buildLegacyFixedCards(List<NominatedBackPhotoCard> cards, int? selectedIndex) {
     if (cards.length == 1) {
-      return _buildFixedBackPhotoCard(boxShadow: null, imageUrl: cards[0].originUrl, hasBorder: true);
+      return _buildFixedBackPhotoCard(
+          boxShadow: null, imageUrl: cards[0].originUrl, hasBorder: true, cropLabelBands: true);
     }
 
     return Row(
@@ -207,6 +222,7 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
                   BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 4.r, offset: Offset(0, 2.h)),
                 ],
           imageUrl: imageUrl,
+          cropLabelBands: true,
         ),
       ),
     );
