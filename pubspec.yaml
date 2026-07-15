@@ -1,7 +1,7 @@
 name: flutter_snaptag_kiosk
 description: "A new Flutter project."
 publish_to: "none"
-version: 4.1.18
+version: 4.1.20
 
 environment:
   sdk: ^3.6.0
@@ -184,4 +184,10 @@ flutter:
     - family: HanwhaGothic
       fonts:
         - asset: assets/fonts/HANWHAGOTHICL.ttf
+          weight: 400
+
+    # 일본어 포토카드 라벨 전용 (payment_screen.dart _labelFontFamily)
+    - family: KeinanMugimaruJP
+      fonts:
+        - asset: assets/fonts/KeinanMugimaruJP.ttf
           weight: 400

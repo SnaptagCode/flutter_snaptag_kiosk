@@ -7,6 +7,7 @@ export 'create_print_response.dart';
 export 'error_response.dart';
 export 'kiosk_machine_info.dart';
 export 'models.dart';
+export 'nominated_back_photo_card.dart';
 export 'nominated_photo.dart';
 export 'nominated_photo_list.dart';
 export 'order_list_response.dart';

@@ -13,6 +13,10 @@ import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/home_timeout_prov
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
 import 'package:flutter_snaptag_kiosk/presentation/payment/payment_failed_type.dart';
 import 'package:flutter_snaptag_kiosk/presentation/payment/photo_card_preview_screen_provider.dart';
+import 'package:flutter_snaptag_kiosk/presentation/payment/widgets/back_photo_images.dart';
+import 'package:flutter_snaptag_kiosk/presentation/payment/widgets/back_photo_style_cards.dart';
+import 'package:flutter_snaptag_kiosk/presentation/payment/widgets/back_photo_thumbnail_strip.dart';
+import 'package:flutter_snaptag_kiosk/presentation/payment/widgets/selection_effects.dart';
 import 'package:flutter_snaptag_kiosk/presentation/verification/verify_photo_card_provider.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 
@@ -48,55 +52,6 @@ class PaymentScreen extends ConsumerStatefulWidget {
 class _PaymentScreenState extends ConsumerState<PaymentScreen> {
   bool _isNetworkErrorHandled = false;
 
-  /// 시안 6: 선택되지 않은 카드 크기 축소 + 애니메이션
-  Widget _buildVariant6AnimatedScaleOnUnselected({
-    required int index,
-    required int? selectedIndex,
-    required String? imageUrl,
-    required VoidCallback onTap,
-  }) {
-    final isSelected = selectedIndex == index;
-    final kioskColors = Theme.of(context).extension<KioskColors>();
-    final buttonColor = kioskColors?.buttonColor ?? const Color(0xFF1B5E4F);
-
-    // 선택되지 않은 경우 크기를 0.85배로 축소
-    final scale = selectedIndex == null ? 1.0 : (isSelected ? 1.0 : 0.85);
-    final opacity = selectedIndex == null ? 1.0 : (isSelected ? 1.0 : 0.6);
-
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedScale(
-        scale: scale,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeOutCubic,
-        child: AnimatedOpacity(
-          opacity: opacity,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOutCubic,
-          child: _buildFixedBackPhotoCard(
-            boxShadow: isSelected
-                ? [
-                    BoxShadow(
-                      color: buttonColor.withOpacity(0.4),
-                      blurRadius: 12.r,
-                      spreadRadius: 2.r,
-                      offset: Offset(0, 4.h),
-                    ),
-                  ]
-                : [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 4.r,
-                      offset: Offset(0, 2.h),
-                    ),
-                  ],
-            imageUrl: imageUrl,
-          ),
-        ),
-      ),
-    );
-  }
-
   Widget _buildFixedBackPhotoCard({
     required List<BoxShadow>? boxShadow,
     required String? imageUrl,
@@ -131,12 +86,11 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(10.r),
-        child: imageUrl != null && imageUrl.isNotEmpty ? _buildNetworkImage(imageUrl) : _buildEmptyImagePlaceholder(),
+        child: imageUrl != null && imageUrl.isNotEmpty ? _buildNetworkImage(imageUrl) : const BackPhotoPlaceholder(),
       ),
     );
   }
 
-  /// 네트워크 이미지 위젯 빌더 (공통 빌더 포함)
   Widget _buildNetworkImage(String imageUrl) {
     return Image.network(
       imageUrl,
@@ -161,17 +115,7 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
           ),
         );
       },
-      errorBuilder: (context, error, stackTrace) => _buildEmptyImagePlaceholder(),
-    );
-  }
-
-  /// 빈 이미지 플레이스홀더
-  Widget _buildEmptyImagePlaceholder() {
-    return Container(
-      color: Colors.grey[200],
-      child: Center(
-        child: Icon(Icons.image, size: 60.sp, color: Colors.grey[400]),
-      ),
+      errorBuilder: (context, error, stackTrace) => const BackPhotoPlaceholder(),
     );
   }
 
@@ -181,52 +125,115 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
     required int? selectedIndex,
   }) {
     final nominatedBackPhotoCardList = kiosk?.nominatedBackPhotoCardList ?? [];
-    if (kiosk == null || nominatedBackPhotoCardList.isEmpty) return _buildEmptyImagePlaceholder();
+    if (kiosk == null || nominatedBackPhotoCardList.isEmpty) return const BackPhotoPlaceholder();
 
-    return isFixed
-        ? Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              if (nominatedBackPhotoCardList.length == 1)
-                _buildFixedBackPhotoCard(
-                  boxShadow: null,
-                  imageUrl: nominatedBackPhotoCardList[0].originUrl,
-                  hasBorder: true,
-                )
-              else
-                _buildVariant6AnimatedScaleOnUnselected(
-                  index: 0,
-                  selectedIndex: selectedIndex,
-                  imageUrl: nominatedBackPhotoCardList[0].originUrl,
-                  onTap: () {
-                    ref.read(backPhotoTypeProvider.notifier).selectFixed(0);
-                  },
-                ),
-              if (nominatedBackPhotoCardList.length > 1) SizedBox(width: 100.w),
-              if (nominatedBackPhotoCardList.length > 1)
-                _buildVariant6AnimatedScaleOnUnselected(
-                  index: 1,
-                  selectedIndex: selectedIndex,
-                  imageUrl: nominatedBackPhotoCardList[1].originUrl,
-                  onTap: () {
-                    ref.read(backPhotoTypeProvider.notifier).selectFixed(1);
-                  },
-                ),
-            ],
-          )
-        : ref.watch(verifyPhotoCardProvider).when(
-              data: (data) {
-                final imageUrl = data?.formattedBackPhotoCardUrl ?? '';
-                return imageUrl.isNotEmpty
-                    ? _buildFixedBackPhotoCard(boxShadow: null, imageUrl: imageUrl)
-                    : _buildEmptyImagePlaceholder();
-              },
-              loading: () => const CircularProgressIndicator(),
-              error: (error, stack) => GeneralErrorWidget(
-                exception: error as Exception,
-                onRetry: () => ref.refresh(verifyPhotoCardProvider),
-              ),
-            );
+    if (!isFixed) {
+      return ref.watch(verifyPhotoCardProvider).when(
+            data: (data) {
+              final imageUrl = data?.formattedBackPhotoCardUrl ?? '';
+              return imageUrl.isNotEmpty
+                  ? _buildFixedBackPhotoCard(boxShadow: null, imageUrl: imageUrl)
+                  : const BackPhotoPlaceholder();
+            },
+            loading: () => const CircularProgressIndicator(),
+            error: (error, stack) => GeneralErrorWidget(
+              exception: error as Exception,
+              onRetry: () => ref.refresh(verifyPhotoCardProvider),
+            ),
+          );
+    }
+
+    if (!kiosk.isHwe) return _buildLegacyFixedCards(nominatedBackPhotoCardList, selectedIndex);
+
+    final int selected = (selectedIndex ?? 0).clamp(0, nominatedBackPhotoCardList.length - 1);
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (nominatedBackPhotoCardList.length > 1)
+          BackPhotoThumbnailStrip(
+            cards: nominatedBackPhotoCardList,
+            selectedIndex: selected,
+            onSelect: (index) => ref.read(backPhotoTypeProvider.notifier).selectFixed(index),
+          ),
+        SizedBox(height: 24.h),
+        BackPhotoStyleCards(card: nominatedBackPhotoCardList[selected]),
+      ],
+    );
+  }
+
+  Widget _buildLegacyFixedCards(List<NominatedBackPhotoCard> cards, int? selectedIndex) {
+    if (cards.length == 1) {
+      return _buildFixedBackPhotoCard(boxShadow: null, imageUrl: cards[0].originUrl, hasBorder: true);
+    }
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        _buildLegacyFixedCard(index: 0, selectedIndex: selectedIndex, imageUrl: cards[0].originUrl),
+        SizedBox(width: 100.w),
+        _buildLegacyFixedCard(index: 1, selectedIndex: selectedIndex, imageUrl: cards[1].originUrl),
+      ],
+    );
+  }
+
+  Widget _buildLegacyFixedCard({
+    required int index,
+    required int? selectedIndex,
+    required String imageUrl,
+  }) {
+    final isSelected = selectedIndex == index;
+    final kioskColors = Theme.of(context).extension<KioskColors>();
+    final buttonColor = kioskColors?.buttonColor ?? const Color(0xFF1B5E4F);
+
+    return GestureDetector(
+      onTap: () => ref.read(backPhotoTypeProvider.notifier).selectFixed(index),
+      child: SelectionTransition(
+        // 아직 아무것도 고르지 않았으면 두 장 모두 원래 크기로 둔다.
+        isSelected: selectedIndex == null || isSelected,
+        unselectedScale: 0.85,
+        unselectedOpacity: 0.6,
+        child: _buildFixedBackPhotoCard(
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: buttonColor.withValues(alpha: 0.4),
+                    blurRadius: 12.r,
+                    spreadRadius: 2.r,
+                    offset: Offset(0, 4.h),
+                  ),
+                ]
+              : [
+                  BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 4.r, offset: Offset(0, 2.h)),
+                ],
+          imageUrl: imageUrl,
+        ),
+      ),
+    );
+  }
+
+  Color get _mainTextColor {
+    final kiosk = ref.read(kioskInfoServiceProvider);
+    return kiosk?.mainTextColor.toColor(fallback: Colors.white) ?? Colors.white;
+  }
+
+  Widget _buildStepLabel(String text) {
+    return Text(
+      text,
+      style: context.typography.kioskBody2B.copyWith(color: _mainTextColor),
+    );
+  }
+
+  String _titleText(KioskMachineInfo? kiosk, bool isFixed) {
+    final cards = kiosk?.nominatedBackPhotoCardList ?? [];
+
+    // 커스텀(나만의 포토카드)은 추천 이미지가 아니므로 '포토카드 이미지 확인하기'
+    if (!isFixed || cards.isEmpty) return LocaleKeys.sub02_txt_01.tr();
+
+    // 한화만 출력 스타일 선택 단계가 있다.
+    if (kiosk?.isHwe ?? false) return LocaleKeys.choice_select_print_style.tr();
+
+    return cards.length > 1 ? LocaleKeys.choice_select_recommended_image.tr() : LocaleKeys.sub02_txt_02.tr();
   }
 
   @override
@@ -370,6 +377,10 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
     final isFixed = selection?.type == BackPhotoType.fixed;
     final selectedIndex = selection?.fixedIndex;
     final mainTextColor = kiosk?.mainTextColor.toColor(fallback: Colors.white) ?? Colors.white;
+    final couponTextColor = (kiosk?.couponTextColor ?? '').toColor(fallback: Colors.white);
+
+    // 한화의 출력 스타일 단계는 세로로 길어서 타이틀 간격을 줄인다.
+    final hasStyleStep = isFixed && isHwe && (kiosk?.nominatedBackPhotoCardList.isNotEmpty ?? false);
 
     return DefaultTextStyle(
       style: TextStyle(
@@ -383,17 +394,13 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Text(
-                  isFixed &&
-                          kiosk?.nominatedBackPhotoCardList.length != null &&
-                          kiosk!.nominatedBackPhotoCardList.length > 1
-                      ? LocaleKeys.choice_select_recommended_image.tr()
-                      : LocaleKeys.sub02_txt_02.tr(),
+                  _titleText(kiosk, isFixed),
                   textAlign: TextAlign.center,
                   style: isHwe
                       ? context.typography.vendingTitle1B.copyWith(color: mainTextColor)
                       : context.typography.kioskBtn1B.copyWith(fontSize: 53.sp, color: mainTextColor),
                 ),
-                SizedBox(height: 50.h),
+                SizedBox(height: hasStyleStep ? 20.h : 50.h),
                 _buildFixedBackPhotoCardList(kiosk: kiosk, isFixed: isFixed, selectedIndex: selectedIndex),
                 SizedBox(height: 50.h),
                 Row(
@@ -430,13 +437,10 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
                 SizedBox(height: 30.h),
                 Text(
                   LocaleKeys.sub03_txt_03.tr(),
+                  textAlign: TextAlign.center,
                   style: isHwe
-                      ? context.typography.vendingBody2B
-                          .copyWith(color: (kiosk?.couponTextColor ?? '').toColor(fallback: Colors.white))
-                      : context.typography.kioskBody2B.copyWith(
-                          color: (kiosk?.couponTextColor ?? '').toColor(fallback: Colors.white),
-                          //fontFamily: 'Pretendard',
-                        ),
+                      ? context.typography.vendingBody2B.copyWith(color: couponTextColor)
+                      : context.typography.kioskBody2B.copyWith(color: couponTextColor),
                 ),
               ],
             ),
