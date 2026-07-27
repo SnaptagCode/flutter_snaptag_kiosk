@@ -120,12 +120,19 @@ class PrintService extends _$PrintService {
     const maxRetries = 3;
     int attempt = 0;
 
+    final pagePrintType = ref.read(pagePrintProvider);
+
     while (attempt < maxRetries) {
       try {
         final request = UpdatePrintRequest(
           kioskMachineId: ref.read(kioskInfoServiceProvider)!.kioskMachineId,
           kioskEventId: ref.read(kioskInfoServiceProvider)!.kioskEventId,
           status: status,
+          printType: switch (pagePrintType) {
+            PagePrintType.single => PrintType.single,
+            PagePrintType.double => PrintType.double,
+            PagePrintType.none => null,
+          },
         );
 
         await ref

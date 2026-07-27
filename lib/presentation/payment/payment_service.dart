@@ -150,7 +150,10 @@ class PaymentService extends _$PaymentService {
   /// 성공적인 결제 처리
   Future<void> _handleSuccessfulPayment() async {
     final response = await _updateOrder(isRefund: false);
-    await ref.read(cardCountProvider.notifier).decrease();
+    // 단면 카운터는 단면 모드일 때만 차감 — 양면 모드 결제는 단면 카드를 쓰지 않음
+    if (ref.read(pagePrintProvider) == PagePrintType.single) {
+      await ref.read(cardCountProvider.notifier).decrease();
+    }
     SlackLogService().sendLogToSlack("paymentResponse0000 : $response");
   }
 
