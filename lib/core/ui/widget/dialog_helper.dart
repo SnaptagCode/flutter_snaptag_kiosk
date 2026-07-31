@@ -145,7 +145,7 @@ class DialogHelper {
       context: context,
       barrierDismissible: barrierDismissible,
       builder: (BuildContext dialogContext) {
-        final isHwe = context.isHwe;
+        final isHwe = dialogContext.isHwe;
 
         return _AutoCloseScope(
           // 타이머를 다이얼로그 라이프사이클에 바인딩한다. 사용자가 먼저 닫으면
@@ -153,7 +153,7 @@ class DialogHelper {
           duration: autoCloseDuration,
           child: DefaultTextStyle(
             style: TextStyle(
-              fontFamily: context.locale.languageCode == 'ja' ? 'MPLUSRounded' : 'Cafe24Ssurround2',
+              fontFamily: dialogContext.locale.languageCode == 'ja' ? 'MPLUSRounded' : 'Cafe24Ssurround2',
             ),
             child: Dialog(
               backgroundColor: Colors.white,
@@ -171,7 +171,7 @@ class DialogHelper {
                       child: Text(
                         title,
                         textAlign: TextAlign.center,
-                        style: context.typography.kioskAlert1B.copyWith(
+                        style: dialogContext.typography.kioskAlert1B.copyWith(
                           fontFamily: isHwe ? 'Hanwha' : 'Pretendard',
                           color: Colors.black,
                           fontSize: isHwe ? 52.sp : 42.sp,
@@ -185,7 +185,7 @@ class DialogHelper {
                       child: Text(
                         content,
                         textAlign: TextAlign.center,
-                        style: context.typography.kioskAlert2M.copyWith(
+                        style: dialogContext.typography.kioskAlert2M.copyWith(
                           color: Colors.black,
                           fontFamily: 'Pretendard',
                         ),
@@ -197,7 +197,7 @@ class DialogHelper {
                       child: Text(
                         subContent,
                         textAlign: TextAlign.center,
-                        style: context.typography.kioskAlert2M.copyWith(
+                        style: dialogContext.typography.kioskAlert2M.copyWith(
                           color: const Color(0xFFFF333F),
                           fontFamily: 'Pretendard',
                           fontWeight: FontWeight.w700,
@@ -211,8 +211,8 @@ class DialogHelper {
                         if (showCancelButton)
                           Expanded(
                             child: OutlinedButton(
-                              onPressed: () async {
-                                await SoundManager().playSound();
+                              onPressed: () {
+                                unawaited(SoundManager().playSound());
                                 Navigator.of(dialogContext).pop(false);
                               },
                               style: cancelButtonStyle,
@@ -222,8 +222,8 @@ class DialogHelper {
                         if (showCancelButton) SizedBox(width: 12.w),
                         Expanded(
                           child: ElevatedButton(
-                            onPressed: () async {
-                              await SoundManager().playSound();
+                            onPressed: () {
+                              unawaited(SoundManager().playSound());
                               Navigator.of(dialogContext).pop(true);
                             },
                             style: confirmButtonStyle,
@@ -658,8 +658,8 @@ class _TimeoutDialogWidgetState extends State<_TimeoutDialogWidget> {
                   children: [
                     Expanded(
                       child: OutlinedButton(
-                        onPressed: () async {
-                          await SoundManager().playSound();
+                        onPressed: () {
+                          unawaited(SoundManager().playSound());
                           Navigator.of(context).pop(false);
                         },
                         style: context.refundDialogCancelButtonStyle,
@@ -669,8 +669,8 @@ class _TimeoutDialogWidgetState extends State<_TimeoutDialogWidget> {
                     SizedBox(width: 12.w),
                     Expanded(
                       child: ElevatedButton(
-                        onPressed: () async {
-                          await SoundManager().playSound();
+                        onPressed: () {
+                          unawaited(SoundManager().playSound());
                           Navigator.of(context).pop(true);
                         },
                         style: widget.confirmButtonStyle ?? context.refundDialogConfirmButtonStyle,
