@@ -8,6 +8,7 @@ import 'package:flutter_snaptag_kiosk/core/common/sound/sound_manager.dart';
 import 'package:flutter_snaptag_kiosk/core/ui/widget/dialog_helper.dart';
 import 'package:flutter_snaptag_kiosk/core/ui/widget/general_error_widget.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
+import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
 import 'package:flutter_snaptag_kiosk/presentation/setup/payment_history_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/setup/setup_refund_process_provider.dart';
 import 'package:flutter_svg/svg.dart';
@@ -44,6 +45,7 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
       );
     });
     final ordersPage = ref.watch(ordersPageProvider());
+    final machineId = ref.watch(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
 
     return Theme(
       data: Theme.of(context).copyWith(
@@ -99,6 +101,15 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
           ),
           body: ordersPage.when(
             data: (response) {
+              if (machineId == 0) {
+                return Center(
+                  child: Text(
+                    '키오스크 기기번호가 없어\n출력 내역을 조회할 수 없습니다.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 36.sp, fontWeight: FontWeight.bold),
+                  ),
+                );
+              }
               return Column(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
@@ -212,7 +223,7 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
               ),
             ),
             error: (error, stack) => GeneralErrorWidget(
-              exception: error as Exception,
+              exception: error is Exception ? error : Exception(error.toString()),
               onRetry: () => ref.refresh(ordersPageProvider()),
             ),
           ),
