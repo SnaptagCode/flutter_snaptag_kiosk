@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter_snaptag_kiosk/lib.dart';
+import 'package:flutter_snaptag_kiosk/presentation/core/card_count_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
 import 'package:flutter_snaptag_kiosk/presentation/payment/create_order_info_state.dart';
 import 'package:flutter_snaptag_kiosk/presentation/payment/payment_response_state.dart';
@@ -135,9 +136,15 @@ class PrintService extends _$PrintService {
           },
         );
 
-        await ref
+        final response = await ref
             .read(kioskRepositoryProvider)
             .updatePrintStatus(printedPhotoCardId: printedPhotoCardId, request: request);
+
+        // 서버는 단면(SINGLE) + COMPLETED 최초 전이에서만 차감하고, 그때만 잔량을 내려준다.
+        final serverCardCount = response.cardCurrentCount;
+        if (serverCardCount != null) {
+          ref.read(cardCountProvider.notifier).updateCurrent(serverCardCount);
+        }
         return;
       } catch (e) {
         attempt++;

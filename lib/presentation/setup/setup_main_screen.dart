@@ -15,6 +15,7 @@ import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_servic
 import 'package:flutter_snaptag_kiosk/presentation/print/card_printer.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/luca/state/printer_connect_state.dart';
 import 'package:flutter_snaptag_kiosk/presentation/setup/alert_definition_provider.dart';
+import 'package:flutter_snaptag_kiosk/presentation/setup/card_stock/card_stock_action.dart';
 import 'package:flutter_snaptag_kiosk/presentation/setup/page_print_provider.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -388,28 +389,24 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
                       borderRadius: const BorderRadius.all(Radius.circular(12)),
                       onTap: () async {
                         final isActive = ref.read(pagePrintProvider) == PagePrintType.single;
-                        if (isActive) {
-                          String? value = await DialogHelper.showKeypadDialog(context, mode: ModeType.card);
+                        if (!isActive) return;
 
-                          if (value == null || value.isEmpty) return; // 값이 없으면 종료
-                          int cardNumber = int.parse(value);
-                          ref.read(cardCountProvider.notifier).update(cardNumber);
-                          if (cardNumber <= 0) {
-                            ref.read(pagePrintProvider.notifier).set(PagePrintType.double);
-                          } else {
-                            ref.read(pagePrintProvider.notifier).set(PagePrintType.single);
-                            if (machineId != 0) {
-                              SlackLogService().sendBroadcastLogToSlackWithKey(InfoKey.cardPrintModeSwitchSingle.key);
-                            }
-                          }
+                        final outcome = await showCardStockDialog(context, ref);
+                        if (outcome == null) return;
+
+                        if (outcome.count <= 0) {
+                          ref.read(pagePrintProvider.notifier).set(PagePrintType.double);
                         } else {
-                          print('click when pagePringType not single');
+                          ref.read(pagePrintProvider.notifier).set(PagePrintType.single);
+                          if (machineId != 0) {
+                            SlackLogService().sendBroadcastLogToSlackWithKey(InfoKey.cardPrintModeSwitchSingle.key);
+                          }
                         }
                       },
                       child: Align(
                         alignment: Alignment.center,
                         child: Text(
-                          (cardCountState.currentCount).toString(),
+                          cardCountState.displayCount,
                           textAlign: TextAlign.center,
                           style: ref.watch(pagePrintProvider) != PagePrintType.single
                               ? context.typography.kioskBody2B.copyWith(color: Color(0xFFECEDEF))

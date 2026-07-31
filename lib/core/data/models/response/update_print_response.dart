@@ -11,6 +11,7 @@ class UpdatePrintResponse with _$UpdatePrintResponse {
     required int kioskEventId,
     required PrintedStatus status,
     required int printedPhotoCardId,
+    int? cardCurrentCount,
   }) = _UpdatePrintResponse;
 
   factory UpdatePrintResponse.fromJson(Map<String, dynamic> json) => _$UpdatePrintResponseFromJson(json);
