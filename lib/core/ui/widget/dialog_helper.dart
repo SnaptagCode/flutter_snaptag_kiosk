@@ -768,8 +768,8 @@ class _RefundCardInsertDialogWidgetState extends State<_RefundCardInsertDialogWi
                 children: [
                   Expanded(
                     child: OutlinedButton(
-                      onPressed: () async {
-                        await SoundManager().playSound();
+                      onPressed: () {
+                        unawaited(SoundManager().playSound());
                         if (mounted) Navigator.of(context, rootNavigator: true).pop(false);
                       },
                       style: context.refundDialogCancelButtonStyle,
@@ -779,8 +779,8 @@ class _RefundCardInsertDialogWidgetState extends State<_RefundCardInsertDialogWi
                   SizedBox(width: 12.w),
                   Expanded(
                     child: ElevatedButton(
-                      onPressed: () async {
-                        await SoundManager().playSound();
+                      onPressed: () {
+                        unawaited(SoundManager().playSound());
                         if (mounted) Navigator.of(context, rootNavigator: true).pop(true);
                       },
                       style: context.dialogKioskStyle,

@@ -119,6 +119,7 @@ class KioskInfoService extends _$KioskInfoService {
         ref.read(pagePrintProvider.notifier).set(PagePrintType.single);
       }
     } catch (e) {
+      _cardStockRestoredMachineId = null;
       SlackLogService().sendLogToSlack('단면 카드 잔량 복원 실패 (machineId: $machineId): $e');
     } finally {
       // 복원 성공·이력 없음·조회 실패 모두 '조회 끝'이다.

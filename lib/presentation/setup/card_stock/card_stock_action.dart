@@ -15,10 +15,12 @@ class CardStockOutcome {
 }
 
 Future<CardStockOutcome?> showCardStockDialog(BuildContext context, WidgetRef ref) async {
+  final cardCount = ref.read(cardCountProvider.notifier);
+  final kioskRepository = ref.read(kioskRepositoryProvider);
+  final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
+
   final requestCount = await _promptCount(context);
   if (requestCount == null) return null;
-
-  final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
 
   int appliedCount = requestCount;
   bool recorded = false;
@@ -28,7 +30,9 @@ Future<CardStockOutcome?> showCardStockDialog(BuildContext context, WidgetRef re
     failureReason = '기기 정보를 불러오지 못했습니다.';
   } else {
     try {
-      final response = await _recordCardStock(ref, machineId: machineId, requestCount: requestCount);
+      final response = await kioskRepository.setCardStock(
+        CardStockSetRequest(machineId: machineId, requestCount: requestCount),
+      );
       appliedCount = response.cardCurrentCount;
       recorded = true;
     } catch (e) {
@@ -37,7 +41,7 @@ Future<CardStockOutcome?> showCardStockDialog(BuildContext context, WidgetRef re
     }
   }
 
-  ref.read(cardCountProvider.notifier).update(appliedCount);
+  cardCount.update(appliedCount);
 
   if (!recorded && context.mounted) {
     await DialogHelper.showSetupDialog(
@@ -48,16 +52,6 @@ Future<CardStockOutcome?> showCardStockDialog(BuildContext context, WidgetRef re
   }
 
   return CardStockOutcome(count: appliedCount, recordedOnServer: recorded);
-}
-
-Future<CardStockResponse> _recordCardStock(
-  WidgetRef ref, {
-  required int machineId,
-  required int requestCount,
-}) {
-  return ref.read(kioskRepositoryProvider).setCardStock(
-        CardStockSetRequest(machineId: machineId, requestCount: requestCount),
-      );
 }
 
 Future<int?> _promptCount(BuildContext context) async {

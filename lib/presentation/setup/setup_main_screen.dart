@@ -388,16 +388,16 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
                     child: InkWell(
                       borderRadius: const BorderRadius.all(Radius.circular(12)),
                       onTap: () async {
-                        final isActive = ref.read(pagePrintProvider) == PagePrintType.single;
-                        if (!isActive) return;
+                        if (ref.read(pagePrintProvider) != PagePrintType.single) return;
 
+                        final pagePrint = ref.read(pagePrintProvider.notifier);
                         final outcome = await showCardStockDialog(context, ref);
                         if (outcome == null) return;
 
                         if (outcome.count <= 0) {
-                          ref.read(pagePrintProvider.notifier).set(PagePrintType.double);
+                          pagePrint.set(PagePrintType.double);
                         } else {
-                          ref.read(pagePrintProvider.notifier).set(PagePrintType.single);
+                          pagePrint.set(PagePrintType.single);
                           if (machineId != 0) {
                             SlackLogService().sendBroadcastLogToSlackWithKey(InfoKey.cardPrintModeSwitchSingle.key);
                           }
