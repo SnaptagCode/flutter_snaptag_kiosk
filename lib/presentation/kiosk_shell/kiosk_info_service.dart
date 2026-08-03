@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_snaptag_kiosk/presentation/core/card_count_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/setup/front_photo_list.dart';
+import 'package:flutter_snaptag_kiosk/presentation/setup/page_print_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/setup/uuid_provider.dart';
 import 'package:path/path.dart' as p;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -21,6 +22,7 @@ class KioskInfoService extends _$KioskInfoService {
   int? _cachedKioskEventId;
   bool _getInfoByKey = true;
   bool _isLoading = false;
+  int? _cardStockRestoredMachineId;
 
   bool get getInfoByKey => _getInfoByKey;
 
@@ -56,6 +58,7 @@ class KioskInfoService extends _$KioskInfoService {
         _cachedMachineId = cached.kioskMachineId;
         _cachedKioskEventId = cached.kioskEventId;
         ref.read(frontPhotoListProvider.notifier).fetch();
+        await _restoreCardStock(cached.kioskMachineId);
         await _startPeriodicTimer();
         _getInfoByKey = true;
         _isLoading = false;
@@ -81,6 +84,8 @@ class KioskInfoService extends _$KioskInfoService {
       _cachedMachineId = response.kioskMachineId;
       _cachedKioskEventId = response.kioskEventId;
 
+      await _restoreCardStock(response.kioskMachineId);
+
       // 응답을 받은 후 10분마다 실행되는 타이머 시작
       await _startPeriodicTimer();
 
@@ -91,7 +96,33 @@ class KioskInfoService extends _$KioskInfoService {
     } catch (e) {
       _getInfoByKey = false;
       _isLoading = false;
+      ref.read(cardCountProvider.notifier).markSynced();
       return null;
+    }
+  }
+
+  Future<void> _restoreCardStock(int machineId) async {
+    if (machineId == 0 || _cardStockRestoredMachineId == machineId) {
+      ref.read(cardCountProvider.notifier).markSynced();
+      return;
+    }
+    final isMachineSwitch = _cardStockRestoredMachineId != null;
+    _cardStockRestoredMachineId = machineId;
+
+    try {
+      final stock = await ref.read(kioskRepositoryProvider).getCardStock(machineId: machineId);
+      ref.read(cardCountProvider.notifier).update(stock.cardCurrentCount);
+      if (stock.cardCurrentCount > 0) {
+        ref.read(pagePrintProvider.notifier).set(PagePrintType.single);
+      }
+    } catch (e) {
+      _cardStockRestoredMachineId = null;
+      if (isMachineSwitch) {
+        ref.read(cardCountProvider.notifier).update(0);
+      }
+      SlackLogService().sendLogToSlack('단면 카드 잔량 복원 실패 (machineId: $machineId): $e');
+    } finally {
+      ref.read(cardCountProvider.notifier).markSynced();
     }
   }
 
@@ -116,6 +147,8 @@ class KioskInfoService extends _$KioskInfoService {
       // 캐시된 값들 업데이트
       _cachedMachineId = machineId;
       _cachedKioskEventId = response.kioskEventId;
+
+      await _restoreCardStock(machineId);
 
       // 응답을 받은 후 10분마다 실행되는 타이머 시작
       await _startPeriodicTimer();

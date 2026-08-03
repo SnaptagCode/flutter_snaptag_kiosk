@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter_snaptag_kiosk/lib.dart';
+import 'package:flutter_snaptag_kiosk/presentation/core/card_count_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
 import 'package:flutter_snaptag_kiosk/presentation/payment/create_order_info_state.dart';
 import 'package:flutter_snaptag_kiosk/presentation/payment/payment_response_state.dart';
@@ -120,17 +121,29 @@ class PrintService extends _$PrintService {
     const maxRetries = 3;
     int attempt = 0;
 
+    final pagePrintType = ref.read(pagePrintProvider);
+
     while (attempt < maxRetries) {
       try {
         final request = UpdatePrintRequest(
           kioskMachineId: ref.read(kioskInfoServiceProvider)!.kioskMachineId,
           kioskEventId: ref.read(kioskInfoServiceProvider)!.kioskEventId,
           status: status,
+          printType: switch (pagePrintType) {
+            PagePrintType.single => PrintType.single,
+            PagePrintType.double => PrintType.double,
+            PagePrintType.none => null,
+          },
         );
 
-        await ref
+        final response = await ref
             .read(kioskRepositoryProvider)
             .updatePrintStatus(printedPhotoCardId: printedPhotoCardId, request: request);
+
+        final serverCardCount = response.cardCurrentCount;
+        if (serverCardCount != null) {
+          ref.read(cardCountProvider.notifier).updateCurrent(serverCardCount);
+        }
         return;
       } catch (e) {
         attempt++;

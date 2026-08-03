@@ -10,6 +10,7 @@ class UpdatePrintRequest with _$UpdatePrintRequest {
     required int kioskMachineId,
     required int kioskEventId,
     required PrintedStatus status,
+    @JsonKey(includeIfNull: false) PrintType? printType,
   }) = _UpdatePrintRequest;
   factory UpdatePrintRequest.fromJson(Map<String, dynamic> json) => _$UpdatePrintRequestFromJson(json);
 }

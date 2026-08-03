@@ -39,6 +39,16 @@ abstract class KioskApiClient {
     @Query('uniqueKey') required String uniqueKey,
   });
 
+  @POST('/v1/machine/card-stock/set')
+  Future<CardStockResponse> setCardStock({
+    @Body() required Map<String, dynamic> body,
+  });
+
+  @GET('/v1/machine/card-stock')
+  Future<CardStockResponse> getCardStock({
+    @Query('machineId') required int machineId,
+  });
+
   @GET('/v1/kiosk-event/back-photo')
   Future<BackPhotoCardResponse> getBackPhotoCard({
     @Query('kioskEventId') required int kioskEventId,

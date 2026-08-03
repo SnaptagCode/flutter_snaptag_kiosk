@@ -2,13 +2,13 @@ import 'dart:convert';
 import 'dart:developer';
 
 import 'package:dio/dio.dart';
-import 'package:http_parser/http_parser.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_snaptag_kiosk/core/data/models/request/unique_key_request.dart';
 import 'package:flutter_snaptag_kiosk/core/data/models/request/update_back_photo_request.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_snaptag_kiosk/presentation/core/card_count_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/luca/state/printer_log.dart';
+import 'package:http_parser/http_parser.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'kiosk_repository.g.dart';
@@ -98,6 +98,22 @@ class _KioskRepository {
   Future<KioskMachineInfo> getKioskMachineInfoByKey(String uniqueKey) async {
     try {
       return await _apiClient.getKioskMachineInfoByKey(uniqueKey: uniqueKey);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<CardStockResponse> setCardStock(CardStockSetRequest request) async {
+    try {
+      return await _apiClient.setCardStock(body: request.toJson());
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<CardStockResponse> getCardStock({required int machineId}) async {
+    try {
+      return await _apiClient.getCardStock(machineId: machineId);
     } catch (e) {
       rethrow;
     }
