@@ -12,7 +12,24 @@ class OrdersPage extends _$OrdersPage {
   int get kioskMachineId => ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
 
   @override
-  Future<OrderListResponse> build({int page = 1}) async {
+  Future<OrderListResponse> build({int page = 1}) {
+    final machineId = ref.watch(kioskInfoServiceProvider.select((info) => info?.kioskMachineId ?? 0));
+    return _fetch(page, machineId);
+  }
+
+  Future<void> goToPage(int newPage) async {
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() => _fetch(newPage, kioskMachineId));
+  }
+
+  Future<OrderListResponse> _fetch(int page, int machineId) async {
+    if (machineId == 0) {
+      return OrderListResponse(
+        list: const [],
+        paging: PagingEntity(totalCount: 0, pageSize: _pageSize, currentPage: page, canNext: false),
+      );
+    }
+
     final OrderListResponse response = await ref.read(kioskRepositoryProvider).getOrders(GetOrdersRequest(
           pageSize: _pageSize,
           currentPage: page,
@@ -20,14 +37,5 @@ class OrdersPage extends _$OrdersPage {
         ));
     logger.i('response: $response');
     return response;
-  }
-
-  Future<void> goToPage(int newPage) async {
-    state = const AsyncLoading();
-    state = await AsyncValue.guard(() => ref.read(kioskRepositoryProvider).getOrders(GetOrdersRequest(
-          pageSize: _pageSize,
-          currentPage: newPage,
-          kioskMachineId: kioskMachineId,
-        )));
   }
 }

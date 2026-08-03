@@ -1,24 +1,29 @@
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:flutter_snaptag_kiosk/core/data/datasources/local/id_writer.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'card_count_provider.g.dart';
 
 class CardCountState {
   final int initialCount; // 처음 설정(기준) 수량
   final int currentCount; // 현재 수량
+  final bool isSynced;
 
   const CardCountState({
     required this.initialCount,
     required this.currentCount,
+    this.isSynced = false,
   });
 
   int get usedCount => (initialCount - currentCount).clamp(0, initialCount);
   int get remaining => currentCount;
 
-  CardCountState copyWith({int? initialCount, int? currentCount}) {
+  String get displayCount => isSynced ? '$currentCount' : '-';
+
+  CardCountState copyWith({int? initialCount, int? currentCount, bool? isSynced}) {
     return CardCountState(
       initialCount: initialCount ?? this.initialCount,
       currentCount: currentCount ?? this.currentCount,
+      isSynced: isSynced ?? this.isSynced,
     );
   }
 
@@ -37,11 +42,16 @@ class CardCount extends _$CardCount {
   }
 
   void updateCurrent(int newCount) {
-    state = state.copyWith(currentCount: newCount);
+    state = state.copyWith(currentCount: newCount, isSynced: true);
   }
 
   void update(int value) {
-    state = state.copyWith(initialCount: value, currentCount: value);
+    state = state.copyWith(initialCount: value, currentCount: value, isSynced: true);
+  }
+
+  void markSynced() {
+    if (state.isSynced) return;
+    state = state.copyWith(isSynced: true);
   }
 
   Future<void> increase([int step = 1]) async {
