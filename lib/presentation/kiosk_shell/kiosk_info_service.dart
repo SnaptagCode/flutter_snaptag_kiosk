@@ -96,33 +96,32 @@ class KioskInfoService extends _$KioskInfoService {
     } catch (e) {
       _getInfoByKey = false;
       _isLoading = false;
-      // 조회까지 가지 못했더라도 수량 표시가 '-'에 갇히면 안 된다.
       ref.read(cardCountProvider.notifier).markSynced();
       return null;
     }
   }
 
-  /// 기기당 1회만 복원한다 — 운영 중 재조회하면 낡은 서버 값이 관리자가 방금 입력한 값을 덮는다.
   Future<void> _restoreCardStock(int machineId) async {
-    // machineId 0은 가드를 소진시키지 않는다. 이후 유효한 기기번호로 등록되면 복원돼야 한다.
     if (machineId == 0 || _cardStockRestoredMachineId == machineId) {
       ref.read(cardCountProvider.notifier).markSynced();
       return;
     }
+    final isMachineSwitch = _cardStockRestoredMachineId != null;
     _cardStockRestoredMachineId = machineId;
 
     try {
       final stock = await ref.read(kioskRepositoryProvider).getCardStock(machineId: machineId);
+      ref.read(cardCountProvider.notifier).update(stock.cardCurrentCount);
       if (stock.cardCurrentCount > 0) {
-        ref.read(cardCountProvider.notifier).update(stock.cardCurrentCount);
-        // 관리자 조작이 아니라 상태 복원이므로 인쇄모드 전환 Slack 알림은 보내지 않는다.
         ref.read(pagePrintProvider.notifier).set(PagePrintType.single);
       }
     } catch (e) {
       _cardStockRestoredMachineId = null;
+      if (isMachineSwitch) {
+        ref.read(cardCountProvider.notifier).update(0);
+      }
       SlackLogService().sendLogToSlack('단면 카드 잔량 복원 실패 (machineId: $machineId): $e');
     } finally {
-      // 복원 성공·이력 없음·조회 실패 모두 '조회 끝'이다.
       ref.read(cardCountProvider.notifier).markSynced();
     }
   }
@@ -149,7 +148,6 @@ class KioskInfoService extends _$KioskInfoService {
       _cachedMachineId = machineId;
       _cachedKioskEventId = response.kioskEventId;
 
-      // 첫 생존보고가 복원된 잔량을 싣도록 타이머 시작 전에 수행한다.
       await _restoreCardStock(machineId);
 
       // 응답을 받은 후 10분마다 실행되는 타이머 시작

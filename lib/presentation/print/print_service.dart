@@ -140,7 +140,6 @@ class PrintService extends _$PrintService {
             .read(kioskRepositoryProvider)
             .updatePrintStatus(printedPhotoCardId: printedPhotoCardId, request: request);
 
-        // 서버는 단면(SINGLE) + COMPLETED 최초 전이에서만 차감하고, 그때만 잔량을 내려준다.
         final serverCardCount = response.cardCurrentCount;
         if (serverCardCount != null) {
           ref.read(cardCountProvider.notifier).updateCurrent(serverCardCount);
