@@ -15,6 +15,8 @@ import 'package:flutter_snaptag_kiosk/presentation/print/card_printer.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/print_process_screen_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/setup/page_print_provider.dart';
 
+const _hweAdImagePath = 'assets/adImages/hanwha/printing_img_smartstore.png';
+
 class PrintProcessScreen extends ConsumerStatefulWidget {
   const PrintProcessScreen({super.key});
 
@@ -269,12 +271,15 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> with Si
                       ),
                     ),
                   )
-                : SizedBox(
-                    width: 1080.w,
-                    height: 400.h,
-                    child: Image.file(
-                      File(randomAdImage),
-                      fit: BoxFit.contain,
+                : Padding(
+                    padding: EdgeInsets.only(bottom: randomAdImage == _hweAdImagePath ? 10.h : 0),
+                    child: SizedBox(
+                      width: 1080.w,
+                      height: 400.h,
+                      child: Image.file(
+                        File(randomAdImage),
+                        fit: BoxFit.contain,
+                      ),
                     ),
                   ),
             SizedBox(height: 40.h),
@@ -384,7 +389,7 @@ class _PrintProcessScreenState extends ConsumerState<PrintProcessScreen> with Si
   String? getRandomAdImageFilePath(WidgetRef ref) {
     final kioskInfo = ref.read(kioskInfoServiceProvider);
     if (kioskInfo?.isHwe == true) {
-      return 'assets/adImages/hanwha/printing_img.png';
+      return _hweAdImagePath;
     }
 
     final version = ref.read(versionStateProvider).currentVersion;
