@@ -1,7 +1,7 @@
 name: flutter_snaptag_kiosk
 description: "A new Flutter project."
 publish_to: "none"
-version: 4.1.22
+version: 4.1.23
 
 environment:
   sdk: ^3.6.0
@@ -91,6 +91,7 @@ flutter:
     - assets/adImages/suwon/
     - assets/adImages/ansan/
     - assets/adImages/hanwha/printing_img.png
+    - assets/adImages/hanwha/printing_img_smartstore.png
     - assets/.env.version
     - assets/config/
 
