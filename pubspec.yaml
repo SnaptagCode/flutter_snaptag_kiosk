@@ -91,6 +91,7 @@ flutter:
     - assets/adImages/suwon/
     - assets/adImages/ansan/
     - assets/adImages/hanwha/printing_img.png
+    - assets/adImages/hanwha/printing_img_smartstore.png
     - assets/.env.version
     - assets/config/
 
