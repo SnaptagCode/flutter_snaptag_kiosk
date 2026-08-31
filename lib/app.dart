@@ -226,14 +226,22 @@ class _ErrorApp extends ConsumerWidget {
 
 /// 라우트 체크 헬퍼 클래스
 class _RouteChecker {
-  static bool isPrintProcessScreen(String location) => location.contains('/print-process');
-  static bool isPreviewScreen(String location) => location.contains('/preview');
-  static bool isHomeScreen(String location) => location.contains('/home');
-  static bool isKioskRoute(String location) => location.contains('/kiosk');
+  static bool isPrintProcessScreen(String location) => _isUnder(location, '/kiosk/print-process');
+  static bool isPreviewScreen(String location) => _isUnder(location, '/kiosk/preview');
+  static bool isHomeScreen(String location) => _isUnder(location, '/kiosk/home');
+  static bool isKioskRoute(String location) => _isUnder(location, '/kiosk');
   static bool shouldListenToTouch(String location) =>
       isKioskRoute(location) && !isHomeScreen(location) && !isPrintProcessScreen(location);
   static bool shouldStartTimer(String location) =>
       isKioskRoute(location) && !isHomeScreen(location) && !isPrintProcessScreen(location);
+
+  /// 부분 문자열이 아닌 경로 단위로 비교한다.
+  /// `contains('/kiosk')`는 `/setup/kiosk-info`·`/setup/kiosk-components`까지
+  /// 키오스크 화면으로 오인해 관리자 화면에 타임아웃이 걸렸다.
+  static bool _isUnder(String location, String route) {
+    final path = location.split('?').first;
+    return path == route || path.startsWith('$route/');
+  }
 }
 
 /// 네트워크 상태 알럿을 표시하는 위젯 (출력 화면 제외)
