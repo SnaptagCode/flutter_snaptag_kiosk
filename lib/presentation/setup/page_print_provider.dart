@@ -15,6 +15,8 @@ class PagePrint extends _$PagePrint {
         state == PagePrintType.single ? InfoKey.cardPrintModeSwitchSingle.key : InfoKey.cardPrintModeSwitchDuplex.key);
   }
 
+  void restore(PagePrintType type) => state = type;
+
   void set(PagePrintType type) {
     final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
     if (type != state) {
