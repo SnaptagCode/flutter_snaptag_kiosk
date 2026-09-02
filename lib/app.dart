@@ -6,6 +6,7 @@ import 'dart:ui';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_snaptag_kiosk/core/providers/heartbeat_service.dart';
 import 'package:flutter_snaptag_kiosk/core/ui/widget/dialog_helper.dart';
 import 'package:flutter_snaptag_kiosk/core/ui/widget/general_error_widget.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
@@ -32,11 +33,14 @@ class _AppState extends ConsumerState<App> with WindowListener {
     super.initState();
     if (Platform.isWindows) {
       windowManager.addListener(this);
+      unawaited(windowManager.setPreventClose(true));
       _ensureFullScreenOnce();
     }
 
     // 앱 실행과 동시에 KioskInfo 미리 로드
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      unawaited(ref.read(heartbeatServiceProvider.notifier).ensureStarted());
+
       // 첫 프레임 이후 디스플레이 정보가 확정된 시점에 창 크기 적용
       if (Platform.isWindows) {
         await _applyWindowSize();
@@ -119,6 +123,21 @@ class _AppState extends ConsumerState<App> with WindowListener {
 
   @override
   void onWindowFocus() {}
+
+  @override
+  void onWindowClose() => unawaited(_shutdownAndClose());
+
+  Future<void> _shutdownAndClose() async {
+    try {
+      await ref
+          .read(heartbeatServiceProvider.notifier)
+          .markShutdown()
+          .timeout(const Duration(seconds: 2));
+    } catch (error) {
+      logger.w('shutdown mark failed: $error');
+    }
+    await windowManager.destroy();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -349,11 +368,15 @@ class _NetworkStatusAlertWrapperState extends ConsumerState<_NetworkStatusAlertW
         context,
         title: _networkAlertTitle,
         confirmButtonText: _networkAlertConfirmText,
-      ).then((_) {
+      ).then((_) async {
         logger.i('_hasKioskInfo: $_hasKioskInfo');
         // 이벤트를 불러오지 않은 상태면 앱 종료.
         if (!_hasKioskInfo) {
-          exit(0);
+          try {
+            await ref.read(heartbeatServiceProvider.notifier).markShutdown();
+          } finally {
+            exit(0);
+          }
         }
         // 확인 버튼을 눌렀을 때 네트워크 상태를 다시 체크
         _resetAlertFlag();

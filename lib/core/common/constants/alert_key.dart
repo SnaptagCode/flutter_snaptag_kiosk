@@ -34,7 +34,8 @@ enum InfoKey {
   serviceMaintenanceEnter("Service_Maintenance_Enter"),
   serviceMaintenanceExit("Service_Maintenance_Exit"),
   adminModeEnter("Admin_Mode_Enter"),
-  periodicInfo("Periodic_Info");
+  periodicInfo("Periodic_Info"),
+  eventAutoRecovered("Event_Auto_Recovered");
 
   final String key;
   const InfoKey(this.key);
