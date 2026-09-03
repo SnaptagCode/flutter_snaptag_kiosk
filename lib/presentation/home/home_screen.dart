@@ -8,6 +8,7 @@ import 'package:flutter_snaptag_kiosk/presentation/home/back_photo_type_provider
 import 'package:flutter_snaptag_kiosk/presentation/home/machine_job_polling_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/home/maintenance_polling_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/home/refund_job_provider.dart';
+import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/event_image_cache.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:qr_flutter/qr_flutter.dart';
@@ -140,7 +141,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 mainTextColor: mainTextColor,
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(10.r),
-                  child: Image.network(kiosk?.emblemImageUrl ?? '', width: 264.w, height: 264.h, fit: BoxFit.contain),
+                  child: _EventEmblem(fallbackUrl: kiosk?.emblemImageUrl ?? ''),
                 ),
                 onTap: () async {
                   ref.read(backPhotoTypeProvider.notifier).selectFixed(0);
@@ -340,4 +341,33 @@ class _GradientOverlayPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+class _EventEmblem extends ConsumerWidget {
+  const _EventEmblem({required this.fallbackUrl});
+
+  final String fallbackUrl;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final cached = ref.watch(eventImageCacheProvider).emblem;
+
+    if (cached != null) {
+      return Image.file(
+        cached,
+        width: 264.w,
+        height: 264.h,
+        fit: BoxFit.contain,
+        errorBuilder: (context, error, stackTrace) => SizedBox(width: 264.w, height: 264.h),
+      );
+    }
+
+    return Image.network(
+      fallbackUrl,
+      width: 264.w,
+      height: 264.h,
+      fit: BoxFit.contain,
+      errorBuilder: (context, error, stackTrace) => SizedBox(width: 264.w, height: 264.h),
+    );
+  }
 }
