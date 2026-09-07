@@ -167,6 +167,43 @@ ${slackLogTemplate.description}
     }
   }
 
+  Future<void> sendCrashRecoveryBroadcastLogToSlack(
+    String errorKey, {
+    required DateTime lastBeat,
+    required Duration downtime,
+  }) async {
+    final slackLogTemplate = await createSlackLogTemplate(errorKey);
+    if (slackLogTemplate.category.isEmpty) return;
+
+    final cardCount = _container.read(cardCountProvider);
+    final eventName = slackLogTemplate.kioskMachineInfo?.printedEventName ?? "-";
+    final printLog = _container.read(printerLogProvider);
+    final printerheadTemp = printLog?.heaterTemperature ?? 0;
+    final printerheadTempString =
+        printerheadTemp != 0 ? (printerheadTemp / 100).toStringAsFixed(2) : "알 수 없음";
+
+    final description = '''
+${slackLogTemplate.description}
+
+- 마지막 신호 : ${lastBeat.toString().split('.').first}
+- 멈춘 시간 : ${downtime.inSeconds}초
+- 불러온 이벤트 : $eventName
+- 단면 카드 수량 : ${cardCount.currentCount} / ${cardCount.initialCount}
+- 프린터 연결 상태 : 정상
+- 결제 단말기 연결 상태 : 정상
+- 프린터 온도 : $printerheadTempString°C
+- 리본 잔량 : ${printLog?.rbnRemainingRatio != null ? "${printLog?.rbnRemainingRatio}%" : "알 수 없음"}
+- 필름 잔량 : ${printLog?.filmRemainingRatio != null ? "${printLog?.filmRemainingRatio}%" : "알 수 없음"}
+''';
+
+    final message = buildSlackAlertMessage(
+      slackLogTemplate: slackLogTemplate.copyWith(description: description),
+      cardCount: cardCount.currentCount,
+    );
+
+    await sendBroadcastLogToSlack(message);
+  }
+
   Future<void> sendPaymentBroadcastLogToSlak(String errorKey, {required String paymentDescription}) async {
     if (await _isPaymentDescriptionExcluded(paymentDescription)) return;
 

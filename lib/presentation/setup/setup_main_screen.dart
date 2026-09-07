@@ -6,7 +6,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_snaptag_kiosk/core/common/launcher/launcher_service.dart';
 import 'package:flutter_snaptag_kiosk/core/common/sound/sound_manager.dart';
+import 'package:flutter_snaptag_kiosk/core/data/datasources/local/heartbeat_note.dart';
 import 'package:flutter_snaptag_kiosk/core/data/datasources/local/id_writer.dart';
+import 'package:flutter_snaptag_kiosk/core/providers/heartbeat_service.dart';
 import 'package:flutter_snaptag_kiosk/core/providers/version_notifier.dart';
 import 'package:flutter_snaptag_kiosk/core/ui/widget/dialog_helper.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
@@ -16,6 +18,7 @@ import 'package:flutter_snaptag_kiosk/presentation/print/card_printer.dart';
 import 'package:flutter_snaptag_kiosk/presentation/print/luca/state/printer_connect_state.dart';
 import 'package:flutter_snaptag_kiosk/presentation/setup/alert_definition_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/setup/card_stock/card_stock_action.dart';
+import 'package:flutter_snaptag_kiosk/presentation/setup/crash_recovery_dialog.dart';
 import 'package:flutter_snaptag_kiosk/presentation/setup/page_print_provider.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -28,12 +31,14 @@ class SetupMainScreen extends ConsumerStatefulWidget {
 
 class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
   Timer? _timer;
+  bool _recovering = false;
 
   @override
   void initState() {
     super.initState();
 
     _timer = Timer.periodic(Duration(seconds: 2), (timer) async {
+      unawaited(_startRecoveryIfPending());
       final connected = await ref.read(printerServiceProvider.notifier).connectedPrinter();
       if (connected) {
         final settingCompleted = await ref.read(printerServiceProvider.notifier).checkSettingPrinter();
@@ -180,6 +185,145 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
     );
   }
 
+  void _reportRecoveryStopped(String reason, {DateTime? lastBeat}) {
+    final machineId = ref.read(kioskInfoServiceProvider)?.kioskMachineId ?? 0;
+    final beat = lastBeat == null ? '-' : lastBeat.toString().split('.').first;
+    final message =
+        '*[MachineId : $machineId]* 이벤트 자동 복귀 중단 — $reason (마지막 신호 $beat)';
+
+    SlackLogService().sendErrorLogToSlack(message);
+  }
+
+  Future<void> _startRecoveryIfPending() async {
+    if (_recovering) return;
+
+    final heartbeat = ref.read(heartbeatServiceProvider.notifier);
+    await heartbeat.ensureStarted();
+
+    final note = heartbeat.pendingRecovery;
+    if (note == null) return;
+
+    if (!canRecoverEvent(note, now: DateTime.now())) {
+      await heartbeat.markRecoveryDone();
+      if (note.restartOnCrash == true &&
+          note.eventRunning == true &&
+          note.screen == kHeartbeatScreenCustomer) {
+        _reportRecoveryStopped('쯓지가 너무 낡음', lastBeat: note.at);
+      }
+      return;
+    }
+
+    var kioskInfo = ref.read(kioskInfoServiceProvider);
+    if (kioskInfo == null) {
+      await ref.read(kioskInfoServiceProvider.notifier).getKioskMachineInfo();
+      kioskInfo = ref.read(kioskInfoServiceProvider);
+    }
+    if (kioskInfo == null || kioskInfo.kioskEventId == 0 || kioskInfo.kioskMachineId == 0) {
+      return;
+    }
+
+    if (!mounted || ModalRoute.of(context)?.isCurrent != true) {
+      return;
+    }
+
+    await heartbeat.markRecoveryDone();
+
+    if (note.eventId != null && note.eventId != '${kioskInfo.kioskEventId}') {
+      _reportRecoveryStopped(
+        '이벤트가 바뀜 (${note.eventId} → ${kioskInfo.kioskEventId})',
+        lastBeat: note.at,
+      );
+      return;
+    }
+
+    final noteMode = switch (note.printMode) {
+      'single' => PagePrintType.single,
+      'double' => PagePrintType.double,
+      _ => PagePrintType.none,
+    };
+    if (noteMode == PagePrintType.none) {
+      _reportRecoveryStopped('인쇄 모드를 알 수 없음', lastBeat: note.at);
+      if (mounted) {
+        await DialogHelper.showSetupDialog(context, title: '인쇄 타입을 선택해주세요.');
+      }
+      return;
+    }
+    if (noteMode == PagePrintType.single && ref.read(cardCountProvider).currentCount == 0) {
+      _reportRecoveryStopped('단면 모드인데 카드가 0장', lastBeat: note.at);
+      if (mounted) {
+        await DialogHelper.showSetupDialog(
+          context,
+          title: '단면 카드가 없습니다',
+          content: '자동 복귀를 멈춥니다.\n인쇄 모드를 확인한 뒤 이벤트를 직접 실행해 주세요.',
+        );
+      }
+      return;
+    }
+
+    _recovering = true;
+    if (!mounted) {
+      _recovering = false;
+      return;
+    }
+
+    ref.read(pagePrintProvider.notifier).restore(noteMode);
+
+    final result = await showDialog<CrashRecoveryResult>(
+          context: context,
+          barrierDismissible: false,
+          builder: (_) => CrashRecoveryDialog(printMode: noteMode),
+        ) ??
+        const CrashRecoveryResult.stopped('화면이 닫힐');
+
+    if (!result.proceed) {
+      _reportRecoveryStopped(result.reason ?? '알 수 없음', lastBeat: note.at);
+      _recovering = false;
+      return;
+    }
+    await _resumeEvent(note, kioskInfo, noteMode);
+  }
+
+  Future<void> _resumeEvent(HeartbeatNote note, KioskMachineInfo kioskInfo, PagePrintType printMode) async {
+    if (!mounted || !await _validatePrinterReadyAndShowDialogs(context)) {
+      _reportRecoveryStopped('프린터 점검 실패', lastBeat: note.at);
+      _recovering = false;
+      return;
+    }
+    if (!mounted || !await _checkPaymentDevice()) {
+      _reportRecoveryStopped('리더기 점검 실패', lastBeat: note.at);
+      _recovering = false;
+      return;
+    }
+
+    final machineId = kioskInfo.kioskMachineId;
+
+    try {
+      await ref.read(printerServiceProvider.notifier).printerStateLog();
+    } catch (e) {
+      SlackLogService().sendErrorLogToSlack('*[MachineId : $machineId]* Printer State Log: $e');
+    }
+
+    final lastBeat = note.at!;
+    SlackLogService().sendErrorLogToSlack(
+      '*[MachineId : $machineId]* 이벤트 실행 중 비정상 종료 → 자동 복귀 (마지막 신호 $lastBeat)',
+    );
+    unawaited(
+      SlackLogService().sendCrashRecoveryBroadcastLogToSlack(
+        InfoKey.eventAutoRecovered.key,
+        lastBeat: lastBeat,
+        downtime: DateTime.now().difference(lastBeat),
+      ),
+    );
+
+    if (!mounted) {
+      _recovering = false;
+      return;
+    }
+    Navigator.of(context, rootNavigator: true).popUntil((route) => route is! PopupRoute);
+
+    HomeRouteData().go(context);
+  }
+
   Future<void> _startEventFlow(BuildContext context) async {
     final versionState = ref.read(versionStateProvider);
     final currentVersion = versionState.currentVersion;
@@ -277,6 +421,7 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
                   } catch (e) {
                     SlackLogService().sendErrorLogToSlack('*[MachineId : $machineId]* End Kiosk Application: $e');
                   }
+                  await ref.read(heartbeatServiceProvider.notifier).markShutdown();
                   exit(0);
                 }
               },
@@ -593,6 +738,7 @@ class _SetupMainScreenState extends ConsumerState<SetupMainScreen> {
                                 mode: ProcessStartMode.detached,
                               );
                               print("Process.start(launcherPath, ['f'])");
+                              await ref.read(heartbeatServiceProvider.notifier).markShutdown();
                               exit(0);
                             } catch (e) {
                               print("런처 실행 실패: $e");
