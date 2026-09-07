@@ -8,6 +8,7 @@ import 'package:flutter_snaptag_kiosk/core/ui/widget/back_button.dart';
 import 'package:flutter_snaptag_kiosk/core/ui/widget/kiosk_navigator_button.dart';
 import 'package:flutter_snaptag_kiosk/core/ui/widget/printer_status_badge.dart';
 import 'package:flutter_snaptag_kiosk/core/ui/widget/triple_tap_fab.dart';
+import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/event_image_cache.dart';
 import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/kiosk_info_service.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 
@@ -22,7 +23,6 @@ class KioskShell extends ConsumerStatefulWidget {
 
 class _KioskShellState extends ConsumerState<KioskShell> {
   Timer? _periodicTimer;
-  bool _hasNetworkError = false;
 
   @override
   void initState() {
@@ -42,6 +42,7 @@ class _KioskShellState extends ConsumerState<KioskShell> {
   @override
   Widget build(BuildContext context) {
     final settings = ref.read(kioskInfoServiceProvider);
+    final eventImages = ref.watch(eventImageCacheProvider);
 
     return Stack(
       children: [
@@ -51,13 +52,21 @@ class _KioskShellState extends ConsumerState<KioskShell> {
               SizedBox(
                 height: 855.h,
                 width: double.infinity,
-                child: Image.network(
-                  settings?.topBannerUrl ?? '',
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return const Center(child: Text('이미지를 찾을 수 없습니다.'));
-                  },
-                ),
+                child: eventImages.banner != null
+                    ? Image.file(
+                        eventImages.banner!,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return const Center(child: Text('이미지를 찾을 수 없습니다.'));
+                        },
+                      )
+                    : Image.network(
+                        settings?.topBannerUrl ?? '',
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return const Center(child: Text('이미지를 찾을 수 없습니다.'));
+                        },
+                      ),
               ),
               Expanded(
                 child: LoaderOverlay(
@@ -70,22 +79,12 @@ class _KioskShellState extends ConsumerState<KioskShell> {
                   ),
                   child: DecoratedBox(
                     decoration: BoxDecoration(
-                      image: !_hasNetworkError
-                          ? DecorationImage(
-                              image: NetworkImage(settings?.mainImageUrl ?? ''),
-                              onError: (_, __) {
-                                if (mounted) {
-                                  setState(() {
-                                    _hasNetworkError = true;
-                                  });
-                                }
-                              },
-                              fit: BoxFit.cover,
-                            )
-                          : const DecorationImage(
-                              image: AssetImage('assets/images/fallback_body.jpg'),
-                              fit: BoxFit.cover,
-                            ),
+                      image: DecorationImage(
+                        image: eventImages.background != null
+                            ? FileImage(eventImages.background!)
+                            : const AssetImage('assets/images/fallback_body.jpg') as ImageProvider,
+                        fit: BoxFit.cover,
+                      ),
                     ),
                     child: Column(
                       children: [

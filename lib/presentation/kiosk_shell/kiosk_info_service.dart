@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_snaptag_kiosk/lib.dart';
 import 'package:flutter_snaptag_kiosk/presentation/core/card_count_provider.dart';
+import 'package:flutter_snaptag_kiosk/presentation/kiosk_shell/event_image_cache.dart';
 import 'package:flutter_snaptag_kiosk/presentation/setup/front_photo_list.dart';
 import 'package:flutter_snaptag_kiosk/presentation/setup/page_print_provider.dart';
 import 'package:flutter_snaptag_kiosk/presentation/setup/uuid_provider.dart';
@@ -58,6 +59,7 @@ class KioskInfoService extends _$KioskInfoService {
         _cachedMachineId = cached.kioskMachineId;
         _cachedKioskEventId = cached.kioskEventId;
         ref.read(frontPhotoListProvider.notifier).fetch();
+        ref.read(eventImageCacheProvider.notifier).fetch();
         await _restoreCardStock(cached.kioskMachineId);
         await _startPeriodicTimer();
         _getInfoByKey = true;
@@ -79,6 +81,7 @@ class KioskInfoService extends _$KioskInfoService {
       state = response;
 
       ref.read(frontPhotoListProvider.notifier).fetch();
+      ref.read(eventImageCacheProvider.notifier).fetch();
 
       // 캐시된 값들 업데이트
       _cachedMachineId = response.kioskMachineId;
@@ -143,6 +146,7 @@ class KioskInfoService extends _$KioskInfoService {
       state = response;
 
       ref.read(frontPhotoListProvider.notifier).fetch();
+      ref.read(eventImageCacheProvider.notifier).fetch();
 
       // 캐시된 값들 업데이트
       _cachedMachineId = machineId;
